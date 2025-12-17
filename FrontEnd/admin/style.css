@@ -1,0 +1,33 @@
+:root{
+    --admin-bg-color: #121212;
+    --admin-box-bg-color: #F5F3EE;
+}
+
+.adminlogincontainer{
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--admin-bg-color);
+    height: 96vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.adminloginbox{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--admin-box-bg-color);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    width: 350px;
+}
+
+.model{
+    width: 300px;
+    height: 300px;
+    margin-bottom: 20px;
+}

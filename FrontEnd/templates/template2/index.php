@@ -49,6 +49,7 @@ $page_path = __DIR__ . "/pages/$page.php";
         :root {
             --primary: <?= htmlspecialchars($shop_assets['primary_color']) ?>;
             --secondary: <?= htmlspecialchars($shop_assets['secondary_color']) ?>;
+            /* --text-color: red; */
         }
     </style>
 </head>
