@@ -55,6 +55,7 @@ body {
 }
 
 .main-nav .navbar-nav .nav-link {
+    margin-left: 15px;
     color: white;
     padding: 15px 25px;
     transition: background-color 0.3s;
