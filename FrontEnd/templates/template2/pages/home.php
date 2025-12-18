@@ -34,8 +34,7 @@
                                 <h5 class="card-title"><?= htmlspecialchars($product['product_name']) ?></h5>
                                 <p class="card-text price">$<?= number_format($product['price'], 2) ?></p>
                                 <button class="btn btn-primary btn-add-cart" data-product-id="<?= $product['product_id'] ?>">Add to Cart</button>
-                            </div>
-                            
+                            </div>                            
                         </div>
                     </div>                                
                 <?php
