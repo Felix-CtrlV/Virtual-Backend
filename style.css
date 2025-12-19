@@ -38,25 +38,17 @@ body{
     font-size:1rem;
 
 }
-.btn1{
-    color:white;
-    padding:10px 40px;
-    border-radius:18px;
-    border:none;
-    background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
 
+.btn2:hover{
+    transform:scale(1.2);
 }
-.mainarea{
-    display: flex;
-    align-items:center;
-    flex:1;
-    flex-direction:column;
-}
-.menu li:hover{
+
+.abc a:hover{
     transform: scale(1.2);
-     background-color:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
+    color:#000dff;
     -webkit-background-clip:text;
-    -webkit-text-fill-color: transparent;
+    /* -webkit-text-fill-color: transparent; */
+    
 }
 
 .btn1:hover{
@@ -71,7 +63,8 @@ body{
     background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
     -webkit-background-clip:text;
     -webkit-text-fill-color: transparent;
-    margin-top:10px;
+    margin-top:250px;
+
 }
 .background{
     position: absolute;
@@ -80,5 +73,100 @@ body{
     width:100%;
     height: 100%;
     transform: scale(1.2);
-    z-index:1;
+    z-index:-1;
 }
+header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 40px;
+    margin-bottom: 30px;
+    
+
+}
+nav a{
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-size: 20px;
+    margin-right: 50px;
+     background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
+    -webkit-background-clip:text;
+    
+}
+.home a:hover{
+    color: rgb(0, 224, 249);
+}
+.mainarea {
+    text-align: center;
+    margin-top: 150px;
+}
+
+/* Button wrapper */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* space between buttons */
+    margin-top: 30px;
+}
+
+/* Common button style */
+.button-group button {
+    padding: 15px 40px;
+    font-size: 18px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+/* Button 1 */
+.btn1 {
+   
+     color:white;
+    padding:10px 40px;
+    border-radius:18px;
+    border:none;
+    background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
+    display: flex;
+
+}
+
+.btn1:hover {
+    transform: scale(1.05);
+}
+
+/* Button 2 */
+.btn2 {
+     color:white;
+    padding:10px 40px;
+    border-radius:18px;
+    border:none;
+    background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
+    display: flex;
+
+}
+
+.btn2:hover {
+
+    transform: scale(1.05);
+}
+.mainarea{
+    margin:auto;
+    margin-bottom:500px;
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding: 8px 35px 8px 15px;
+    width:250px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    
+}
+
