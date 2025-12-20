@@ -4,31 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <link rel="stylesheet" href="..//style.css">
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.8.9/build/spline-viewer.js"></script>
-    
-    </head>
+
+    <link rel="stylesheet" href="../style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Spline -->
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" href="../FrontEnd/image/logo1.png">
+</head>
 
 <body>
-    <spline-viewer class="background" url="https://prod.spline.design/TBHPO4E614pdOb-Q/scene.splinecode"></spline-viewer>
 
-   <nav class="navbar">
-        <h1 class="logo">Logo</h1>
+    <!-- Spline Background -->
+    <spline-viewer class="background"
+        url="https://prod.spline.design/t2YIwW1EsI2cSOEN/scene.splinecode">
+    </spline-viewer>
 
-        <ul class="menu">
-            <li class="#">Home</li>
-            <li class="#">App</li>
-            <li class="#">Work</li>
-        </ul>
-
-        <button class="btn1">Connect</button>
+    <!-- Header -->
+    <header>
+        <div class="logo">Virtual Mall</div>
         
+        <div class="search-box">
+            <input type="text" placeholder="Search products...">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
 
-    </nav>
-    <main class="mainarea">
-        <h1>Subscribe From Coding</h1>
-    </main>
+        <nav class="home">
+            <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="#"><i class="fa-solid fa-list"></i> Catalog</a>
+            <a href="#"><i class="fa-solid fa-box-open"></i> Collection</a>
+            <a href="#"><i class="fa-solid fa-right-to-bracket"></i> Sign In</a>
+            <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+    </header>
 
-    
+   <main class="mainarea">
+    <h1>Virtual Mall PlatForm</h1>
+    <div class="button-group">
+        <button class="btn1">Rent a Shop</button>
+        <button class="btn2">Buy Product</button>
+    </div>
+</main>
+
+
+
 </body>
 </html>
