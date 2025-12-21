@@ -26,11 +26,11 @@ include("../../BackEnd/config/dbconfig.php");
         <form class="loginform" action="" method="post">
             <div class="row">
                 <label for="username">Username :</label>
-                <input type="text" id="username" name="username" required><br><br>
+                <input autocomplete="off" type="text" id="username" name="username" required><br><br>
             </div>
             <div class="row">
                 <label for="password">Password :</label>
-                <input type="password" id="password" name="password" required><br><br>
+                <input autocomplete="off" type="password" id="password" name="password" required><br><br>
             </div>
             <span class="showerror">Username or Password is Incorrect</span>
             <button type="submit" name="submit" class="login-btn">
@@ -57,13 +57,14 @@ include("../../BackEnd/config/dbconfig.php");
 
 <?php
 if (isset($_POST["submit"])) {
-    session_start();
     $username = trim($_POST["username"]);
     $password = trim($_POST["password"]);
 
-    $adminquery = "SELECT * FROM admins WHERE name='$username'";
-    $adminresult = mysqli_query($conn, $adminquery);
-    $admininfo = mysqli_fetch_assoc($adminresult);
+    $stmt = $conn->prepare("SELECT * FROM admins WHERE name = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $adminresult = $stmt->get_result();
+    $admininfo = $adminresult->fetch_assoc();
 
     if (!$admininfo) {
         echo "<script>
@@ -74,12 +75,14 @@ if (isset($_POST["submit"])) {
         exit();
     }
 
-    
-    if ($password === $admininfo['password']) { 
+
+    if ($password === $admininfo['password']) {
         $_SESSION["admin_logged_in"] = true;
-        $adminid = $admininfo['adminid'];
-        header("Location: dashboard.php?adminid=$adminid");
+        $_SESSION["adminid"] = $admininfo['adminid'];
+
+        header("Location: dashboard.php");
         exit();
+
     } else {
         echo "<script>
             document.querySelector('.btn-text').style.display = 'block';

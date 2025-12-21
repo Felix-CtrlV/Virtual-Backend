@@ -3,9 +3,10 @@ $pageTitle = 'Supplier Management';
 $pageSubtitle = 'Manage and view supplier details.';
 include("partials/nav.php");
 
-$supplierid = isset($_GET['supplierid']) ? intval($_GET['supplierid']) : 0;
+$supplierid = isset($_GET['supplierid']) ? $_GET['supplierid'] : 0;
 
 if ($supplierid <= 0) {
+    echo '<div class="section-header"><div><p></p></div><div class="section-actions"><a href="viewsuppliers.php?adminid=<?= urlencode($adminid) ?>" class="btn btn-ghost">Back to List</a></div></div>';
     echo '<section class="section active"><div class="card"><p style="text-align: center; padding: 30px; color: var(--muted);">No supplier selected. Please select a supplier from the list.</p></div></section>';
     echo '<script src="script.js"></script></body></html>';
     exit;
@@ -24,16 +25,8 @@ $supplierquery = "SELECT s.*, sa.logo, sa.banner, rp.paid_date AS contract_start
     ) rp ON rp.supplier_id = s.supplier_id
     WHERE s.supplier_id = $supplierid";
 $supplierresult = mysqli_query($conn, $supplierquery);
-
-if (mysqli_num_rows($supplierresult) == 0) {
-    echo '<section class="section active"><div class="card"><p style="text-align: center; padding: 30px; color: var(--muted);">Supplier not found.</p></div></section>';
-    echo '<script src="script.js"></script></body></html>';
-    exit;
-}
-
 $supplierrow = mysqli_fetch_assoc($supplierresult);
 
-// Get review stats
 $reviewquery = "SELECT ROUND(AVG(rating),1) AS avg_rating, COUNT(*) AS total_reviews 
     FROM reviews 
     WHERE supplier_id = $supplierid";

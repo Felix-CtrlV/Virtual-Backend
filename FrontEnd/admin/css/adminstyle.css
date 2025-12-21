@@ -332,6 +332,10 @@ a {
     margin-bottom: 15px;
 }
 
+.section-header .supplierResult{
+    margin-right: 10px;
+}
+
 .btn {
     font-size: 12px;
     padding: 7px 11px;

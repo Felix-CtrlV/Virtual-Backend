@@ -1,9 +1,15 @@
 <?php
 include("../../BackEnd/config/dbconfig.php");
-$adminid = $_GET["adminid"];
+
+if (!isset($_SESSION["admin_logged_in"])) {
+    header("Location: login.php");
+    exit();
+}
+
+$adminid = $_SESSION["adminid"];
 $admininfosql = "select * from admins where adminid='$adminid'";
 $adminresult = mysqli_query($conn, $admininfosql);
-$admininfo = mysqli_fetch_array($adminresult);
+$admininfo = mysqli_fetch_assoc($adminresult);
 $name = $admininfo['name'];
 
 $currentPage = basename($_SERVER['PHP_SELF']);

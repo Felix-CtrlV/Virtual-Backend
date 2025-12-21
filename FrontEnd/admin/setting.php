@@ -99,10 +99,6 @@ include("partials/nav.php");
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <label style="display:flex; align-items:center; gap:8px;">
                         <input type="checkbox" checked />
-                        <span>Enable email notifications</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" checked />
                         <span>Show quick stats on dashboard</span>
                     </label>
                     <label style="display:flex; align-items:center; gap:8px;">

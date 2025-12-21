@@ -7,6 +7,12 @@ include("partials/nav.php");
 <section class="section active">
 
     <div class="card">
+        <div class="search">
+            <lord-icon class="search-icon" src="https://cdn.lordicon.com/xaekjsls.json" trigger="loop" delay="2000"
+                colors="primary:#ffffff" style="width:13px;height:13px">
+            </lord-icon>
+            <input autocomplete="off" type="text" id="searchuser" placeholder="Search Users..." />
+        </div>
         <table>
             <thead>
                 <tr>
@@ -17,49 +23,8 @@ include("partials/nav.php");
                     <th>Joined</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php
-                $users = "SELECT adminid AS id, name, email, status, created_at, 'admin' AS role FROM admins
-                UNION ALL
-                SELECT supplier_id AS id, name, email, status, created_at, 'supplier' AS role FROM suppliers
-                UNION ALL
-                SELECT customer_id AS id, name, email, status, created_at, 'customer' AS role FROM customers
-                ORDER BY 
-                CASE role
-                    WHEN 'admin' THEN 1
-                    WHEN 'supplier' THEN 2
-                    WHEN 'customer' THEN 3
-                END, CASE status
-                    WHEN 'active' THEN 1
-                    WHEN 'inactive' THEN 2
-                END,name;";
-                $result = mysqli_query($conn, $users);
-                while ($row = mysqli_fetch_assoc($result)) {
-                    ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['name']); ?></td>
-                        <td><?php echo htmlspecialchars($row['email']); ?></td>
-                        <td><span class="card-chip badge-soft"><?php echo htmlspecialchars($row['role']); ?></span></td>
-                        <td>
-                            <?php
-                            $status = $row['status'];
-
-                            $statusClass = match ($status) {
-                                'active' => 'status-active',
-                                'inactive' => 'status-inactive',
-                                'banned' => 'status-banned',
-                                default => 'status-inactive'
-                            };
-                            ?>
-
-                            <span class="card-chip status-pill <?= $statusClass ?>">
-                                <?= ucfirst(htmlspecialchars($status)) ?>
-                            </span>
-
-                        </td>
-                        <td><?= date("M d, Y", strtotime($row['created_at'])) ?></td>
-                    </tr>
-                <?php } ?>
+            <tbody id="userbody">
+                
             </tbody>
         </table>
     </div>
@@ -67,5 +32,34 @@ include("partials/nav.php");
 
 <script src="script.js"></script>
 </body>
+
+<script>
+    const searchInput = document.getElementById("searchuser");
+    const tableBody = document.getElementById("userbody");
+
+    function fetchUsers(query = "") {
+        fetch("./utils/search_users.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "search=" + encodeURIComponent(query)
+        })
+            .then(res => res.text())
+            .then(data => {
+                tableBody.innerHTML = data;
+            });
+    }
+
+    fetchUsers();
+
+    let debounceTimer;
+
+    searchInput.addEventListener("keyup", () => {
+    clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(() => {
+        fetchUsers(searchInput.value);
+    }, 300);
+});
+</script>
 
 </html>
