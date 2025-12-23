@@ -102,10 +102,30 @@ if ($banner_filename && file_exists($banner_fs)) {
             <?php else: ?>
                 <section class="hero-banner hero-no-image">
                 <?php endif; ?>
+
                 <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <h1 class="hero-title"><?= htmlspecialchars($supplier['company_name']) ?></h1>
-                    <p class="hero-sub"><?= htmlspecialchars($supplier['tagline'] ?? ($supplier['company_name'] . ' — Quality products')) ?></p>
+
+                <div class="container hero-container">
+                    <div class="hero-side-left">
+                        <h1 class="hero-title"><?= htmlspecialchars($supplier['company_name']) ?></h1>
+                        <p class="hero-sub"><?= htmlspecialchars($supplier['tagline'] ?? 'Quality products') ?></p>
+                        <div class="hero-btns">
+                            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="hero-cta">Explore Shop</a>
+                        </div>
+                    </div>
+
+                    <div class="hero-side-right d-none d-md-flex">
+                        <div class="hero-floating-card">
+                            <span>Established Quality</span>
+                            <small>Premium Supplier</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-curve">
+                    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C49.1,24.2,105.86,48.35,159.27,62.13,212.68,75.91,263.39,67.23,321.39,56.44Z" class="shape-fill"></path>
+                    </svg>
                 </div>
                 </section>
 
