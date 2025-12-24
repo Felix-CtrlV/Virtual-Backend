@@ -307,7 +307,7 @@ body {
         transform: translateX(0)
     }
     100% {
-        transform: translateX(calc(-250px * 6));
+        transform: translateX(calc(-300px * 5));
     }
 }
 .coats-container{
