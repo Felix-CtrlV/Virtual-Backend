@@ -278,7 +278,7 @@ body {
 /* CARD */
 .coat-card {
     min-width: 300px;
-    background: #111;
+    /*background: #111;*/
     padding: 15px;
     border-radius: 16px;
     text-align: center;
@@ -294,8 +294,11 @@ body {
 }
 
 /* PAUSE ON HOVER */
-/*.coats-container:hover .coat-card {
+.coats-container:hover .coat-card {
     animation-play-state:running;
+}
+/*.coat-card h3{
+    margin-top:15px;
 }*/
 
 /* KEYFRAMES */
