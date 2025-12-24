@@ -246,7 +246,7 @@ body {
 }
 
 /* Highlighted card */
-.card.active {
+.card.active{
     background: #f5f5f5;
     color: #000;
 }
@@ -282,7 +282,7 @@ body {
     padding: 15px;
     border-radius: 16px;
     text-align: center;
-    animation: scroll 18s linear infinite;
+    animation: scroll 20s linear infinite;
 }
 
 /* IMAGE */
@@ -294,9 +294,9 @@ body {
 }
 
 /* PAUSE ON HOVER */
-.coats-container:hover .coat-card {
-    animation-play-state: paused;
-}
+/*.coats-container:hover .coat-card {
+    animation-play-state:running;
+}*/
 
 /* KEYFRAMES */
 @keyframes scroll {
