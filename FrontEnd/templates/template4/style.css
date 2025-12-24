@@ -5,6 +5,9 @@
   padding: 25px 10%;
   background: #ffffff;
   border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  z-index: 10;
+  top: 0;
 }
 
 .logo-box {
@@ -456,4 +459,148 @@
   color: var(--primary) !important;
   font-weight: bold;
   /* border-bottom: 2px solid var(--primary); */
+}
+
+/* ==========================
+   PAGE DESCRIPTION (HOVER++)
+========================== */
+
+.page-description-section {
+  position: relative;
+  padding: 110px 0;
+  background: transparent;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+/* ambient light */
+.page-description-section::before {
+  content: "";
+  position: absolute;
+  inset: -200px 0 auto 0;
+  height: 500px;
+  /* background: radial-gradient(
+    circle at center,
+    rgba(74, 144, 226, 0.08),
+    transparent 65%
+  ); */
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 1s ease;
+}
+
+/* content layer */
+.page-description-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* LABEL */
+.page-desc-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: softRise 1s ease forwards;
+  transition: transform 0.4s ease, letter-spacing 0.4s ease;
+}
+
+/* TITLE */
+.page-desc-title {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #1a1a1b;
+  margin-bottom: 22px;
+  position: relative;
+  opacity: 0;
+  animation: softRise 1s ease forwards;
+  animation-delay: 0.15s;
+  transition: transform 0.4s ease, text-shadow 0.4s ease;
+}
+
+/* underline */
+.page-desc-title::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 3px;
+  margin: 16px auto 0;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  transition: width 0.5s ease;
+}
+
+/* TEXT */
+.page-desc-text {
+  font-size: 1.05rem;
+  color: #666;
+  line-height: 1.85;
+  max-width: 720px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: softRise 1s ease forwards;
+  animation-delay: 0.3s;
+  transition: transform 0.4s ease, color 0.4s ease;
+}
+
+/* =================
+   HOVER INTERACTION
+================= */
+
+.page-description-section:hover::before {
+  opacity: 1;
+  transform: translateY(40px);
+}
+
+.page-description-section:hover .page-desc-label {
+  transform: translateY(-3px);
+  letter-spacing: 2px;
+}
+
+.page-description-section:hover .page-desc-title {
+  transform: translateY(-6px);
+  text-shadow: 0 18px 45px rgba(0, 0, 0, 0.15);
+}
+
+.page-description-section:hover .page-desc-title::after {
+  width: 120px;
+}
+
+.page-description-section:hover .page-desc-text {
+  transform: translateY(-4px);
+  color: #555;
+}
+
+/* cursor feedback */
+.page-description-section:hover {
+  cursor: default;
+}
+
+/* animations */
+@keyframes softRise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-description-section {
+    padding: 80px 0;
+  }
+
+  .page-desc-title {
+    font-size: 1.6rem;
+  }
+
+  .page-desc-text {
+    font-size: 1rem;
+  }
 }

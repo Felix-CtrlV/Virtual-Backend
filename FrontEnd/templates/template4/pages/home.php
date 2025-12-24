@@ -21,26 +21,28 @@
     </div>
 </section>
 
-<section class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Featured Products</h2>
-        <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="btn btn-outline-primary btn-sm" style="border-color: var(--primary); color: var(--primary);">View All</a>
-    </div>
-
-    <div class="row">
-        <?php for ($i = 1; $i <= 4; $i++): ?>
-            <div class="col-6 col-md-3 mb-4">
-                <div class="card h-100 border-0 shadow-sm product-card">
-                    <div class="bg-secondary rounded-top" style="height: 200px; background: #f0f0f0 url('../assets/placeholder-prod.jpg') center/cover;"></div>
-                    <div class="card-body">
-                        <h5 class="card-title h6">Product Name <?= $i ?></h5>
-                        <p class="card-text fw-bold" style="color: var(--secondary);">$0.00</p>
-                    </div>
-                </div>
+<section class="page-description-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <span class="page-desc-label">Why Choose Us</span>
+                <h2 class="page-desc-title">
+                    Trusted Solutions from <?= htmlspecialchars($supplier['company_name']) ?>
+                </h2>
+                <p class="page-desc-text">
+                    We help businesses grow by delivering reliable products, transparent pricing,
+                    and consistent support. Our focus is long-term partnerships built on trust,
+                    performance, and quality.
+                </p>
             </div>
-        <?php endfor; ?>
+        </div>
     </div>
 </section>
+
+
+
+
+
 
 <section class="py-5 my-5" style="background-color: var(--primary); color: white;">
     <div class="container text-center">
