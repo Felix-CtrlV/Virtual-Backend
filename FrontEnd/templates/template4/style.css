@@ -604,3 +604,151 @@
     font-size: 1rem;
   }
 }
+
+:root {
+  --card-bg: #e0e0e0;
+  --accent-color: #333;
+}
+
+/* Category Buttons */
+.btn-category {
+  border-radius: 20px;
+  padding: 8px 20px;
+  margin: 5px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  transition: 0.3s;
+}
+.btn-category.active {
+  background: #000;
+  color: #fff;
+}
+
+/* The Modern Card Container */
+.modern-card {
+  background: var(--card-bg);
+  border-radius: 40px; /* Highly rounded as per image */
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  border-radius: 30px;
+  background: linear-gradient(145deg, #d1d1d1, #ffffff);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-container img {
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.2));
+}
+
+/* Top Left Labels */
+.category-label {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  text-transform: uppercase;
+  color: var(--accent-color);
+ 
+  z-index: 1;
+}
+.category-label h3 {
+  font-weight: 800;
+  margin: 0;
+  font-size: 1.5rem;
+}
+.category-label span {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: #666;
+}
+
+/* Floating Zoom Button */
+.zoom-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bottom "Refresh" Pill Style */
+.card-footer-custom {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.refresh-pill {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  border-radius: 30px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon-circle {
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-text {
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.price-tag {
+  font-weight: bold;
+}
+
+.btn-add-cart {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 50px; /* Fully rounded pill shape */
+  padding: 15px;
+  width: 100%;
+  font-weight: 700;
+  text-transform: capitalize;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-add-cart:hover {
+  background: #444;
+}

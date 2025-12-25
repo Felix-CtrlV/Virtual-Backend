@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="../templates/template4/style.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
 <header class="smart-header">
     <div class="logo-container">
         <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
