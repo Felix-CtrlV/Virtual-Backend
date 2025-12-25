@@ -9,15 +9,102 @@
  
 }
 
-/* To match the light silver/white color */
-.featured-title {
-  color: #d1d5db;
-  font-family: sans-serif;
-  letter-spacing: 2px;
-   text-align: center;
-   font-size:40px;
-  
+/*Virtual Mall Logo*/
+/* Navigation Container*/
+.home {
+    position: fixed;        /* Stays at the top while scrolling */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;           /* Standard nav height */
+    display: flex;
+    justify-content: space-between; /* Pushes Logo to left, Links to right */
+    align-items: center;
+    padding: 0 50px;        /* Side spacing */
+    background: rgba(255, 255, 255, 0.05); /* Semi-transparent glass */
+    backdrop-filter: blur(15px);          /* Frosty glass effect */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;          /* Stays above the Spline background */
+    box-sizing: border-box;
 }
+
+/* Logo Section Alignment */
+.mall-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(45deg, #000dff, #ff00e6);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    box-shadow: 0 4px 15px rgba(0, 13, 255, 0.3);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.v-text {
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 1px;
+    background: linear-gradient(to right, #000dff, #ff00e6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.m-text {
+    font-weight: 400;
+    font-size: 11px;
+    color: #ffffff; /* White text for 3D background contrast */
+    letter-spacing: 3px;
+}
+
+/* Nav Links Section */
+.nav-links {
+    display: flex;
+    gap: 35px; /* Space between links */
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-links a i {
+    font-size: 18px;
+    color: #ff00e6; /* Matching the pink in your gradient */
+}
+
+/* Hover Effects */
+.nav-links a:hover {
+    color: #ff00e6;
+    transform: translateY(-2px);
+}
+
+.mall-logo:hover .logo-icon {
+    transform: rotate(-10deg) scale(1.1);
+}
+/*Virtual mall logo Nav Section End*/
 
 body{
     background:rgb(0, 0,0);
@@ -27,6 +114,7 @@ body{
     font-family:"Black Ops One","system-ui";
    
 }
+
 
 .navbar{
     display:flex;
@@ -42,13 +130,6 @@ body{
     gap:80px;
 }
 
-.logo{
-    font-size:15px;
-    background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color: transparent;
-    margin-left:10px;
-}
 
 .menu li{
     font-size:1rem;
@@ -93,31 +174,11 @@ body{
     transform: scale(1.2);
     z-index:-1;
 }
-header{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 40px;
-    margin-bottom: 30px;
-    
 
-}
-nav a{
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 20px;
-    margin-right: 50px;
-     background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
-    -webkit-background-clip:text;
-    
-}
-.home a:hover{
-    color: rgb(232, 155, 13);
-}
-.mainarea {
+.mainarea h1{
     text-align: center;
-    margin-top: 150px;
+    margin-top: 170px;
+    margin-bottom:60px;
   
 }
 
@@ -126,6 +187,7 @@ nav a{
     display: flex;
     justify-content: center;
     gap: 30px; /* space between buttons */
+    
    
     
 }
@@ -148,6 +210,7 @@ nav a{
     
     /* 2. Transition everything smoothly */
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
 }
 .btn1:hover {
     /* 3. Scale up with a slight "bounce" effect */
@@ -205,6 +268,11 @@ nav a{
 }
 /*btn2 hover end*/
 
+
+/* Add padding to body so content doesn't hide under the fixed nav */
+body {
+    padding-top: 80px;
+}
 
 .home a{
     font-size:15px;
@@ -343,7 +411,8 @@ p {
     color: var(--text-main);
     font-size: 24px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 50px;
+    
 }
 .text-content{
     text-align: center;
@@ -636,7 +705,7 @@ p {
 
 /*input section*/
 .site-footer {
-    background-color:#3f3f3f;
+    background-color:#1a1a1a;
     padding: 60px 10% 30px 10%;
     font-family: Arial, sans-serif;
     color: #333;
