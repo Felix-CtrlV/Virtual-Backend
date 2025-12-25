@@ -145,9 +145,9 @@ include("partials/nav.php");
             const status = "<?= $_GET['status'] ?>";
 
             const messages = {
-                success: "Profile updated successfully ✅",
-                wrong_password: "Current password is incorrect ❌",
-                password_mismatch: "Passwords do not match ❌"
+                success: "Profile updated successfully",
+                wrong_password: "Current password is incorrect",
+                password_mismatch: "Passwords do not match"
             };
 
             if (messages[status]) {
