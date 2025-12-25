@@ -152,13 +152,12 @@ nav a{
     background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
     display: flex;
     font-size:25px;
-  
-
 }
 
 .btn1:hover {
     transform: scale(1.05);
 }
+
 
 /* Button 2 */
 .btn2 {
@@ -172,8 +171,9 @@ nav a{
 }
 
 .btn2:hover {
-    background:linear-gradient(45deg,#000dff,#ff00e6,#ff7700);
     transform: scale(1.05);
+    cursor: pointer;
+    transition: 0.3s ease;
 }
 
 
