@@ -155,7 +155,7 @@ nav a{
 }
 
 .btn1:hover {
-    transform: scale(1.05);
+    transform: scale(1.10);
 }
 
 
@@ -171,7 +171,7 @@ nav a{
 }
 
 .btn2:hover {
-    transform: scale(1.05);
+    transform: scale(1.10);
     cursor: pointer;
     transition: 0.3s ease;
 }
