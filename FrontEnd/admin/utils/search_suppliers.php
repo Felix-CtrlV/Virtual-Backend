@@ -92,9 +92,20 @@ if ($supplierresult->num_rows > 0) {
             <td><?= date("M d, Y", strtotime($supplierrow['created_at'])) ?></td>
 
             <td>
-                <a href="suppliersmanagement.php?adminid=<?= $_SESSION['adminid'] ?>&supplierid=<?= $supplierrow['supplier_id'] ?>"
+                <a class="button" href="suppliersmanagement.php?adminid=<?= $_SESSION['adminid'] ?>&supplierid=<?= $supplierrow['supplier_id'] ?>"
                     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">
-                    View
+                    <span class="span-mother">
+                        <span>V</span>
+                        <span>i</span>
+                        <span>e</span>
+                        <span>w</span>
+                    </span>
+                    <span class="span-mother2">
+                        <span>V</span>
+                        <span>i</span>
+                        <span>e</span>
+                        <span>w</span>
+                    </span>
                 </a>
             </td>
         </tr>
