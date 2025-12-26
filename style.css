@@ -159,9 +159,6 @@ body{
     display: flex;
     justify-content: center;
     gap: 30px; /* space between buttons */
-    
-   
-    
 }
 
 /* Button 1 Base State */
