@@ -982,6 +982,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 20px; /* Space between the two rows */
+  align-items: center;
 }
 
 .logo-grid, .logo-grid1 {
@@ -993,6 +994,7 @@ p {
   /* Fade edges effect */
   mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  text-align: center;
 }
 
 /* Track 1: Scrolls Right */
