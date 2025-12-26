@@ -114,6 +114,59 @@ html {
 }
 /*Virtual mall logo Nav Section End*/
 
+/*btn section*/
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0turn;
+  inherits: false;
+}
+
+.Hdr_box__Djvoy {
+  /* Variables */
+  --border-angle: 0turn;
+  --main-bg: conic-gradient(from var(--border-angle), #fff, #fff 5%, #fff 60%, #fff 95%);
+  --gradient-border: conic-gradient(from var(--border-angle), transparent 25%, #ff0f7b, #f89b29 99%, transparent);
+  
+  /* Animation */
+  animation: Hdr_bg-spin__xIsE8 3s linear infinite;
+  
+  /* Background Logic: 
+     The first 'padding-box' layer covers the inside.
+     The second 'border-box' layer provides the colorful gradient under the transparent border. */
+  background: var(--main-bg) padding-box, var(--gradient-border) border-box, var(--main-bg) border-box;
+  
+  /* Layout & Styling */
+  border: 3px solid transparent;
+  border-radius: 8px; /* Optional: smooth corners look better with this effect */
+  color: #000; /* Changed to black since background is white (#fff) */
+  padding: 12px 24px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: sans-serif;
+  transition: opacity 0.3s;
+}
+
+/* 2. The Animation Keyframes */
+@keyframes Hdr_bg-spin__xIsE8 {
+  to {
+    --border-angle: 1turn;
+  }
+}
+
+/* Hover effect */
+.btn1:hover {
+  opacity: 0.8;
+   color: #ff00e6;
+}
+.btn2:hover{
+  opacity: 0.8;
+   color: #ff00e6;
+
+}
+
+/*btn1,btn2 hover section end*/
+
+
 body{
     background:rgb(0, 0,0);
     color:white;
@@ -169,57 +222,8 @@ body{
     gap: 30px; /* space between buttons */
 }
 
-/* Button 1 Base State */
-/* Container for buttons (optional) */
-.button-container {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
-}
 
-/* Base Button Styles */
-button {
-  padding: 12px 28px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease; /* This makes the animation smooth */
-  position: relative;
-  overflow: hidden;
-}
 
-/* Rent a Shop - Solid Style */
-.btn1 {
-  background-color: #6366f1;
-  color: white;
-  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
-}
-
-.btn1:hover {
-  background-color: #4f46e5;
-  transform: translateY(-3px); /* Lifts the button up */
-  box-shadow: 0 8px 15px rgba(99, 102, 241, 0.4);
-}
-
-.btn1:active {
-  transform: translateY(-1px); /* Slight push down when clicked */
-}
-
-/* Buy Product - Outline Style */
-.btn2 {
-  background-color:#6366f1;
-   color: white;
-  border: 2px solid #1e293b;
-}
-
-.btn2:hover {
- background-color: #4f46e5;
-  transform: translateY(-3px); /* Lifts the button up */
-  box-shadow: 0 8px 15px rgba(99, 102, 241, 0.4);/* Slightly grows the button */
-}
-/*btn2 hover end*/
 
 
 /* Add padding to body so content doesn't hide under the fixed nav */
@@ -1387,3 +1391,4 @@ p {
         grid-template-columns: 1fr;
     }
 }
+
