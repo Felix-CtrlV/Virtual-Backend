@@ -3,8 +3,21 @@
     padding:0;
     font-family:"Black Ops One","system-ui";
 }
+/* To match the gold color in your image */
+.gold-text, .gold-icon {
+  color: #c5a47e;
+ 
+}
 
-
+/* To match the light silver/white color */
+.featured-title {
+  color: #d1d5db;
+  font-family: sans-serif;
+  letter-spacing: 2px;
+   text-align: center;
+   font-size:40px;
+  
+}
 
 body{
     background:rgb(0, 0,0);
@@ -207,6 +220,7 @@ body {
     font-size: 16px;
 }
 
+<<<<<<< HEAD
 /* CARDS */
 .cards {
     display: grid;
@@ -360,12 +374,13 @@ body {
     background-size: 40px 40px;
     margin-left:400px;
 }
+=======
+>>>>>>> 4057ee1cc6a0b88b33856d4e870dd47ab0a7c227
 
 h2 {
     color: #fff;
     font-size: 1.5rem;
-    margin-bottom: 16px;
-    font-weight: 600;
+    margin-bottom: 1
 }
 
 p {
@@ -423,7 +438,7 @@ p {
 
 .layers-placeholder::after {
     content: '';
-    position: absolute;
+    position:absolute;
     top: -15px;
     left: 0;
     width: 80px;
@@ -437,18 +452,19 @@ p {
     padding: 40px;
     max-width: 1200px;
     margin-top:40px;
+    margin-left:150px;
 }
 
 .feature-card {
-    background-color: var(--card-bg);
-    border-radius: 32px;
-    padding: 48px;
+    background-color: #0a0e14;
+    border-radius: 25px;
+    padding: 40px;
     flex: 1;
     position: relative;
     overflow: hidden;
     min-height: 480px;
     /* Isometric Grid Background */
-
+  
 }
 
 .title {
@@ -458,8 +474,9 @@ p {
     margin-bottom: 16px;
 }
 .text-content{
-    margin-left:180px;
+    text-align: center;
 }
+
 
 .description {
     color: var(--text-muted);
@@ -473,6 +490,7 @@ p {
 .check-list {
     list-style: none;
     padding: 0;
+    margin-right:25px;
 }
 
 .check-list li {
@@ -868,6 +886,7 @@ p {
     }
 }
 
+<<<<<<< HEAD
 /*Second Section Scroll*/
 /* 1. The Container: Hide the scrollbar and set the stage */
 .coats-container1 {
@@ -912,3 +931,215 @@ p {
   object-fit: cover;
   border-radius: 8px;
 }
+=======
+
+
+
+/* Container with a "Fade" effect on the edges */
+/*Moving Section*/
+.brand-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between the two rows */
+}
+
+.logo-grid, .logo-grid1 {
+  width: 100%;
+  height:120px;
+  overflow: hidden;
+  position: relative;
+  background-color: #0a0e14;
+  /* Fade edges effect */
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+
+/* Track 1: Scrolls Right */
+.logo-track2 {
+  display: flex;
+  width: calc(250px * 12);
+  animation: scrollRight 25s linear infinite;
+}
+
+/* Track 2: Scrolls Left */
+.logo-track {
+  display: flex;
+  width: calc(250px * 12);
+  animation: scrollLeft 28s linear infinite;
+
+}
+
+.logo-item, .logo-item1 {
+  width: 250px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* --- Typography Styles --- */
+.nike-text {
+  font-family: 'Impact', sans-serif;
+  font-size: 2rem;
+  font-style: italic;
+  text-transform: uppercase;
+  color: white;
+  letter-spacing: -2px;
+ 
+}
+
+.burger-king {
+  font-family: 'Arial Rounded MT Bold', sans-serif;
+  font-size: 1.4rem;
+  color: #f5ebdc;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.cosmetics {
+  font-family: 'Didot', serif;
+  font-size: 1.2rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: white;
+}
+
+.dior {
+  font-family: 'Baskerville', serif;
+  font-size: 2.2rem;
+  color: white;
+}
+
+.sport-text {
+  font-family: 'Helvetica', sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: white;
+  text-transform: uppercase;
+  font-style: italic;
+}
+
+.SkinCate-text {
+  font-family: 'Garamond', serif;
+  font-size: 1.8rem;
+  font-style: italic;
+  color: white;
+}
+
+/* --- Keyframes --- */
+
+/* Moves logos from Left to Right */
+@keyframes scrollRight {
+  0% { transform: translateX(calc(-250px * 6)); }
+  100% { transform: translateX(0); }
+}
+
+/* Moves logos from Right to Left */
+@keyframes scrollLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-250px * 6)); }
+}
+
+/*Future Shopping Malls CSS Code*/
+/* Heading */
+.main-title {
+  font-size:45px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin-bottom: 60px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Grid and Cards */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 100px;
+}
+
+.feature-card {
+  background-color:#0a0e14;
+  padding: 50px 40px;
+  border-radius: 30px;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.feature-card1 {
+  background-color:#0a0e14;
+  padding: 50px 40px;
+  border-radius: 30px;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.feature-card1:hover {
+  background-color:#0a0e14;
+  padding: 50px 40px;
+  border-radius: 30px;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+/* Hover Effect matching image */
+.feature-card:hover {
+  background: linear-gradient(
+        135deg, 
+        rgba(152, 131, 91, 1) 0%,   /* Gold Bronze */
+        rgba(22, 27, 34, 1) 100%    /* Back to Navy */
+    );
+  transform: translateY(-10px);
+  border: 1px solid #5a5441;
+}
+
+.feature-card .icon {
+  font-size: 1.5rem;
+  color: var(--text-sub);
+  margin-bottom: 40px;
+}
+
+.feature-card h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.feature-card p {
+  color: var(--text-sub);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+/* Logo Marquee */
+.logo-marquee {
+  overflow: hidden;
+  padding: 40px 0;
+  border-top: 1px solid #1a1f26;
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+
+.logo-track {
+  display: flex;
+  width: calc(250px * 12);
+  animation: scrollLeft 30s linear infinite;
+}
+
+.logo-item {
+  width: 250px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  opacity: 0.6;
+}
+
+@keyframes scrollLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-250px * 6)); }
+}
+
+>>>>>>> 4057ee1cc6a0b88b33856d4e870dd47ab0a7c227
