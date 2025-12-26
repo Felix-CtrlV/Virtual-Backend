@@ -1089,7 +1089,7 @@ p {
     background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
     border-radius: 20px;
     padding: 10px;
-    box-shadow: 20px 20px 50px rgba(0,0,0,0.5);
+    /*box-shadow: 20px 20px 50px rgba(0,0,0,0.5);*/
 }
 
 .card-front img {
