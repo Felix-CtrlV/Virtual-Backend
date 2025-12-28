@@ -1,6 +1,6 @@
 <section class="page-content product-page">
     <div class="container">
-        <h2 class="text-center mb-5">Our Products</h2>
+        <h2 class="text-center">Our Products</h2>
         <div class="row g-4">
         <div class="welcome-section text-center py-1">
             <?php if (!empty($supplier['description'])): ?>                
