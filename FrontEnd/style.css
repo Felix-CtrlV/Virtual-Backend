@@ -15,7 +15,7 @@ html {
 
 /* Adds space so the top of the section doesn't hit the very edge of the screen */
 #contact {
-  scroll-margin-top: 80px; 
+  scroll-margin-top: 80px;
 }
 /*Virtual Mall Logo*/
 /* Navigation Container*/
@@ -30,7 +30,7 @@ html {
     align-items: center;
     padding: 0 50px;        /* Side spacing */
     background: rgba(255, 255, 255, 0.05); /* Semi-transparent glass */
-    backdrop-filter: blur(15px);          /* Frosty glass effect */
+    backdrop-filter: blur(15px);        /* Frosty glass effect */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1000;          /* Stays above the Spline background */
     box-sizing: border-box;
@@ -1225,7 +1225,7 @@ p {
 }
 
 .gradient-text {
-    background: linear-gradient(90deg, #6366f1, #a855f7);
+     background: linear-gradient(90deg, #6366f1, #a855f7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -1405,54 +1405,3 @@ p {
     }
 }
 
-/*Arrow Scroll Testing*/
-.scroll-top-btn{
-    /* Position the button */
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 99;
-    
-    /* Button Styling */
-    width: 40px;
-    height: 40px;
-    background-color: #0b112b; /* Dark navy color*/
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s ease;
-}
-
-/* The Dashed Outer Ring */
-.scroll-top-btn::before {
-    content: "";
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    right: -8px;
-    bottom: -8px;
-    border: 2px dashed #0b112b; /* Dashed border */
-    border-radius: 50%;
-}
-
-/* Hover Animation */
-.scroll-top-btn:hover {
-    transform: scale(1.1);
-}
-
-/* Hide by default (for JS) */
-.scroll-top-btn {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s, visibility 0.4s, transform 0.3s;
-}
-
-.scroll-top-btn.show {
-    opacity: 1;
-    visibility: visible;
-}
