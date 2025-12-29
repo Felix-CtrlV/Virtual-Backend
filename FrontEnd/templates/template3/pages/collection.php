@@ -3,8 +3,8 @@
         <div class="collectionContainer"></div>        
         <h2 class="text-center mb-5">Latest Products</h2>
         <div class="row g-4">
-            
-            <?php
+
+              <?php
             if (!isset($_GET['category_id'])) { //category_id not found
                 $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC"); //pop products that's same with supplier_id
                 if ($products_stmt) {
@@ -56,22 +56,59 @@
     </div>
 </section>
 
-    <!--Search Collection-->
+    <?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Ensure supplier_id is defined (adjust 'user_id' to your actual session key)
+$supplier_id = $_SESSION['supplier_id'] ?? null;
+
+if (!$supplier_id) {
+    echo "<div class='alert alert-danger'>Error: You must be logged in as a supplier to view these products.</div>";
+    exit; // Stop execution if ID is missing
+}
+?>
+
     <script>
+   document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchshop");
     const tableBody = document.getElementById("suppliertable");
 
-    function fetchSuppliers(query = "text") {
-        fetch("./utils/search_products.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "search=" + encodeURIComponent(query)
-        })
-            .then(res => res.text())
-            .then(data => {
-                tableBody.innerHTML = data;
-            });
+    if (searchInput && tableBody) {
+        // ... rest of your logic
     }
+});
+   function fetchSuppliers(query = "") {
+    // Get the supplier ID from a PHP variable or a hidden input field
+    const supplierId = "<?= $supplier_id ?>"; 
+
+    fetch("./utils/search_products.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "search=" + encodeURIComponent(query) + "&supplier_id=" + supplierId
+    })
+    .then(res => res.text())
+    .then(data => {
+        tableBody.innerHTML = data;
+    });
+}
 
     fetchSuppliers();
+
+    let debounceTimer;
+
+    searchInput.addEventListener("keyup", () => {
+        clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(() => {
+            fetchSuppliers(searchInput.value);
+        }, 300);
+    });
+
+</script>
+
+
+    
  
