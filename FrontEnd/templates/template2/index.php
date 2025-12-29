@@ -34,7 +34,12 @@ if(!in_array($page, $allowed_pages)){
     $page = 'home';
 }
 
+<<<<<<< HEAD
 $page_path = __DIR__. "/pages/$page.php";
+=======
+$page_path = __DIR__ . "/pages/$page.php"; 
+
+>>>>>>> 31de85602fffdab61d7b1f644f4b36b2e1e652dd
 ?>
 
 <!DOCTYPE html>

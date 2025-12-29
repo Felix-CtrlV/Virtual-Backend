@@ -1,0 +1,274 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #05070c;
+  color: #e9eefc;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 14px;
+  pointer-events: none;
+}
+
+#hudLeft {
+  display: grid;
+  gap: 6px;
+}
+
+#sceneTitle {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+#sceneHint {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+#hudCenter {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+}
+
+#searchContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#searchContainer:not([hidden]) {
+  opacity: 1;
+  visibility: visible;
+}
+
+#searchBar {
+  background: rgba(247, 247, 245, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #0b1020;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  width: 300px;
+  backdrop-filter: blur(8px);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+#searchBar::placeholder {
+  color: rgba(11, 16, 32, 0.5);
+}
+
+#searchBar:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+#floorSelector {
+  background: rgba(247, 247, 245, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #0b1020;
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+#floorSelector:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+#hudRight {
+  pointer-events: auto;
+}
+
+#btnBack {
+  background: rgba(15, 20, 34, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e9eefc;
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-left: 15px;
+  backdrop-filter: blur(8px);
+}
+
+#btnBack:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+#canvasWrap {
+  position: absolute;
+  inset: 0;
+}
+
+#threeCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.postFx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background:
+    radial-gradient(1200px 700px at 50% 50%, rgba(255,255,255,0.06), rgba(255,255,255,0.0) 55%),
+    radial-gradient(900px 520px at 50% 55%, rgba(0,0,0,0.22), rgba(0,0,0,0.0) 55%),
+    radial-gradient(1200px 900px at 50% 50%, rgba(0,0,0,0.28), rgba(0,0,0,0.0) 65%);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+.postFx::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, rgba(0,0,0,0.0) 2px, rgba(0,0,0,0.0) 3px);
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+}
+
+.postFx::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 600px at 50% 50%, rgba(255,255,255,0.08), rgba(255,255,255,0.0) 60%),
+    radial-gradient(1200px 900px at 50% 50%, rgba(0,0,0,0.32), rgba(0,0,0,0.0) 70%);
+  opacity: 0.35;
+}
+
+.fade {
+  position: absolute;
+  inset: 0;
+  background: #05070c;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  pointer-events: none;
+}
+
+.fade.on {
+  opacity: 1;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+  background: radial-gradient(1200px 600px at 30% 40%, rgba(255, 255, 255, 0.10), rgba(5, 7, 12, 0.0) 60%),
+    linear-gradient(180deg, rgba(5, 7, 12, 0.10), rgba(5, 7, 12, 0.45));
+  pointer-events: auto;
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.overlayInner {
+  width: min(820px, 100%);
+  padding: 18px 18px;
+}
+
+.overlayKicker {
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.overlayTitle {
+  margin-top: 14px;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(38px, 6vw, 74px);
+  line-height: 0.95;
+  font-weight: 600;
+  color: rgba(233, 238, 252, 0.95);
+}
+
+.overlayTitleEm {
+  display: inline-block;
+  font-style: italic;
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+.overlayDesc {
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 520px;
+  opacity: 0.9;
+}
+
+.overlayCtas {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btnPrimary {
+  appearance: none;
+  border: 0;
+  background: rgba(233, 238, 252, 0.92);
+  color: #0b1020;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnPrimary:hover {
+  background: rgba(233, 238, 252, 1);
+}
+
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: rgba(233, 238, 252, 0.95);
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  background: rgba(15, 20, 34, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.btnGhost:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}

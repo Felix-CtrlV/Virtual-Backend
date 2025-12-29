@@ -1,0 +1,754 @@
+.smart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 10%;
+  background: #ffffff;
+  border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  z-index: 10;
+  top: 0;
+}
+
+.logo-box {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1b;
+}
+
+.logo-box span {
+  color: #0070f3;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-menu li {
+  margin: 0 20px;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+  position: relative;
+  padding: 5px 0;
+  transition: color 0.3s;
+}
+
+.nav-menu a:hover {
+  color: #000;
+}
+
+/* The Animated Underline */
+.nav-menu a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: black;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.nav-menu a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.login-link {
+  background: none;
+  border: 1px solid black;
+  color: black;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-link:hover {
+  background: black;
+  color: white;
+}
+
+.logo-container {
+  top: 20px;
+  left: 50px;
+  cursor: pointer;
+  position: absolute;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* ADD THESE */
+  width: 50px; /* Match the image height for a square */
+  height: 50px;
+  overflow: hidden; /* Clips the image to the blob shape */
+  border-radius: 5px; /* Initial state */
+  transition: border-radius 0.3s ease-out; /* Animates both ways */
+}
+
+.logo-container img {
+  height: 50px;
+  /* Remove border-radius here if you want the container to control the shape */
+  border-radius: inherit;
+}
+
+.logo-container:hover {
+  /* The "blob" shape now applies to the clipped container */
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+@media (max-width: 768px) {
+  .smart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-menu {
+    margin-top: 50px;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-menu li {
+    margin: 10px 0;
+  }
+
+  .login-link {
+    margin-top: 10px;
+  }
+}
+
+/* Footer styles */
+
+.main-footer {
+  background-color: #fafafa;
+  border-top: 1px solid #eaeaea;
+  padding: 60px 6% 24px 6%;
+  color: #1a1a1b;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  flex: 1;
+  min-width: 250px;
+  text-align: left;
+}
+
+.footer-brand p {
+  color: #666;
+  margin: 20px 0;
+  max-width: 300px;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.social-icons a {
+  text-decoration: none;
+  color: #000;
+  font-size: 1.2rem;
+  opacity: 0.6;
+  transition: 0.3s;
+}
+
+.social-icons a:hover {
+  opacity: 1;
+  color: #0070f3;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+  justify-content: flex-end;
+  flex: 1 1 420px;
+  flex-wrap: wrap;
+}
+
+.link-column {
+  flex: 0 1 180px;
+  min-width: 140px;
+  text-align: center;
+  justify-content: center;
+}
+
+.link-column h4 {
+  margin-top: 0;
+  font-size: 0.9rem;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1a1a1b;
+  text-align: center;
+}
+
+.link-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.link-column li {
+  margin-bottom: 12px;
+}
+
+.link-column a {
+  text-decoration: none;
+  color: #666;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.link-column a:hover {
+  color: #0070f3;
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid #eee;
+  text-align: center;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 992px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-links {
+    width: 100%;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .footer-brand {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .link-column {
+    text-align: center;
+    flex: 0 1 45%;
+  }
+
+  .social-icons {
+    justify-content: center;
+  }
+}
+
+/* Hero banner styles */
+.hero-banner {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.45));
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 40px 6%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 2.25rem;
+  margin: 0 0 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.hero-sub {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 18px;
+  max-width: 720px;
+}
+
+.hero-cta {
+  display: inline-block;
+  background: var(--primary, #0070f3);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .hero-banner {
+    min-height: 260px;
+  }
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  .hero-content {
+    padding: 24px 4%;
+  }
+  .hero-sub {
+    font-size: 0.95rem;
+  }
+}
+
+/* Fallback when there's no banner image */
+.hero-banner.hero-no-image {
+  background: linear-gradient(
+    135deg,
+    var(--primary, #4a90e2) 0%,
+    var(--secondary, #2c3e50) 100%
+  );
+  color: #fff;
+}
+
+.hero-banner.hero-no-image .hero-overlay {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* Hero Banner Enhancements */
+.hero-banner {
+  position: relative;
+  height: 80vh; /* Increased height for better split look */
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  overflow: hidden; /* Necessary for the curve clipping */
+  margin-bottom: 80px; /* Space for the curve to overlap */
+}
+
+.hero-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 5;
+  position: relative;
+  width: 100%;
+}
+
+.hero-side-left {
+  flex: 1;
+  text-align: left;
+  max-width: 600px;
+}
+
+.hero-side-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.hero-floating-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 30px;
+  border-radius: 20px;
+  color: white;
+  text-align: center;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Darkens banner so text is readable */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 4rem;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  text-align: left; /* Overriding previous center alignment */
+}
+
+.hero-sub {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+/*  */
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .hero-side-left {
+    text-align: center;
+    max-width: 100%;
+  }
+  .hero-title {
+    font-size: 2.5rem;
+    text-align: center;
+  }
+  .hero-sub {
+    text-align: center;
+  }
+  .hero-banner {
+    height: 60vh;
+  }
+}
+
+/* Product Card Hover Effect */
+.product-card {
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Navigation Active State */
+.nav-link.active {
+  color: var(--primary) !important;
+  font-weight: bold;
+  /* border-bottom: 2px solid var(--primary); */
+}
+
+/* ==========================
+   PAGE DESCRIPTION (HOVER++)
+========================== */
+
+.page-description-section {
+  position: relative;
+  padding: 110px 0;
+  background: transparent;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+/* ambient light */
+.page-description-section::before {
+  content: "";
+  position: absolute;
+  inset: -200px 0 auto 0;
+  height: 500px;
+  /* background: radial-gradient(
+    circle at center,
+    rgba(74, 144, 226, 0.08),
+    transparent 65%
+  ); */
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 1s ease;
+}
+
+/* content layer */
+.page-description-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* LABEL */
+.page-desc-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: softRise 1s ease forwards;
+  transition: transform 0.4s ease, letter-spacing 0.4s ease;
+}
+
+/* TITLE */
+.page-desc-title {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #1a1a1b;
+  margin-bottom: 22px;
+  position: relative;
+  opacity: 0;
+  animation: softRise 1s ease forwards;
+  animation-delay: 0.15s;
+  transition: transform 0.4s ease, text-shadow 0.4s ease;
+}
+
+/* underline */
+.page-desc-title::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 3px;
+  margin: 16px auto 0;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  transition: width 0.5s ease;
+}
+
+/* TEXT */
+.page-desc-text {
+  font-size: 1.05rem;
+  color: #666;
+  line-height: 1.85;
+  max-width: 720px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: softRise 1s ease forwards;
+  animation-delay: 0.3s;
+  transition: transform 0.4s ease, color 0.4s ease;
+}
+
+/* =================
+   HOVER INTERACTION
+================= */
+
+.page-description-section:hover::before {
+  opacity: 1;
+  transform: translateY(40px);
+}
+
+.page-description-section:hover .page-desc-label {
+  transform: translateY(-3px);
+  letter-spacing: 2px;
+}
+
+.page-description-section:hover .page-desc-title {
+  transform: translateY(-6px);
+  text-shadow: 0 18px 45px rgba(0, 0, 0, 0.15);
+}
+
+.page-description-section:hover .page-desc-title::after {
+  width: 120px;
+}
+
+.page-description-section:hover .page-desc-text {
+  transform: translateY(-4px);
+  color: #555;
+}
+
+/* cursor feedback */
+.page-description-section:hover {
+  cursor: default;
+}
+
+/* animations */
+@keyframes softRise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-description-section {
+    padding: 80px 0;
+  }
+
+  .page-desc-title {
+    font-size: 1.6rem;
+  }
+
+  .page-desc-text {
+    font-size: 1rem;
+  }
+}
+
+:root {
+  --card-bg: #e0e0e0;
+  --accent-color: #333;
+}
+
+/* Category Buttons */
+.btn-category {
+  border-radius: 20px;
+  padding: 8px 20px;
+  margin: 5px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  transition: 0.3s;
+}
+.btn-category.active {
+  background: #000;
+  color: #fff;
+}
+
+/* The Modern Card Container */
+.modern-card {
+  background: var(--card-bg);
+  border-radius: 40px; /* Highly rounded as per image */
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  border-radius: 30px;
+  background: linear-gradient(145deg, #d1d1d1, #ffffff);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-container img {
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.2));
+}
+
+/* Top Left Labels */
+.category-label {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  text-transform: uppercase;
+  color: var(--accent-color);
+ 
+  z-index: 1;
+}
+.category-label h3 {
+  font-weight: 800;
+  margin: 0;
+  font-size: 1.5rem;
+}
+.category-label span {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: #666;
+}
+
+/* Floating Zoom Button */
+.zoom-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bottom "Refresh" Pill Style */
+.card-footer-custom {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.refresh-pill {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  border-radius: 30px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon-circle {
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-text {
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.price-tag {
+  font-weight: bold;
+}
+
+.btn-add-cart {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 50px; /* Fully rounded pill shape */
+  padding: 15px;
+  width: 100%;
+  font-weight: 700;
+  text-transform: capitalize;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-add-cart:hover {
+  background: #444;
+}

@@ -34,10 +34,13 @@
                                 <h5 class="card-title"><?= htmlspecialchars($product['product_name']) ?></h5>
                                 <p class="card-text price">$<?= number_format($product['price'], 2) ?></p>
                                 <button class="btn btn-primary btn-add-cart" data-product-id="<?= $product['product_id'] ?>">Add to Cart</button>
+<<<<<<< HEAD
                             </div>
-                            
+=======
+                            </div>                            
+>>>>>>> 2a4fe0b58d4473c18425af1dd218de45a3427c0b
                         </div>
-                    </div>
+                    </div>                                
                 <?php
                     }
                     if (isset($products_stmt)) {

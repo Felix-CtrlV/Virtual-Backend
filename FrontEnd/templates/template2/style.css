@@ -55,6 +55,7 @@ body {
 }
 
 .main-nav .navbar-nav .nav-link {
+    margin-left: 15px;
     color: white;
     padding: 15px 25px;
     transition: background-color 0.3s;
@@ -84,7 +85,8 @@ body {
 
 .banner-image {
     width: 100%;
-    height: 100%;
+    height: 500px;
+    margin-bottom: 30px;
     object-fit: cover;
 }
 

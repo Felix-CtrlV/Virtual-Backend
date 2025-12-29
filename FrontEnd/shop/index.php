@@ -12,7 +12,7 @@ $stmt = mysqli_prepare($conn, "
     FROM suppliers s
     JOIN templates t ON s.template_id = t.template_id
     WHERE s.supplier_id = ?
-");
+    ");
 
 if (!$stmt) {
     die("Database query preparation failed: " . mysqli_error($conn));
