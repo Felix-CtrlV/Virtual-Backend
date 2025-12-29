@@ -18,12 +18,16 @@
                     <a class="nav-link <?= $page === 'collection' ? 'active' : '' ?>" href="<?= $base_url ?>&page=collection">Collection</a>
                 </li>                
             </ul>
-            <?php if ($page !== 'home' && $page !== 'about'): ?>
+    
+    
+                
                 <form class="search-bar">
-                    <input type="text" placeholder="Search.....">
-                    <i class="fas fa-search"></i>
+                    <input type="text" name="search_product" placeholder="Search....." required>
+                         <i class="fas fa-search"></i>
+                    </button>
                 </form>
-            <?php endif; ?>
-    </div>
+
+
+        </div>
 </nav>
 
