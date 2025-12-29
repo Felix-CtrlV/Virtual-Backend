@@ -639,10 +639,10 @@ function createFloorWithMaterial(width, depth, material) {
 
 function createOutside() {
   clearSceneGeometry();
-  setHud('Outside', 'Click to ENTER');
+  setHud('Mall Exterior', 'Click the Entrance Doors to Enter');
   btnBack.hidden = true;
 
-  // Hide search container when outside - make completely invisible
+  // Hide search container
   if (searchContainer) {
     searchContainer.hidden = true;
     searchContainer.style.opacity = '0';
@@ -651,908 +651,340 @@ function createOutside() {
 
   if (overlayEl) overlayEl.hidden = false;
 
-  // Serene, minimalist theme - soft pink-beige sky
-  scene.background = new THREE.Color('#f5d4d0');
-  scene.fog = new THREE.FogExp2(0xf5e8e9, 0.008);
+  // --- 1. LIGHTING & ATMOSPHERE ---
+  scene.background = new THREE.Color('#87CEEB'); // Sky blue
+  scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
 
-  // Softer, more diffused lighting for serene aesthetic
-  ambient.intensity = 0.92;
-  keyLight.intensity = 0.65;
-  fillLight.intensity = 0.25;
-  keyLight.color = new THREE.Color(0xfff8f8);
-  fillLight.color = new THREE.Color(0xf0e8f5);
-  keyLight.position.set(12, 20, 12);
-
-  // Softer background wall matching serene theme
-  // const bgWall = new THREE.Mesh(
-  //   new THREE.PlaneGeometry(70, 32),
-  //   new THREE.MeshStandardMaterial({ color: 0xf8ecec, metalness: 0.0, roughness: 1.0 })
-  // );
-  // bgWall.position.set(0, 12, -45);
-  // scene.add(bgWall);
-
-  const rippleNormal = makeRippleNormalTexture();
-  // Softer floor material for serene aesthetic
-  const luxuryFloorMat = new THREE.MeshPhysicalMaterial({
-    color: 0xf0e8e9,
-    metalness: 0.0,
-    roughness: 0.15,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.08,
-    normalMap: rippleNormal,
-    normalScale: new THREE.Vector2(0.18, 0.18)
-  });
-
-
+  ambient.intensity = 0.6;
+  keyLight.intensity = 1.4;
+  keyLight.position.set(30, 50, 40);
+  keyLight.color.setHex(0xfffaed);
+  keyLight.castShadow = true;
   
-  const floor = new THREE.Mesh(new THREE.BoxGeometry(70, 0.18, 60), luxuryFloorMat);
-  floor.position.set(0, -0.09, -6);
-  floor.receiveShadow = true;
-  scene.add(floor);
+  // Shadow settings
+  keyLight.shadow.mapSize.width = 2048;
+  keyLight.shadow.mapSize.height = 2048;
+  keyLight.shadow.camera.near = 0.5;
+  keyLight.shadow.camera.far = 200;
+  keyLight.shadow.camera.left = -50;
+  keyLight.shadow.camera.right = 50;
+  keyLight.shadow.camera.top = 50;
+  keyLight.shadow.camera.bottom = -50;
+  keyLight.shadow.bias = -0.0005;
 
-  // --- TEXTURES AND MATERIALS ---
-const plasterTex = makePlasterTexture(); // single plaster texture
+  fillLight.intensity = 0.5;
+  fillLight.color.setHex(0xb0c4de);
 
-// Wall materials
-const courtyardMat = new THREE.MeshStandardMaterial({
-  map: plasterTex,
-  color: 0xf3e0e1,
-  metalness: 0.0,
-  roughness: 1.0,
-  side: THREE.DoubleSide
-});
+  // --- 2. MATERIALS ---
 
-const luxuryWallMat = new THREE.MeshStandardMaterial({
-  map: plasterTex,
-  color: 0xf5e5e6,
-  metalness: 0.0,
-  roughness: 0.98
-});
+  const concreteMat = new THREE.MeshStandardMaterial({ 
+    color: 0xdddddd, 
+    roughness: 0.9, 
+    metalness: 0.1,
+  });
 
-// Facade panels & accents
-const facadePanelMat = new THREE.MeshStandardMaterial({
-  color: 0xf9efef,
-  metalness: 0.0,
-  roughness: 0.94
-});
+  const buildingMat = new THREE.MeshStandardMaterial({ 
+    color: 0xf0f0f0, // White stucco/stone
+    roughness: 0.9, 
+    metalness: 0.0 
+  });
 
-const accentMat = new THREE.MeshStandardMaterial({
-  map: plasterTex,
-  color: 0xf0d7d9,
-  metalness: 0.0,
-  roughness: 0.98
-});
+  const frameMat = new THREE.MeshStandardMaterial({ 
+    color: 0x1a1a1a, 
+    roughness: 0.4, 
+    metalness: 0.6 
+  });
 
-// --- COURTYARD WALLS ---
-const courtyard = new THREE.Group();
-
-const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(120, 50), courtyardMat);
-wallBack.position.set(0, 17, -50);
-wallBack.receiveShadow = true;
-courtyard.add(wallBack);
-
-const wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(120, 50), courtyardMat);
-wallLeft.rotation.y = Math.PI / 2;
-wallLeft.position.set(-42, 17, -20);
-wallLeft.receiveShadow = true;
-courtyard.add(wallLeft);
-
-const wallRight = new THREE.Mesh(new THREE.PlaneGeometry(120, 50), courtyardMat);
-wallRight.rotation.y = -Math.PI / 2;
-wallRight.position.set(42, 17, -20);
-wallRight.receiveShadow = true;
-courtyard.add(wallRight);
-
-const wallFront = new THREE.Mesh(new THREE.PlaneGeometry(120, 50), courtyardMat);
-wallFront.position.set(0, 17, 38);
-wallFront.receiveShadow = true;
-courtyard.add(wallFront);
-
-scene.add(courtyard);
-
-// --- MALL BUILDING BODY ---
-const mallBody = new THREE.Mesh(new THREE.BoxGeometry(18, 20, 7), luxuryWallMat);
-mallBody.position.set(0, 4.0, -10.5);
-mallBody.castShadow = true;
-mallBody.receiveShadow = true;
-scene.add(mallBody);
-
-// --- FACADE PANELS ---
-for (let i = -2; i <= 2; i++) {
-  if (i === 0) continue; // skip middle
-  const panel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 7.0, 0.12), facadePanelMat);
-  panel.position.set(i * 3.6, 3.8, -7.85);
-  panel.castShadow = true;
-  panel.receiveShadow = true;
-  scene.add(panel);
-}
-
-// --- CURVED ACCENTS / CORNICES ---
-const cornice = new THREE.Mesh(new THREE.TorusGeometry(12.2, 0.28, 12, 64), accentMat);
-cornice.rotation.set(Math.PI / 2, Math.PI / 11, 0);
-cornice.position.set(0, 8.15, -10.5);
-cornice.castShadow = true;
-cornice.receiveShadow = true;
-scene.add(cornice);
-
-
-  const carpetMat = new THREE.MeshStandardMaterial({ color: 0x7a1d2e, metalness: 0.0, roughness: 0.95 });
-  const carpet = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.03, 20.5), carpetMat);
-  carpet.position.set(0, 0.02, -3.6);
-  carpet.receiveShadow = true;
-  scene.add(carpet);
-
-  const carpetTrimMat = new THREE.MeshStandardMaterial({ color: 0xd7b87a, metalness: 0.35, roughness: 0.35 });
-  const trimL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.035, 20.7), carpetTrimMat);
-  trimL.position.set(-3.24, 0.025, -3.6);
-  trimL.receiveShadow = true;
-  scene.add(trimL);
-  const trimR = trimL.clone();
-  trimR.position.set(3.24, 0.025, -3.6);
-  scene.add(trimR);
-
-  const plaster = makePlasterTexture();
-  // Softer wall color matching serene minimalist theme
-
-  // Softer courtyard walls
-  wallBack.position.set(0, 17, -50);
-  wallBack.receiveShadow = true;
-  courtyard.add(wallBack);
-  wallLeft.rotation.y = Math.PI / 2;
-  wallLeft.position.set(-42, 17, -20);
-  wallLeft.receiveShadow = true;
-  courtyard.add(wallLeft);
-  wallRight.rotation.y = -Math.PI / 2;
-  wallRight.position.set(42, 17, -20);
-  wallRight.receiveShadow = true;
-  courtyard.add(wallRight);
-  wallFront.position.set(0, 17, 38);
-  wallFront.receiveShadow = true;
-  courtyard.add(wallFront);
-  scene.add(courtyard);
-
-  mallBody.position.set(0, 4.0, -10.5);
-  mallBody.castShadow = true;
-  mallBody.receiveShadow = true;
-  scene.add(mallBody);
-
-  // Softer trim matching theme
-  const trimMat = new THREE.MeshStandardMaterial({ color: 0xf8ecec, metalness: 0.0, roughness: 0.88 });
-  const trim = new THREE.Mesh(new THREE.BoxGeometry(19.6, 8.6, 7.3), trimMat);
-  trim.position.copy(mallBody.position);
-  trim.castShadow = true;
-  trim.receiveShadow = true;
-  // scene.add(trim);
-
-  // Subtle rounded corners on trim
-  const cornerRadius = 0.5;
-  const cornerSegments = 24;
-  const buildingHeight = 20; // total height of the 2-story building
-
-  const trimCornerGeo = new THREE.CylinderGeometry(cornerRadius, cornerRadius, buildingHeight, cornerSegments);
-  const trimCornerMat = new THREE.MeshStandardMaterial({ color: 0xf8ecec, metalness: 0.0, roughness: 0.88 });
-
-  // Front-Left corner
-  const trimCornerFL = new THREE.Mesh(trimCornerGeo, trimCornerMat);
-  trimCornerFL.position.set(-9.2, buildingHeight / 2, -7.35); // Y = half of building height
-  trimCornerFL.rotation.set(0, 0, 0);
-  trimCornerFL.castShadow = true;
-  scene.add(trimCornerFL);
-
-
-  const trimCornerFR = trimCornerFL.clone();
-  trimCornerFR.position.set(9.2, 4.0, -7.35);
-  scene.add(trimCornerFR);
-
-  // Back corners
-  const trimCornerBL = trimCornerFL.clone();
-  trimCornerBL.position.set(-9.2, 4.0, -13.65);
-  scene.add(trimCornerBL);
-
-  const trimCornerBR = trimCornerFL.clone();
-  trimCornerBR.position.set(9.2, 4.0, -13.65);
-  scene.add(trimCornerBR);
-
-  const radiusMat = new THREE.MeshStandardMaterial({ color: 0xf7eaea, metalness: 0.0, roughness: 0.90 });
-  const cornerGeo = new THREE.CylinderGeometry(0.48, 0.48, 8.6, 28, 1, false, 0, Math.PI / 2);
-  const cornerFL = new THREE.Mesh(cornerGeo, radiusMat);
-  cornerFL.position.set(-9.8, 4.0, -7.75);
-  cornerFL.rotation.y = Math.PI;
-  cornerFL.castShadow = true;
-  cornerFL.receiveShadow = true;
-  scene.add(cornerFL);
-  const cornerFR = cornerFL.clone();
-  cornerFR.position.set(9.8, 5.0, -7.75);
-  cornerFR.rotation.y = -Math.PI / 2;
-  // scene.add(cornerFR);
-
-  for (let i = -2; i <= 2; i++) {
-    if (i === 0) continue;
-    const panel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 7.0, 0.12), facadePanelMat);
-    panel.position.set(i * 3.6, 3.8, -7.85);
-    panel.castShadow = true;
-    panel.receiveShadow = true;
-    scene.add(panel);
-  }
-
-  // Subtle curved elements for dreamy aesthetic
-
-  // Subtle curved cornice (gentle arch)
-
-  cornice.rotation.set(
-    Math.PI / 2,    // stand up
-    Math.PI / 11,   // horizontal tilt
-    0
-  );
-  cornice.position.set(0, 8.15, -10.5);
-  cornice.castShadow = true;
-  cornice.receiveShadow = true;
-  scene.add(cornice);
-
-
-  function addLuxuryCornice({
-    x = 0,
-    y = 8.15,
-    z = -10.5,
-    radius = 12.2,
-    tube = 0.28,
-    radialSegments = 24,
-    tubularSegments = 128,
-    rotationX = Math.PI / 2,
-    rotationY = Math.PI / 11,
-    rotationZ = 0,
-    fasciaWidth = 19.8,
-    fasciaHeight = 0.75,
-    fasciaDepth = 0.8,
-    material = accentMat
-  }) {
-    // Cornice torus (smooth)
-    const corniceGeo = new THREE.TorusGeometry(
-      radius,
-      tube,
-      radialSegments,
-      tubularSegments
-    );
-    corniceGeo.computeVertexNormals(); // ensures smooth shading
-
-    const cornice = new THREE.Mesh(corniceGeo, material);
-    cornice.rotation.set(rotationX, rotationY, rotationZ);
-    cornice.position.set(x, y, z);
-    cornice.castShadow = true;
-    cornice.receiveShadow = true;
-    scene.add(cornice);
-
-    // Optional fascia below cornice
-    const corniceFascia = new THREE.Mesh(
-      new THREE.BoxGeometry(fasciaWidth, fasciaHeight, fasciaDepth),
-      material
-    );
-    corniceFascia.position.set(x, y - 0.15, z + 2.35);
-    corniceFascia.castShadow = true;
-    corniceFascia.receiveShadow = true;
-    scene.add(corniceFascia);
-
-    return { cornice, corniceFascia };
-  }
-
-  const sideButtressL = new THREE.Mesh(new THREE.BoxGeometry(1.0, 6.0, 1.1), accentMat);
-  sideButtressL.position.set(-9.55, 4.8, -10.5);
-  sideButtressL.castShadow = true;
-  sideButtressL.receiveShadow = true;
-  scene.add(sideButtressL);
-
-  const sideButtressR = sideButtressL.clone();
-  sideButtressR.position.set(9.55, 4.8, -10.5);
-  scene.add(sideButtressR);
-
-  // Dreamy aesthetic elements
-  // Floating translucent orbs
-  const orbMat = new THREE.MeshPhysicalMaterial({
-    color: 0xff1493,
-    metalness: 0.0,
-    roughness: 0.1,
-    transmission: 0.9,
-    thickness: 0.5,
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0xaaddff,
+    metalness: 0.1,
+    roughness: 0.0,
+    transmission: 0.2,
+    reflectivity: 1.0,
+    clearcoat: 1.0,
     transparent: true,
-    opacity: 0.3,
-    emissive: 0xffe8f0,
-    emissiveIntensity: 0.2
-  });
-
-  // Create floating orbs around the mall
-  const orbPositions = [
-    { x: -24, y: 8, z: -6 },
-    { x: 24, y: 13, z: -7 },
-    { x: -18, y: 5, z: -11 },
-    { x: 18, y: 10, z: -12 },
-    { x: -12, y: 12, z: -9 },
-    { x: 12, y: 6, z: -10 },
-    { x: -21, y: 9, z: -14 },
-    { x: 21, y: 7, z: -13 },
-    // { x: -16, y: 4, z: -8 },
-    { x: 16, y: 14, z: -9 }
-  ];
-
-
-  const floatingOrbs = [];
-  orbPositions.forEach((pos, i) => {
-    const size = 0.4 + Math.random() * 0.3;
-    const orb = new THREE.Mesh(new THREE.SphereGeometry(size, 16, 16), orbMat.clone());
-    orb.position.set(pos.x, pos.y, pos.z);
-    orb.userData = {
-      baseY: pos.y,
-      speed: 0.3 + Math.random() * 0.2,
-      phase: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.02
-    };
-    orb.castShadow = false;
-    scene.add(orb);
-    floatingOrbs.push(orb);
-  });
-
-  // Floating geometric shapes
-  const geometricMat = new THREE.MeshPhysicalMaterial({
-    color: 0xff1493,        // base color
-    metalness: 0.25,        // slightly more metallic → reflects more
-    roughness: 0.05,        // low roughness → smooth glossy surface
-    transmission: 0.7,      // allows light to pass through (glass-like)
-    thickness: 0.3,
-    transparent: true,
-    opacity: 0.4,
-    clearcoat: 1.0,         // adds extra glossy layer
-    clearcoatRoughness: 0.05,
-    reflectivity: 0.9,      // stronger reflection
-    emissive: 0xffe8f5,     // subtle glow
-    emissiveIntensity: 0.15
-  });
-
-
-  const floatingShapes = [];
-  const shapePositions = [
-    { x: -25, y: 6, z: -5, type: 'box' },
-    { x: 25, y: 12, z: -6, type: 'octa' },
-    { x: -20, y: 9, z: -12, type: 'tetra' },
-    { x: 20, y: 7, z: -14, type: 'box' },
-    { x: -15, y: 11, z: -10, type: 'octa' },
-    { x: 15, y: 5, z: -13, type: 'tetra' },
-    { x: -22, y: 14, z: -8, type: 'box' },
-    { x: 22, y: 4.5, z: -9, type: 'octa' }
-  ];
-
-
-
-  shapePositions.forEach((pos) => {
-    let geometry;
-    if (pos.type === 'box') {
-      geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    } else if (pos.type === 'octa') {
-      geometry = new THREE.OctahedronGeometry(0.4);
-    } else if (pos.type === 'tetra') {
-      geometry = new THREE.TetrahedronGeometry(0.35);
-    }
-
-    const shape = new THREE.Mesh(geometry, geometricMat.clone());
-    shape.position.set(pos.x, pos.y, pos.z);
-    shape.castShadow = true;
-    shape.userData = {
-      baseY: pos.y,
-      speed: 0.25 + Math.random() * 0.15,
-      phase: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.03
-    };
-    shape.receiveShadow = true;
-    scene.add(shape);
-    floatingShapes.push(shape);
-  });
-
-
-  // Soft ambient glow around the mall
-  const glowMat = new THREE.MeshStandardMaterial({
-    color: 0xfff0f5,
-    emissive: 0xffe8f0,
-    emissiveIntensity: 0.3,
-    transparent: true,
-    opacity: 0.15,
+    opacity: 0.6,
     side: THREE.DoubleSide
   });
 
-  const ambientGlow = new THREE.Mesh(new THREE.SphereGeometry(25, 32, 32), glowMat);
-  ambientGlow.position.set(0, 5, -10);
-  ambientGlow.scale.set(1, 0.6, 1);
-  ambientGlow.renderOrder = -1;
-  scene.add(ambientGlow);
+  // --- 3. PROCEDURAL STONE TEXTURE GENERATOR ---
+  function createStoneTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
 
-  // Store dreamy elements for animation
-  scene.userData.dreamyOrbs = floatingOrbs;
-  scene.userData.dreamyShapes = floatingShapes;
+    // Base Grout Color
+    ctx.fillStyle = '#555555';
+    ctx.fillRect(0, 0, 1024, 1024);
 
-  // Minimalist flat roof matching mall aesthetic
-  const mallTop = 8.0; // Top of mall at y = 4.0 + 4.0
-  const overhang = 2; // Subtle overhang for minimalist look
+    // Draw Stones
+    const rows = 16;
+    const cols = 8;
+    const tileW = 1024 / cols;
+    const tileH = 1024 / rows;
+    const gap = 8;
 
-  // Roof material matching mall's soft pink/beige aesthetic
-  const roofMat = new THREE.MeshStandardMaterial({
-    map: plaster,
-    color: 0x643e47,
-    metalness: 0.0,
-    roughness: 0.95
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        // Offset every other row for running bond pattern
+        const xOff = (y % 2 === 0) ? 0 : tileW / 2;
+        
+        // Random slight color variation
+        const shade = 180 + Math.random() * 50;
+        ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+
+        // Draw rounded rect (the stone)
+        const stoneX = (x * tileW) + xOff - (y%2!==0 && x===cols-1 ? tileW*cols : 0);
+        const stoneY = y * tileH;
+        
+        ctx.beginPath();
+        ctx.roundRect(stoneX + gap, stoneY + gap, tileW - gap*2, tileH - gap*2, 10);
+        ctx.fill();
+
+        // Add noise/texture to stone
+        ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1})`;
+        ctx.fill();
+      }
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(4, 8); 
+    tex.anisotropy = 16;
+    return tex;
+  }
+
+  const stoneTexture = createStoneTexture();
+  // Create a bump map from the texture (cheap way: just use same texture)
+  const stoneMat = new THREE.MeshStandardMaterial({
+    map: stoneTexture,
+    bumpMap: stoneTexture,
+    bumpScale: 0.1,
+    roughness: 0.8,
+    color: 0xdddddd
   });
 
-  // Main flat roof slab - clean and minimalist
-  const roofSlab = new THREE.Mesh(new THREE.BoxGeometry(18 + overhang * 2, 0.25, 7 + overhang * 2), roofMat);
-  roofSlab.position.set(0, mallTop + 0.125, -10.5);
-  roofSlab.castShadow = true;
-  roofSlab.receiveShadow = true;
-  scene.add(roofSlab);
+  // --- 4. GROUND & WALKWAY ---
 
-  // Subtle roof edge/fascia - slightly lighter tone with rounded corners
-  const roofEdgeMat = new THREE.MeshStandardMaterial({
-    map: plaster,
-    color: 0xf5e5e6,  // Slightly lighter pink-beige
-    metalness: 0.0,
-    roughness: 0.92
-  });
+  // Main Plaza Floor
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), concreteMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = 0;
+  ground.receiveShadow = true;
+  scene.add(ground);
 
-  // Front edge
-  const frontEdge = new THREE.Mesh(new THREE.BoxGeometry(18 + overhang * 2, 0.12, 0.15), roofEdgeMat);
-  frontEdge.position.set(0, mallTop + 0.125, -6.85 - overhang);
-  frontEdge.castShadow = true;
-  scene.add(frontEdge);
+  // Stone Walkway (Leading to door)
+  // Width 8, Length 40 (starts at z=20, ends at z=-20)
+  const walkway = new THREE.Mesh(new THREE.PlaneGeometry(10, 45), stoneMat);
+  walkway.rotation.x = -Math.PI / 2;
+  walkway.position.set(0, 0.02, 5); // Slightly above ground to prevent z-fighting
+  walkway.receiveShadow = true;
+  scene.add(walkway);
 
-  // Rounded front edge corners
-  const frontEdgeCornerL = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.15, 16), roofEdgeMat);
-  frontEdgeCornerL.rotation.z = Math.PI / 2;
-  frontEdgeCornerL.position.set(-9.6 - overhang, mallTop + 0.125, -6.85 - overhang);
-  scene.add(frontEdgeCornerL);
+  // --- 5. GRASS (Instanced) ---
+  
+  function createGrassPatch(xPos, zPos, width, depth, count) {
+    // Planter Box
+    const borderSize = 0.3;
+    const pHeight = 0.4;
+    const planterGeo = new THREE.BoxGeometry(width + borderSize, pHeight, depth + borderSize);
+    const planter = new THREE.Mesh(planterGeo, new THREE.MeshStandardMaterial({color: 0x888888}));
+    planter.position.set(xPos, pHeight/2, zPos);
+    planter.castShadow = true;
+    planter.receiveShadow = true;
+    scene.add(planter);
 
-  const frontEdgeCornerR = frontEdgeCornerL.clone();
-  frontEdgeCornerR.position.set(9.6 + overhang, mallTop + 0.125, -6.85 - overhang);
-  scene.add(frontEdgeCornerR);
+    const soil = new THREE.Mesh(new THREE.BoxGeometry(width, 0.1, depth), new THREE.MeshStandardMaterial({color: 0x3d2817}));
+    soil.position.set(xPos, pHeight, zPos);
+    scene.add(soil);
 
-  // Back edge
-  const backEdge = new THREE.Mesh(new THREE.BoxGeometry(18 + overhang * 2, 0.12, 0.15), roofEdgeMat);
-  backEdge.position.set(0, mallTop + 0.125, -14.15 + overhang);
-  backEdge.castShadow = true;
-  scene.add(backEdge);
+    // Grass Blades
+    const bladeGeo = new THREE.ConeGeometry(0.04, 0.5, 2);
+    bladeGeo.translate(0, 0.25, 0);
+    const bladeMat = new THREE.MeshStandardMaterial({color: 0x4caf50, side: THREE.DoubleSide});
+    const instancedGrass = new THREE.InstancedMesh(bladeGeo, bladeMat, count);
+    
+    const dummy = new THREE.Object3D();
+    const _color = new THREE.Color();
+    for(let i=0; i<count; i++) {
+        dummy.position.set(
+            xPos + (Math.random()-0.5)*width,
+            pHeight,
+            zPos + (Math.random()-0.5)*depth
+        );
+        dummy.rotation.y = Math.random() * Math.PI;
+        dummy.rotation.x = (Math.random()-0.5)*0.3;
+        dummy.scale.setScalar(0.8 + Math.random()*0.5);
+        dummy.updateMatrix();
+        instancedGrass.setMatrixAt(i, dummy.matrix);
+        _color.setHex(0x4caf50);
+        _color.offsetHSL(0, 0, (Math.random()-0.5)*0.1);
+        instancedGrass.setColorAt(i, _color);
+    }
+    instancedGrass.instanceColor.needsUpdate = true; // Use instanceColor
+    instancedGrass.receiveShadow = true;
+    scene.add(instancedGrass);
+  }
 
-  // Rounded back edge corners
-  const backEdgeCornerL = frontEdgeCornerL.clone();
-  backEdgeCornerL.position.set(-9.6 - overhang, mallTop + 0.125, -14.15 + overhang);
-  scene.add(backEdgeCornerL);
+  createGrassPatch(-16, 5, 12, 20, 4000);
+  createGrassPatch(16, 5, 12, 20, 4000);
 
-  const backEdgeCornerR = frontEdgeCornerL.clone();
-  backEdgeCornerR.position.set(9.6 + overhang, mallTop + 0.125, -14.15 + overhang);
-  scene.add(backEdgeCornerR);
+  // --- 6. BUILDING & WINDOWS ---
 
-  // Softer entry cut matching serene theme
-  const cutMat = new THREE.MeshStandardMaterial({ map: plaster, color: 0xf8ecec, metalness: 0.0, roughness: 0.98 });
-  const entryCut = new THREE.Mesh(new THREE.BoxGeometry(6.6, 6.8, 0.9), cutMat);
-  entryCut.position.set(0, 2.5, -9.9);
-  entryCut.castShadow = true;
-  entryCut.receiveShadow = true;
-  scene.add(entryCut);
+  const bWidth = 60;
+  const bHeight = 18;
+  const mainBuilding = new THREE.Mesh(new THREE.BoxGeometry(bWidth, bHeight, 20), buildingMat);
+  // Building front face is at Z = -10 (-20 center + 10 half-depth)
+  mainBuilding.position.set(0, bHeight/2, -20); 
+  mainBuilding.castShadow = true;
+  mainBuilding.receiveShadow = true;
+  scene.add(mainBuilding);
 
-  // Softer inner glow - warm but muted
-  const innerGlow = new THREE.Mesh(
-    new THREE.PlaneGeometry(5.4, 5.9),
-    new THREE.MeshStandardMaterial({ color: 0xfff5e8, emissive: 0xfff5e8, emissiveIntensity: 0.35, transparent: true, opacity: 0.15 })
-  );
-  innerGlow.position.set(0, 2.4, -10.28);
-  innerGlow.renderOrder = 0;
-  scene.add(innerGlow);
+  // Roof
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(bWidth+1, 1, 21), new THREE.MeshStandardMaterial({color: 0x333333}));
+  roof.position.set(0, bHeight+0.5, -20);
+  scene.add(roof);
 
-  const signTex = makeTextTexture('Malltiverse', {
-    width: 1024,
-    height: 256,
-    bg: 'rgba(255,255,255,0.0)',
-    color: '#e9eefc',
-    font: '600 84px Inter, Arial',
-    subText: 'VIRTUAL MALL',
-    subFont: '500 30px Inter, Arial'
-  });
-  const signMat = new THREE.MeshStandardMaterial({ map: signTex, transparent: true, emissive: new THREE.Color(0xffffff), emissiveIntensity: 0.12 });
-  signMat.depthWrite = false;
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 2.2), signMat);
-  sign.position.set(0, 7.0, -7.01);
-  scene.add(sign);
+  // Window Generator
+  function createWindowPanel(w, h, divX, divY) {
+    const g = new THREE.Group();
+    // Thicker frame that sticks out
+    const thick = 0.2; 
+    const depth = 0.3; 
+    
+    // Frame Material
+    const fMat = frameMat;
 
-  const plaqueTex = makeTextTexture('LUXURY BRANDS', {
-    width: 768,
-    height: 256,
-    bg: 'rgba(255,255,255,0.0)',
-    color: '#0b1020',
-    font: '600 54px Inter, Arial',
-    subText: 'Shoes • Clothing • Accessories',
-    subFont: '500 22px Inter, Arial'
-  });
-  const plaqueMat = new THREE.MeshStandardMaterial({ map: plaqueTex, transparent: true, metalness: 0.0, roughness: 0.95 });
-  plaqueMat.depthWrite = false;
-  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(6.6, 1.8), plaqueMat);
-  plaque.position.set(-5.9, 2.5, -7.02);
-  scene.add(plaque);
+    // Outer Frame
+    const top = new THREE.Mesh(new THREE.BoxGeometry(w, thick, depth), fMat);
+    top.position.set(0, h/2-thick/2, 0); g.add(top);
+    
+    const bot = top.clone();
+    bot.position.set(0, -h/2+thick/2, 0); g.add(bot);
+    
+    const left = new THREE.Mesh(new THREE.BoxGeometry(thick, h, depth), fMat);
+    left.position.set(-w/2+thick/2, 0, 0); g.add(left);
+    
+    const right = left.clone();
+    right.position.set(w/2-thick/2, 0, 0); g.add(right);
 
-  const vTex = makeTextTexture('MALL', {
-    width: 512,
-    height: 1024,
-    bg: 'rgba(255,255,255,1.0)',
-    color: '#0b1020',
-    font: '700 120px Inter, Arial',
-    subText: 'ENTER',
-    subFont: '600 44px Inter, Arial'
-  });
-  const vMat = new THREE.MeshStandardMaterial({ map: vTex, metalness: 0.0, roughness: 0.9 });
-  const vSign = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 2.2), vMat);
-  vSign.position.set(7.9, 3.0, -7.05);
-  scene.add(vSign);
+    // Mullions
+    for(let i=1; i<divX; i++) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.08, h, depth*0.8), fMat);
+        m.position.set(-w/2 + (w/divX)*i, 0, 0); g.add(m);
+    }
+    for(let i=1; i<divY; i++) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.08, depth*0.8), fMat);
+        m.position.set(0, -h/2 + (h/divY)*i, 0); g.add(m);
+    }
 
-  const surroundMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.0, roughness: 0.82 });
-  const surroundZ = -6.66;
-  const surroundTop = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.22, 0.14), surroundMat);
-  surroundTop.position.set(0, 5.55, surroundZ);
-  surroundTop.castShadow = true;
-  surroundTop.receiveShadow = true;
-  scene.add(surroundTop);
-  const surroundL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 5.35, 0.14), surroundMat);
-  surroundL.position.set(-1.95, 2.88, surroundZ);
-  surroundL.castShadow = true;
-  surroundL.receiveShadow = true;
-  scene.add(surroundL);
-  const surroundR = surroundL.clone();
-  surroundR.position.set(1.95, 2.88, surroundZ);
-  scene.add(surroundR);
-  const surroundBot = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.18, 0.14), surroundMat);
-  surroundBot.position.set(0, 0.52, surroundZ);
-  surroundBot.castShadow = true;
-  surroundBot.receiveShadow = true;
-  scene.add(surroundBot);
+    // Glass (Set slightly back from frame, but clearly visible)
+    const glass = new THREE.Mesh(new THREE.PlaneGeometry(w-0.1, h-0.1), glassMat);
+    glass.position.set(0, 0, 0);
+    g.add(glass);
 
-  const doorWoodTex = makeWoodTexture();
-  doorWoodTex.repeat.set(1.6, 1.05);
-  doorWoodTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const doorWoodBump = makeWoodBumpTexture();
-  doorWoodBump.repeat.copy(doorWoodTex.repeat);
-  doorWoodBump.anisotropy = doorWoodTex.anisotropy;
-  // Enhanced wood material with richer colors and better properties for realistic wood appearance
-  const doorWoodMat = new THREE.MeshStandardMaterial({
-    map: doorWoodTex,
-    bumpMap: doorWoodBump,
-    bumpScale: 0.12,  // Increased bump for more pronounced wood grain
-    color: 0x8b5a3c,  // Rich brown wood color
-    metalness: 0.0,   // Wood has no metalness
-    roughness: 0.75,  // Slightly rougher for natural wood texture
-    emissive: 0x0a0602,
-    emissiveIntensity: 0.01
-  });
-  doorWoodMat.depthWrite = true;
-  doorWoodMat.depthTest = true;
-  const doorFrameMat = new THREE.MeshStandardMaterial({ color: 0x101827, metalness: 0.25, roughness: 0.55 });
-  doorFrameMat.polygonOffset = true;
-  doorFrameMat.polygonOffsetFactor = -1;
-  doorFrameMat.polygonOffsetUnits = -1;
+    return g;
+  }
+
+  // FIX: Position windows at Z = -9.85. 
+  // Since building face is at -10, this puts them 0.15 units IN FRONT of the wall.
+  // The frame depth is 0.3, so it will look embedded but sticking out.
+  const winZ = -9.85; 
+
+  // Center Atrium Window
+  const atriumWin = createWindowPanel(14, 11, 4, 3);
+  atriumWin.position.set(0, 11.5, winZ + 0.2); // Stick out a bit more for the atrium
+  scene.add(atriumWin);
+
+  // Left Windows
+  for(let i=0; i<3; i++) {
+    const w = createWindowPanel(4.5, 4, 2, 2);
+    w.position.set(-14 - (i*7), 4, winZ);
+    w.castShadow = true;
+    scene.add(w);
+  }
+  for(let i=0; i<3; i++) {
+    const w = createWindowPanel(4.5, 4, 2, 2);
+    w.position.set(-14 - (i*7), 12, winZ);
+    w.castShadow = true;
+    scene.add(w);
+  }
+
+  // Right Windows
+  for(let i=0; i<3; i++) {
+    const w = createWindowPanel(4.5, 4, 2, 2);
+    w.position.set(14 + (i*7), 4, winZ);
+    w.castShadow = true;
+    scene.add(w);
+  }
+  for(let i=0; i<3; i++) {
+    const w = createWindowPanel(4.5, 4, 2, 2);
+    w.position.set(14 + (i*7), 12, winZ);
+    w.castShadow = true;
+    scene.add(w);
+  }
+
+  // --- 7. ENTRANCE ---
+
+  // Canopy
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(18, 0.5, 6), frameMat);
+  canopy.position.set(0, 6, -7); // Sticks out to -4
+  canopy.castShadow = true;
+  canopy.receiveShadow = true;
+  scene.add(canopy);
+
+  // Canopy Supports
+  const colGeo = new THREE.CylinderGeometry(0.25, 0.25, 6, 12);
+  const col1 = new THREE.Mesh(colGeo, new THREE.MeshStandardMaterial({color: 0x555555}));
+  col1.position.set(-8, 3, -5); scene.add(col1);
+  const col2 = col1.clone();
+  col2.position.set(8, 3, -5); scene.add(col2);
 
   const doorGroup = new THREE.Group();
-  doorGroup.position.set(0, 0, 0);
+  doorGroup.position.set(0, 0, -10);
   scene.add(doorGroup);
 
-  const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(2.62, 4.32, 0.18), doorWoodMat);
-  doorLeaf.position.set(0, 2.8, -6.64);  // Moved forward to be in front of surround (-6.66) so wood texture is visible
-  doorLeaf.castShadow = true;
-  doorLeaf.receiveShadow = true;
-  doorLeaf.renderOrder = 1;  // Render order to ensure visibility
-  doorLeaf.userData = { kind: 'mallDoor' };
-  doorGroup.add(doorLeaf);
-  clickable.push(doorLeaf);
+  // Door Frame
+  const dFrame = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4.5, 0.4), frameMat);
+  dFrame.position.set(0, 2.25, 0.2);
+  dFrame.castShadow = true;
+  doorGroup.add(dFrame);
 
-  const frameZ = -6.88;
-  const frameTop = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 0.06), doorFrameMat);
-  frameTop.position.set(0, 4.88, frameZ);
-  frameTop.castShadow = true;
-  frameTop.receiveShadow = true;
-  frameTop.renderOrder = 3;
-  doorGroup.add(frameTop);
-  const frameBot = frameTop.clone();
-  frameBot.position.set(0, 0.72, frameZ);
-  frameBot.renderOrder = 3;
-  doorGroup.add(frameBot);
-  const frameL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 4.18, 0.06), doorFrameMat);
-  frameL.position.set(-1.14, 2.8, frameZ);
-  frameL.castShadow = true;
-  frameL.receiveShadow = true;
-  frameL.renderOrder = 3;
-  doorGroup.add(frameL);
-  const frameR = frameL.clone();
-  frameR.position.set(1.14, 2.8, frameZ);
-  frameR.renderOrder = 3;
-  doorGroup.add(frameR);
+  // Doors (Clickable)
+  const dPanelGeo = new THREE.BoxGeometry(2.8, 4.0, 0.15);
+  const lDoor = new THREE.Mesh(dPanelGeo, glassMat);
+  lDoor.position.set(-1.5, 2.25, 0.25);
+  lDoor.userData = { kind: 'mallDoor' };
+  doorGroup.add(lDoor);
+  clickable.push(lDoor);
 
-  const glassPaneMat = new THREE.MeshPhysicalMaterial({ color: 0xdfe8ff, metalness: 0.0, roughness: 0.32, transmission: 0.52, thickness: 0.7, transparent: true, opacity: 0.08 });
-  glassPaneMat.depthWrite = false;
-  glassPaneMat.depthTest = true;
-  glassPaneMat.polygonOffset = true;
-  glassPaneMat.polygonOffsetFactor = -3;
-  glassPaneMat.polygonOffsetUnits = -3;
-  const glassZ = -6.65;  // Positioned just in front of the door to show glass panes
-  const glassTop = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 1.2), glassPaneMat);
-  glassTop.position.set(0, 3.72, glassZ);
-  glassTop.renderOrder = 10;  // Higher render order to render on top
-  doorGroup.add(glassTop);
-  const glassMid = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 0.95), glassPaneMat);
-  glassMid.position.set(0, 2.55, glassZ);
-  glassMid.renderOrder = 10;  // Higher render order to render on top
-  doorGroup.add(glassMid);
+  const rDoor = lDoor.clone();
+  rDoor.position.set(1.5, 2.25, 0.25);
+  rDoor.userData = { kind: 'mallDoor' };
+  doorGroup.add(rDoor);
+  clickable.push(rDoor);
 
-  const rail = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.12, 0.05), doorFrameMat);
-  rail.position.set(0, 3.05, frameZ);
-  rail.castShadow = true;
-  rail.receiveShadow = true;
-  doorGroup.add(rail);
+  // Handles
+  const hGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.2, 8);
+  const hMat = new THREE.MeshStandardMaterial({color: 0xffffff, metalness: 1, roughness: 0.2});
+  const h1 = new THREE.Mesh(hGeo, hMat); h1.position.set(-0.3, 2.25, 0.35); doorGroup.add(h1);
+  const h2 = h1.clone(); h2.position.set(0.3, 2.25, 0.35); doorGroup.add(h2);
 
-  const pillarMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.0, roughness: 0.78 });
-  const pillarCapMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.0, roughness: 0.72 });
-  const makePillar = (x) => {
-    const g = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.56, 0.45, 24), pillarCapMat);
-    base.position.set(x, 0.23, -6.98);
-    base.castShadow = true;
-    base.receiveShadow = true;
-    g.add(base);
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 4.9, 28), pillarMat);
-    shaft.position.set(x, 2.75, -6.98);
-    shaft.castShadow = true;
-    shaft.receiveShadow = true;
-    g.add(shaft);
-    const capital = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.44, 0.48, 24), pillarCapMat);
-    capital.position.set(x, 5.35, -6.98);
-    capital.castShadow = true;
-    capital.receiveShadow = true;
-    g.add(capital);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.39, 0.05, 10, 24), pillarCapMat);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(x, 4.95, -6.98);
-    ring.castShadow = true;
-    g.add(ring);
-    scene.add(g);
-  };
-  makePillar(-2.65);
-  makePillar(2.65);
-
-  const makeOverhangRoof = () => {
-    const roofGroup = new THREE.Group();
-
-    const roofWidth = 7;   // X direction (span between pillars)
-    const roofDepth = 2;   // Z direction (overhang in front/back)
-    const roofThickness = 0.3;
-
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, metalness: 0.0, roughness: 0.6 });
-
-    // Create main roof slab
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(roofWidth, roofThickness, roofDepth), roofMat);
-    roof.position.set(0, 5.7, -6.98); // slightly above the pillars
-    roof.castShadow = true;
-    roof.receiveShadow = true;
-    roofGroup.add(roof);
-
-    // Optional: small bevel or trim around edges
-    const trim = new THREE.Mesh(new THREE.BoxGeometry(roofWidth + 0.1, 0.05, roofDepth + 0.1), roofMat);
-    trim.position.set(0, 5.95, -6.98);
-    roofGroup.add(trim);
-
-    scene.add(roofGroup);
-  };
-
-  makeOverhangRoof();
-
-  const handleMat = new THREE.MeshStandardMaterial({ color: 0xffff00, metalness: 0.7, roughness: 0.2, emissive: 0xffeb3b, emissiveIntensity: 0.3 });
-  handleMat.polygonOffset = true;
-  handleMat.polygonOffsetFactor = -2;
-  handleMat.polygonOffsetUnits = -2;
-  const handleZ = -6.76;
-  const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 14), handleMat);
-  handleBar.rotation.z = Math.PI / 2;
-  handleBar.position.set(0.72, 2.85, handleZ);
-  handleBar.castShadow = true;
-  handleBar.receiveShadow = true;
-  handleBar.renderOrder = 6;
-  doorGroup.add(handleBar);
-  const handleBar2 = handleBar.clone();
-  handleBar2.position.set(-0.72, 2.85, handleZ);
-  doorGroup.add(handleBar2);
-  const handleMount = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.12, 16), handleMat);
-  handleMount.rotation.x = Math.PI / 2;
-  handleMount.position.set(0.72, 2.85, handleZ - 0.02);
-  handleMount.castShadow = true;
-  handleMount.receiveShadow = true;
-  handleMount.renderOrder = 6;
-  doorGroup.add(handleMount);
-  const handleMount2 = handleMount.clone();
-  handleMount2.position.set(-0.72, 2.85, handleZ - 0.02);
-  doorGroup.add(handleMount2);
-
-  const windowMat = new THREE.MeshPhysicalMaterial({
-    color: 0xd0e8ff,  // Light blue tint to make windows more visible
-    metalness: 0.0,
-    roughness: 0.02,
-    transmission: 0.88,
-    thickness: 0.5,
-    transparent: true,
-    opacity: 0.75,
-    emissive: 0x4a90e2,
-    emissiveIntensity: 0.15
+  // Signage
+  const signTex = makeTextTexture('MALLTIVERSE', {
+    width: 1024, height: 256, bg: 'rgba(0,0,0,0)', color: '#222222', font: 'bold 120px Inter, Arial'
   });
-  windowMat.depthWrite = true;
-  windowMat.depthTest = true;
-  windowMat.polygonOffset = true;
-  windowMat.polygonOffsetFactor = -8;
-  windowMat.polygonOffsetUnits = -8;
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(12, 3), new THREE.MeshStandardMaterial({map: signTex, transparent: true}));
+  sign.position.set(0, 7.5, -9.8);
+  scene.add(sign);
 
-  const winFrameMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.1, roughness: 0.25 });
-  winFrameMat.polygonOffset = true;
-  winFrameMat.polygonOffsetFactor = -3;
-  winFrameMat.polygonOffsetUnits = -3;
-
-  // Create window group with frame and single glass plane
-  // Make sure the tracking array exists
-  if (!scene.userData.windows) scene.userData.windows = [];
-
-  const createWindow = (x, floor = 1) => {
-    const winGroup = new THREE.Group();
-
-    // Floor Y positions
-    const floorY = { 1: 4.0, 2: 12 };
-
-    // Window frame dimensions
-    const frameThickness = 0.2;
-    const frameDepth = 0.15;
-    const frameWidth = 3.5;
-    const frameHeight = 4.2;
-    const glassWidth = 3.05;
-    const glassHeight = 3.65;
-
-    // Frame material
-    const winFrameMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6, metalness: 0.3 });
-
-    // Glass material
-    const windowMat = new THREE.MeshStandardMaterial({ color: 0x99ccff, transparent: true, opacity: 0.6 });
-
-    // Top frame
-    const frameTop = new THREE.Mesh(new THREE.BoxGeometry(frameWidth, frameThickness, frameDepth), winFrameMat);
-    frameTop.position.set(0, frameHeight / 2 - frameThickness / 2, 0.1);
-    frameTop.castShadow = true;
-    frameTop.renderOrder = 2;
-    winGroup.add(frameTop);
-
-    // Bottom frame
-    const frameBottom = new THREE.Mesh(new THREE.BoxGeometry(frameWidth, frameThickness, frameDepth), winFrameMat);
-    frameBottom.position.set(0, -frameHeight / 2 + frameThickness / 2, 0.1);
-    frameBottom.castShadow = true;
-    frameBottom.renderOrder = 2;
-    winGroup.add(frameBottom);
-
-    // Left frame
-    const frameLeft = new THREE.Mesh(new THREE.BoxGeometry(frameThickness, frameHeight, frameDepth), winFrameMat);
-    frameLeft.position.set(-frameWidth / 2 + frameThickness / 2, 0, 0.1);
-    frameLeft.castShadow = true;
-    frameLeft.renderOrder = 2;
-    winGroup.add(frameLeft);
-
-    // Right frame
-    const frameRight = new THREE.Mesh(new THREE.BoxGeometry(frameThickness, frameHeight, frameDepth), winFrameMat);
-    frameRight.position.set(frameWidth / 2 - frameThickness / 2, 0, 0.1);
-    frameRight.castShadow = true;
-    frameRight.renderOrder = 2;
-    winGroup.add(frameRight);
-
-    // Glass
-    const glassPlane = new THREE.Mesh(new THREE.PlaneGeometry(glassWidth, glassHeight), windowMat);
-    glassPlane.position.set(0, 0, 0.12);
-    glassPlane.renderOrder = 1;
-    winGroup.add(glassPlane);
-
-    // Mullion material
-    const mullionMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.1, roughness: 0.3 });
-    mullionMat.polygonOffset = true;
-    mullionMat.polygonOffsetFactor = -3;
-    mullionMat.polygonOffsetUnits = -3;
-
-    // Vertical mullions (2 dividers for 3 columns)
-    for (let i = 1; i < 3; i++) {
-      const xPos = -glassWidth / 2 + (glassWidth / 3) * i;
-      const mullionV = new THREE.Mesh(new THREE.BoxGeometry(0.05, glassHeight, 0.02), mullionMat);
-      mullionV.position.set(xPos, 0, 0.06);
-      mullionV.castShadow = false;
-      mullionV.renderOrder = 3;
-      winGroup.add(mullionV);
-    }
-
-    // Horizontal mullions (3 dividers for 4 rows)
-    for (let i = 1; i < 4; i++) {
-      const yPos = glassHeight / 2 - (glassHeight / 4) * i;
-      const mullionH = new THREE.Mesh(new THREE.BoxGeometry(glassWidth, 0.05, 0.02), mullionMat);
-      mullionH.position.set(0, yPos, 0.06);
-      mullionH.castShadow = false;
-      mullionH.renderOrder = 3;
-      winGroup.add(mullionH);
-    }
-
-    // Set position based on floor
-    winGroup.position.set(x, floorY[floor], -7);
-    scene.add(winGroup);
-
-    // Track window
-    scene.userData.windows.push(winGroup);
-  };
-
-  // --- USAGE EXAMPLES ---
-  createWindow(-6.2);        // First floor
-  createWindow(6.2);         // First floor
-  createWindow(-6.2, 2);     // Second floor
-  createWindow(6.2, 2);      // Second floor
-
-
-  const stairMat = new THREE.MeshStandardMaterial({ color: 0xf3eeef, metalness: 0.0, roughness: 0.92 });
-  for (let i = 0; i < 7; i++) {
-    const step = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.28, 1.2), stairMat);
-    step.position.set(0, 0.14 + i * 0.28, -2.2 - i * 1.05);
-    step.receiveShadow = true;
-    step.castShadow = true;
-    scene.add(step);
-  }
-
-  const planterMat = new THREE.MeshStandardMaterial({ color: 0xf7eded, metalness: 0.0, roughness: 0.9 });
-  const soilMat = new THREE.MeshStandardMaterial({ color: 0x2a1a16, metalness: 0.0, roughness: 1.0 });
-  const leafMat = new THREE.MeshStandardMaterial({ color: 0x1f6f4a, metalness: 0.0, roughness: 0.85 });
-
-  const makePlanter = (x, z) => {
-    const g = new THREE.Group();
-    const pod = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.9, 0.55, 24), planterMat);
-    pod.position.set(x, 0.28, z);
-    pod.castShadow = true;
-    pod.receiveShadow = true;
-    g.add(pod);
-    const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.72, 0.18, 20), soilMat);
-    soil.position.set(x, 0.48, z);
-    soil.receiveShadow = true;
-    g.add(soil);
-    for (let i = 0; i < 7; i++) {
-      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.16 + Math.random() * 0.08, 0.85 + Math.random() * 0.55, 10), leafMat);
-      leaf.position.set(x + (Math.random() - 0.5) * 0.45, 0.75 + Math.random() * 0.45, z + (Math.random() - 0.5) * 0.45);
-      leaf.rotation.z = (Math.random() - 0.5) * 0.5;
-      leaf.rotation.x = (Math.random() - 0.5) * 0.4;
-      leaf.castShadow = true;
-      g.add(leaf);
-    }
-    scene.add(g);
-  };
-
-  const planterZs = [-2.8, -4.5, -6.2, -7.9, -9.6];
-  for (let i = 0; i < planterZs.length; i++) {
-    makePlanter(-5.8, planterZs[i]);
-    makePlanter(5.8, planterZs[i]);
-  }
-
-  const archMat = new THREE.MeshStandardMaterial({ map: plaster, color: 0xf2d9da, metalness: 0.0, roughness: 0.98 });
-  const archPillarGeo = new THREE.BoxGeometry(1.1, 9.6, 1.0);
-  const archTopGeo = new THREE.TorusGeometry(4.6, 0.42, 16, 64, Math.PI);
-  const archOffsets = [-10.5, 10.5];
-  for (let i = 0; i < archOffsets.length; i++) {
-    const ax = archOffsets[i];
-    const p1 = new THREE.Mesh(archPillarGeo, archMat);
-    p1.position.set(ax, 4.8, -14);
-    scene.add(p1);
-    const p2 = new THREE.Mesh(archPillarGeo, archMat);
-    p2.position.set(ax + (ax < 0 ? 6.8 : -6.8), 4.8, -14);
-    scene.add(p2);
-    const top = new THREE.Mesh(archTopGeo, archMat);
-    top.rotation.x = Math.PI / 2;
-    top.rotation.z = ax < 0 ? Math.PI : 0;
-    top.position.set(ax + (ax < 0 ? 3.4 : -3.4), 9.6, -14);
-    scene.add(top);
-  }
-
-  camera.position.set(0, 2.05, 10);
-  state.cameraTargetPos.set(0, 2.05, 10);
-  state.cameraLookAt.set(0, 3.3, -8.5);
-  state.cameraTargetLookAt.set(0, 3.3, -8.5);
+  // --- 8. CAMERA ---
+  camera.position.set(0, 2.5, 25);
+  state.cameraTargetPos.set(0, 2.5, 25);
+  state.cameraLookAt.set(0, 4, 0);
+  state.cameraTargetLookAt.set(0, 4, 0);
 }
 
 function createHallway() {
