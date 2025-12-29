@@ -37,6 +37,48 @@
     url="https://prod.spline.design/t2YIwW1EsI2cSOEN/scene.splinecode">
   </spline-viewer>
 
+  <!--Arrow Scroll-->
+
+ <!--Arrow Scroll Start-->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <button id="scrollToTop" class="scroll-top-btn">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  <script>
+  const scrollBtn = document.getElementById("scrollToTop");
+
+  // Show/Hide button based on scroll position
+  window.addEventListener("scroll", () => {
+    if (window.pageYOffset > 400) {
+        scrollBtn.classList.add("show");
+    } else {
+        scrollBtn.classList.remove("show");
+    }
+    });
+
+  // Smooth scroll to top
+  scrollBtn.addEventListener("click", () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+    });
+    </script>
+  <!--Arrow Section End-->
+
+
+
+
+
+
+
+
+
+
+
+
+
   <!--Logo Section-->
   <header>
   <nav class="home">
