@@ -1,7 +1,8 @@
 <section class="page-content collection-page">
     <div class="container">
-        <div class="collectionContainer"></div>        
+        <div class="collectionContainer"></div>
         <h2 class="text-center mb-5">Latest Products</h2>
+<<<<<<< HEAD
         <div class="row g-4">
 
               <?php
@@ -24,38 +25,15 @@
                     $products_result = false;
                 }
             }
+=======
+        <div class="row g-4" id="productResults">
+>>>>>>> 20da0d89b5d02c4796792814d73fa12757885793
 
-            if ($products_result && mysqli_num_rows($products_result) > 0) { //at least has one product
-                while ($product = mysqli_fetch_assoc($products_result)) { //will stop if no rows
-            ?>
-                    <div class="col-md-3 col-sm-6 col-12">
-                        <div class="card-product image h-100">
-                            <?php if (!empty($product['image'])): ?>
-                                <img src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>"
-                                    class="card-img-top" alt="<?= htmlspecialchars($product['product_name']) ?>">
-                            <?php endif; ?>
-                            <div class="card-body">
-                                <h4 class="card_title"><?= htmlspecialchars($product['product_name']) ?></h4>
-                                <p class="card-text price">$<?= number_format($product['price'], 2) ?></p>
-                                <a href="product_detail.php?id=<?= $product['product_id'] ?>" class="btn-black-rounded">Shop Now ➔</a>
-                            </div>
-                        </div>
-                    </div>
-                <?php
-                }
-                if (isset($products_stmt)) {
-                    mysqli_stmt_close($products_stmt);
-                }
-                    } else {
-                ?>
-                <div class="col-12">
-                    <p class="text-center">No products available at the moment.</p>
-                </div>
-            <?php } ?>
         </div>
     </div>
 </section>
 
+<<<<<<< HEAD
 
 
 
@@ -63,3 +41,36 @@
 
     
  
+=======
+<script>
+    const searchInput = document.getElementById("searchBar");
+    const resultContainer = document.getElementById("productResults");
+
+    if (searchInput && resultContainer) {
+        let supplierId = <?= json_encode($supplier_id) ?>;
+
+        function fetchProduct(query = "") {
+            fetch("../templates/template3/utils/search.php?supplier_id=" + supplierId, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "search=" + encodeURIComponent(query)
+            })
+                .then(res => res.text())
+                .then(data => {
+                    resultContainer.innerHTML = data;
+                });
+        }
+
+        fetchProduct(); 
+
+        let debounceTimer;
+        searchInput.addEventListener("keyup", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchProduct(searchInput.value);
+            }, 300);
+        });
+    }
+
+</script>
+>>>>>>> 20da0d89b5d02c4796792814d73fa12757885793
