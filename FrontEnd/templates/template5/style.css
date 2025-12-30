@@ -299,36 +299,32 @@ html{
 
 
 /*Nav link CSS code */
+/* Gold Color Hover Effect */
+
 .nav-item a {
     position: relative;
-    color: #000;
+    color: #000; /* မူရင်းစာသားအရောင် */
     text-decoration: none;
-    transition: color 0.3s;
+    transition: color 0.3s ease;
 }
 
-/* Create the rainbow line */
+
+/* အောက်ခြေမြဉ်း (Line) ကို ရွှေရောင်ပြောင်းရန် */
 .nav-item a::after {
     content: '';
     position: absolute;
     width: 0;
-    height: 3px; /* Slightly thicker for better color visibility */
+    height: 2px;
     bottom: -4px;
     left: 0;
-    /* Rainbow gradient effect */
-    background: linear-gradient(to right, #ff0000,#ffff00, #00ff00);
+    /* Gold Gradient သုံးထားတာကြောင့် ပိုပြီး ဇိမ်ကျကျ (Luxury) ဖြစ်စေပါတယ် */
+    background:rgb(159, 135, 2);
     transition: width 0.3s ease-in-out;
 }
 
-
-/* Animate the line width on hover */
+/* Hover လုပ်တဲ့အခါ မြဉ်းတိုလေး ရှည်ထွက်လာစေရန် */
 .nav-item a:hover::after {
     width: 100%;
-    
-}
-
-/* Optional: Smoothly change text color on hover */
-.nav-item a:hover {
-    color: #4b0082; /* Picking a color from the rainbow */
 }
 /* General Styles */
 body {
