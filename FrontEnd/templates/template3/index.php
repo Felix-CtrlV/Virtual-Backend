@@ -3,7 +3,8 @@ if (!isset($conn)) {
     include '../../../BackEnd/config/dbconfig.php';
 }
 
-$supplier_id = (int)$supplier['supplier_id'];
+
+$supplier_id = (int) $supplier['supplier_id'];
 
 $assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE supplier_id = ?");
 if ($assets_stmt) {
@@ -14,7 +15,7 @@ if ($assets_stmt) {
     $assets_result = false;
 }
 
-if($assets_result && mysqli_num_rows($assets_result) > 0){
+if ($assets_result && mysqli_num_rows($assets_result) > 0) {
     $shop_assets = mysqli_fetch_assoc($assets_result);
     if (isset($assets_stmt)) {
         mysqli_stmt_close($assets_stmt);
@@ -28,9 +29,17 @@ if($assets_result && mysqli_num_rows($assets_result) > 0){
     ];
 }
 
+$banner_string = $shop_assets["banner"];
+$banners = explode(",", $banner_string);
+$banner_count = count($banners);
+
+for ($i = 0; $i < $banner_count; $i++) {
+    ${"banner" . ($i + 1)} = $banners[$i];
+}
+
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 $allowed_pages = ['home', 'about', 'products', 'collection'];
-if(!in_array($page, $allowed_pages)){
+if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
 
@@ -39,6 +48,7 @@ $page_path = __DIR__ . "/pages/$page.php";
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,12 +57,17 @@ $page_path = __DIR__ . "/pages/$page.php";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: <?= htmlspecialchars($shop_assets['primary_color']) ?>;
-            --secondary: <?= htmlspecialchars($shop_assets['secondary_color']) ?>;
+            --primary:
+                <?= htmlspecialchars($shop_assets['primary_color']) ?>
+            ;
+            --secondary:
+                <?= htmlspecialchars($shop_assets['secondary_color']) ?>
+            ;
             /* --text-color: red; */
         }
     </style>
 </head>
+
 <body>
     <?php include(__DIR__ . '/partial/header.php'); ?>
 
@@ -60,7 +75,7 @@ $page_path = __DIR__ . "/pages/$page.php";
 
     <main class="main-content">
         <?php
-        if(file_exists($page_path)){
+        if (file_exists($page_path)) {
             include($page_path);
         } else {
             echo "<div class='container'><p>Page not found.</p></div>";
@@ -73,6 +88,5 @@ $page_path = __DIR__ . "/pages/$page.php";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../templates/<?= basename(__DIR__) ?>/script.js"></script>
 </body>
-</html>
 
-        
+</html>

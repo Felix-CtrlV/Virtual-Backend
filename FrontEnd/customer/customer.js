@@ -642,278 +642,336 @@ function createOutside() {
   setHud('Mall Exterior', 'Click the Entrance Doors to Enter');
   btnBack.hidden = true;
 
-  // Hide search container
+  // Hide search UI
   if (searchContainer) {
     searchContainer.hidden = true;
     searchContainer.style.opacity = '0';
     searchContainer.style.visibility = 'hidden';
   }
-
   if (overlayEl) overlayEl.hidden = false;
 
-  // --- 1. LIGHTING & ATMOSPHERE ---
-  scene.background = new THREE.Color('#87CEEB'); // Sky blue
-  scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
+  // --- 1. TEXTURE GENERATORS ---
 
-  ambient.intensity = 0.6;
-  keyLight.intensity = 1.4;
-  keyLight.position.set(20, 50, 40);
-  keyLight.color.setHex(0xfffaed);
-  keyLight.castShadow = true;
-  
-  // Shadow settings for large exterior
-  keyLight.shadow.mapSize.width = 2048;
-  keyLight.shadow.mapSize.height = 2048;
-  keyLight.shadow.camera.near = 0.5;
-  keyLight.shadow.camera.far = 200;
-  keyLight.shadow.camera.left = -50;
-  keyLight.shadow.camera.right = 50;
-  keyLight.shadow.camera.top = 50;
-  keyLight.shadow.camera.bottom = -50;
-  keyLight.shadow.bias = -0.0005;
-
-  fillLight.intensity = 0.5;
-  fillLight.color.setHex(0xb0c4de);
-
-  // --- 2. MATERIALS ---
-  const pavementMat = new THREE.MeshStandardMaterial({ 
-    color: 0xdddddd, 
-    roughness: 0.9, 
-    metalness: 0.1 
-  });
-
-  const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x88ccee,
-    metalness: 0.9,
-    roughness: 0.05,
-    transmission: 0.2, // Slight transparency
-    reflectivity: 1.0,
-    clearcoat: 1.0,
-    transparent: true,
-    opacity: 0.7,
-    side: THREE.DoubleSide
-  });
-
-  const frameMat = new THREE.MeshStandardMaterial({ 
-    color: 0x222222, 
-    roughness: 0.4, 
-    metalness: 0.8 
-  });
-
-  const slabMat = new THREE.MeshStandardMaterial({ 
-    color: 0xfdfdfd, 
-    roughness: 0.2, 
-    metalness: 0.1 
-  });
-
-  // --- 3. CURVE LOGIC ---
-  // Calculates Z position and rotation (tangent) for any X along the building face
-  function getBuildingLoc(x) {
-    // Cosine wave: z = base + cos(x) * amp
-    // Center (x=0) pushes out towards camera
-    const freq = 0.08;
-    const amp = 6.0;
-    const baseZ = -18.0;
-
-    const z = baseZ + Math.cos(x * freq) * amp;
-    
-    // Derivative (slope) to find rotation: d/dx(cos) = -sin
-    // We rotate the object to face the normal of the curve
-    const slope = -freq * amp * Math.sin(x * freq);
-    const rotY = Math.atan(slope);
-
-    return { z, rotY };
+  // A. Pavement
+  function createPavementTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#b0b0b0'; ctx.fillRect(0,0,512,512); 
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 4;
+    const step = 64;
+    for(let y=0; y<512; y+=step) {
+      for(let x=0; x<512; x+=step) {
+         ctx.fillStyle = (Math.random()>0.5) ? '#bfbfbf' : '#aaaaaa';
+         ctx.fillRect(x+2, y+2, step-4, step-4);
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 8); 
+    return tex;
   }
 
-  // --- 4. GROUND & WALKWAY ---
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(150, 150), pavementMat);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = 0;
-  ground.receiveShadow = true;
+  // B. Modern Door Texture (Lighter & Higher Contrast)
+  function createModernDoorTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    
+    // 1. Lighter Glass Base (so it pops against black frame)
+    const grad = ctx.createLinearGradient(0, 0, 512, 1024);
+    grad.addColorStop(0, '#4a4a4a'); // Lighter gray top
+    grad.addColorStop(1, '#2a2a2a'); // Darker gray bottom
+    ctx.fillStyle = grad; 
+    ctx.fillRect(0,0,512,1024);
+    
+    // 2. Strong Reflection Streak
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath(); 
+    ctx.moveTo(0,0); ctx.lineTo(300,0); ctx.lineTo(0, 600); 
+    ctx.fill();
+
+    // 3. Inner Metal Frame Border
+    ctx.strokeStyle = '#111'; 
+    ctx.lineWidth = 20;
+    ctx.strokeRect(10,10,492,1004);
+
+    // 4. Handle (Chrome style)
+    const handleX = 40, handleY = 400, handleH = 300;
+    const hGrad = ctx.createLinearGradient(handleX, 0, handleX + 25, 0);
+    hGrad.addColorStop(0, '#555'); 
+    hGrad.addColorStop(0.5, '#fff'); // Bright highlight
+    hGrad.addColorStop(1, '#555');
+    ctx.fillStyle = hGrad; 
+    ctx.fillRect(handleX, handleY, 25, handleH);
+
+    // 5. PULL Text
+    ctx.save();
+    ctx.translate(handleX + 60, handleY + 160);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '700 34px sans-serif';
+    ctx.fillText("PULL", 0, 0);
+    ctx.restore();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }
+
+  // C. Clouds
+  function createCloudTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64,64,0, 64,64,64);
+    grad.addColorStop(0, 'rgba(255,255,255,0.9)'); 
+    grad.addColorStop(1, 'rgba(255,255,255,0.0)');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  // --- 2. LIGHTING ---
+  scene.background = new THREE.Color('#87CEEB'); 
+  scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
+  ambient.intensity = 0.7;
+  keyLight.intensity = 1.5; keyLight.position.set(30, 60, 40);
+  fillLight.intensity = 0.5;
+
+  // --- 3. MATERIALS ---
+  const pavementTex = createPavementTexture();
+  const pavementMat = new THREE.MeshStandardMaterial({ map: pavementTex, roughness: 0.8 });
+  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x88ccee, metalness: 0.9, roughness: 0.05, transmission: 0.2, opacity: 0.7, transparent: true, side: THREE.DoubleSide });
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4, metalness: 0.8 }); // Dark Metal
+  const slabMat = new THREE.MeshStandardMaterial({ color: 0xfdfdfd, roughness: 0.2 });
+  const curbMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.9 });
+
+  // --- 4. CLOUDS ---
+  const cloudTex = createCloudTexture();
+  const cloudMat = new THREE.SpriteMaterial({ map: cloudTex, transparent: true, opacity: 0.8, color: 0xffffff });
+  const cloudGroup = new THREE.Group();
+  for(let i=0; i<20; i++) {
+      const sprite = new THREE.Sprite(cloudMat);
+      sprite.position.set((Math.random()-0.5)*180, 15 + Math.random() * 20, (Math.random()-0.5)*60 - 20);
+      sprite.scale.set(30 + Math.random()*20, 15 + Math.random()*10, 1);
+      cloudGroup.add(sprite);
+  }
+  scene.add(cloudGroup);
+  scene.userData.dreamyShapes = cloudGroup.children.map(c => ({
+      ...c, userData: { speed: 0.02, baseY: c.position.y, phase: Math.random() * Math.PI }
+  }));
+
+  // --- 5. GROUND & WALKWAY ---
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(250, 250), new THREE.MeshStandardMaterial({ color: 0x3a5a3a }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.1;
   scene.add(ground);
 
-  // Stone Walkway leading to entrance
-  const walkway = new THREE.Mesh(new THREE.PlaneGeometry(12, 50), new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.8 }));
-  walkway.rotation.x = -Math.PI / 2;
-  walkway.position.set(0, 0.02, 10);
+  const walkway = new THREE.Mesh(new THREE.PlaneGeometry(14, 70), pavementMat);
+  walkway.rotation.x = -Math.PI / 2; walkway.position.set(0, 0.02, 10);
   walkway.receiveShadow = true;
   scene.add(walkway);
 
-  // Grass Patches
-  function createGrass(x, z, w, d) {
-    const g = new THREE.Mesh(new THREE.BoxGeometry(w, 0.3, d), new THREE.MeshStandardMaterial({ color: 0x55aa55, roughness: 1 }));
-    g.position.set(x, 0.15, z);
-    scene.add(g);
-  }
-  createGrass(-20, 10, 20, 30);
-  createGrass(20, 10, 20, 30);
+  const curbGeo = new THREE.BoxGeometry(0.6, 0.15, 70);
+  const leftCurb = new THREE.Mesh(curbGeo, curbMat);
+  leftCurb.position.set(-7.3, 0.075, 10); leftCurb.receiveShadow = true; scene.add(leftCurb);
 
-  // --- 5. MODERN CURVED BUILDING ---
-  const bWidth = 90;
-  const bHeight = 24;
-  const segs = 120; // High segments for smooth curve
+  const rightCurb = new THREE.Mesh(curbGeo, curbMat);
+  rightCurb.position.set(7.3, 0.075, 10); rightCurb.receiveShadow = true; scene.add(rightCurb);
 
-  // A. Glass Curtain Wall (Deformed Plane)
-  const wallGeo = new THREE.PlaneGeometry(bWidth, bHeight, segs, 1);
-  const posAttribute = wallGeo.attributes.position;
-
-  for (let i = 0; i < posAttribute.count; i++) {
-    const x = posAttribute.getX(i);
-    const { z } = getBuildingLoc(x);
-    posAttribute.setZ(i, z);
-  }
-  wallGeo.computeVertexNormals();
-
-  const building = new THREE.Mesh(wallGeo, glassMat);
-  building.position.y = bHeight / 2;
-  building.castShadow = true;
-  building.receiveShadow = true;
-  scene.add(building);
-
-  // B. Horizontal Floor Slabs (Ribbons)
-  function createRibbon(yPos, height) {
-    const bandGeo = new THREE.PlaneGeometry(bWidth, height, segs, 1);
-    const pos = bandGeo.attributes.position;
-    
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i);
-      const loc = getBuildingLoc(x);
-      
-      // Offset slightly forward based on normal so it sits on top of glass
-      const offset = 0.3; 
-      const nx = -Math.sin(loc.rotY);
-      const nz = Math.cos(loc.rotY);
-      
-      pos.setXYZ(i, x + nx * offset, pos.getY(i), loc.z + nz * offset);
+  // --- 6. 3D GRASS ---
+  function createDenseGrass(count, centerX, centerZ, width, depth) {
+    const bladeGeo = new THREE.ConeGeometry(0.12, 0.6, 2); 
+    bladeGeo.translate(0, 0.3, 0); 
+    const bladeMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.9, side: THREE.DoubleSide });
+    const mesh = new THREE.InstancedMesh(bladeGeo, bladeMat, count);
+    const dummy = new THREE.Object3D();
+    const _color = new THREE.Color();
+    for (let i = 0; i < count; i++) {
+        dummy.position.set(centerX + (Math.random()-0.5)*width, 0, centerZ + (Math.random()-0.5)*depth);
+        dummy.rotation.set((Math.random()-0.5)*0.3, Math.random()*Math.PI, (Math.random()-0.5)*0.3);
+        dummy.scale.setScalar(0.8 + Math.random() * 0.7);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+        _color.setHex(Math.random() > 0.8 ? 0x3e8e41 : 0x5cb85c); 
+        mesh.setColorAt(i, _color);
     }
-    bandGeo.computeVertexNormals();
-    
-    const band = new THREE.Mesh(bandGeo, slabMat);
-    band.position.y = yPos;
-    band.castShadow = true;
-    band.receiveShadow = true;
-    scene.add(band);
+    mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; mesh.receiveShadow = true;
+    scene.add(mesh);
   }
+  createDenseGrass(8000, -28, 10, 35, 60); 
+  createDenseGrass(8000, 28, 10, 35, 60);
 
-  createRibbon(0.5, 1.0);  // Base
-  createRibbon(8.0, 0.8);  // 1st Floor
-  createRibbon(16.0, 0.8); // 2nd Floor
-  createRibbon(23.5, 1.2); // Roof coping
+  // --- 7. TREES ---
+  function createTree(x, z) {
+      const g = new THREE.Group(); g.position.set(x, 0, z);
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 1.5, 6), new THREE.MeshStandardMaterial({color:0x4a3c31}));
+      t.position.y = 0.75; g.add(t);
+      const lMat = new THREE.MeshStandardMaterial({color:0x2d5a27});
+      const lGeo = new THREE.DodecahedronGeometry(1.3);
+      const l1 = new THREE.Mesh(lGeo, lMat); l1.position.y=2.2; g.add(l1);
+      const l2 = l1.clone(); l2.position.set(0.7, 2.5, 0); l2.scale.setScalar(0.7); g.add(l2);
+      const l3 = l1.clone(); l3.position.set(-0.7, 2.3, 0.4); l3.scale.setScalar(0.8); g.add(l3);
+      scene.add(g);
+  }
+  for(let z=-5; z<35; z+=12) { createTree(-10, z); createTree(10, z); }
 
-  // C. Vertical Mullions (Frames)
+  // --- 8. BUILDING ---
+  function getBuildingLoc(x) {
+    const freq = 0.08, amp = 6.0, baseZ = -18.0;
+    const z = baseZ + Math.cos(x*freq)*amp;
+    const rotY = Math.atan(-freq*amp*Math.sin(x*freq));
+    return { z, rotY };
+  }
+  const bWidth = 90, bHeight = 24, segs = 120;
+  const wGeo = new THREE.PlaneGeometry(bWidth, bHeight, segs, 1);
+  const pos = wGeo.attributes.position;
+  for(let i=0; i<pos.count; i++) {
+      const {z} = getBuildingLoc(pos.getX(i));
+      pos.setZ(i, z);
+  }
+  wGeo.computeVertexNormals();
+  const b = new THREE.Mesh(wGeo, glassMat); b.position.y = bHeight/2; b.receiveShadow = true; scene.add(b);
+
+  function addRibbon(y, h) {
+      const g = new THREE.PlaneGeometry(bWidth, h, segs, 1);
+      const p = g.attributes.position;
+      for(let i=0; i<p.count; i++){
+          const x = p.getX(i); const l = getBuildingLoc(x);
+          const nx = -Math.sin(l.rotY), nz = Math.cos(l.rotY);
+          p.setXYZ(i, x+nx*0.3, p.getY(i), l.z+nz*0.3);
+      }
+      g.computeVertexNormals();
+      const m = new THREE.Mesh(g, slabMat); m.position.y=y; scene.add(m);
+  }
+  [0.5, 8.0, 16.0, 23.5].forEach(y => addRibbon(y, y===23.5?1.2:0.9));
+
   const mulGeo = new THREE.BoxGeometry(0.15, bHeight, 0.3);
-  const numMullions = 36;
-  for (let i = 0; i <= numMullions; i++) {
-    const t = i / numMullions;
-    const x = -bWidth / 2 + t * bWidth;
-    const loc = getBuildingLoc(x);
-    
-    const m = new THREE.Mesh(mulGeo, frameMat);
-    m.position.set(x, bHeight / 2, loc.z);
-    m.rotation.y = loc.rotY;
-    scene.add(m);
+  for(let i=0; i<=36; i++){
+      const x = -bWidth/2 + (i/36)*bWidth; const l = getBuildingLoc(x);
+      const m = new THREE.Mesh(mulGeo, frameMat);
+      m.position.set(x, bHeight/2, l.z); m.rotation.y = l.rotY; scene.add(m);
   }
 
-  // --- 6. ENTRANCE (Dynamic & Attached) ---
-  const entLoc = getBuildingLoc(0); // Get center position/rotation
+  // --- 9. ENTRANCE & DOORS (FIXED VISIBILITY) ---
+  const entLoc = getBuildingLoc(0);
+  const dGrp = new THREE.Group();
+  dGrp.position.set(0, 0, entLoc.z); dGrp.rotation.y = entLoc.rotY;
+  scene.add(dGrp);
+
+  // Canopy
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(14, 0.5, 10), slabMat);
+  canopy.position.set(0, 6.5, 5); dGrp.add(canopy);
   
-  const doorGroup = new THREE.Group();
-  // Position group exactly on the curve at x=0
-  doorGroup.position.set(0, 0, entLoc.z); 
-  doorGroup.rotation.y = entLoc.rotY;
-  scene.add(doorGroup);
+  // Pillars
+  const cG = new THREE.CylinderGeometry(0.25, 0.25, 6.5);
+  const c1 = new THREE.Mesh(cG, frameMat); c1.position.set(-6, 3.25, 9); dGrp.add(c1);
+  const c2 = c1.clone(); c2.position.set(6, 3.25, 9); dGrp.add(c2);
 
-  // Large Canopy sticking out
-  const canopy = new THREE.Mesh(new THREE.BoxGeometry(14, 0.4, 10), slabMat);
-  canopy.position.set(0, 6.5, 5);
-  canopy.castShadow = true;
-  doorGroup.add(canopy);
+  // FRAME (Black Box) - Pushed BACK to Z = -0.5
+  // This ensures it is BEHIND the doors
+  const df = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 0.5), frameMat);
+  df.position.set(0, 2.5, 0.5); 
+  dGrp.add(df);
 
-  // Canopy Columns
-  const colGeo = new THREE.CylinderGeometry(0.2, 0.2, 6.5);
-  const c1 = new THREE.Mesh(colGeo, frameMat); c1.position.set(-6, 3.25, 9); doorGroup.add(c1);
-  const c2 = c1.clone(); c2.position.set(6, 3.25, 9); doorGroup.add(c2);
+  // DOORS - Pulled FORWARD to Z = 0.0
+  const dTex = createModernDoorTexture();
+  const dMat = new THREE.MeshStandardMaterial({ 
+      map: dTex, 
+      roughness: 0.2, 
+      metalness: 0.6,
+      envMapIntensity: 1.0 
+  }); 
+  const dGeo = new THREE.BoxGeometry(3.5, 4.6, 0.15); // Thin doors
+  
+  const ld = new THREE.Mesh(dGeo, dMat);
+ld.position.set(1.85, 2.5, 1);
+ld.userData = { kind: 'mallDoor' };
+dGrp.add(ld);
+clickable.push(ld);
 
-  // Door Frame
-  const dFrame = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 0.6), frameMat);
-  dFrame.position.set(0, 2.5, 0.2);
-  doorGroup.add(dFrame);
+const rd = ld.clone();
+rd.position.set(-1.85, 2.5, 1);
 
-  // Glass Doors (Clickable)
-  const doorGeo = new THREE.BoxGeometry(3.5, 4.6, 0.15);
-  const lDoor = new THREE.Mesh(doorGeo, glassMat);
-  lDoor.position.set(-1.85, 2.5, 0.25);
-  lDoor.userData = { kind: 'mallDoor' };
-  doorGroup.add(lDoor);
-  clickable.push(lDoor);
+// 🔥 MIRROR IT
+rd.scale.x = -1;
 
-  const rDoor = lDoor.clone();
-  rDoor.position.set(1.85, 2.5, 0.25);
-  rDoor.userData = { kind: 'mallDoor' };
-  doorGroup.add(rDoor);
-  clickable.push(rDoor);
+rd.userData = { kind: 'mallDoor' };
+dGrp.add(rd);
+clickable.push(rd);
 
-  // Handles
-  const hGeo = new THREE.BoxGeometry(0.08, 1.8, 0.08);
-  const h1 = new THREE.Mesh(hGeo, frameMat); h1.position.set(-0.5, 0, 0.15); lDoor.add(h1);
-  const h2 = h1.clone(); h2.position.set(0.5, 0, 0.15); rDoor.add(h2);
 
-  // 3D Signage on Canopy
-  const signTex = makeTextTexture('MALLTIVERSE', {
-    width: 1024, height: 256, bg: 'rgba(0,0,0,0)', color: '#111', font: '900 120px Inter, sans-serif'
-  });
+  // Sign
+  const signTex = makeTextTexture('MALLTIVERSE', { width: 1024, height: 256, bg: 'rgba(0,0,0,0)', color: '#111', font: '900 120px Inter, sans-serif' });
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(12, 3), new THREE.MeshStandardMaterial({map: signTex, transparent: true}));
-  sign.position.set(0, 8.0, 5); // Sitting on top of canopy
-  doorGroup.add(sign);
+  sign.position.set(0, 8.0, 5); dGrp.add(sign);
 
-  // --- 7. STREET LIGHTS ---
-  function createLightPole(x, z) {
-    const g = new THREE.Group();
-    g.position.set(x, 0, z);
+  // --- 10. LIGHT POLES (NEW: MODERN DESIGN) ---
+  function createLightPole(x, z, rotY) {
+  const g = new THREE.Group();
+  g.position.set(x, 0, z);
+  g.rotation.y = rotY;
 
-    // Pole
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 7), frameMat);
-    pole.position.y = 3.5;
-    g.add(pole);
+  // Pole
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.2, 6, 16),
+    frameMat
+  );
+  pole.position.y = 3;
+  g.add(pole);
 
-    // Arm
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 2), frameMat);
-    arm.position.set(0.8, 6.8, 0);
-    g.add(arm);
+  // 🔑 ARM PIVOT (hinge point)
+  const armPivot = new THREE.Group();
+  armPivot.position.set(0, 6, 0); // top of pole
+  g.add(armPivot);
 
-    // Lamp Head
-    const head = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.5, 8, 1, true), frameMat);
-    head.position.set(1.8, 6.6, 0);
-    g.add(head);
+  // Arm (extends forward)
+  const arm = new THREE.Mesh(
+    new THREE.BoxGeometry(1.5, 0.12, 0.12),
+    frameMat
+  );
+  arm.position.x = 0.75; // half its length
+  armPivot.add(arm);
 
-    // Bulb Glow
-    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
-    bulb.position.set(1.8, 6.5, 0);
-    g.add(bulb);
+  // Head
+  const head = new THREE.Mesh(
+    new THREE.BoxGeometry(0.8, 0.15, 0.4),
+    frameMat
+  );
+  head.position.set(1.6, -0.05, 0);
+  armPivot.add(head);
 
-    // Real Light
-    const spot = new THREE.SpotLight(0xffaa00, 8, 25, 0.8, 0.5, 1);
-    spot.position.set(1.8, 6.5, 0);
-    spot.target.position.set(1.8, 0, 0);
-    spot.castShadow = true;
-    g.add(spot);
-    g.add(spot.target);
+  // Emissive bulb
+  const bulb = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.6, 0.3),
+    new THREE.MeshStandardMaterial({
+      emissive: 0xffaa00,
+      emissiveIntensity: 1.5,
+      color: 0xffcc66
+    })
+  );
+  bulb.rotation.x = Math.PI / 2;
+  bulb.position.set(1.6, -0.15, 0);
+  armPivot.add(bulb);
 
-    scene.add(g);
-  }
+  // 🔥 THIS is the angle (clean + correct)
+  armPivot.rotation.z = -Math.PI / 100;
 
-  // Add poles along the path
-  createLightPole(-7, 10);
-  createLightPole(7, 10);
-  createLightPole(-7, 28);
-  createLightPole(7, 28);
+  scene.add(g);
+}
 
-  // --- 8. CAMERA ---
+
+  // Position poles on the curbs
+  createLightPole(-8, 5, 0);
+  createLightPole(-8, 25, 0);
+  createLightPole(8, 5, Math.PI); // Rotate to face inward
+  createLightPole(8, 25, Math.PI);
+
+  // --- 11. CAMERA ---
   camera.position.set(0, 2.5, 35);
   state.cameraTargetPos.set(0, 2.5, 35);
   state.cameraLookAt.set(0, 6, 0);
   state.cameraTargetLookAt.set(0, 6, -10);
-}
+} 
 
 function createHallway() {
   clearSceneGeometry();
