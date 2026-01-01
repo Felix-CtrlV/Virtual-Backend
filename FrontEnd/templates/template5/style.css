@@ -5,7 +5,7 @@
     --dark-bg: #0d1219;
 }
 html{
-    scroll-behavior: s;
+    scroll-behavior: smooth;
 }
 
 /* 1. Hero Container with Perspective */
@@ -44,9 +44,22 @@ html{
     letter-spacing: 2px;
     box-shadow: 0 10px 20px rgba(138, 109, 59, 0.3);
     animation: float3D 3s ease-in-out infinite;
+    object-fit: cover;
     
+
+}
+.card-img-top{
+    height:300px;
+    width:100%;
+    object-fit: cover;
 }
 
+.btn btn-primary btn-view{
+    position: relative;
+    top:25px;
+    background-color: #000;
+    color: var(--gold-primary);
+}
 
 .hero-content h2 {
   
@@ -109,6 +122,38 @@ html{
     box-shadow: 0 10px 20px rgba(138, 109, 59, 0.3);
     animation: float3D 3s ease-in-out infinite;
 }
+
+.category_name{
+    text-align: center;
+    color:var(--gold-primary);
+    background-color:white;
+    padding:8px;
+     position: relative;
+    top: 10px;
+    letter-spacing: 5px;
+    display: inline-block;
+    font-family: 'Playfair Display', serif; /* Matching your font choice */
+    letter-spacing: 2px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: luxuryReveal 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+@keyframes luxuryReveal {
+    0% {
+        opacity: 0;
+        letter-spacing: -3px;
+        transform: translateY(20px);
+        filter: blur(5px);
+    }
+    100% {
+        opacity: 1;
+        letter-spacing: 6px;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+
 
 .hero-content h2 {
     font-size: 4rem;
@@ -301,10 +346,10 @@ html{
 
 
 /*Nav link CSS code */
-/* Gold Color Hover Effect *
+/* Gold Color Hover Effect */
 .nav-item a {
     position: relative;
-    color: #000; /*
+    color: #000; 
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -417,11 +462,11 @@ h1 {
   color: #ffffff;
   
   /* Modern Gradient */
-  background: linear-gradient(45deg, #ff512f, #dd2476);
+  background:var(--gold-primary);
   border-radius: 50px;
   
   /* Soft Shadow */
-  box-shadow: 0 4px 15px rgba(221, 36, 118, 0.3);
+  /*box-shadow: 0 4px 15px rgba(221, 36, 118, 0.3);*/
   
   /* Smooth Animation Property */
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -435,7 +480,7 @@ h1 {
   transform: translateY(-4px);
   
   /* Stronger glow effect */
-  box-shadow: 0 12px 24px rgba(221, 36, 118, 0.5);
+ /* box-shadow: 0 12px 24px rgba(221, 36, 118, 0.5);*/
   
   /* Brightens the button slightly */
   filter: brightness(1.1);
@@ -477,7 +522,7 @@ h1 {
   gap: 30px;
   padding: 60px 20px;
   justify-content: center;
-  background-color: #fdfdfd; /* Off-white for a clean look */
+
   margin-bottom:100px;
 }
 
@@ -487,8 +532,7 @@ h1 {
   max-width: 350px;
   padding: 40px 30px;
   background: #ffffff;
-  border: 1px solid #eee; /* Thin, subtle border */
-  border-radius: 12px;
+ 
   text-align: center;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); /* Smooth movement */
   position: relative;
@@ -652,6 +696,10 @@ h1 {
     font-family: 'Cormorant Garamond', serif;
     position: relative;
     padding-bottom: 10px;
+}
+.text-center{
+    color:var(--gold-primary);
+    text-align: center;
 }
 
 .footer-links h4::after {
@@ -854,6 +902,30 @@ h1 {
 /* Smooth scroll behavior for anchor links */
 .luxury-footer a {
     scroll-behavior: smooth;
+}
+/*Luxury Watch Animation*/
+.text-center i {
+    display: inline-block;
+    font-family: 'Playfair Display', serif; /* Matching your font choice */
+    letter-spacing: 2px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: luxuryReveal 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes luxuryReveal {
+    0% {
+        opacity: 0;
+        letter-spacing: -3px;
+        transform: translateY(20px);
+        filter: blur(5px);
+    }
+    100% {
+        opacity: 1;
+        letter-spacing: 6px;
+        transform: translateY(0);
+        filter: blur(0);
+    }
 }
 
 
