@@ -144,10 +144,10 @@ $tagline = $supplier['tagline'] ?? 'Redefine Your Limits.';
         color: var(--bg-color);
         padding: 1.5rem 0;
         overflow: hidden;
+        position: relative;
+        top: -64px;
         white-space: nowrap;
         position: relative;
-        /* transform: rotate(-1deg) scale(1.05); */
-        /* Slight tilt for "edge" */
         z-index: 5;
     }
 
@@ -276,7 +276,7 @@ $tagline = $supplier['tagline'] ?? 'Redefine Your Limits.';
         <video class="hero-media" autoplay muted loop playsinline src="../uploads/shops/<?= $supplier_id?>/<?= $shop_assets['banner'] ?>"></video>
     
     <?php else: ?>
-        <img src="<?= htmlspecialchars($banner_url) ?>" alt="Hero Banner" class="hero-media" style="transform: scale(1.1);">
+        <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>" alt="Hero Banner" class="hero-media" style="transform: scale(1.1);">
     <?php endif; ?>
 
     <div class="hero-content">
