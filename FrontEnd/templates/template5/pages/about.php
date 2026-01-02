@@ -1,65 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us | YourVirtualMall</title>
-    
-</head>
-<body>
-
-    <section class="header-section">
-        <h1>Welcome to the Future of Shopping</h1>
-        <p>Experience the world's most immersive virtual marketplace.</p>
-    </section>
-
+<section class="page-content about-page py-5">
     <div class="container">
-        <div class="content-grid">
-            <div>
-                <h2 class="about">Who We Are</h2>
-                <p>Founded in 2026, <strong>[MALLTIVERSE PLATFORM]</strong> was born out of a simple idea: shopping should be an adventure, not a chore. We are a digital-first platform that bridges the gap between the convenience of e-commerce and the social excitement of a physical mall.</p>
-                <p>We host hundreds of premium brands in a seamless, 3D-integrated environment, allowing users to browse, interact, and shop from anywhere in the world.</p>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                
+                <h2 class="text-center mb-4">About <?= htmlspecialchars($supplier['company_name']) ?></h2>
+                
+                <?php if (!empty($shop_assets['about'])): ?>
+                    <div class="about-content mb-4 text-center">
+                        <p class="lead font-italic" style="color: #555;">
+                            "<?= nl2br(htmlspecialchars($shop_assets['about'])) ?>"
+                        </p>
+                    </div>
+                <?php endif; ?>
+        </div>
+        </div>
+    </div>
+</section>
+                    
+
+
+
+                    
+
+
+    
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h2 class="footer-logo">LUXURY<span>WATCH</span></h2>
+      <?php 
+    
+    $since_year = date("Y"); 
+        ?>
+
+    <p>Providing high-quality products  <?php echo $since_year; ?>. Quality you can trust, delivered to your door.</p>
+            
+            <div class="social-links">
+                <a href=""><i class="fab fa-facebook-f"></i></a>
+                <a href=""><i class="fab fa-instagram"></i></a>
+                <a href=""><i class="fab fa-twitter"></i></a>
+                <a href=""><i class="fab fa-viber"></i></a>
             </div>
-            <div>
-                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=500&q=80" alt="Virtual Technology" style="width:100%; border-radius:10px;">
-            </div>
+        </div>
+
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="products.php">Products</a></li>
+                <li><a href="about.php">About Us</a></li>
+                <li><a href="contact.php">Contact Us</a></li>
+                <li><a href="review.php">Review</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Contact Us</h3>
+            <p><i class="fas fa-envelope"></i> kaungpyaesone@gmail.com</p>
+            <p><i class="fas fa-envelope"></i> kaungswanthaw@gmail.com</p>
+            <p><i class="fas fa-phone"></i> +95 123456</p>
+            <p><i class="fas fa-map-marker-alt"></i> Metro IT and Japanese Language Center</p>
         </div>
     </div>
 
-    <section class="stats-bar">
-        <div class="stat-item">
-            <h2>500+</h2>
-            <p>Global Brands</p>
-        </div>
-        <div class="stat-item">
-            <h2>1M+</h2>
-            <p>Active Shoppers</p>
-        </div>
-        <div class="stat-item">
-            <h2>24/7</h2>
-            <p>Virtual Access</p>
-        </div>
-    </section>
-
-    <div class="container1">
-        <div class="mission-vision">
-            <h2 class="animation">Our Core Values</h2>
-            <div class="content-grid">
-                <div style="background: #fff;">
-                    <h3>Innovation</h3>
-                    <p>We constantly push the boundaries of Web3 and VR technology to make your shopping experience more realistic and engaging.</p>
-                </div>
-                <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-                    <h3>Accessibility</h3>
-                    <p>High-end retail should be available to everyone. We bring the luxury of a metropolitan mall to your screen, no matter your location.</p>
-                </div>
-            </div>
-        </div>
+    <div class="footer-bottom">
+        <p>&copy; <?php echo date("Y"); ?> <span>MALLTIVERSE</span>. All rights reserved.</p>
     </div>
-
-    <footer style="text-align:center; padding: 40px; background: #eee;">
-        <p class="copyright">&copy; <?php echo date("Y"); ?> [MALLTIVERSE]. All Rights Reserved.</p>
-    </footer>
-
+</footer>
 </body>
 </html>
