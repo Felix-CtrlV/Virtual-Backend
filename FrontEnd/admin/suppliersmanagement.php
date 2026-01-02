@@ -33,6 +33,14 @@ $reviewquery = "SELECT ROUND(AVG(rating),1) AS avg_rating, COUNT(*) AS total_rev
 $reviewresult = mysqli_query($conn, $reviewquery);
 $reviewrow = mysqli_fetch_assoc($reviewresult);
 
+$banner_string = $supplierrow["banner"];
+$banners = explode(",", $banner_string);
+$banner_count = count($banners);
+
+for ($i = 0; $i < $banner_count; $i++) {
+    ${"banner" . ($i + 1)} = $banners[$i];
+}
+
 $status = $supplierrow['status'];
 $statusClass = match ($status) {
     'active' => 'status-active',
@@ -57,7 +65,7 @@ $statusClass = match ($status) {
             <div class="card-header">
                 <div class="company_image_container" style="height: 150px;">
                     <img class="company_image" style="height: 150px;"
-                        src="../uploads/shops/<?= $supplierid ?>/<?= $supplierrow['banner'] ?>" alt="Banner">
+                        src="../uploads/shops/<?= $supplierid ?>/<?= $banner1?>" alt="Banner">
                 </div>
             </div>
             <div class="company_status" style="margin-top: 12px;">

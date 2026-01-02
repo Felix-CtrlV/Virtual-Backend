@@ -74,7 +74,7 @@ include("../../BackEnd/config/dbconfig.php");
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                 if (data.success) {
                     window.location.href = 'dashboard.php';
                 } else {
                     errortext.style.display = 'block';
