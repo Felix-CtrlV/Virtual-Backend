@@ -1,43 +1,81 @@
-<section class="page-content about-page py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                
-                <h2 class="text-center mb-4">About <?= htmlspecialchars($supplier['company_name']) ?></h2>
-                
-                <?php if (!empty($shop_assets['about'])): ?>
-                    <div class="about-content mb-4 text-center">
-                        <p class="lead font-italic" style="color: #555;">
-                            "<?= nl2br(htmlspecialchars($shop_assets['about'])) ?>"
-                        </p>
-                    </div>
-                <?php endif; ?>
+
+<section class="about-hero">
+    <div class="hero-content">
+        <span class="sub-title">ABOUT US</span>
+        <h1 class="main-title">& LOCATIONS</h1>
+    </div>
+
+</section>
+
+     
+        
+
+
+<section class="about-section clearfix">
+    <div class="container2">
+        <div class="about-img-float">
+            <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=800" alt="Luxury Watch">
         </div>
+        <div class="about-text">
+            <span class="sub-title">OUR STORY</span>
+            <h2>Dedicated to Excellence</h2>
+            <p>We started with a simple goal: to provide high-quality timepieces that make a real difference. Our team of experts works tirelessly to ensure customer satisfaction through innovation and integrity.</p>
+            <ul class="features">
+                <li><i class="fas fa-check-circle"></i> 10+ Years of Craftsmanship</li>
+                <li><i class="fas fa-check-circle"></i> Premium Water Resistance</li>
+                <li><i class="fas fa-check-circle"></i>Timeless Excellence</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="location-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Our Locations</h2>
+            <p>Visit us at any of our branches across the country.</p>
+        </div>
+        
+        <div class="location-grid clearfix">
+            <div class="location-card">
+                <div class="icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>Yangon Head Office</h3>
+                <p>No. 123, Pyay Road, Kamayut Township, Yangon, Myanmar.</p>
+                <p class="contact-info"><strong>Phone:</strong> +95 9 123 456 789</p>
+                <a href="#" class="view-map">View on Map</a>
+            </div>
+
+            <div class="location-card">
+                <div class="icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>Mandalay Branch</h3>
+                <p>73rd St, Between 30th & 31st St, Mandalay, Myanmar.</p>
+                <p class="contact-info"><strong>Phone:</strong> +95 9 987 654 321</p>
+                <a href="#" class="view-map">View on Map</a>
+            </div>
+
+            <div class="location-card">
+                <div class="icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>Naypyidaw Office</h3>
+                <p>Thapyay Gone Market, Zabuthiri Township, Naypyidaw.</p>
+                <p class="contact-info"><strong>Phone:</strong> +95 67 123 456</p>
+                <a href="#" class="view-map">View on Map</a>
+            </div>
         </div>
     </div>
 </section>
 
                     
-                    
-
-
-
-                    
 
 
     
+
+    <!--Footer Section-->
 
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-section">
             <h2 class="footer-logo">LUXURY<span>WATCH</span></h2>
-      <?php 
-    
-    $since_year = date("Y"); 
-        ?>
-
-    <p>Providing high-quality products  <?php echo $since_year; ?>. Quality you can trust, delivered to your door.</p>
-            
+            <p>Providing high-quality products 2026. Quality you can trust, delivered to your door.</p>
             <div class="social-links">
                 <a href=""><i class="fab fa-facebook-f"></i></a>
                 <a href=""><i class="fab fa-instagram"></i></a>
@@ -68,7 +106,7 @@
 
     <div class="footer-bottom">
         <p>&copy; <?php echo date("Y"); ?> <span>MALLTIVERSE</span>. All rights reserved.</p>
+        
+
     </div>
 </footer>
-</body>
-</html>
