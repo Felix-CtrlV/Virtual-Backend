@@ -50,6 +50,13 @@ if ($assets_result && mysqli_num_rows($assets_result) > 0) {
     ];
 }
 
+$banner_string = $shop_assets["banner"];
+$banners = explode(",", $banner_string);
+$banner_count = count($banners);
+
+for ($i = 0; $i < $banner_count; $i++) {
+    ${"banner" . ($i + 1)} = $banners[$i];
+}
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 $allowed_pages = ['home', 'about', 'products', 'contact', 'review'];
@@ -70,7 +77,7 @@ if ($banner_filename && file_exists($banner_fs)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">    
 
 <head>
     <meta charset="UTF-8">
@@ -96,22 +103,22 @@ if ($banner_filename && file_exists($banner_fs)) {
 
 
     <!-- Hero banner inserted here -->
-   
 
-            <main class="main-content">
-                <?php
-                if (file_exists($page_path)) {
-                    include($page_path);
-                } else {
-                    echo "<p class='not-found'>Page not found.</p>";
-                }
-                ?>
-            </main>
 
-            <?php include(__DIR__ . '/partial/footer.php'); ?>
+    <main class="main-content">
+        <?php
+        if (file_exists($page_path)) {
+            include($page_path);
+        } else {
+            echo "<p class='not-found'>Page not found.</p>";
+        }
+        ?>
+    </main>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="script.js"></script>
+    <?php include(__DIR__ . '/partial/footer.php'); ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
 
 </body>
 

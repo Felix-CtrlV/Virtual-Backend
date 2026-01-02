@@ -1,4 +1,3 @@
-
 <?php
 $current_page = 'home.php';
 ?>
@@ -19,7 +18,7 @@ $current_page = 'home.php';
        <span class="category-title">
     <i class="fa-solid fa-clock"></i> Luxury Watch
 </span>
-        <h2 style="width:500px;"><?= $shop_assets['description']?></h2>
+        <h2 class="home" style="width:500px;"><?= $shop_assets['description']?></h2>
         <p class="hero-description"><b><i>Discover Your Favorite Smart Watch.</b></i></p> 
         <br>
         <a href="?supplier_id=<?= $supplier['supplier_id'] ?>&page=products" class="btn-shop-now">
