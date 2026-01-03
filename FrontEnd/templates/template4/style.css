@@ -93,7 +93,7 @@
   width: 50px; /* Match the image height for a square */
   height: 50px;
   overflow: hidden; /* Clips the image to the blob shape */
-  border-radius: 5px; /* Initial state */
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; /* Initial state */
   transition: border-radius 0.3s ease-out; /* Animates both ways */
 }
 
@@ -101,11 +101,6 @@
   height: 50px;
   /* Remove border-radius here if you want the container to control the shape */
   border-radius: inherit;
-}
-
-.logo-container:hover {
-  /* The "blob" shape now applies to the clipped container */
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
 }
 
 @media (max-width: 768px) {
@@ -663,7 +658,7 @@
   left: 25px;
   text-transform: uppercase;
   color: var(--accent-color);
- 
+
   z-index: 1;
 }
 .category-label h3 {

@@ -23,6 +23,9 @@
         <li class="nav-item">
             <a class="nav-link <?= $page === 'contact' ? 'active' : '' ?>" href="<?= $base_url ?>&page=contact">Contact</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link <?= $page === 'review' ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">Review</a>
+        </li>
     </ul>
 
     <div class="auth-buttons">
