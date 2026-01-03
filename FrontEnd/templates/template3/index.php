@@ -3,7 +3,6 @@ if (!isset($conn)) {
     include '../../../BackEnd/config/dbconfig.php';
 }
 
-
 $supplier_id = (int) $supplier['supplier_id'];
 
 $assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE supplier_id = ?");
@@ -38,7 +37,7 @@ for ($i = 0; $i < $banner_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'products', 'collection'];
+$allowed_pages = ['home', 'about', 'products', 'collection', 'review', 'product_details'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
@@ -69,8 +68,6 @@ $page_path = __DIR__ . "/pages/$page.php";
 </head>
 
 <body>
-    <?php include(__DIR__ . '/partial/header.php'); ?>
-
     <?php include(__DIR__ . '/partial/nav.php'); ?>
 
     <main class="main-content">

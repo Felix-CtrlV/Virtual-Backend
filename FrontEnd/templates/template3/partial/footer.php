@@ -18,6 +18,7 @@
                         <li><a href="<?= $base_url ?>&page=shop">Shop</a></li>
                         <li><a href="<?= $base_url ?>&page=about">About Us</a></li>
                         <li><a href="<?= $base_url ?>&page=collection">Collection</a></li>
+                        <li><a href="<?= $base_url ?>&page=collection">Review</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
