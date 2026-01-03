@@ -51,15 +51,15 @@ $current_page = 'home.php';
 <section class="features">
     <div class="feature-card">
         <h3>Swiss Movement</h3>
-        <p><b><i>Engineered with world-class precision and 72-hour power reserve.</i></b></p>
+        <p>Engineered with world-class precision and 72-hour power reserve.</p>
     </div>
     <div class="feature-card">
         <h3>Sapphire Crystal</h3>
-        <p><b><i>Scratch-resistant clarity designed to last a lifetime.</i></b></p>
+        <p>Scratch-resistant clarity designed to last a lifetime.</p>
     </div>
     <div class="feature-card">
         <h3>Heritage</h3>
-        <p><b><i>A legacy of watchmaking spanning over a century of innovation.</i></b></p>
+        <p>A legacy of watchmaking spanning over a century of innovation.</p>
     </div>
 </section>
 

@@ -1,4 +1,4 @@
-<section class="page-content product-page">
+<section class="page-content product-page" style="min-height: 80vh;">
     <div class="container">
         <h2 class="text-center mb-4"><i>2026 Luxury Watch List</i></h2>
         
@@ -24,7 +24,8 @@
     </div>
 </section>
 
-<script>
+   
+    <script>
     const searchInput = document.getElementById("searchBar");
     const resultContainer = document.getElementById("productResults");
 
@@ -62,6 +63,8 @@
         });
     }
 </script>
+
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
