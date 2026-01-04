@@ -1,6 +1,6 @@
 <section class="page-content product-page">
     <div class="container">
-        <h2 class="text-center">Our Products</h2>
+        <h2 class="text-center">Trendy Stocks</h2>
         <div class="row g-4">
         <div class="welcome-section text-center py-1">
             <?php if (!empty($supplier['description'])): ?>                
@@ -38,7 +38,8 @@
                                      class="card-img-top" 
                                      alt="<?= htmlspecialchars($category_row['category_name']) ?>">
                                      <h3 class="category_name"><?= $category_row['category_name'] ?></h3>                
-                                     <a href="?supplier_id=<?= $supplier['supplier_id']?>&category_id=<?= $category_row['category_id'] ?>&page=collection" class="btn btn-primary btn-view">View</a> 
+                                     <a href="?supplier_id=<?= $supplier['supplier_id']?>&category_id=<?= $category_row['category_id'] ?>&page=collection" class="btn btn-primary btn-view">View</a>
+                                     
                                 <?php endif; ?>
                         </div>
                     </div>                    

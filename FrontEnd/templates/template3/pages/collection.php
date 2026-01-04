@@ -1,7 +1,11 @@
 <section class="page-content collection-page">
     <div class="container">
         <div class="collectionContainer"></div>
-        <h2 class="text-center mb-5">Latest Products</h2>
+        <h2 class="text-center mb-5">Latest Stock Items</h2>
+        <div class="search-bar">
+            <input type="text" name="search_product" id="searchBar" placeholder="Search.....">
+            <i class="fas fa-search"></i>
+        </div>
         <div class="row g-4" id="productResults">
 
         </div>

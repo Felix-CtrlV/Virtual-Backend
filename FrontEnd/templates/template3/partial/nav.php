@@ -1,5 +1,5 @@
 <?php
-  if (session_status() == PHP_SESSION_NONE) {
+if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 ?>
@@ -7,6 +7,20 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <nav class="main-nav navbar navbar-expand-lg">
     <div class="container">
+        <div class="header-wrapper">
+            <?php if (!empty($shop_assets['logo'])): ?>
+                <div class="logo-container">
+                    <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
+                        alt="<?= htmlspecialchars($supplier['company_name']) ?> Logo" class="NFlogo">
+                </div>
+            <?php endif; ?>
+            <div class="header-text">
+                <h1 class="site-title"><?= htmlspecialchars($supplier['company_name']) ?></h1>
+                <?php if (!empty($supplier['tagline'])): ?>
+                    <p class="site-tagline"><?= htmlspecialchars($supplier['tagline']) ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
 
         <ul class="navbar-nav me-auto">
             <?php
@@ -27,11 +41,10 @@
                 <a class="nav-link <?= $page === 'collection' ? 'active' : '' ?>"
                     href="<?= $base_url ?>&page=collection">Collection</a>
             </li>
-        </ul>
-
-        <div class="search-bar">
-            <input type="text" name="search_product" id="searchBar" placeholder="Search.....">
-            <i class="fas fa-search"></i>
-        </div>
+            <li class="nav-item">
+                <a class="nav-link <?= $page === 'review' ? 'active' : '' ?>"
+                    href="<?= $base_url ?>&page=review">Review</a>
+            </li>
+        </ul>        
     </div>
 </nav>

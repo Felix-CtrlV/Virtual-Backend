@@ -1,4 +1,4 @@
-<section class="page-content product-page">
+<section class="page-content product-page" style="min-height: 80vh;">
     <div class="container">
         <h2 class="text-center mb-4"><i>2026 Luxury Watch List</i></h2>
         
@@ -24,7 +24,8 @@
     </div>
 </section>
 
-<script>
+   
+    <script>
     const searchInput = document.getElementById("searchBar");
     const resultContainer = document.getElementById("productResults");
 
@@ -63,13 +64,15 @@
     }
 </script>
 
+
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-section">
-            <h2 class="footer-logo">MALL<span>TIVERSE</span></h2>
-            <p>Providing high-quality products since 2025. Quality you can trust, delivered to your door.</p>
+            <h2 class="footer-logo">LUXURY<span>WATCH</span></h2>
+            <p>Providing high-quality products 2026. Quality you can trust, delivered to your door.</p>
             <div class="social-links">
                 <a href=""><i class="fab fa-facebook-f"></i></a>
                 <a href=""><i class="fab fa-instagram"></i></a>

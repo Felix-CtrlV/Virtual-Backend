@@ -21,7 +21,7 @@ $current_page = 'home.php';
         <div class="hero-banner">
             <div class="logo-container">
 
-                <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>) ?>"
+                <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>"
                     alt="<?= htmlspecialchars($supplier['company_name']) ?> banner" class="fashion-banner">
             </div>
         </div>
