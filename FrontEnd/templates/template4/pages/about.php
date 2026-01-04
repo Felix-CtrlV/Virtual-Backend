@@ -249,6 +249,10 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.02);
     }
 
+    .orbit-ring img{
+        border-radius: 50%;
+    }
+
     .ring-outer {
         width: 380px;
         height: 380px;

@@ -3,224 +3,519 @@
 if (!isset($supplier)) {
     die("Access Denied");
 }
+
+$company_name = $supplier['company_name'] ?? 'BRAND';
+$tagline = $supplier['tagline'] ?? 'Get in touch.';
 ?>
 
 <style>
-    /* Section Styling */
-    .contact-section {
-        padding: 80px 0 100px;
-        background-color: #fff;
+    /* ============================================
+       1. SHARED VARIABLES (SYNCED WITH HOME.PHP)
+       ============================================ */
+    :root {
+        --bg-color: #0a0a0a;
+        --card-bg: #141414;
+        --text-main: #ffffff;
+        --text-muted: #888888;
+        --accent: #D4AF37;
+        /* Gold/Premium accent */
+        --border-color: #333333;
+        --font-display: 'Helvetica Neue', 'Arial Black', sans-serif;
+        --font-body: 'Helvetica', sans-serif;
+        --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .contact-heading {
-        font-weight: 800;
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-        color: #1a1a1b;
+    /* ============================================
+       2. GLOBAL RESET & UTILITIES
+       ============================================ */
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-body);
+        overflow-x: hidden;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    /* Scroll Reveal Animation */
+    .reveal-on-scroll {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 1s var(--transition-smooth);
+    }
+
+    .reveal-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ============================================
+       3. HERO SECTION (MATCHING HOME.PHP)
+       ============================================ */
+    .contact-hero {
+        position: relative;
+        height: 50vh;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 100%);
+        overflow: hidden;
+        border-bottom: 1px solid #222;
+    }
+
+    /* Abstract Background Noise/Grain */
+    .contact-hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    .contact-title {
+        font-family: var(--font-display);
+        font-size: clamp(4rem, 12vw, 9rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+        margin: 0;
+        color: #fff;
+        z-index: 2;
+        text-align: center;
+        opacity: 0;
+        animation: heroTextReveal 1.2s var(--transition-smooth) forwards;
     }
 
     .contact-sub {
-        font-size: 1.1rem;
-        color: #666;
-        margin-bottom: 50px;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-top: 20px;
+        color: var(--accent);
+        z-index: 2;
+        opacity: 0;
+        animation: heroTextReveal 1.2s var(--transition-smooth) 0.3s forwards;
     }
 
-    /* Left Side: Contact Info Cards */
-    .contact-info-card {
-        background: #f8f9fa;
-        border-radius: 20px;
-        padding: 25px;
-        margin-bottom: 20px;
+    @keyframes heroTextReveal {
+        from {
+            transform: translateY(100px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* ============================================
+       4. INFINITE MARQUEE (IMPORTED FROM HOME)
+       ============================================ */
+    .marquee-container {
+        background: var(--text-main);
+        color: var(--bg-color);
+        padding: 1rem 0;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+        z-index: 5;
+        border-bottom: 1px solid #000;
+    }
+
+    .marquee-content {
+        display: inline-block;
+        animation: marquee 20s linear infinite;
+    }
+
+    .marquee-item {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-right: 4rem;
+    }
+
+    @keyframes marquee {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    /* ============================================
+       5. MAIN GRID LAYOUT
+       ============================================ */
+    .contact-wrapper {
+        padding: 80px 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 60px;
+        align-items: start;
+    }
+
+    @media (max-width: 992px) {
+        .grid-layout {
+            grid-template-columns: 1fr;
+            gap: 60px;
+        }
+    }
+
+    /* ============================================
+       6. TILT CARDS (HOVER ANIMATION PRESERVED)
+       ============================================ */
+    .info-column {
         display: flex;
-        align-items: center;
-        transition: transform 0.3s ease, border-color 0.3s ease;
-        border: 1px solid #eaeaea;
+        flex-direction: column;
+        gap: 20px;
+        perspective: 1000px;
+        /* REQUIRED FOR 3D EFFECT */
     }
 
-    .contact-info-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--primary);
-        background: #fff;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    }
-
-    .info-icon-box {
-        width: 60px;
-        height: 60px;
-        background: #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 20px;
-        flex-shrink: 0;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .info-content h5 {
-        font-weight: 700;
-        margin-bottom: 5px;
-        font-size: 1.1rem;
-        color: #1a1a1b;
-    }
-
-    .info-content p,
-    .info-content a {
-        margin: 0;
-        color: #555;
-        font-size: 0.95rem;
-        text-decoration: none;
-        word-break: break-all;
-        /* Handles long emails */
-    }
-
-    .info-content a:hover {
-        color: var(--primary);
-    }
-
-    /* Right Side: Contact Form */
-    .contact-form-container {
-        background: #fff;
+    .tilt-card {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 12px;
         padding: 40px;
-        border-radius: 30px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-        border: 1px solid #f0f0f0;
+        position: relative;
+        transform-style: preserve-3d;
+        /* REQUIRED FOR 3D EFFECT */
+        transform: rotateX(0) rotateY(0);
+        transition: transform 0.1s ease-out;
+        /* SNAP ANIMATION */
+        cursor: default;
+        overflow: hidden;
     }
 
-    .form-control-custom {
-        background-color: #f8f9fa;
-        border: 1px solid #eee;
-        border-radius: 15px;
-        /* Pill inputs */
-        padding: 15px 20px;
-        margin-bottom: 20px;
-        transition: all 0.3s;
-    }
-
-    .form-control-custom:focus {
-        background-color: #fff;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.03);
-        outline: none;
-    }
-
-    .btn-send {
-        background: var(--primary);
-        color: #fff;
-        border: none;
-        border-radius: 50px;
-        padding: 15px 30px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        width: 100%;
+    /* Inner Glare Effect */
+    .tilt-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 60%);
+        opacity: 0;
         transition: opacity 0.3s;
+        pointer-events: none;
     }
 
-    .btn-send:hover {
-        opacity: 0.9;
+    .tilt-card:hover {
+        border-color: #444;
+    }
+
+    .tilt-card:hover::after {
+        opacity: 1;
+    }
+
+    .tilt-content {
+        transform: translateZ(30px);
+        /* POP EFFECT */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .card-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--accent);
+        font-weight: bold;
+    }
+
+    .card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
         color: #fff;
+        line-height: 1.2;
     }
 
-    @media (max-width: 991px) {
-        .contact-form-container {
-            margin-top: 40px;
+    .card-value a {
+        color: #fff;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .card-value a:hover {
+        color: var(--accent);
+    }
+
+    /* ============================================
+       7. MODERN FORM (BENTO/GLASS STYLE)
+       ============================================ */
+    .form-column {
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 60px;
+        border-radius: 20px;
+        border: 1px solid #333;
+        position: relative;
+    }
+
+    .form-header h2 {
+        font-family: var(--font-display);
+        font-size: 3rem;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .minimal-input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #333;
+        padding: 25px 0;
+        font-size: 1.5rem;
+        /* Larger typing font */
+        color: #fff;
+        font-family: var(--font-display);
+        transition: all 0.3s ease;
+        border-radius: 0;
+    }
+
+    .minimal-input:focus {
+        outline: none;
+        border-bottom-color: var(--accent);
+        padding-left: 20px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+    }
+
+    .minimal-input::placeholder {
+        color: #444;
+        font-family: var(--font-body);
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    /* Modern Button (Matches Home) */
+    .magnet-btn {
+        display: inline-block;
+        padding: 25px 60px;
+        background: #fff;
+        color: #000;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 40px;
+        transition: all 0.3s var(--transition-smooth);
+    }
+
+    .magnet-btn:hover {
+        background: var(--accent);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .form-column {
             padding: 30px;
+        }
+
+        .minimal-input {
+            font-size: 1.2rem;
         }
     }
 </style>
 
-<div class="contact-section">
-    <div class="container">
+<div class="contact-hero">
+    <h1 class="contact-title">Contact</h1>
+    <p class="contact-sub">Let's Build something great</p>
+</div>
 
-        <div class="row justify-content-center text-center mb-4">
-            <div class="col-lg-8">
-                <span class="text-uppercase text-primary fw-bold letter-spacing-2" style="font-size: 0.8rem;">Contact Us</span>
-                <h2 class="contact-heading">Get in touch</h2>
-                <p class="contact-sub">Have a question? We'd love to hear from you.</p>
-            </div>
-        </div>
-
-        <div class="row align-items-start">
-
-            <div class="col-lg-5">
-
-                <?php if (!empty($supplier['email'])): ?>
-                    <div class="contact-info-card">
-                        <div class="info-icon-box">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/wpsdctqb.json"
-                                trigger="hover"
-                                style="width:32px;height:32px">
-                            </lord-icon>
-                        </div>
-                        <div class="info-content">
-                            <h5>Email</h5>
-                            <a href="mailto:<?= htmlspecialchars($supplier['email']) ?>"><?= htmlspecialchars($supplier['email']) ?></a>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($supplier['phone'])): ?>
-                    <div class="contact-info-card">
-                        <div class="info-icon-box">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/wtywrnoz.json"
-                                trigger="hover"
-                                style="width:32px;height:32px">
-                            </lord-icon>
-                        </div>
-                        <div class="info-content">
-                            <h5>Phone</h5>
-                            <p><?= htmlspecialchars($supplier['phone']) ?></p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($supplier['address'])): ?>
-                    <div class="contact-info-card">
-                        <div class="info-icon-box">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/surcxhka.json"
-                                trigger="hover"
-                                colors="primary:#121331,secondary:<?= htmlspecialchars($shop_assets['primary_color']) ?>"
-                                style="width:32px;height:32px">
-                            </lord-icon>
-                        </div>
-                        <div class="info-content">
-                            <h5>Address</h5>
-                            <p><?= htmlspecialchars($supplier['address']) ?></p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-            </div>
-
-            <div class="col-lg-7">
-                <div class="contact-form-container">
-                    <h3 class="fw-bold mb-4">Send us a Message</h3>
-
-                    <form id="contactForm" method="POST" action="">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label visually-hidden">Name</label>
-                                <input type="text" class="form-control form-control-custom" id="name" name="name" placeholder="Your Name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label visually-hidden">Email</label>
-                                <input type="email" class="form-control form-control-custom" id="email" name="email" placeholder="Your Email" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="message" class="form-label visually-hidden">Message</label>
-                            <textarea class="form-control form-control-custom" id="message" name="message" rows="5" placeholder="How can we help you?" required></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-send">Send Message</button>
-                    </form>
-                </div>
-            </div>
-
-        </div>
+<div class="marquee-container">
+    <div class="marquee-content">
+        <span class="marquee-item">Customer Support</span>
+        <span class="marquee-item">•</span>
+        <span class="marquee-item">Custom Inquiries</span>
+        <span class="marquee-item">•</span>
+        <span class="marquee-item">Global Partnerships</span>
+        <span class="marquee-item">•</span>
+        <span class="marquee-item">24/7 Assistance</span>
+        <span class="marquee-item">•</span>
+        <span class="marquee-item">Customer Support</span>
+        <span class="marquee-item">•</span>
+        <span class="marquee-item">Custom Inquiries</span>
     </div>
 </div>
+
+<div class="contact-wrapper">
+    <div class="grid-layout">
+
+        <div class="info-column">
+
+            <?php if (!empty($supplier['email'])): ?>
+                <div class="tilt-card reveal-on-scroll">
+                    <div class="tilt-content">
+                        <span class="card-label">Email Us</span>
+                        <div class="card-value">
+                            <a href="mailto:<?= htmlspecialchars($supplier['email']) ?>">
+                                <?= htmlspecialchars($supplier['email']) ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($supplier['phone'])): ?>
+                <div class="tilt-card reveal-on-scroll">
+                    <div class="tilt-content">
+                        <span class="card-label">Call Us</span>
+                        <div class="card-value">
+                            <a href="tel:<?= htmlspecialchars($supplier['phone']) ?>">
+                                <?= htmlspecialchars($supplier['phone']) ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($supplier['address'])): ?>
+                <div class="tilt-card reveal-on-scroll">
+                    <div class="tilt-content">
+                        <span class="card-label">Visit Us</span>
+                        <div class="card-value">
+                            <?= htmlspecialchars($supplier['address']) ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <div class="tilt-card reveal-on-scroll" style="background: linear-gradient(135deg, #111, #0a0a0a);">
+                <div class="tilt-content">
+                    <span class="card-label" style="color: #10b981;">Live Status</span>
+                    <div class="card-value" style="font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></span>
+                        Systems Online
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-column reveal-on-scroll">
+            <div class="form-header">
+                <h2>Send a Message</h2>
+                <p style="color: #666;">Fill out the form below and we will get back to you shortly.</p>
+            </div>
+
+            <form id="contactForm" method="POST" action="">
+                <div class="form-group">
+                    <input type="text" id="subject" name="subject" class="minimal-input" placeholder="What is this regarding?" required />
+                </div>
+
+                <div class="form-group">
+                    <textarea id="message" name="message" class="minimal-input" placeholder="Your Message..." style="min-height: 150px; resize: vertical;" required></textarea>
+                </div>
+
+                <button type="submit" class="magnet-btn">Submit Request</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // 1. SCROLL REVEAL (Consistent with Home.php)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+
+        // 2. 3D TILT LOGIC (PRESERVED AS REQUESTED)
+        const cards = document.querySelectorAll('.tilt-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', handleHover);
+            card.addEventListener('mouseleave', resetCard);
+        });
+
+        function handleHover(e) {
+            const card = this;
+            const cardRect = card.getBoundingClientRect();
+
+            // Math for 3D rotation
+            const x = e.clientX - cardRect.left;
+            const y = e.clientY - cardRect.top;
+            const centerX = cardRect.width / 2;
+            const centerY = cardRect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            // Apply
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        }
+
+        function resetCard() {
+            this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+        }
+
+        // 3. FORM MOCKUP
+        const form = document.getElementById('contactForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = form.querySelector('.magnet-btn');
+                const originalText = btn.textContent;
+
+                btn.textContent = 'Sending...';
+                btn.style.opacity = '0.8';
+
+                setTimeout(() => {
+                    btn.textContent = 'Message Sent';
+                    btn.style.background = '#10b981'; // Green
+                    btn.style.color = '#fff';
+                    btn.style.opacity = '1';
+                    form.reset();
+
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '#fff';
+                        btn.style.color = '#000';
+                    }, 3000);
+                }, 1500);
+            });
+        }
+    });
+</script>
