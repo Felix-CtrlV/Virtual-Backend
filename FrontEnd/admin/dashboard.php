@@ -53,7 +53,7 @@ $lastmonthrow = mysqli_fetch_assoc($lastmonthresult);
 $thismonthcount = $thismonthrow["this_month"];
 $lastmonthcount = $lastmonthrow["last_month"];
 
-$supplierdiff = $thismonthcount - $lastmonthcount;
+$supplierdiff = max(0, $thismonthcount - $lastmonthcount);
 
 // ...................................................................................................................................................
 
@@ -74,11 +74,16 @@ $ratingthismonthcount = $ratingthismonthrow["this_month"];
 $ratinglastmonthcount = $ratinglastmonthrow["last_month"];
 
 $ratingdiff = $ratingthismonthcount - $ratinglastmonthcount;
+
 if ($ratinglastmonthcount > 0) {
-    $ratingpercent = round(($ratingdiff / $ratinglastmonthcount) * 100, 1);
+    $ratingpercent = max(
+        0,
+        round(($ratingdiff / $ratinglastmonthcount) * 100, 1)
+    );
 } else {
     $ratingpercent = 100;
 }
+
 
 // ...................................................................................................................................................
 

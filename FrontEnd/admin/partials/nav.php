@@ -2,7 +2,7 @@
 include("../../BackEnd/config/dbconfig.php");
 
 if (!isset($_SESSION["admin_logged_in"])) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -122,7 +122,7 @@ if (!isset($pageTitle)) {
         <div class="nav-foot">
             <p>Signed in as <strong><?php echo htmlspecialchars($name); ?></strong></p>
             <small>Malltiverse • v1.0.0</small><br>
-            <small><a href="./utils/signout.php">Sign out</a></small>
+            <small><a href="../utils/signout.php">Sign out</a></small>
         </div>
     </aside>
 

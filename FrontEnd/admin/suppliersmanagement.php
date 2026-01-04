@@ -12,7 +12,7 @@ if ($supplierid <= 0) {
     exit;
 }
 
-$supplierquery = "SELECT s.*, sa.logo, sa.banner, rp.paid_date AS contract_start, rp.due_date AS contract_end
+$supplierquery = "SELECT s.*, sa.logo, sa.banner, sa.template_type, rp.paid_date AS contract_start, rp.due_date AS contract_end
     FROM suppliers s 
     LEFT JOIN shop_assets sa ON sa.supplier_id = s.supplier_id 
     LEFT JOIN (
@@ -64,8 +64,14 @@ $statusClass = match ($status) {
         <div class="card" style="grid-column: span 2;">
             <div class="card-header">
                 <div class="company_image_container" style="height: 150px;">
-                    <img class="company_image" style="height: 150px;"
-                        src="../uploads/shops/<?= $supplierid ?>/<?= $banner1?>" alt="Banner">
+                    <?php
+                    if ($supplierrow['template_type'] == 'video'): ?>
+                        <video class="company_image" autoplay muted loop playsinline
+                            src="../uploads/shops/<?= $supplierid ?>/<?= $banner1 ?>" style="height: 100%;"></video>
+                    <?php else: ?>
+                        <img src="../uploads/shops/<?= $supplierid ?>/<?= $banner1 ?>" alt="Hero Banner"
+                            class="company_image" style="height: 100%;">
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="company_status" style="margin-top: 12px;">
