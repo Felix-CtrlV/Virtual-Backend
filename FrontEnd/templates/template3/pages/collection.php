@@ -1,5 +1,5 @@
 <section class="page-content collection-page">
-    <div class="container">
+    <div class="container" style="padding-top: 20px;">
         <div class="collectionContainer"></div>
         <h2 class="text-center mb-5">Latest Stock Items</h2>
         <div class="search-bar">

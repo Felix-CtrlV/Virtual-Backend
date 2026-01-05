@@ -12,6 +12,7 @@ $current_page = 'home.php';
 
     <!-- Hero Section -->
     <section class="hero">
+        
         <div class="hero-content">
             <span class="title">NEW FASHION</span>
             <h2>New collection for 2026</h2>
