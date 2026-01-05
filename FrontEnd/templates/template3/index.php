@@ -67,7 +67,7 @@ $page_path = __DIR__ . "/pages/$page.php";
     </style>
 </head>
 
-<body>
+<body class="body">
     <?php include(__DIR__ . '/partial/nav.php'); ?>
 
     <main class="main-content">

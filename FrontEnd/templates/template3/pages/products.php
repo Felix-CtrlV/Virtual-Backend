@@ -38,7 +38,7 @@
                                      class="card-img-top" 
                                      alt="<?= htmlspecialchars($category_row['category_name']) ?>">
                                      <h3 class="category_name"><?= $category_row['category_name'] ?></h3>                
-                                     <a href="?supplier_id=<?= $supplier['supplier_id']?>&category_id=<?= $category_row['category_id'] ?>&page=collection" class="btn btn-primary btn-view">View</a>
+                                     <a href="?supplier_id=<?= $supplier['supplier_id']?>&category_id=<?= $category_row['category_id'] ?>&page=collection" class="btn btn-primary btn-view" style="background-color: #000000;">View</a>
                                      
                                 <?php endif; ?>
                         </div>
