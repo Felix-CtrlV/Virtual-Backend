@@ -44,6 +44,12 @@
 
               <button class="add-to-cart" title="Add to cart">+</button>
             </div>
+            <a class="detail-link"
+              href="?supplier_id=<?= $supplier_id ?>&page=productDetail&product_id=<?= $product['product_id'] ?>">
+              <button class="detail-btn">VIEW DETAILS</button>
+            </a>
+
+
           </div>
 
 

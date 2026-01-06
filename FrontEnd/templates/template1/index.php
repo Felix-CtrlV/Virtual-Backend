@@ -29,7 +29,7 @@ if($assets_result && mysqli_num_rows($assets_result) > 0){
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'products', 'contact'];
+$allowed_pages = ['home', 'about', 'products','productDetail','review', 'contact'];
 if(!in_array($page, $allowed_pages)){
     $page = 'home';
 }
