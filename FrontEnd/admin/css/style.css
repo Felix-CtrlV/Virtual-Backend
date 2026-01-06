@@ -100,6 +100,8 @@
     color: #121212;
 }
 
+<<<<<<< HEAD:FrontEnd/admin/style.css
+=======
 @media (max-width: 1024px) {
     .adminlogincontainer {
         align-items: center;
@@ -152,3 +154,4 @@
 
 /* ................................................... */
 
+>>>>>>> 31de85602fffdab61d7b1f644f4b36b2e1e652dd:FrontEnd/admin/css/style.css

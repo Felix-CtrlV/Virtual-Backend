@@ -11,6 +11,11 @@
             <h3 class="text-center mb-4">Featured Products</h3>
             <div class="row g-4">
                 <?php
+
+                if($isPreview){
+
+                }else{
+
                 $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? LIMIT 6");
                 if ($products_stmt) {
                     mysqli_stmt_bind_param($products_stmt, "i", $supplier_id);
@@ -47,7 +52,8 @@
                     <div class="col-12">
                         <p class="text-center">No featured products available at the moment.</p>
                     </div>
-                <?php } ?>
+                <?php } 
+                }?>
             </div>
         </div>
     </div>

@@ -1,3 +1,37 @@
+<<<<<<< HEAD
+
+.homeimg {
+    width: 100%;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 400px;
+    height: 500px;
+    margin: 20px;
+    border-radius: 15px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease-in-out;
+    align-items: center;
+}
+
+.cardslot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cardimg {
+    width: 100%;
+    height: 70%;
+    border-radius: 15px 15px 0px 0px;
+}
+=======
 .footer {
     background: #000000ff;
     color: #ffffff;
@@ -663,6 +697,7 @@
 .product body {
     background-color: #cecdcdff;
 }
+<<<<<<< HEAD
  .productDetail * {
             box-sizing: border-box;
         }
@@ -1220,3 +1255,6 @@
   background-color: #e5ac00;
   color: #000;
 }
+=======
+>>>>>>> 31de85602fffdab61d7b1f644f4b36b2e1e652dd
+>>>>>>> ac9e8767e8b2eeca321593b82a1901fb06a5df7e

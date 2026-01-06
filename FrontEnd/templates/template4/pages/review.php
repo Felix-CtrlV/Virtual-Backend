@@ -4,6 +4,18 @@
 // 1. Initialize & Fetch ID
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 1;
 
+// Fetch colors from shop_assets
+$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE supplier_id = $supplier_id LIMIT 1";
+$color_result = $conn->query($color_sql);
+$primary_color = "#000000"; // Default
+$secondary_color = "#ededed"; // Default
+
+if ($color_result && $color_result->num_rows > 0) {
+    $color_row = $color_result->fetch_assoc();
+    $primary_color = $color_row['primary_color'];
+    $secondary_color = $color_row['secondary_color'];
+}
+
 // 2. Handle Form Submission (Consolidated)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Ensure database connection $conn exists
@@ -88,13 +100,13 @@ $reviews_res = $conn->query($sql_reviews);
 <style>
     /* --- 1. THEME VARIABLES (Matching Home.php) --- */
     :root {
-        --bg-color: #0a0a0a;
+        --bg-color: <?= $secondary_color ?>;
         --card-bg: #141414;
         --card-border: #2a2a2a;
-        --text-main: #ffffff;
+        --text-main: <?= $primary_color ?>;
         --text-muted: #888888;
-        --accent: #D4AF37;
-        /* Gold */
+        --accent: <?= $primary_color ?>;
+        /* Primary Color as Accent */
         --font-display: 'Helvetica Neue', 'Arial Black', sans-serif;
         --font-body: 'Helvetica', sans-serif;
         --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -127,6 +139,7 @@ $reviews_res = $conn->query($sql_reviews);
         margin: 0;
         line-height: 0.9;
         letter-spacing: -0.02em;
+        color: white;
     }
 
     .page-subtitle {
@@ -185,7 +198,7 @@ $reviews_res = $conn->query($sql_reviews);
     .big-score {
         font-size: 5rem;
         font-weight: 800;
-        color: var(--accent);
+        color: white;
         line-height: 1;
         font-family: var(--font-display);
     }
@@ -310,6 +323,7 @@ $reviews_res = $conn->query($sql_reviews);
         margin-bottom: 25px;
         border-bottom: 1px solid #333;
         padding-bottom: 15px;
+        color: white;
     }
 
     .futuristic-input {

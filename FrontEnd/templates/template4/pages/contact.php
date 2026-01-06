@@ -6,6 +6,19 @@ if (!isset($supplier)) {
 
 $company_name = $supplier['company_name'] ?? 'BRAND';
 $tagline = $supplier['tagline'] ?? 'Get in touch.';
+
+// Fetch colors from shop_assets
+$supplier_id = $supplier['supplier_id'] ?? 1;
+$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE supplier_id = $supplier_id LIMIT 1";
+$color_result = $conn->query($color_sql);
+$primary_color = "#000000"; // Default
+$secondary_color = "#ededed"; // Default
+
+if ($color_result && $color_result->num_rows > 0) {
+    $color_row = $color_result->fetch_assoc();
+    $primary_color = $color_row['primary_color'];
+    $secondary_color = $color_row['secondary_color'];
+}
 ?>
 
 <style>
@@ -13,12 +26,13 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
        1. SHARED VARIABLES (SYNCED WITH HOME.PHP)
        ============================================ */
     :root {
-        --bg-color: #0a0a0a;
+        --bg-color: <?= $secondary_color ?>;
         --card-bg: #141414;
-        --text-main: #ffffff;
+        --text-main: <?= $primary_color ?>;
         --text-muted: #888888;
-        --accent: #D4AF37;
-        /* Gold/Premium accent */
+        --accent: <?= $primary_color ?>;
+        --primary-color: <?= $primary_color ?>;
+        /* Primary color as accent */
         --border-color: #333333;
         --font-display: 'Helvetica Neue', 'Arial Black', sans-serif;
         --font-body: 'Helvetica', sans-serif;
@@ -88,7 +102,7 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
         line-height: 0.9;
         letter-spacing: -0.04em;
         margin: 0;
-        color: #fff;
+        color: white;
         z-index: 2;
         text-align: center;
         opacity: 0;
@@ -122,7 +136,7 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
        4. INFINITE MARQUEE (IMPORTED FROM HOME)
        ============================================ */
     .marquee-container {
-        background: var(--text-main);
+        background:white;
         color: var(--bg-color);
         padding: 1rem 0;
         overflow: hidden;
@@ -247,12 +261,12 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
     .card-value {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #fff;
+        color: white;
         line-height: 1.2;
     }
 
     .card-value a {
-        color: #fff;
+        color: white;
         text-decoration: none;
         transition: 0.3s;
     }
@@ -279,6 +293,7 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
         font-size: 3rem;
         text-transform: uppercase;
         margin-bottom: 10px;
+        color: white;
     }
 
     .minimal-input {
@@ -289,7 +304,7 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
         padding: 25px 0;
         font-size: 1.5rem;
         /* Larger typing font */
-        color: #fff;
+        color: var(--text-main);
         font-family: var(--font-display);
         transition: all 0.3s ease;
         border-radius: 0;
@@ -299,7 +314,7 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
         outline: none;
         border-bottom-color: var(--accent);
         padding-left: 20px;
-        background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.03), transparent);
     }
 
     .minimal-input::placeholder {
@@ -318,8 +333,8 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
     .magnet-btn {
         display: inline-block;
         padding: 25px 60px;
-        background: #fff;
-        color: #000;
+        background: var(--primary-color);
+        color: var(--bg-color);
         border-radius: 50px;
         font-size: 1rem;
         font-weight: 900;

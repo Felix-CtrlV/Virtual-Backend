@@ -134,8 +134,7 @@ $message = "";
         toggle.classList.toggle('fa-eye');
         toggle.classList.toggle('fa-eye-slash');
     });
-
+        
 </script>
 
-
-</html>7
+</html>
