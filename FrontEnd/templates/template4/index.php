@@ -59,7 +59,7 @@ for ($i = 0; $i < $banner_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'products', 'contact', 'review'];
+$allowed_pages = ['home', 'about', 'products', 'contact', 'review', 'productdetail'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
@@ -77,7 +77,7 @@ if ($banner_filename && file_exists($banner_fs)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">    
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">

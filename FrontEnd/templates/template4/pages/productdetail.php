@@ -1,14 +1,14 @@
 <?php
-// product_detail.php - Nike-Style Layout with Hover Effects
+// product_detail.php - Full Fix for Dynamic Sizes and Availability
 
 if (!isset($_GET['product_id'])) {
     echo "Product not found.";
     exit;
 }
 
-$product_id = $_GET['product_id'];
+$product_id = intval($_GET['product_id']);
 
-// Secure Query
+// 1. Fetch Product Basic Info
 $stmt = mysqli_prepare($conn, "SELECT p.*, c.category_name FROM products p LEFT JOIN category c ON p.category_id = c.category_id WHERE p.product_id = ?");
 mysqli_stmt_bind_param($stmt, "i", $product_id);
 mysqli_stmt_execute($stmt);
@@ -20,262 +20,409 @@ if (!$product) {
     exit;
 }
 
-// Image Path Builder
+// 2. UPDATED QUERY: Fetch ALL variants (even those with 0 quantity) 
+// This ensures the size buttons exist but are "disabled" if out of stock.
+$v_stmt = mysqli_prepare($conn, "SELECT * FROM product_variant WHERE product_id = ? ORDER BY size ASC");
+mysqli_stmt_bind_param($v_stmt, "i", $product_id);
+mysqli_stmt_execute($v_stmt);
+$v_result = mysqli_stmt_get_result($v_stmt);
+
+$variants = [];
+$available_colors = [];
+
+while ($row = mysqli_fetch_assoc($v_result)) {
+    // Clean up size string (removes accidental spaces from DB)
+    $row['size'] = trim($row['size']);
+    $variants[] = $row;
+
+    // Group unique colors
+    if (!in_array($row['color'], $available_colors)) {
+        $available_colors[] = $row['color'];
+    }
+}
+
 $main_image = "../uploads/products/" . $product['product_id'] . "_" . htmlspecialchars($product['image']);
 ?>
 
 <style>
-    /* ============================================
-       NIKE-STYLE DARK THEME VARIABLES
-       ============================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
     :root {
-        --bg-color: #0a0a0a;
+        --bg-color: #0f0f0f;
         --text-main: #ffffff;
-        --text-muted: #757575;
-        --accent: #fff;
-        /* White accent for high contrast */
-        --font-display: 'Helvetica Neue', 'Arial Black', sans-serif;
+        --text-sub: #b0b0b0;
+        --border-light: #2a2a2a;
+        --accent: #ff6b35;
+        --accent-dark: #d94124;
+        --hover-color: #ff8555;
     }
 
-    /* Layout Structure */
-    .pdp-container {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 40px;
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 40px 20px;
-        min-height: 100vh;
-    }
-
-    /* Left: Image Gallery (Scrollable) */
-    .pdp-gallery {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .main-image-frame {
-        width: 100%;
-        background: #141414;
-        border-radius: 12px;
-        overflow: hidden;
-        position: relative;
-        cursor: crosshair;
-        /* Suggests zoom ability */
-    }
-
-    .pdp-img {
-        width: 100%;
-        height: auto;
-        display: block;
-        transition: transform 0.3s ease;
-    }
-
-    /* Zoom effect on hover */
-    .main-image-frame:hover .pdp-img {
-        transform: scale(1.05);
-    }
-
-    /* Right: Sticky Details */
-    .pdp-details {
-        position: sticky;
-        top: 40px;
-        height: fit-content;
-        padding: 20px 40px;
+    body {
+        background-color: var(--bg-color);
         color: var(--text-main);
     }
 
-    /* Typography */
-    .pdp-title {
-        font-family: var(--font-display);
-        font-size: 3rem;
-        line-height: 0.95;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        font-weight: 800;
+    /* Back button */
+    .btn-back {
+        background: transparent;
+        color: var(--text-main);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 8px 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        margin-bottom: 18px;
+        align-self: start;
+        transition: all 0.18s ease-in-out;
     }
 
-    .pdp-category {
-        font-size: 1rem;
-        color: var(--text-muted);
+    .btn-back:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 107, 53, 0.9);
+        color: var(--accent);
+    }
+
+    .pdp-wrapper {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 60px;
+        max-width: 1300px;
+        margin: 50px auto;
+        padding: 0 25px;
+        color: var(--text-main);
+        font-family: 'Nunito', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Left: Image */
+    .pdp-image-container {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+        border-radius: 0px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-light);
+        min-height: 500px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .pdp-main-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* Right: Details */
+    .pdp-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .p-cat {
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.75rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .p-name {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0 0 15px;
+        text-transform: uppercase;
+        line-height: 1.1;
+        letter-spacing: -1px;
+    }
+
+    .p-price {
+        font-size: 1.75rem;
+        margin-bottom: 35px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    /* Radio Style Color Swatches */
+    .selector-label {
+        font-weight: 700;
+        margin-bottom: 18px;
+        display: block;
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 20px;
-    }
-
-    .pdp-price {
-        font-size: 1.5rem;
-        font-weight: 500;
-        margin-bottom: 30px;
-        display: block;
-    }
-
-    .pdp-desc {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #ccc;
-        margin-bottom: 40px;
-    }
-
-    /* Interactive Color Selectors (Hover to swap) */
-    .variant-section {
-        margin-bottom: 30px;
-    }
-
-    .variant-label {
         font-size: 0.9rem;
-        font-weight: bold;
-        margin-bottom: 15px;
-        display: block;
     }
 
-    .color-grid {
+    .color-flex {
         display: flex;
-        gap: 15px;
+        gap: 18px;
+        margin-bottom: 35px;
     }
 
-    .color-swatch {
-        width: 60px;
-        height: 60px;
-        border-radius: 8px;
-        border: 1px solid #333;
-        background-size: cover;
+    .radio-swatch {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
         cursor: pointer;
-        transition: all 0.2s;
-        position: relative;
+        background-clip: content-box;
+        padding: 4px;
+        border: 2px solid #333;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .color-swatch:hover,
-    .color-swatch.active {
-        border-color: #fff;
-        transform: scale(1.1);
+    .radio-swatch:hover {
+        border-color: var(--accent);
+        transform: scale(1.08);
+        box-shadow: 0 0 15px rgba(255, 107, 53, 0.2);
     }
 
-    /* Add to Cart Button */
-    .btn-add-cart-large {
-        width: 100%;
-        padding: 25px 0;
-        background: #fff;
-        color: #000;
-        border: none;
-        border-radius: 50px;
-        font-size: 1.1rem;
-        font-weight: 900;
+    .radio-swatch.active {
+        border-color: var(--accent);
+        border-width: 2px;
+        transform: scale(1.12);
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+    }
+
+    /* Size Grid */
+    .size-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 35px;
+    }
+
+    .size-btn {
+        background: transparent;
+        border: 2px solid var(--border-light);
+        color: var(--text-main);
+        padding: 16px 8px;
+        border-radius: 0px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        font-size: 0.95rem;
         text-transform: uppercase;
-        cursor: pointer;
-        transition: transform 0.2s, background 0.2s;
-        margin-top: 20px;
+        letter-spacing: 0.5px;
     }
 
-    .btn-add-cart-large:hover {
-        background: #ddd;
+    .size-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
         transform: translateY(-2px);
     }
 
-    /* Mobile Responsive */
-    @media (max-width: 992px) {
-        .pdp-container {
+    .size-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+        font-weight: 700;
+    }
+
+    /* Out of Stock Style */
+    .size-btn:disabled {
+        color: #555;
+        background: #0a0a0a;
+        border-color: #222;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .btn-submit {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 18px 40px;
+        border-radius: 0px;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: 1px;
+        font-size: 1rem;
+    }
+
+    .btn-submit:hover {
+        background: var(--hover-color);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-submit:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    #error-msg {
+        color: #ff5555;
+        font-size: 0.9rem;
+        margin-top: 12px;
+        display: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 768px) {
+        .pdp-wrapper {
             grid-template-columns: 1fr;
+            gap: 30px;
+            margin: 30px auto;
         }
 
-        .pdp-details {
+        .pdp-image-container {
             position: relative;
-            padding: 20px 0;
-            top: 0;
+            top: auto;
+            min-height: 400px;
+        }
+
+        .p-name {
+            font-size: 2rem;
+        }
+
+        .size-grid {
+            grid-template-columns: repeat(3, 1fr);
         }
     }
 </style>
 
-<div class="pdp-container">
-
-    <div class="pdp-gallery">
-        <div class="main-image-frame">
-            <img id="mainImage" src="<?= $main_image ?>" alt="Product Image" class="pdp-img">
-        </div>
-
+<div class="pdp-wrapper">
+    <div class="pdp-image-container">
+        <img src="<?= $main_image ?>" id="main-product-img" class="pdp-main-img">
     </div>
 
-    <div class="pdp-details">
-        <div class="pdp-category"><?= htmlspecialchars($product['category_name']) ?></div>
-        <h1 class="pdp-title"><?= htmlspecialchars($product['product_name']) ?></h1>
-        <span class="pdp-price">$<?= number_format($product['price'], 2) ?></span>
+    <div class="pdp-info">
+        <button type="button" class="btn-back" onclick="goBack()">← Back</button>
+        <span class="p-cat"><?= htmlspecialchars($product['category_name']) ?></span>
+        <h1 class="p-name"><?= htmlspecialchars($product['product_name']) ?></h1>
+        <div class="p-price">$<?= number_format($product['price'], 2) ?></div>
 
-        <div class="pdp-desc">
-            <?= htmlspecialchars($product['description'] ?? 'Engineered for those who refuse to settle. This product combines premium materials with cutting-edge design to deliver specific performance and style.') ?>
-        </div>
+        <?php if (empty($available_colors)): ?>
+            <p style="color: red;">Product is currently unavailable.</p>
+        <?php else: ?>
 
-        <div class="variant-section">
-            <span class="variant-label">Select Style (Hover to Preview)</span>
-            <div class="color-grid">
-                <div class="color-swatch active"
-                    style="background-image: url('<?= $main_image ?>');"
-                    data-img="<?= $main_image ?>">
-                </div>
-
-                <div class="color-swatch"
-                    style="background-image: url('<?= $main_image ?>'); filter: hue-rotate(90deg);"
-                    data-img="<?= $main_image ?>"
-                    data-filter="hue-rotate(90deg)">
-                </div>
-
-                <div class="color-swatch"
-                    style="background-image: url('<?= $main_image ?>'); filter: hue-rotate(180deg) invert(10%);"
-                    data-img="<?= $main_image ?>"
-                    data-filter="hue-rotate(180deg) invert(10%)">
-                </div>
+            <span class="selector-label">Select Color</span>
+            <div class="color-flex">
+                <?php foreach ($available_colors as $index => $color): ?>
+                    <div class="radio-swatch <?= $index === 0 ? 'active' : '' ?>"
+                        style="background-color: <?= $color ?>;"
+                        onclick="changeColor('<?= $color ?>', this)"
+                        title="<?= $color ?>">
+                    </div>
+                <?php endforeach; ?>
             </div>
-        </div>
 
-        <button class="btn-add-cart-large" onclick="addToCart(<?= $product['product_id'] ?>)">
-            Add to Bag
-        </button>
+            <span class="selector-label">Select Size</span>
+            <div class="size-grid" id="size-container">
+            </div>
 
-        <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
-            <p style="color: #666; font-size: 0.9rem;">
-                <i class="fas fa-truck" style="margin-right: 10px;"></i> Free delivery on orders over $150
-            </p>
+            <form id="cart-form">
+                <input type="hidden" name="variant_id" id="selected-variant-id" value="">
+                <button type="button" class="btn-submit" id="add-btn" onclick="handleAddToCart()">Add to Bag</button>
+                <div id="error-msg">Please select a size.</div>
+            </form>
+
+        <?php endif; ?>
+
+        <div style="margin-top: 40px; line-height: 1.6; color: var(--text-sub);">
+            <?= nl2br(htmlspecialchars($product['description'])) ?>
         </div>
     </div>
 </div>
 
 <script>
-    // HOVER LOGIC TO CHANGE IMAGE DISPLAY
-    const mainImg = document.getElementById('mainImage');
-    const swatches = document.querySelectorAll('.color-swatch');
+    // All variants from PHP/Database
+    const variants = <?= json_encode($variants) ?>;
+    let selectedColor = "<?= $available_colors[0] ?? '' ?>";
+    let selectedVariantId = null;
 
-    swatches.forEach(swatch => {
-        // When hovering over a swatch
-        swatch.addEventListener('mouseenter', function() {
-            // 1. Update visual selection
-            swatches.forEach(s => s.classList.remove('active'));
-            this.classList.add('active');
-
-            // 2. Change Main Image Source (if different)
-            const newSrc = this.getAttribute('data-img');
-            mainImg.src = newSrc;
-
-            // 3. Apply CSS Filter (For demo purposes only, to simulate color change)
-            // In a real database, you would just swap the 'src' to the real image URL.
-            const filter = this.getAttribute('data-filter');
-            if (filter) {
-                mainImg.style.filter = filter;
-            } else {
-                mainImg.style.filter = 'none';
-            }
-        });
+    // Run on page load
+    document.addEventListener("DOMContentLoaded", () => {
+        if (selectedColor) {
+            renderSizes(selectedColor);
+        }
     });
 
-    // Simple Add to Cart Mockup
-    function addToCart(id) {
-        const btn = document.querySelector('.btn-add-cart-large');
-        const oldText = btn.innerText;
-        btn.innerText = "Added";
-        btn.style.background = "#D4AF37"; // Gold accent
+    // 1. When user clicks a color
+    function changeColor(color, element) {
+        selectedColor = color;
+        selectedVariantId = null; // Reset size selection
+        document.getElementById('selected-variant-id').value = "";
+
+        // UI updates
+        document.querySelectorAll('.radio-swatch').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+
+        // Update size grid
+        renderSizes(color);
+    }
+
+    // Back navigation (used by the back button)
+    function goBack() {
+        if (document.referrer && document.referrer !== window.location.href) {
+            window.history.back();
+        } else {
+            // Fallback: go to shop home
+            window.location.href = '../index.php';
+        }
+    }
+
+    // 2. Render Sizes for the selected color
+    function renderSizes(color) {
+        const container = document.getElementById('size-container');
+        container.innerHTML = ""; // Clear
+
+        // Filter variants that match the chosen color
+        const filtered = variants.filter(v => v.color === color);
+
+        filtered.forEach(v => {
+            const btn = document.createElement('button');
+            btn.type = "button";
+            btn.className = "size-btn";
+            btn.innerText = v.size;
+
+            // Check availability (Quantity)
+            if (parseInt(v.quantity) <= 0) {
+                btn.disabled = true;
+            } else {
+                btn.onclick = () => {
+                    selectSize(v.variant_id, btn);
+                };
+            }
+            container.appendChild(btn);
+        });
+    }
+
+    // 3. When user clicks a size
+    function selectSize(id, btn) {
+        selectedVariantId = id;
+        document.getElementById('selected-variant-id').value = id;
+
+        // UI updates
+        document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.getElementById('error-msg').style.display = 'none';
+    }
+
+    // 4. Submit logic
+    function handleAddToCart() {
+        if (!selectedVariantId) {
+            document.getElementById('error-msg').style.display = 'block';
+            return;
+        }
+
+        const btn = document.getElementById('add-btn');
+        btn.innerText = "Adding...";
+
+        // Simulate AJAX / Database update
         setTimeout(() => {
-            btn.innerText = oldText;
-            btn.style.background = "#fff";
-        }, 2000);
-        // Integrate with your existing script.js cart logic here
+            alert("Success! Variant ID " + selectedVariantId + " added to cart.");
+            btn.innerText = "Add to Bag";
+        }, 800);
     }
 </script>
