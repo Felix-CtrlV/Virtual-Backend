@@ -38,7 +38,7 @@ $result = mysqli_query($conn, "
         r.rating,
         r.created_at,
         c.name,
-        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where supplier_id = 3 limit 5");
+        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where supplier_id = 3");
 
 while ($row = mysqli_fetch_assoc($result)) {
     $reviews[] = $row;
@@ -123,15 +123,11 @@ $average_rating = $total_ratings > 0
                                 <div class="user-avatar-circle"
                                     style="background-image: url(../assets/customer_profiles/<?= $r['image'] ?>);">
                                     <!-- <?= strtoupper(substr($r['name'], 0, 1)) ?> -->
-
-
                                 </div>
-
-
                                 <div class="comment-content">
                                     <div class="comment-bubble">
                                         <div class="bubble-header">
-                                            <span class="user-name">
+                                            <span class="user-name">                                                
                                                 <?= $r['name'] ?>
                                             </span>
 
@@ -163,8 +159,7 @@ $average_rating = $total_ratings > 0
                         <form id="reviewForm" method="POST" action="../utils/review.php?supplier_id=<?= $supplier_id ?>">
                             <div class="textarea-group">
                                 <label>Your Feedback</label>
-                                <textarea name="review" placeholder="Within 400 Characters"
-                                    maxlength="400" required></textarea>
+                                <textarea name="review" placeholder="Within 400 Characters" maxlength="400" required></textarea>
                             </div>
 
                             <div class="stars-wrapper">
@@ -174,10 +169,10 @@ $average_rating = $total_ratings > 0
                                 <div class="star-box gray" data-rating="4"><i class="fa-solid fa-star"></i></div>
                                 <div class="star-box gray" data-rating="5"><i class="fa-solid fa-star"></i></div>
                             </div>
-                            <input type="hidden" name="rating" id="selected-rating" value="5">
-                    </div>
-                    <button type="submit" name="submit" class="submit-btn-gradient">SUBMIT</button>
-                    </form>
+                                <input type="hidden" name="rating" id="selected-rating" value="5">
+                            </div>
+                                <button type="submit" name="submit" class="submit-btn-gradient">SUBMIT</button>
+                        </form>
                 </div>
             </div>
         </div>
@@ -199,5 +194,4 @@ $average_rating = $total_ratings > 0
         </script>
 
 </body>
-
 </html>

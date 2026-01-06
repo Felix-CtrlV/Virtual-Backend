@@ -38,7 +38,7 @@ for ($i = 0; $i < $banner_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'products', 'contact', 'review'];
+$allowed_pages = ['home', 'products', 'about', 'contact', 'review'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
@@ -87,12 +87,6 @@ $page_path = __DIR__ . "/pages/$page.php";
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../templates/<?= basename(__DIR__) ?>/script.js"></script>
-
-    <?php 
-    
-
-
-?>
 </body>
 
 </html>

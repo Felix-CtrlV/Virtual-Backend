@@ -16,7 +16,7 @@
                     mysqli_stmt_execute($products_stmt);
                     $products_result = mysqli_stmt_get_result($products_stmt);
                 } else {
-                    $products_result = false; //query fail
+                    $products_result = false;
                 }
                 
                 $shown_category = [];
@@ -25,12 +25,13 @@
                         $categoryquery = "select * from category where category_id = $product[category_id]";
                         $category_result = mysqli_query($conn, $categoryquery);
                         $category_row = mysqli_fetch_assoc($category_result);
-                        if (in_array($category_row['category_name'], $shown_category)) { //one time show category
-                        continue; //if shown skip continue
+                        if (in_array($category_row['category_name'], $shown_category)) {
+                        continue;
                         }
 
                     $shown_category[] = $category_row['category_name'];
                 ?>
+                
                     <div class="col-md-4 col-sm-6">           
                         <div class="card product-card h-100">
                             <?php if (!empty($product['image'])): ?> 

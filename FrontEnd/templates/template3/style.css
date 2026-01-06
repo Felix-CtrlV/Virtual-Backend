@@ -798,6 +798,16 @@ body {
     flex-direction: column;
 }
 
+/* Custom Scrollbar for Feedback */
+.comments-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-section::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
 .comment-header h2 {
     font-size: 20px;
     font-weight: bold;
@@ -848,7 +858,7 @@ body {
 }
 
 .star-rating {
-    font-size: 19px;
+    font-size: 20px;
     letter-spacing: 2px;
 }
 
@@ -929,13 +939,12 @@ body {
     border: 1px solid #bbb;
     border-radius: 15px;
     padding: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 35px;
 }
 
 .textarea-group label {
     font-size: 17px;
-    color: #333;
-    ;
+    color: #333;    ;
     font-weight: 600;
 }
 
@@ -959,6 +968,7 @@ body {
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(233, 119, 119, 0.3);
+    margin-top: 30px;
 }
 
 @media (max-width: 900px) {
@@ -998,7 +1008,7 @@ body {
 /* Stars Wrapper */
 .stars-wrapper {
     display: flex;
-    gap: 40px;
+    gap: 50px;
 }
 
 /* Star Box Style */
