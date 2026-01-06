@@ -1,395 +1,274 @@
+<?php
+// Optional: Include your database config if you want to handle the final POST here
+// include 'BackEnd/config/dbconfig.php';
+$message = "";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Virtual Mall Platform</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CORE CSS (Matching your Login) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body {
+            background: linear-gradient(rgba(45, 20, 85, 0.6), rgba(20, 20, 30, 0.9));
+            background-color: #1a1a1e;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; color: #fff;
+        }
+        .container {
+            background-color: #24242a; width: 1150px; max-width: 95%; height: 720px;
+            display: flex; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        .left-panel {
+            width: 45%; padding: 40px; display: flex; flex-direction: column;
+            overflow-y: auto; position: relative; background: #24242a;
+        }
+        .right-panel {
+            width: 55%; background: linear-gradient(rgba(45, 20, 85, 0.6), rgba(20, 20, 30, 0.9)), url('assets/images/virtual.jpg');
+            background-size: cover; background-position: center; padding: 40px;
+            display: flex; flex-direction: column; justify-content: flex-end; position: relative;
+        }
+        .left-panel::-webkit-scrollbar { width: 5px; }
+        .left-panel::-webkit-scrollbar-thumb { background: #3e3e46; border-radius: 10px; }
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="../FrontEnd/image/virtual-mall-image.avif">
-  <link rel="website icon" href="..//FrontEnd/image/virtual mall image.avif">
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+        /* --- UI ELEMENTS --- */
+        .logo-icon {
+            width: 42px; height: 42px; background: linear-gradient(45deg, #000dff, #ff00e6);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 22px; margin-bottom: 20px;
+        }
+        h1 { font-size: 28px; margin-bottom: 5px; }
+        .sub-text { color: #888; margin-bottom: 25px; font-size: 14px; }
+        .sub-text a { color: #7d6de3; text-decoration: none; }
+        
+        .progress-bar { display: flex; gap: 8px; margin-bottom: 30px; }
+        .dot { height: 4px; flex: 1; background: #3e3e46; border-radius: 2px; }
+        .dot.active { background: #7d6de3; }
 
-  <!-- Icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+        .input-group { margin-bottom: 18px; position: relative; }
+        input, textarea {
+            width: 100%; padding: 14px; background-color: #2f2f36;
+            border: 1px solid #3e3e46; border-radius: 8px; color: white; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: #7d6de3; }
+        .eye-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #666; cursor: pointer; }
 
-  <!-- Spline -->
-  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"></script>
+        /* --- STEP 2: YOUTUBE LAYOUT --- */
+        .shop-visual-header { position: relative; margin-bottom: 50px; margin-top: 10px; }
+        .banner-upload {
+            width: 100%; height: 110px; background: #2f2f36; border: 1px dashed #3e3e46;
+            border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; overflow: hidden; position: relative; color: #666;
+        }
+        .banner-upload img { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; }
+        .logo-upload {
+            width: 80px; height: 80px; position: absolute; bottom: -30px; left: 20px;
+            background: #24242a; padding: 4px; border-radius: 12px;
+        }
+        .logo-inner {
+            width: 100%; height: 100%; background: #2f2f36; border: 1px dashed #3e3e46;
+            border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        .logo-inner img { width: 100%; height: 100%; object-fit: cover; display: none; }
 
-  <!--Label-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        /* --- STEP 3: TEMPLATES --- */
+        .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .template-card {
+            background: #2f2f36; border: 2px solid #3e3e46; border-radius: 8px;
+            overflow: hidden; cursor: pointer; transition: 0.2s;
+        }
+        .template-card.selected { border-color: #7d6de3; }
+        .template-card img { width: 100%; height: 70px; object-fit: cover; }
+        .template-card div { padding: 5px; font-size: 11px; text-align: center; color: #aaa; }
+        
+        .pagination { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; align-items: center; }
+        .page-btn { background: transparent; border: 1px solid #3e3e46; color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+        
+        .color-row { display: flex; gap: 15px; background: #2f2f36; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .color-item { display: flex; align-items: center; gap: 8px; flex: 1; font-size: 12px; color: #ccc; }
+        .color-box { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #fff; }
 
-  <!--Websie Icon-->
-  <link rel="website icon" href="..//FrontEnd/assets/images/websiteicon.jpg">
-  
-  
+        /* --- BUTTONS --- */
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { padding: 14px 25px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-next { background: #7d6de3; color: white; flex: 1; }
+        .btn-back { background: transparent; border: 1px solid #3e3e46; color: #888; }
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        /* --- IFRAME PREVIEW --- */
+        #preview-container { display: none; width: 100%; height: 100%; background: #fff; border-radius: 12px; overflow: hidden; flex-direction: column; }
+        .browser-top { height: 25px; background: #eee; display: flex; align-items: center; padding: 0 10px; gap: 5px; }
+        .b-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        .step-group { display: none; }
+        .step-group.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
 
-  
+<div class="container">
+    <div class="left-panel">
+        <div class="logo-icon"><i class="fas fa-vr-cardboard"></i></div>
+        <h1>Create Account</h1>
+        <p class="sub-text">Build your virtual shop today. <a href="login.php">Login</a></p>
 
-  <!-- 3D Background -->
-  <spline-viewer class="background"
-    url="https://prod.spline.design/t2YIwW1EsI2cSOEN/scene.splinecode">
-  </spline-viewer>
+        <div class="progress-bar">
+            <div class="dot active" id="d1"></div>
+            <div class="dot" id="d2"></div>
+            <div class="dot" id="d3"></div>
+        </div>
 
+        <form id="regForm" method="POST" enctype="multipart/form-data" action="utils/supplierUtil.php">
+            <div class="step-group active" id="step1">
+                <div class="input-group"><input type="text" id="name" name="name" placeholder="Full Name" required></div>
+                <div class="input-group"><input type="email" id="email" name="email" placeholder="Email Address" required></div>
+                <div class="input-group password-container">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <i class="fa-regular fa-eye eye-icon" onclick="togglePass()"></i>
+                </div>
+                <div class="input-group"><input type="text" name="phone" placeholder="Phone Number"></div>
+                <button type="button" class="btn btn-next" onclick="nextStep(2)">Next Step &rarr;</button>
+            </div>
 
+            <div class="step-group" id="step2">
+                <div class="shop-visual-header">
+                    <label class="banner-upload" for="u_banner">
+                        <span id="b_label">Upload Banner</span>
+                        <img id="p_banner">
+                    </label>
+                    <input type="file" id="u_banner" name="company_banner" hidden onchange="prevImg(this, 'p_banner', 'b_label')">
+                    
+                    <div class="logo-upload">
+                        <label class="logo-inner" for="u_logo">
+                            <i class="fas fa-camera" id="l_label"></i>
+                            <img id="p_logo">
+                        </label>
+                        <input type="file" id="u_logo" name="company_image" hidden onchange="prevImg(this, 'p_logo', 'l_label')">
+                    </div>
+                </div>
+                <div class="input-group"><input type="text" id="shop_name" name="company_name" placeholder="Shop Name" oninput="sync()"></div>
+                <div class="input-group"><textarea id="shop_desc" name="description" placeholder="Short Shop Description" rows="3" oninput="sync()"></textarea></div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-back" onclick="nextStep(1)">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep(3)">Next Step &rarr;</button>
+                </div>
+            </div>
 
-  
+            <div class="step-group" id="step3">
+                <div class="template-grid" id="tplList"></div>
+                <div class="pagination">
+                    <button type="button" class="page-btn" id="pBtn" onclick="changePage(-1)">&lt;</button>
+                    <span id="pInd" style="font-size:12px; color:#888;">1 / 1</span>
+                    <button type="button" class="page-btn" id="nBtn" onclick="changePage(1)">&gt;</button>
+                </div>
+                
+                <input type="hidden" name="template_id" id="sel_tpl_id">
+                
+                <div class="color-row">
+                    <div class="color-item" onclick="document.getElementById('c1').click()">
+                        <div class="color-box" id="cb1" style="background:#7d6de3"></div> Primary
+                        <input type="color" id="c1" name="primary_color" value="#7d6de3" hidden oninput="sync()">
+                    </div>
+                    <div class="color-item" onclick="document.getElementById('c2').click()">
+                        <div class="color-box" id="cb2" style="background:#ff00e6"></div> Secondary
+                        <input type="color" id="c2" name="secondary_color" value="#ff00e6" hidden oninput="sync()">
+                    </div>
+                </div>
+                <div class="input-group"><input type="text" id="headline" name="about_headline" placeholder="Website Hero Headline" oninput="sync()"></div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-back" onclick="nextStep(2)">Back</button>
+                    <button type="submit" name="register" class="btn btn-next">Finish & Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-  <!--Arrow Scroll-->
+    <div class="right-panel" id="rPanel">
+        <div id="qBox"><h2>Where Malls,<br>Transcend Reality.</h2></div>
+        <div id="preview-container">
+            <div class="browser-top"><div class="b-dot"></div><div class="b-dot"></div><div class="b-dot"></div></div>
+            <iframe id="pFrame" src="about:blank"></iframe>
+        </div>
+    </div>
+</div>
 
- <!--Arrow Scroll Start-->
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script>
+    let curPg = 1, totPg = 1, curTpl = '';
 
-  <button id="scrollToTop" class="scroll-top-btn">
-    <i class="fas fa-arrow-up"></i>
-  </button>
-  <script>
-  const scrollBtn = document.getElementById("scrollToTop");
-
-  // Show/Hide button based on scroll position
-  window.addEventListener("scroll", () => {
-    if (window.pageYOffset > 400) {
-        scrollBtn.classList.add("show");
-    } else {
-        scrollBtn.classList.remove("show");
+    function togglePass() {
+        const p = document.getElementById('password');
+        p.type = p.type === 'password' ? 'text' : 'password';
     }
-    });
 
-  // Smooth scroll to top
-  scrollBtn.addEventListener("click", () => {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-    });
-    </script>
-  <!--Arrow Section End-->
- 
+    function nextStep(s) {
+        document.querySelectorAll('.step-group').forEach(g => g.classList.remove('active'));
+        document.getElementById('step'+s).classList.add('active');
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i < s));
+        
+        const isS3 = (s === 3);
+        document.getElementById('qBox').style.display = isS3 ? 'none' : 'block';
+        document.getElementById('preview-container').style.display = isS3 ? 'flex' : 'none';
+        if(isS3 && !curTpl) loadTpl(1);
+    }
 
+    function prevImg(input, imgId, lblId) {
+        if (input.files && input.files[0]) {
+            const r = new FileReader();
+            r.onload = e => {
+                const img = document.getElementById(imgId);
+                img.src = e.target.result; img.style.display = 'block';
+                document.getElementById(lblId).style.display = 'none';
+            };
+            r.readAsDataURL(input.files[0]);
+        }
+    }
 
-   <!--Logo Section-->
-  <header>
-  <nav class="home">
-    <div class="mall-logo">
-      <div class="logo-icon">
-        <i class="fas fa-vr-cardboard"></i>
-      </div>
-      <div class="logo-text">
-        <span class="v-text">Malltiverse</span>
-        <span class="m-text">Virtual MALL</span>
-      </div>
-    </div>
+    function loadTpl(p) {
+        fetch(`utils/get_templates.php?page=${p}`)
+            .then(r => r.json()).then(data => {
+                const g = document.getElementById('tplList');
+                g.innerHTML = ''; totPg = data.totalPages; curPg = data.currentPage;
+                document.getElementById('pInd').innerText = `${curPg} / ${totPg}`;
+                data.templates.forEach(t => {
+                    const c = document.createElement('div');
+                    c.className = 'template-card' + (curTpl === t.template_folder ? ' selected' : '');
+                    c.onclick = () => {
+                        document.querySelectorAll('.template-card').forEach(x => x.classList.remove('selected'));
+                        c.classList.add('selected'); curTpl = t.template_folder;
+                        document.getElementById('sel_tpl_id').value = t.template_id;
+                        document.getElementById('pFrame').src = `templates/${t.template_folder}/index.php`;
+                        document.getElementById('pFrame').onload = () => sync();
+                    };
+                    c.innerHTML = `<img src="templates/${t.template_folder}/${t.preview_image}"><div>${t.template_name}</div>`;
+                    g.appendChild(c);
+                });
+            });
+    }
 
-    <div class="nav-links">
-      <a href="#home"><i class="fa fa-house"></i>Home</a>
-     <a href="#aboutus" class="nav-link">
-      <i class="fas fa-users"></i> About
-    </a>
-     
-      <a href="#contact">
-      <i class="fa-solid fa-shop"></i> Contact
-    </a>
-     <a href="login.php" class="login-link">
-    <i class="fas fa-sign-in-alt"></i> Login</a>
-    </div>
-  </nav>
-</header>
+    function changePage(d) { if(curPg+d > 0 && curPg+d <= totPg) loadTpl(curPg+d); }
 
-
-  <!--Virtual Mall Platform Floating Image Section-->
- <section class="virtual-mall-hero" id="home">
-    <div class="hero-content">
-        <span class="badge">Next-Gen Shopping</span>
-        <h2><span class="gradient-text">Virtual Mall Platform</span><br><span class="gradient-text">Warmely Welcome to Visit Malltiverse</span></h2>
-        <p>Step into the future of e-commerce. Remix, build, and explore virtual mall website by our global community.</p>
-        <div class="hero-btns">
-           <a href="supplierLogin.php" style="text-decoration: none;" class="btn1 Hdr_box__Djvoy">Rent a Shop</a>
-           <a href="customer/index.html" style="text-decoration: none;" class="btn2 Hdr_box__Djvoy">Buy Product</a>
-        </div>
-    </div>
-
-    <div class="hero-visual">
-        <div class="floating-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <img src="..//FrontEnd/assets/images/virtual mall image.jpg" alt="3D Mall Preview">
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!--Floating End Section-->
-
-  <div class="brand-section">
-  <div class="logo-grid">
-    <div class="logo-track2">
-      <div class="logo-item"><p class="nike-text">Nike</p></div>
-      <div class="logo-item"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item"><p class="dior">Dior</p></div>
-      <div class="logo-item"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item"><p class="SkinCate-text">SkinCare</p></div>
-      <div class="logo-item"><p class="nike-text">Nike</p></div>
-      <div class="logo-item"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item"><p class="dior">Dior</p></div>
-      <div class="logo-item"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item"><p class="SkinCate-text">SkinCare</p></div>
-    </div>
-  </div>
-
-  <div class="logo-grid1" id="aboutus">
-    <div class="logo-track">
-      <div class="logo-item1"><p class="nike-text">Nike</p></div>
-      <div class="logo-item1"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item1"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item1"><p class="dior">Dior</p></div>
-      <div class="logo-item1"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item1"><p class="SkinCate-text">SkinCare</p></div>
-      <div class="logo-item1"><p class="nike-text">Nike</p></div>
-      <div class="logo-item1"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item1"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item1"><p class="dior">Dior</p></div>
-      <div class="logo-item1"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item1"><p class="SkinCate-text">SkinCare</p></div>
-    </div>
-  </div>
-</div>
-  
-
-     <br><br><br>
-
-
-    
-   <section id="aboutus">
-      <!--Future Shopping Malls Section-->
-  <div class="vr-container">
-  <h1 class="main-title">WHY VIRTUAL MALL REALITY IS<br>THE FUTURE FOR SHOPPING MALLS</h1>
-  
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="icon">↗</div>
-      <h2>Interactive Storefront</h2>
-      <p>Create a metaverse shopping centre with customers able to enter virtual storefronts, interact with products, and try on clothing or accessories in a virtual fitting room.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="icon">⊞</div>
-      <h2>Virtual Shopping Mall</h2>
-      <p>Allow shoppers to wander through a fully immersive 3D shopping mall, from the comfort of their home, browsing shops and products as if they were really there.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="icon">⬡</div>
-      <h2>Personalized Virtual Shopping Experience</h2>
-      <p>Based on a customers shopping history, you can help customers discover new items, new stores and introduce them to exclusive offers.</p>
-    </div>
-  </div>  
-</section>
-
-
-    <!--Main Style-->
-      <section class="collection-section">
-    <h2 class="section-title"><i>COLLECTION</i></h2>
-    
-    <div class="collection-container">
-        <div class="collection-card">
-            <div class="image-wrapper">
-                <img src="..//FrontEnd/assets/images/men collection.webp" alt="Mens Collection">
-            </div>
-            <h3>MEN'S Collection</h3>
-            <p><b><i>Shop for trendy men's clothing at The Virtual Mall. Keep your look fresh with the latest arrivals in men's clothing, accessories and shoes.</i></b></p>
-          <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
-        </div>
-
-     
-
-            <div class="collection-card">
-            <div class="image-wrapper">
-                <img src="..//FrontEnd/assets/images/women collection.webp" alt="Womens Collection">
-            </div>
-            <h3>WOMEN'S Collection</h3>
-            <p><b><i>Discover 2021 Women's Collection. Shop dresses, tops, jackets, jeans, sweaters and more from a variety of brands and designers.</i></b></p>
-           <!--<a href="#" class="btn">OUR LATEST STYLES</a>-->
-        </div>
-
-        <div class="collection-card">
-            <div class="image-wrapper">
-                <img src="..//FrontEnd/assets/images/accessories2.jpg" alt="Accessories Collection">
-            </div>
-            <h3>ACCESSORIES Collection</h3>
-            <p><b><i>Discover our newest accessories at The Virtual Mall, including handbags, watches, jewelry, sunglasses and more.</i></b></p><br>
-          <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
-        </div>
-    </div>
-</section>
-
-
-
-
-
-    <div class="main-wrapper">
-    <section class="feature-card">
-        <div class="text-content">
-            <h2 class="title">Virtual Mall Advandages</h2>
-            <p class="description">Welcome to The Virtual Mall We bridge the gap between high-end boutique shopping and the digital world.</p>
-            <ul class="check-list">
-                <li>"The Future of Retail, Redefined."</li>
-                <li>"Your Global Boutique, Just a Click Away."</li>
-                <li>"Elevate Your Lifestyle. Explore the Virtual Mall."</li>
-                <li>"Luxury Fashion. Digital Convenience.</li>
-                
-            </ul>
-        </div>
-        <div class="graphic-area">
-            <div class="button-3d">
-                <div class="icon-ring"></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="feature-card data-card">   
-        <div class="text-content">
-            <h2 class="title">Benefits of using this virtual mall</h2>
-            <ul class="check-list">
-              <li>You spend less time scrolling through low-quality items and more time looking at "trendy" and "fresh" styles that fit your aesthetic.</li>
-              <li>Whether it’s 2 AM or during your lunch break, you can shop for the latest Mens, Womens, and Accessory collections from the comfort of your home.</li>
-              <li>With descriptions that highlight specific trends (like the "2021 Collection" or "Trendy Men's Clothing"), you get a mini-stylist experience that helps you put outfits together easily.</li>
-            </ul>
-        </div>
-        <div class="graphic-area"> 
-            <div class="data-node">
-                <div class="glow-core"></div>
-            </div>
-            <div class="floating-icon cloud"></div>
-            <div class="floating-icon ai"></div>
-        </div>
-    </section>
-</div>
-      <br><br>
-
-      <!--Contact Section-->
-
-     
-    <section id="contact" class="contact-section">
-    <div class="contact-wrapper">
-        <div class="contact-content">
-            <div class="contact-text">
-                <div class="mall-logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-vr-cardboard"></i>
-                    </div>
-                    <div class="logo-text">
-                        <span class="v-text">Malltiverse</span>
-                        <span class="m-text">Virtual MALL</span>
-                    </div>
-                </div>
-                <h2>Get in Touch</h2>
-                <p>Have questions about our VR shopping experience? Our team is available 24/7 to help you navigate the mall.</p>
-                
-                <ul class="contact-details">
-                    <li><i class="fa-solid fa-location-dot"></i> Metro IT and Japanese Language Centre, Yangon City</li>
-                    <li><i class="fa-solid fa-envelope"></i> support@kaungpyaesone@gmail.com</li>
-                    <li><i class="fa-solid fa-phone"></i> +95123456 VR-MALL</li>
-                </ul>
-            </div>
-
-            <div class="contact-form-container">
-                <form class="contact-main-form">
-                    <div class="form-row">
-                        <input type="text" placeholder="Your Name" required>
-                        <input type="email" placeholder="Your Email" required>
-                    </div>
-                    <input type="text" placeholder="Subject">
-                    <textarea placeholder="Message" rows="5" required></textarea>
-                    <button type="submit" class="contact-submit">SEND MESSAGE</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-    <!--Footer Section-->
-    <footer class="spline-footer">
-  <div class="footer-main">
-    <div class="footer-brand">
-     
-         <div class="mall-logo">
-      <div class="logo-icon">
-        <i class="fas fa-vr-cardboard"></i>
-      </div>
-      <div class="logo-text">
-        <span class="v-text">Malltiverse</span>
-        <span class="m-text">Virtual MALL</span>
-      </div>
-    </div>
-      </div>
-
-    <div class="footer-nav">
-      <div class="nav-col">
-        <h3>Reference</h3>
-        <ul>
-          <li><a href="#">3D Design Virtual Mall</a></li>
-          <li><a href="#">Vitual Mall Builder</a></li>
-          <li><a href="#">Spline</a></li>
-         
-         
-        </ul>
-      </div>
-
-      <div class="nav-col">
-        <h3>Resources</h3>
-        <ul>
-          <li><a href="#">Contra</a></li>
-          <li><a href="#">Hackathon</a></li>
-          <li><a href="#">Education</a></li>
-          <li><a href="#">Enterprise</a></li>
-          <li><a href="#">Solutions</a></li>
-        </ul>
-      </div>
-
-      <div class="nav-col">
-        <h3>Company</h3>
-        <ul>
-          <li><a href="#">Metro IT&Japanese Language Center</a></li>
-          <li><a href="#">Careers</a></li>
-          <li><a href="#">Terms & Conditions</a></li>
-          <li><a href="#">Privacy</a></li>
-          <li><a href="#">Security</a></li>
-        </ul>
-      </div>
-
-      <div class="nav-col">
-        <h3>Contact</h3>
-        <ul>
-          <li><a href="">kaungpyaesone@gmail.com</a></li>
-          <li><a href="">kaungswan59@gmail.com</a></li>
-          <li><a href="">aungkgmyat@gmail.com</a></li>
-          
-
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <div class="copyright">© 2026 Malltiverse. Powered by immersive digital experiences.</div>
-    <div class="social-icons">
-      <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-      <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-      <a href="#" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
-    </div>
-  </div>
-</footer>
-    </section>
-
+    function sync() {
+        const f = document.getElementById('pFrame');
+        const doc = f.contentDocument || f.contentWindow.document;
+        const c1 = document.getElementById('c1').value, c2 = document.getElementById('c2').value;
+        document.getElementById('cb1').style.background = c1;
+        document.getElementById('cb2').style.background = c2;
+        if (f.src === 'about:blank') return;
+        try {
+            doc.documentElement.style.setProperty('--primary', c1);
+            doc.documentElement.style.setProperty('--secondary', c2);
+            const sn = doc.getElementById('tpl_shop_name'), h = doc.getElementById('tpl_headline'), d = doc.getElementById('tpl_desc');
+            if(sn) sn.innerText = document.getElementById('shop_name').value || "Shop Name";
+            if(h) h.innerText = document.getElementById('headline').value || "Headline";
+            if(d) d.innerText = document.getElementById('shop_desc').value || "Description";
+        } catch(e) {}
+    }
+</script>
 </body>
 </html>
