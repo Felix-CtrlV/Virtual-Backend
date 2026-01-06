@@ -8,48 +8,61 @@ $result = mysqli_query($conn, $query);
 $shop_assets = mysqli_fetch_assoc($result);
 ?>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="search-bar">
+    <input type="text" name="search" id="searchBar" placeholder="Search.....">
+    <button type="submit">
+        <i class="fas fa-search"></i>
+    </button>
+</div>
+
 <section class="page-content products-page t5-products-section">
     <div class="container">
-        <h2 class="text-center mb-5"><?= htmlspecialchars($shop_assets['about'] ?? 'Our Products') ?></h2>
+        <h2 class="text-center mb-5"><?= htmlspecialchars($shop_assets['about'] ?? '2026 Luxury Watch List') ?></h2>
 
         <div class="row g-4 products-container" id="productResults">
-            <?php
-            // Products ဆွဲထုတ်တဲ့ မူလ PHP Code များ...
-            $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC");
-            if ($products_stmt) {
-                mysqli_stmt_bind_param($products_stmt, "i", $supplier_id);
-                mysqli_stmt_execute($products_stmt);
-                $products_result = mysqli_stmt_get_result($products_stmt);
-
-                if ($products_result && mysqli_num_rows($products_result) > 0) {
-                    while ($product = mysqli_fetch_assoc($products_result)) {
-                        ?>
-                        <div class="col-md-4 col-sm-6">
-                            <div class="card t5-product-card h-100">
-                                <div class="card product-card h-100">
-                                    <?php if (!empty($product['image'])): ?>
-                                        <img src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>"
-                                             class="card-img-top" alt="<?= htmlspecialchars($product['product_name']) ?>">
-                                    <?php endif; ?>
-                                    <div class="card-body">
-                                        <h5 class="card-title"><?= htmlspecialchars($product['product_name']) ?></h5>
-                                        <p class="card-text price">$<?= number_format($product['price'], 2) ?></p>
-                                        <button class="btn btn-primary btn-add-cart" data-product-id="<?= $product['product_id'] ?>">
-                                            Add to Cart
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                } else {
-                    echo '<div class="col-12"><p class="text-center">No products available.</p></div>';
-                }
-                mysqli_stmt_close($products_stmt);
-            }
-            ?>
+            <div class="col-12 text-center">
+                <p>Loading products...</p>
+            </div>
         </div>
     </div>
 </section>
 
+<script>
+    const searchInput = document.getElementById("searchBar");
+    const resultContainer = document.getElementById("productResults");
+
+    if (searchInput && resultContainer) {
+        let supplierId = <?= json_encode($supplier_id) ?>;
+
+        function fetchProduct(query = "") {
+          
+            fetch("../templates/template5/utils/search.php?supplier_id=" + supplierId, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "search=" + encodeURIComponent(query)
+            })
+            .then(res => res.text())
+            .then(data => {
+                
+                resultContainer.innerHTML = data;
+            })
+            .catch(err => {
+                resultContainer.innerHTML = '<div class="col-12 text-center text-danger">Error loading products.</div>';
+            });
+        }
+
+      
+        fetchProduct(); 
+
+        
+        let debounceTimer;
+        searchInput.addEventListener("keyup", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchProduct(searchInput.value);
+            }, 300);
+        });
+    }
+</script>

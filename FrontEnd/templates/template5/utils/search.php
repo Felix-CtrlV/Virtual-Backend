@@ -2,12 +2,10 @@
 include("../../../../BackEnd/config/dbconfig.php");
 
 
-$search = isset($_POST['search']) ? $_POST['search'] : '';
+$search = $_POST['search'];
 $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : null;
-$supplierid = isset($_REQUEST["supplier_id"]) ? intval($_REQUEST["supplier_id"]) : 0;
-
 $like = "%$search%";
-
+$supplierid = $_GET["supplier_id"];
 
 if ($category_id) {
     $stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? AND LOWER(product_name) LIKE LOWER(?) ORDER BY created_at DESC");
@@ -20,21 +18,19 @@ if ($category_id) {
 mysqli_stmt_execute($stmt);
 $products_result = mysqli_stmt_get_result($stmt);
 
-// 2. Theme Selection
+
 switch ($supplierid) {
     case 10: $theme_class = "luxury-theme"; $brand_text = "ROLEX"; break; 
-    case 4:  $theme_class = "sport-theme";  $brand_text = "NIKE"; break; 
-    case 5:  $theme_class = "casual-theme"; $brand_text = "UNIQLO"; break; 
-    default: $theme_class = "default-theme"; $brand_text = "BRAND"; break;
+    
 }
 
-// 3. UI Display
+
 if ($products_result && mysqli_num_rows($products_result) > 0) {
     while ($row = mysqli_fetch_assoc($products_result)) { ?>
         <div class="col-md-3 col-sm-6 col-12 mb-4">
             <div class="card-product <?= $theme_class ?> h-100 shadow-sm border-0">
                 <div class="card-header-brand">
-                    <span class="brand-label"><?= $brand_text ?></span>
+                    <!--<span class="brand-label"><?= $brand_text ?></span>-->
                 </div>
                 <?php if (!empty($row['image'])): ?>
                     <div class="product-image-wrapper">
