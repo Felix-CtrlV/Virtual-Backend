@@ -106,8 +106,15 @@
                         <button class="qty-btn" id="decrease">-</button>
                         <span id="qty">1</span>
                         <button class="qty-btn" id="increase">+</button>
-                    </div>
-                    <button class="addtobag_btn">ADD TO BAG</button>
+                    </div><button type="button" class="addtobag_btn" id="addToCartBtn">
+                        ADD TO BAG
+                    </button>
+
+                    <form id="addToCartForm" action="/cart/add.php" method="POST">
+                        <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+                        <input type="hidden" name="quantity" id="cart-quantity" value="1">
+                    </form>
+
                 </div>
 
             </div>
@@ -234,3 +241,33 @@
 </body>
 
 </html>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const qtySpan = document.getElementById('qty');
+    const cartQtyInput = document.getElementById('cart-quantity');
+
+    if (!addToCartBtn) {
+        console.error('ADD TO CART button not found');
+        return;
+    }
+
+    addToCartBtn.addEventListener('click', () => {
+        const selectedColor = document.querySelector('.color.active');
+        const selectedSize = document.querySelector('.sizes button.active');
+
+        if (!selectedColor) {
+            alert('Please select a color');
+            return;
+        }
+
+        if (!selectedSize) {
+            alert('Please select a size');
+            return;
+        }
+
+        cartQtyInput.value = qtySpan.textContent;
+        document.getElementById('addToCartForm').submit();
+    });
+});
+</script>
