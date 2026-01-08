@@ -37,6 +37,14 @@ for ($i = 0; $i < $banner_count; $i++) {
     ${"banner" . ($i + 1)} = $banners[$i];
 }
 
+$about_string = $shop_assets["about"];
+$abouts = explode(".", $about_string);
+$about_count = count($abouts);
+
+for ($i = 0; $i < $about_count; $i++) {
+    ${"about" . ($i + 1)} = $abouts[$i];
+}
+
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 $allowed_pages = ['home', 'products', 'about', 'contact', 'review'];
 if (!in_array($page, $allowed_pages)) {

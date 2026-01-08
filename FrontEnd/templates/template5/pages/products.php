@@ -19,7 +19,7 @@ $shop_assets = mysqli_fetch_assoc($result);
 
 <section class="page-content products-page t5-products-section">
     <div class="container">
-        <h2 class="text-center mb-5"><?= htmlspecialchars($shop_assets['about'] ?? '2026 Luxury Watch List') ?></h2>
+        <h2 class="text-center mb-5"><?= htmlspecialchars($shop_assets['description'] ?? '') ?></h2>
 
         <div class="row g-4 products-container" id="productResults">
             <div class="col-12 text-center">

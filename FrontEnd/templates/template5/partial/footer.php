@@ -1,39 +1,47 @@
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h2 class="footer-logo">LUXURY<span>WATCH</span></h2>
-            <p>Providing high-quality products 2026. Quality you can trust, delivered to your door.</p>
-            <div class="social-links">
-                <a href=""><i class="fab fa-facebook-f"></i></a>
-                <a href=""><i class="fab fa-instagram"></i></a>
-                <a href=""><i class="fab fa-twitter"></i></a>
-                <a href=""><i class="fab fa-viber"></i></a>
+
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><?= htmlspecialchars($supplier['company_name']) ?></h5>
+                    <?php if (!empty($supplier['description'])): ?>
+                        <p><?= htmlspecialchars(substr($supplier['description'], 0, 150)) ?>...</p>
+                    <?php endif; ?>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <?php
+                        $base_url = "?supplier_id=" . $supplier_id;
+                        ?>
+                        <li><a href="<?= $base_url ?>&page=home">Home</a></li>
+                        <li><a href="<?= $base_url ?>&page=products">Products</a></li>
+                        <li><a href="<?= $base_url ?>&page=about">About</a></li>
+                        <li><a href="<?= $base_url ?>&page=contact">Contact</a></li>
+                        <li><a href="<?= $base_url ?>&page=review">Review</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-4">
+                    <h5>Contact Info</h5>
+                    <?php if (!empty($supplier['email'])): ?>
+                        <p><i class="bi bi-envelope"></i> <a href="mailto:<?= htmlspecialchars($supplier['email']) ?>"><?= htmlspecialchars($supplier['email']) ?></a></p>
+                    <?php endif; ?>
+                    <?php if (!empty($supplier['phone'])): ?>
+                        <p><i class="bi bi-phone"></i> <?= htmlspecialchars($supplier['phone']) ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($supplier['address'])): ?>
+                        <p><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($supplier['address']) ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="footer-bottom">
+                <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($supplier['company_name']) ?>. All rights reserved.</p>
             </div>
         </div>
-
-        <div class="footer-section">
-            <h3>Quick Links</h3>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="products.php">Products</a></li>
-                <li><a href="about.php">About Us</a></li>
-                <li><a href="contact.php">Contact Us</a></li>
-                <li><a href="review.php">Review</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-section">
-            <h3>Contact Us</h3>
-            <p><i class="fas fa-envelope"></i> kaungpyaesone@gmail.com</p>
-            <p><i class="fas fa-envelope"></i> kaungswanthaw@gmail.com</p>
-            <p><i class="fas fa-phone"></i> +95 123456</p>
-            <p><i class="fas fa-map-marker-alt"></i> Metro IT and Japanese Language Center</p>
-        </div>
-    </div>
-
-    <div class="footer-bottom">
-        <p>&copy; <?php echo date("Y"); ?> <span>MALLTIVERSE</span>. All rights reserved.</p>
-        
-
     </div>
 </footer>
+

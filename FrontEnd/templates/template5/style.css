@@ -571,7 +571,7 @@ h1 {
 
 .search-bar{
     margin-top:20px;
-    margin-left:30px;
+    margin-left:50px;
    
 }
 .search-bar input{
@@ -842,186 +842,99 @@ h1 {
 
 
 
-/* General Footer Style */
-.footer {
-    background: linear-gradient(135deg, #121212 0%, #1e1e2e 100%);
-    color: #e0e0e0;
-    padding: 80px 0 30px;
-    font-family: 'Poppins', sans-serif;
-    position: relative;
-    overflow: hidden;
+/* Footer အောက်ခံ Background နှင့် စာလုံးအရောင် */
+.site-footer {
+    background-color: #1a1d20; /* Dark Grey/Black */
+    color: #ced4da;
+    padding: 60px 0 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Glassmorphism subtle background element */
-.footer::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 200px;
-    height: 200px;
-    /*background: rgba(255, 107, 107, 0.1);*/
-    border-radius: 50%;
-    filter: blur(50px);
-    
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 40px;
-    padding: 0 25px;
-    
-}
-
-/* Brand Section */
-.footer-logo {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-    color: #fff;
-}
-
-.footer-logo span {
-    color: #ff6b6b; /* Highlight Color */
-    text-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
-}
-
-.footer-section p {
-    line-height: 1.8;
-    color: #b0b0b0;
-    font-size: 15px;
-}
-
-/* Links & List */
-.footer-section h3 {
-    color: #fff;
-    font-size: 20px;
-    margin-bottom: 25px;
+/* ခေါင်းစဉ်များ (Company Name, Quick Links, etc.) */
+.site-footer h5 {
+    color: #ffffff;
     font-weight: 600;
+    margin-bottom: 25px;
     position: relative;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
 }
 
-.footer-section h3::after {
+/* ခေါင်းစဉ်အောက်က မျဉ်းတိုလေး (Decoration) */
+.site-footer h5::after {
     content: '';
     position: absolute;
     left: 0;
     bottom: -8px;
-    width: 30px;
-    height: 3px;
-    background: #ff6b6b;
-    border-radius: 2px;
+    height: 2px;
+    width: 40px;
+    background-color: #0d6efd; /* Blue color - သင့် logo အရောင်နဲ့ ပြောင်းနိုင်ပါတယ် */
 }
 
-.footer-section ul {
+/* Footer Content များ */
+.footer-content p {
+    line-height: 1.8;
+    font-size: 0.95rem;
+}
+
+/* Link များ Style */
+.footer-links {
     list-style: none;
     padding: 0;
 }
 
-.footer-section ul li {
+.footer-links li {
     margin-bottom: 12px;
 }
 
-.footer-section ul li a {
-    color: #b0b0b0;
+.footer-links li a {
+    color: #adb5bd;
     text-decoration: none;
     transition: all 0.3s ease;
     display: inline-block;
 }
 
-.footer-section ul li a:hover {
-    color: #ff6b6b;
-    transform: translateX(8px);
+
+.footer-links li a:hover {
+    color: #ffffff;
+    transform: translateX(8px); 
 }
 
-/* Contact Icons */
-.footer-section i {
+
+.footer-content i {
     margin-right: 10px;
-    color: #ff6b6b;
-    width: 20px;
-}
-/* Social Media Icons - Fixed Centering */
-.social-links {
-    margin-top: 25px;
-    display: flex;
-    gap: 15px;
+    color: #0d6efd;
+    font-size: 1.1rem;
 }
 
-.social-links a {
-    width: 45px; 
-    height: 45px;
-    background: rgba(255, 255, 255, 0.05);
-    
-   
-    display: grid;
-    place-items: center; 
-    
-    border-radius: 50%;
-    color: #ff6b6b;
+.footer-content a {
+    color: #ced4da;
     text-decoration: none;
-    transition: 0.4s;
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.social-links a i {
-    
-    font-size: 20px;
-    width: auto;  
-    height: auto;
-    line-height: 1; 
-    display: block;
+.footer-content a:hover {
+    color: #ffffff;
 }
 
-.social-links a:hover {
-    background: #ff6b6b;
-    color: #fff;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+
+.footer-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 40px 0 20px;
 }
 
-.social-links a:hover {
-    background: #ff6b6b;
-    color: #fff;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
-}
-
-.social-links a:hover {
-    background: #ff6b6b;
-    color: #fff;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
-}
-
-/* Footer Bottom */
 .footer-bottom {
     text-align: center;
-    margin-top: 60px;
-    padding-top: 25px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 14px;
-    color: #888;
+    font-size: 0.85rem;
+    color: #868e96;
 }
 
-.footer-bottom span {
-    color: #ff6b6b;
-    font-weight: 600;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .footer-container {
-        text-align: center;
+@media (max-width: 767px) {
+    .site-footer {
+        padding: 40px 0 20px;
     }
-    .footer-section h3::after {
-        left: 50%;
-        transform: translateX(-50%);
-    }
-    .social-links {
-        justify-content: center;
+    .col-md-4 {
+        margin-bottom: 30px;
     }
 }
 
@@ -1057,15 +970,8 @@ h1 {
     z-index: -1;
 }
 
-/* Contact Card Animation */
-.contact-card-premium {
-    transition: transform 0.3s ease;
-    border-radius: 2px;
-}
 
-.contact-card-premium:hover {
-    transform: translateY(-5px);
-}
+
 
 .italic {
     font-style: italic;
@@ -1689,7 +1595,7 @@ h1, h2, h3, .footer-logo {
     left: 0;
     width: 100%;
     height: 100px;
-   /* background: linear-gradient(transparent, var(--white));*/
+   
 }
 
 .hero-content .sub-title {
@@ -2725,6 +2631,7 @@ footer css
     z-index: 2;
     box-shadow: 20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff;
     transition: transform 0.5s ease;
+
 }
 
 .image-box:hover .main-banner-img {
@@ -2748,4 +2655,559 @@ footer css
     .section-title {
         font-size: 2rem;
     }
+}
+
+
+
+/* Review CSS */
+
+
+    /* --- 1. LUXURY MASTER THEME --- */
+ /* --- 2. UPDATED HEADER DESIGN --- */
+    .page-header {
+        text-align: center;
+        margin-bottom: 70px;
+        position: relative;
+    }
+
+    /* Luxury Watch Title */
+    .page-title {
+        font-family: var(--font-serif);
+        font-size: clamp(3rem, 6vw, 4.5rem);
+        font-weight: 400; /* Luxury brands typically use lighter weight fonts */
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--watch-silver);
+        margin: 0;
+        background: linear-gradient(to bottom, #ffffff 0%, #a2a2a2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1.1;
+    }
+
+    /* Feedback Subtitle */
+    .page-subtitle {
+        font-size: 15px;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        color:whitesmoke;
+        margin-top: 15px;
+        font-weight: 300;
+        
+    }
+    .page-wrapper p{
+        color:whitesmoke;
+    }
+
+    .page-header::after {
+        content: "";
+        display: block;
+        width: 60px;
+        height: 1px;
+        background: var(--luxury-gold);
+        margin: 30px auto 0;
+        position: relative;
+    }
+
+  
+    .bento-card {
+        background: linear-gradient(145deg, rgba(20,20,20,0.8) 0%, rgba(5,5,5,1) 100%);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+  
+    .bento-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: radial-gradient(circle at top left, rgba(197, 160, 89, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* --- 4. LUXURY BUTTON --- */
+    .submit-btn {
+        background: transparent;
+        color: var(--luxury-gold);
+        border: 1px solid var(--luxury-gold);
+        padding: 18px 40px;
+        font-family: var(--font-serif);
+        font-size: 13px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        border-radius: 0; /* Luxury style is often sharp or minimal */
+        transition: all 0.4s ease;
+        cursor: pointer;
+    }
+
+    .submit-btn:hover {
+        background: var(--luxury-gold);
+        color: #000;
+        box-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
+    }
+
+    /* --- 5. STAR RATING --- */
+    .big-score {
+        font-family: var(--font-serif);
+        color: var(--luxury-gold);
+        text-shadow: 0 0 15px rgba(197, 160, 89, 0.2);
+    }
+
+    .rating-stars {
+        color: var(--luxury-gold) !important;
+        filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.3));
+    }
+
+ဒီ Luxury Split-Screen layout အတွက် သန့်ရှင်းပြီး ခေတ်မီတဲ့ CSS Style ကို ရေးပေးထားပါတယ်။ အဓိကအားဖြင့် Watch brand တွေမှာ သုံးလေ့ရှိတဲ့ Luxury feel ရအောင် Gold/Black/White tone နဲ့ Cormorant Garamond font ကို အခြေခံထားပါတယ်။
+
+အောက်ပါ CSS ကို သင်၏ style.css ထဲသို့ ထည့်သွင်းပေးပါ-
+
+CSS
+
+/* Core Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #fff;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+/* Split Screen Layout */
+.split-screen {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Visual Side (Left) */
+.visual-side {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 60px;
+}
+.visual-side img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+}
+
+.visual-side .overlay {
+    position: relative;
+    z-index: 2;
+    color: white;
+    max-width: 450px;
+}
+
+.visual-side h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.visual-side p {
+    font-size: 1.1rem;
+    font-weight: 200;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+/* Content Side (Right) */
+.content-side {
+    flex: 1;
+    padding: 60px 80px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.mini-nav {
+    margin-bottom: 60px;
+}
+
+.mini-nav a {
+    text-decoration: none;
+    color: #888;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    transition: color 0.3s;
+}
+
+.mini-nav a:hover {
+    color: #1a1a1a;
+}
+
+/* Form Styles */
+.form-wrapper {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+
+header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 300;
+    margin-bottom: 15px;
+}
+
+header p {
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.luxury-form .row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.field {
+    margin-bottom: 25px;
+    flex: 1;
+}
+
+.field label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    color: #999;
+}
+
+.field input, 
+.field select, 
+.field textarea {
+    width: 100%;
+    padding: 15px 0;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: inherit;
+    font-size: 1rem;
+    background: transparent;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.field input:focus, 
+.field select:focus, 
+.field textarea:focus {
+    border-bottom: 1px solid #1a1a1a;
+}
+
+/* Radio Group */
+.radio-group {
+    display: flex;
+    gap: 30px;
+    padding-top: 10px;
+}
+
+.radio-group label {
+    color: #1a1a1a;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 20px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 0.8rem;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #333;
+}
+
+/* Footer Section */
+footer {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 50px;
+}
+
+.footer-item span {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #aaa;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.footer-item p {
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .split-screen {
+        flex-direction: column;
+    }
+    .visual-side {
+        min-height: 400px;
+    }
+    .content-side {
+        padding: 60px 20px;
+    }
+}
+/*for review section css*/
+.page-wrapper {
+    max-width: 1200px;
+    margin: 80px auto;
+    padding: 0 40px;
+}
+
+/* Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.page-title {
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0;
+}
+
+.page-subtitle {
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-size: 0.8rem;
+    color: var(--gold-leaf);
+    opacity: 0.7;
+}
+
+/* Stats Dashboard */
+.stats-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    background: var(--graphite);
+    border: 1px solid var(--border);
+    padding: 60px;
+    margin-bottom: 80px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+
+.big-score {
+    font-family: var(--font-serif);
+    font-size: 7rem;
+    color: var(--gold);
+    line-height: 1;
+}
+
+.total-count {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.7rem;
+    margin: 10px 0;
+}
+
+.stars-row { color: var(--gold); font-size: 1.2rem; }
+
+.hud-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.hud-label { width: 100px; font-size: 0.7rem; text-transform: uppercase; color: var(--gray); }
+
+.hud-track {
+    flex-grow: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+}
+.hud-value{
+    color: var(--gray);
+}
+
+.hud-fill {
+    height: 100%;
+    background: var(--gold);
+    box-shadow: 0 0 15px var(--gold);
+}
+
+/* Main Layout */
+.bento-wrapper {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 80px;
+}
+
+.section-heading {
+    font-family: var(--font-serif);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    color:white;
+}
+
+/* Review Cards */
+.review-card {
+    padding-bottom: 50px;
+    margin-bottom: 50px;
+    border-bottom: 1px solid var(--border);
+}
+
+.reviewer-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.reviewer-img {
+    width: 60px;
+    height: 60px;
+    border: 1px solid var(--gold);
+    padding: 3px;
+    filter: sepia(50%) contrast(110%);
+}
+
+.reviewer-info h4 {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    margin: 0;
+    color: var(--gold);
+}
+
+.reviewer-info span { font-size: 0.65rem; letter-spacing: 2px; color: #888; }
+
+.review-stars { margin-left: auto; color: var(--gold); font-size: 0.8rem; }
+
+.review-body {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.2rem;
+    color: #ccc;
+    line-height: 1.8;
+}
+
+/* Sticky Form */
+.form-sticky-panel {
+    position: sticky;
+    top: 40px;
+    background: var(--graphite);
+    padding: 40px;
+    border: 1px solid var(--gold);
+    height: fit-content;
+}
+
+.form-header {
+    font-family: var(--font-serif);
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    letter-spacing: 3px;
+    color:whitesmoke;
+}
+
+.luxury-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: white;
+    padding: 15px 0;
+    margin-bottom: 30px;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.luxury-input:focus {
+    outline: none;
+    border-bottom: 1px solid var(--gold);
+}
+
+.star-rating-select {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    color: var(--gold);
+    cursor: pointer;
+}
+
+.submit-btn {
+    width: 100%;
+    border: none;
+    padding: 20px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.submit-btn:hover {
+    color: var(--gold-primary);
+    letter-spacing: 6px;
+}
+.star-rating-select {
+    display: flex;
+    flex-direction: row-reverse; 
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.star-rating-select input {
+    display: none; 
+}
+
+.star-rating-select label svg {
+    width: 30px;
+    height: 30px;
+    fill: #333; 
+    cursor: pointer;
+    transition: fill 0.3s ease, transform 0.2s ease, filter 0.3s ease;
+}
+
+
+.star-rating-select label:hover svg,
+.star-rating-select label:hover ~ label svg,
+.star-rating-select input:checked ~ label svg {
+    fill: var(--gold);
+    filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.5)); 
+}
+
+
+.star-rating-select label:hover svg {
+    transform: scale(1.2);
 }

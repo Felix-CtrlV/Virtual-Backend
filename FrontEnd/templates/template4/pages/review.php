@@ -451,7 +451,7 @@ $reviews_res = $conn->query($sql_reviews);
                 <?php while ($row = $reviews_res->fetch_assoc()): ?>
                     <div class="review-card reveal-on-scroll">
                         <div class="reviewer-header">
-                            <img src="<?= $row['image'] ? '../uploads/customers/' . $row['image'] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' ?>" class="reviewer-img">
+                            <img src="<?= $row['image'] ? '../assets/customer_profiles/' . $row['image'] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' ?>" class="reviewer-img">
                             <div class="reviewer-info">
                                 <h4><?= htmlspecialchars($row['name']) ?></h4>
                                 <span><?= date('d M Y', strtotime($row['created_at'])) ?></span>

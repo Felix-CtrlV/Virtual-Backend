@@ -136,7 +136,7 @@ if ($color_result && $color_result->num_rows > 0) {
        4. INFINITE MARQUEE (IMPORTED FROM HOME)
        ============================================ */
     .marquee-container {
-        background:white;
+        background: white;
         color: var(--bg-color);
         padding: 1rem 0;
         overflow: hidden;
@@ -304,7 +304,7 @@ if ($color_result && $color_result->num_rows > 0) {
         padding: 25px 0;
         font-size: 1.5rem;
         /* Larger typing font */
-        color: var(--text-main);
+        color: white;
         font-family: var(--font-display);
         transition: all 0.3s ease;
         border-radius: 0;

@@ -116,12 +116,13 @@ if (!isset($active)) {
         $active = "dashboard";
     elseif ($current_page === "monthlypayment.php")
         $active = "monthlypayment";
-    elseif ($current_page === "setting.php")
-        $active = "profile";
+    elseif ($current_page === "setting.php"|| $current_page === "customize.php")
+        $active = "setting";
     elseif ($current_page === "inventory.php")
         $active = "inventory";
 }
 
+// echo $supplierid;
 
 $supplierName = $row['name'];
 
@@ -162,8 +163,7 @@ $orders = [
     <style>
         :root {
             --primary:
-                <?= htmlspecialchars($row['primary_color']) ?>
-            ;
+                <?= htmlspecialchars($row['primary_color']) ?>;
             --secondary:
                 <?= htmlspecialchars($row['secondary_color']) ?>
         }
@@ -175,14 +175,14 @@ $orders = [
   radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--primary) 30%, transparent) 0%, transparent 40%);
 ">
 
-<header>
+    <header>
         <div class="logo"><?= $row['company_name'] ?></div>
         <div class="navline">
             <nav class="nav-links">
-                <a href="#" class="active">Dashboard</a>
-                <a href="#">Inventory</a>
+                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>>Dashboard</a>
+                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?>>Inventory</a>
                 <a href="#">Rent Payment</a>
-                <a href="#">Settings</a>
+                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?>>Settings</a>
             </nav>
             <button class="btn-logout" onclick="window.location.href='../index.html'">Logout</button>
         </div>

@@ -1,0 +1,533 @@
+ /* --- 1. CORE STYLES (FROM YOUR LOGIN CSS) --- */
+ * {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+     font-family: 'Segoe UI', sans-serif;
+ }
+
+ body {
+     background: linear-gradient(rgba(45, 20, 85, 0.6), rgba(20, 20, 30, 0.9));
+     background-color: #1a1a1e;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     min-height: 100vh;
+     color: #fff;
+ }
+
+ .container {
+     background-color: #24242a;
+     width: 1100px;
+     /* Slightly wider for the preview */
+     max-width: 95%;
+     height: 700px;
+     display: flex;
+     border-radius: 20px;
+     overflow: hidden;
+     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+ }
+
+ /* --- 2. LAYOUT ADAPTATION --- 
+           For Registration: Left = Form, Right = Preview/Image 
+           (Inverting your Login CSS logic slightly to fit the flow) 
+        */
+
+ /* The Form Side */
+ .left-panel {
+     width: 50%;
+     padding: 40px;
+     display: flex;
+     flex-direction: column;
+     overflow-y: auto;
+     /* Scrollable form */
+     background-color: #24242a;
+     /* Match container */
+     position: relative;
+ }
+
+ /* The Visual/Preview Side */
+ .right-panel {
+     width: 50%;
+     background: linear-gradient(rgba(45, 20, 85, 0.6), rgba(20, 20, 30, 0.9)),
+         url('https://images.unsplash.com/photo-1555421689-d68471e189f2?q=80&w=2070&auto=format&fit=crop');
+     background-size: cover;
+     background-position: center;
+     padding: 40px;
+     display: flex;
+     flex-direction: column;
+     justify-content: flex-end;
+     /* Align quote to bottom */
+     position: relative;
+     transition: 0.3s;
+ }
+
+ /* Custom Scrollbar for Left Panel */
+ .left-panel::-webkit-scrollbar {
+     width: 5px;
+ }
+
+ .left-panel::-webkit-scrollbar-track {
+     background: #24242a;
+ }
+
+ .left-panel::-webkit-scrollbar-thumb {
+     background: #3e3e46;
+     border-radius: 10px;
+ }
+
+ /* Typography & Icons */
+ h1 {
+     margin-bottom: 10px;
+     font-size: 32px;
+ }
+
+ h3 {
+     font-size: 20px;
+     margin-bottom: 20px;
+     color: #fff;
+     font-weight: 500;
+ }
+
+ .sub-text {
+     color: #888;
+     margin-bottom: 30px;
+     font-size: 14px;
+ }
+
+ .sub-text a {
+     color: #7d6de3;
+     text-decoration: none;
+ }
+
+ .logo-icon {
+     width: 42px;
+     height: 42px;
+     background: linear-gradient(45deg, #000dff, #ff00e6);
+     border-radius: 12px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     color: white;
+     font-size: 22px;
+     box-shadow: 0 4px 15px rgba(0, 13, 255, 0.3);
+     margin-bottom: 20px;
+ }
+
+ /* --- 3. INPUTS & FORM ELEMENTS (EXACT MATCH) --- */
+ .input-group {
+     margin-bottom: 20px;
+     position: relative;
+ }
+
+ .input-label {
+     display: block;
+     margin-bottom: 8px;
+     color: #888;
+     font-size: 13px;
+ }
+
+ input,
+ textarea,
+ select {
+     width: 100%;
+     padding: 15px;
+     background-color: #2f2f36;
+     border: 1px solid #3e3e46;
+     border-radius: 8px;
+     color: white;
+     font-size: 14px;
+     outline: none;
+     transition: 0.3s;
+ }
+
+ input:focus,
+ textarea:focus {
+     border-color: #7d6de3;
+ }
+
+ input::placeholder {
+     color: #666;
+ }
+
+ .password-container {
+     position: relative;
+ }
+
+ .eye-icon {
+     position: absolute;
+     right: 15px;
+     top: 50%;
+     transform: translateY(-50%);
+     color: #666;
+     cursor: pointer;
+     z-index: 10;
+ }
+
+ /* Buttons */
+ .btn-row {
+     display: flex;
+     justify-content: space-between;
+     margin-top: 20px;
+     gap: 10px;
+ }
+
+ .submit-btn {
+     padding: 15px 30px;
+     background-color: #7d6de3;
+     border: none;
+     border-radius: 8px;
+     color: white;
+     font-size: 16px;
+     font-weight: 600;
+     cursor: pointer;
+     transition: 0.3s;
+     width: auto;
+     flex: 1;
+ }
+
+ .submit-btn:hover {
+     background-color: #6a5ac2;
+ }
+
+ .back-btn-form {
+     padding: 15px 30px;
+     background-color: transparent;
+     border: 1px solid #3e3e46;
+     border-radius: 8px;
+     color: #888;
+     font-size: 16px;
+     font-weight: 600;
+     cursor: pointer;
+     transition: 0.3s;
+     width: auto;
+ }
+
+ .back-btn-form:hover {
+     color: white;
+     border-color: #fff;
+ }
+
+ /* --- 4. WIZARD UI --- */
+ .step-group {
+     display: none;
+     animation: fadeIn 0.4s ease;
+ }
+
+ .step-group.active {
+     display: block;
+ }
+
+ @keyframes fadeIn {
+     from {
+         opacity: 0;
+         transform: translateY(10px);
+     }
+
+     to {
+         opacity: 1;
+         transform: translateY(0);
+     }
+ }
+
+ /* Progress Dots */
+ .progress-bar {
+     display: flex;
+     gap: 10px;
+     margin-bottom: 30px;
+ }
+
+ .dot {
+     height: 4px;
+     flex: 1;
+     background: #3e3e46;
+     border-radius: 2px;
+     transition: 0.3s;
+ }
+
+ .dot.active {
+     background: #7d6de3;
+ }
+
+ /* --- 5. STEP 2: YOUTUBE STYLE LAYOUT --- */
+ .shop-visual-header {
+     position: relative;
+     margin-bottom: 50px;
+     /* Space for the logo to hang */
+     margin-top: 10px;
+ }
+
+ /* Banner Rectangle */
+ .banner-upload-box {
+     width: 100%;
+     height: 120px;
+     background-color: #2f2f36;
+     border: 1px dashed #3e3e46;
+     border-radius: 8px;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     color: #666;
+     cursor: pointer;
+     transition: 0.3s;
+     overflow: hidden;
+     position: relative;
+ }
+
+ .banner-upload-box:hover {
+     border-color: #7d6de3;
+     color: #7d6de3;
+ }
+
+ .banner-upload-box img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+     display: none;
+ }
+
+ /* Logo Square (Overlapping) */
+ .logo-upload-box {
+     width: 80px;
+     height: 80px;
+     position: absolute;
+     bottom: -30px;
+     left: 20px;
+     /* Overlap effect */
+     background-color: #24242a;
+     /* Match background to create border effect */
+     padding: 4px;
+     /* Creates the gap */
+     border-radius: 12px;
+     cursor: pointer;
+ }
+
+ .logo-inner {
+     width: 100%;
+     height: 100%;
+     background-color: #2f2f36;
+     border: 1px dashed #3e3e46;
+     border-radius: 8px;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     color: #666;
+     overflow: hidden;
+ }
+
+ .logo-inner:hover {
+     border-color: #7d6de3;
+     color: #7d6de3;
+ }
+
+ .logo-inner img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+     display: none;
+ }
+
+ /* Hidden File Inputs */
+ input[type="file"] {
+     display: none;
+ }
+
+ /* --- 6. STEP 3: MINIMAL DESIGN --- */
+
+ /* Minimal Template Grid */
+ .template-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 15px;
+     margin-bottom: 25px;
+ }
+
+ .template-card {
+     background: #2f2f36;
+     border: 1px solid #3e3e46;
+     border-radius: 8px;
+     padding: 15px;
+     cursor: pointer;
+     text-align: center;
+     transition: 0.2s;
+ }
+
+ .template-card:hover {
+     border-color: #666;
+ }
+
+ .template-card.selected {
+     border-color: #7d6de3;
+     background: rgba(125, 109, 227, 0.1);
+ }
+
+ .template-card i {
+     font-size: 20px;
+     margin-bottom: 5px;
+     color: #888;
+ }
+
+ .template-card.selected i {
+     color: #7d6de3;
+ }
+
+ .t-name {
+     font-size: 12px;
+     color: #ccc;
+ }
+
+ /* Minimal Color Picker Row */
+ .color-picker-row {
+     display: flex;
+     align-items: center;
+     gap: 20px;
+     margin-bottom: 25px;
+     background: #2f2f36;
+     padding: 15px;
+     border-radius: 8px;
+     border: 1px solid #3e3e46;
+ }
+
+ .color-item {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     cursor: pointer;
+     flex: 1;
+ }
+
+ .color-preview {
+     width: 24px;
+     height: 24px;
+     border-radius: 50%;
+     border: 2px solid #3e3e46;
+     flex-shrink: 0;
+ }
+
+ .color-label {
+     font-size: 13px;
+     color: #ccc;
+     cursor: pointer;
+ }
+
+ input[type="color"] {
+     visibility: hidden;
+     width: 0;
+     height: 0;
+     padding: 0;
+     position: absolute;
+ }
+
+
+ /* --- 7. RIGHT PANEL (LIVE PREVIEW) --- */
+ #live-preview-wrapper {
+     display: none;
+     /* Hidden until step 3 */
+     width: 100%;
+     height: 100%;
+     background: #fff;
+     border-radius: 12px;
+     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+     flex-direction: column;
+     overflow: hidden;
+     animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+ }
+
+ @keyframes slideIn {
+     from {
+         transform: translateX(50px);
+         opacity: 0;
+     }
+
+     to {
+         transform: translateX(0);
+         opacity: 1;
+     }
+ }
+
+ .browser-header {
+     height: 30px;
+     background: #e0e0e0;
+     display: flex;
+     align-items: center;
+     padding: 0 10px;
+     gap: 6px;
+ }
+
+ .b-dot {
+     width: 8px;
+     height: 8px;
+     border-radius: 50%;
+     background: #ccc;
+ }
+
+ .b-dot.r {
+     background: #ff5f56;
+ }
+
+ .b-dot.y {
+     background: #ffbd2e;
+ }
+
+ .b-dot.g {
+     background: #27c93f;
+ }
+
+ /* Preview Internal CSS */
+ .p-body {
+     flex: 1;
+     overflow-y: auto;
+     font-family: 'Arial', sans-serif;
+     color: #333;
+ }
+
+ .p-nav {
+     padding: 15px;
+     color: white;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+ }
+
+ .p-hero {
+     height: 160px;
+     background: #eee;
+     background-size: cover;
+     background-position: center;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     text-align: center;
+     color: white;
+     position: relative;
+ }
+
+ .p-hero-overlay {
+     position: absolute;
+     inset: 0;
+     background: rgba(0, 0, 0, 0.3);
+ }
+
+ .p-content {
+     position: relative;
+     z-index: 2;
+     padding: 20px;
+ }
+
+ .p-btn {
+     padding: 8px 20px;
+     border: none;
+     border-radius: 4px;
+     margin-top: 10px;
+     font-size: 12px;
+     font-weight: bold;
+     color: white;
+ }
+
+ /* Quote for Steps 1 & 2 */
+ .quote-box h2 {
+     font-size: 36px;
+     font-weight: 600;
+     line-height: 1.2;
+     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+ }
