@@ -578,15 +578,6 @@ h1 {
     width:200px;
    
 }
-
-
-
-
-
-
-
-
-
 .feature-card:hover {
   transform: translateY(-10px); /* Lifts up gracefully */
   border-color: #d4af37; /* Changes to a Gold/Brass color */
@@ -617,7 +608,6 @@ h1 {
 
 
 
-    
 
 
 
@@ -1331,6 +1321,7 @@ h1 {
     float: left;
     margin-right: 5%; 
 }
+
 
 .about-img-float img {
     width: 100%;
@@ -2741,8 +2732,12 @@ footer css
         border-radius: 0; /* Luxury style is often sharp or minimal */
         transition: all 0.4s ease;
         cursor: pointer;
+        margin:0;
+       
+        
     }
-
+   
+     
     .submit-btn:hover {
         background: var(--luxury-gold);
         color: #000;
@@ -2761,11 +2756,8 @@ footer css
         filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.3));
     }
 
-ဒီ Luxury Split-Screen layout အတွက် သန့်ရှင်းပြီး ခေတ်မီတဲ့ CSS Style ကို ရေးပေးထားပါတယ်။ အဓိကအားဖြင့် Watch brand တွေမှာ သုံးလေ့ရှိတဲ့ Luxury feel ရအောင် Gold/Black/White tone နဲ့ Cormorant Garamond font ကို အခြေခံထားပါတယ်။
-
-အောက်ပါ CSS ကို သင်၏ style.css ထဲသို့ ထည့်သွင်းပေးပါ-
-
-CSS
+   
+   
 
 /* Core Reset */
 * {
@@ -3108,7 +3100,7 @@ footer {
 
 .reviewer-info span { font-size: 0.65rem; letter-spacing: 2px; color: #888; }
 
-.review-stars { margin-left: auto; color: var(--gold); font-size: 0.8rem; }
+.review-stars { margin-left: auto; color: var(--gold); font-size: 1.5rem; }
 
 .review-body {
     font-family: var(--font-serif);
@@ -3211,3 +3203,91 @@ footer {
 .star-rating-select label:hover svg {
     transform: scale(1.2);
 }
+.stats-dashboard reveal-on-scroll{
+    width:500px;
+    height:100px;
+}
+
+
+/* ==== Product Layout ==== */
+.product-container {
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+.product-image-box img {
+    width: 100%;
+    height:500px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+/* ==== Option Labels ==== */
+.options label {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* ==== Color Swatches ==== */
+.colors label {
+    margin-right: 10px;
+}
+
+.color-swatch {
+    cursor: pointer;
+    border: 2px solid #ddd;
+    transition: all 0.2s ease;
+}
+
+.color-radio:checked + .color-swatch {
+    border-color: #000;
+    transform: scale(1.1);
+}
+
+/* ==== Size Select ==== */
+select[name="size"] {
+    width: 140px;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+/* ==== Quantity ==== */
+input[name="qty"] {
+    width: 100px;
+    padding: 6px 8px;
+}
+
+/* ==== Buttons ==== */
+.product-buttons .btn {
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.product-buttons .btn-dark {
+    background: #1f2428;
+    border: none;
+}
+
+.product-buttons .btn-dark:hover {
+    background: #343a40;
+}
+
+/* ==== Spacing Fixes ==== */
+.option-group {
+    margin-bottom: 22px;
+}
+
+@media (max-width: 767px) {
+    .product-buttons {
+        flex-direction: column;
+    }
+    .product-buttons .btn {
+        width: 100%;
+    }
+}
+
+

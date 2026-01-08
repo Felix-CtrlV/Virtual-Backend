@@ -191,7 +191,7 @@ $reviews_res = $conn->query($sql_reviews);
     </label>
 </div>
                 
-                <input type="email" name="email" class="luxury-input" placeholder="Registered Email" required>
+               
                 <textarea name="review_text" class="luxury-input" rows="5" placeholder="Your experience..." required></textarea>
                 
                 <button type="submit" class="submit-btn">Publish Review</button>

@@ -46,7 +46,7 @@ for ($i = 0; $i < $about_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'products', 'about', 'contact', 'review'];
+$allowed_pages = ['home', 'products', 'about', 'contact', 'review','product_details'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
@@ -80,6 +80,8 @@ $page_path = __DIR__ . "/pages/$page.php";
     <?php include(__DIR__ . '/partial/header.php'); ?>
 
     <?php include(__DIR__ . '/partial/nav.php'); ?>
+
+   
 
     <main class="main-content">
         <?php
