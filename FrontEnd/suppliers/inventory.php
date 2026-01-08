@@ -4,58 +4,194 @@ include("partials/nav.php");
 
 // --- CONFIGURATION ---
 $items_per_page = 6;
-$supplier_id = $_SESSION['supplier_id'] ?? 6; // Default to 6 if session not set (for demo)
+$supplier_id = $_SESSION['supplierid'] ?? 6; // Default fallback
 
-// --- MOCK DATABASE (Populated from your product.csv) ---
-// In a real app, this would be: $conn->query("SELECT * FROM products WHERE supplier_id = $supplier_id");
-$all_products = [
-    ['id' => 1, 'supplier_id' => 5, 'name' => 'uniqlo sweatshirt', 'price' => 5000.00, 'image' => 'uniqlohoodie.jpg', 'stock' => 120, 'status' => 'active'],
-    ['id' => 2, 'supplier_id' => 6, 'name' => 'Clothing', 'price' => 220.00, 'image' => 'clothing.png', 'stock' => 50, 'status' => 'active'],
-    ['id' => 3, 'supplier_id' => 6, 'name' => 'Footwear', 'price' => 225.00, 'image' => 'footwear.jpg', 'stock' => 30, 'status' => 'active'],
-    ['id' => 4, 'supplier_id' => 6, 'name' => 'Accessories', 'price' => 300.00, 'image' => 'accessories1.jpg', 'stock' => 15, 'status' => 'active'],
-    ['id' => 5, 'supplier_id' => 6, 'name' => 'Fregrance', 'price' => 250.00, 'image' => 'perfume.jpg', 'stock' => 60, 'status' => 'active'],
-    ['id' => 6, 'supplier_id' => 6, 'name' => 'Dress', 'price' => 20.00, 'image' => 'gucci dress.jpg', 'stock' => 5, 'status' => 'inactive'], // Low stock example
-    ['id' => 7, 'supplier_id' => 6, 'name' => 'White Dress', 'price' => 22.00, 'image' => 'whitedress.jpg', 'stock' => 0, 'status' => 'inactive'],
-    ['id' => 8, 'supplier_id' => 6, 'name' => 'Black Dress', 'price' => 300.00, 'image' => 'blackdress.jpg', 'stock' => 25, 'status' => 'active'],
-    ['id' => 9, 'supplier_id' => 6, 'name' => 'Red Dress', 'price' => 200.00, 'image' => 'reddress.jpg', 'stock' => 18, 'status' => 'active'],
-    ['id' => 10, 'supplier_id' => 6, 'name' => 'Short Dress', 'price' => 220.00, 'image' => 'shortdress.jpg', 'stock' => 10, 'status' => 'active'],
-    ['id' => 11, 'supplier_id' => 6, 'name' => 'Fit Dress', 'price' => 300.00, 'image' => 'fitcoatdress.jpg', 'stock' => 42, 'status' => 'active'],
-    ['id' => 16, 'supplier_id' => 6, 'name' => 'Heels', 'price' => 400.00, 'image' => 'heel.jpg', 'stock' => 8, 'status' => 'active'],
-    ['id' => 18, 'supplier_id' => 6, 'name' => 'Jimmy choo heels', 'price' => 450.00, 'image' => 'heel1.jpg', 'stock' => 12, 'status' => 'active'],
-    ['id' => 28, 'supplier_id' => 4, 'name' => 'NIKE1', 'price' => 900.00, 'image' => 'nike1.jpg', 'stock' => 45, 'status' => 'active'],
-    ['id' => 31, 'supplier_id' => 6, 'name' => 'Neckless', 'price' => 200.00, 'image' => 'neckless.jpg', 'stock' => 100, 'status' => 'active'],
-    // ... Added enough items to test pagination
-];
+// ==========================================
+// 0. HANDLE AJAX: ADD NEW CATEGORY
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'add_category') {
+    $cat_name = trim($_POST['category_name']);
+    if (!empty($cat_name)) {
+        $stmt = $conn->prepare("INSERT INTO category (supplier_id, category_name) VALUES (?, ?)");
+        $stmt->bind_param("is", $supplier_id, $cat_name);
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'id' => $conn->insert_id, 'name' => htmlspecialchars($cat_name)]);
+        } else {
+            echo json_encode(['status' => 'error']);
+        }
+        $stmt->close();
+    }
+    exit;
+}
 
-// 1. FILTER: Get only this supplier's products
-$my_products = array_filter($all_products, function ($p) use ($supplier_id) {
-    return $p['supplier_id'] == $supplier_id;
-});
+// ==========================================
+// 1. HANDLE UPDATES (Price & Stock)
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_existing') {
+    $pid = (int) $_POST['product_id'];
+    $new_price = (float) $_POST['product_price'];
 
-// 2. STATS CALCULATION
+    $stmt = $conn->prepare("UPDATE products SET price = ? WHERE product_id = ? AND supplier_id = ?");
+    $stmt->bind_param("dii", $new_price, $pid, $supplier_id);
+    $stmt->execute();
+    $stmt->close();
+
+    if (isset($_POST['stock']) && is_array($_POST['stock'])) {
+        $updateStmt = $conn->prepare("UPDATE product_variant SET quantity = ? WHERE variant_id = ?");
+        foreach ($_POST['stock'] as $vid => $qty) {
+            $updateStmt->bind_param("ii", $qty, $vid);
+            $updateStmt->execute();
+        }
+        $updateStmt->close();
+    }
+    header("Location: inventory.php");
+    exit;
+}
+
+// ==========================================
+// 2. HANDLE ADDING NEW VARIANT
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_variant') {
+    $pid = (int) $_POST['product_id'];
+    $color = $_POST['new_color'];
+    $size = $_POST['new_size'];
+    $qty = (int) $_POST['new_qty'];
+
+    if ($pid && $color && $size) {
+        $stmt = $conn->prepare("INSERT INTO product_variant (product_id, color, size, quantity) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("issi", $pid, $color, $size, $qty);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: inventory.php");
+    exit;
+}
+
+// ==========================================
+// 3. HANDLE ADDING NEW PRODUCT (FIXED)
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product_main'])) {
+
+    $p_name = $_POST['product_name'];
+    $p_desc = $_POST['description'];
+    $p_cat = (int) $_POST['category_id'];
+    $p_price = (float) $_POST['price'];
+    $initial_stock = (int) $_POST['initial_stock'];
+
+    // 1. Insert Product Info
+    $stmt = $conn->prepare("INSERT INTO products (supplier_id, category_id, product_name, description, price, status, created_at) VALUES (?, ?, ?, ?, ?, 'available', NOW())");
+    $stmt->bind_param("iisss", $supplier_id, $p_cat, $p_name, $p_desc, $p_price);
+
+    if ($stmt->execute()) {
+        $new_product_id = $conn->insert_id;
+        $stmt->close();
+
+        // 2. Handle Image Upload (ROBUST PATHING)
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+
+            // Define path using __DIR__ to be safe (Current dir is 'supplier', so go up one to root, then uploads)
+            $upload_dir = __DIR__ . '/../uploads/products/';
+
+            // Create directory if it doesn't exist
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            // Get extension (e.g. png)
+            $file_ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+
+            // Clean original name (remove spaces/weird chars) for safety
+            $clean_name = preg_replace('/[^a-zA-Z0-9]/', '', pathinfo($_FILES['image']['name'], PATHINFO_FILENAME));
+
+            // Format: ID_OriginalName.ext (e.g. 15_nike.png)
+            $final_filename = $new_product_id . "_" . $clean_name . "." . $file_ext;
+            $target_file = $upload_dir . $final_filename;
+
+            // Move the file
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                // UPDATE DATABASE with the Final Filename
+                $updateImg = $conn->prepare("UPDATE products SET image = ? WHERE product_id = ?");
+                $updateImg->bind_param("si", $final_filename, $new_product_id);
+                $updateImg->execute();
+                $updateImg->close();
+            } else {
+                // Optional: Error handling if move fails
+                // echo "Failed to move file to " . $target_file; exit;
+            }
+        }
+
+        // 3. Create Default Variant
+        $def_color = "#000000";
+        $def_size = "One Size";
+        $varStmt = $conn->prepare("INSERT INTO product_variant (product_id, color, size, quantity) VALUES (?, ?, ?, ?)");
+        $varStmt->bind_param("issi", $new_product_id, $def_color, $def_size, $initial_stock);
+        $varStmt->execute();
+        $varStmt->close();
+    }
+
+    header("Location: inventory.php");
+    exit;
+}
+$catQuery = $conn->prepare("SELECT category_id, category_name FROM category WHERE supplier_id = ?");
+$catQuery->bind_param("i", $supplier_id);
+$catQuery->execute();
+$categories_result = $catQuery->get_result();
+$categories = [];
+while ($c = $categories_result->fetch_assoc()) {
+    $categories[] = $c;
+}
+$catQuery->close();
+
+// Products
+$productQuery = $conn->prepare('SELECT p.product_id, p.supplier_id, p.product_name, p.price, p.image, p.status, 
+                                     v.variant_id, v.size, v.color, v.quantity
+                                FROM products p 
+                                LEFT JOIN product_variant v ON p.product_id = v.product_id 
+                                WHERE p.supplier_id = ? ORDER BY p.product_id DESC');
+$productQuery->bind_param('i', $supplier_id);
+$productQuery->execute();
+$result = $productQuery->get_result();
+
+$grouped_products = [];
+while ($row = $result->fetch_assoc()) {
+    $pid = $row['product_id'];
+    if (!isset($grouped_products[$pid])) {
+        $grouped_products[$pid] = [
+            'product_id' => $row['product_id'],
+            'product_name' => $row['product_name'],
+            'price' => $row['price'],
+            'image' => $row['image'],
+            'status' => $row['status'],
+            'total_stock' => 0,
+            'variants' => []
+        ];
+    }
+    if ($row['variant_id']) {
+        $grouped_products[$pid]['variants'][] = [
+            'variant_id' => $row['variant_id'],
+            'size' => $row['size'],
+            'color' => $row['color'],
+            'quantity' => $row['quantity']
+        ];
+        $grouped_products[$pid]['total_stock'] += $row['quantity'];
+    }
+}
+$my_products = array_values($grouped_products);
+
+// Stats & Pagination
 $total_items = count($my_products);
 $total_value = 0;
 $low_stock_count = 0;
-
 foreach ($my_products as $p) {
-    $total_value += ($p['price'] * $p['stock']);
-    if ($p['stock'] < 10) $low_stock_count++;
+    $total_value += ($p['price'] * $p['total_stock']);
+    if ($p['total_stock'] < 10)
+        $low_stock_count++;
 }
 
-// 3. PAGINATION LOGIC
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-if ($page < 1) $page = 1;
-
+$page = max(1, isset($_GET['page']) ? (int) $_GET['page'] : 1);
 $offset = ($page - 1) * $items_per_page;
 $paginated_products = array_slice($my_products, $offset, $items_per_page);
 $total_pages = ceil($total_items / $items_per_page);
-
-// --- HANDLERS (Placeholder) ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Handle Add/Edit/Toggle logic here (SQL Update/Insert)
-    // Refresh page to show changes
-    // header("Location: inventory.php");
-}
 ?>
 
 <!DOCTYPE html>
@@ -64,577 +200,503 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory - Supplier Dashboard</title>
-    <link rel="stylesheet" href="supplierCss.css">
-
+    <title>Inventory Management</title>
     <style>
-        /* --- UTILITIES & LAYOUT --- */
-        :root {
-            --primary-accent: #333;
-            --secondary-accent: #FFD55A;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        .page-container {
-            padding: 30px 0 60px 0;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* --- STATS CARDS --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: var(--card-shadow);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .stat-title {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-            margin-top: 10px;
-        }
-
-        .stat-icon {
-            font-size: 1.5rem;
-            opacity: 0.7;
-            align-self: flex-end;
-            margin-top: -30px;
-        }
-
-        /* --- ACTION BAR --- */
-        .action-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .btn-add {
-            background: var(--primary-accent);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-add:hover {
-            background: var(--secondary-accent);
-            color: black;
-        }
-
-        /* --- TABLE STYLES --- */
-        .inventory-panel {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .custom-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px;
-        }
-
-        .custom-table th {
-            text-align: left;
-            padding: 15px;
-            color: #777;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        .custom-table td {
-            padding: 15px;
-            background: white;
-            vertical-align: middle;
-            border-top: 1px solid rgba(0, 0, 0, 0.02);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-        }
-
-        .custom-table td:first-child {
-            border-radius: 12px 0 0 12px;
-            border-left: 1px solid rgba(0, 0, 0, 0.02);
-        }
-
-        .custom-table td:last-child {
-            border-radius: 0 12px 12px 0;
-            border-right: 1px solid rgba(0, 0, 0, 0.02);
-        }
-
-        .product-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .product-img {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            object-fit: cover;
-            background: #eee;
-        }
-
-        .badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .badge.instock {
-            background: rgba(46, 204, 113, 0.15);
-            color: var(--success);
-        }
-
-        .badge.lowstock {
-            background: rgba(231, 76, 60, 0.15);
-            color: var(--danger);
-        }
-
-        .btn-icon {
-            background: #f4f4f4;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 10px;
-            cursor: pointer;
-            color: #555;
-            transition: 0.2s;
-        }
-
-        .btn-icon:hover {
-            background: #333;
-            color: white;
-        }
-
-        /* --- PAGINATION --- */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-            gap: 8px;
-        }
-
-        .page-link {
-            padding: 10px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: #555;
-            background: rgba(255, 255, 255, 0.6);
-            transition: 0.2s;
-            font-weight: 500;
-        }
-
-        .page-link.active {
-            background: #333;
-            color: white;
-        }
-
-        .page-link:hover:not(.active) {
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        /* --- MODERN MODAL --- */
+        /* --- GENERAL MODAL STYLES --- */
         .modal-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            display: none;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
         }
 
         .modal-overlay.open {
             opacity: 1;
         }
 
-        .modern-modal {
-            background: #fff;
-            width: 550px;
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- ADD PRODUCT MODAL SPECIFIC (GRID LAYOUT) --- */
+        .add-product-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            /* Image Col | Form Col */
+            width: 850px;
+            height: 600px;
+            /* Fixed height for consistency */
+        }
+
+        /* Left Column: Image Upload */
+        .ap-image-section {
+            background: #f4f5f7;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #eee;
+        }
+
+        .image-drop-zone {
+            width: 100%;
+            height: 100%;
+            max-height: 400px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
             position: relative;
+            background: white;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
         }
 
-        .modal-overlay.open .modern-modal {
-            transform: scale(1);
+        .image-drop-zone:hover {
+            border-color: #333;
+            background: #fafafa;
         }
 
-        .modal-header h2 {
-            font-size: 1.8rem;
+        /* The Preview Image Logic */
+        .preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Key: keeps aspect ratio inside box */
+            display: none;
+            z-index: 2;
+        }
+
+        .upload-msg {
+            text-align: center;
+            color: #888;
+            pointer-events: none;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        /* Right Column: Form Inputs */
+        .ap-form-section {
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        /* Inputs & Pills */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
             margin-bottom: 5px;
         }
 
-        .modal-header p {
-            color: #888;
-            margin-bottom: 25px;
+        .input-std {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
             font-size: 0.95rem;
         }
 
-        /* Drag & Drop Upload */
-        .upload-zone {
-            border: 2px dashed #e0e0e0;
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-bottom: 25px;
-            background: #fafafa;
-            position: relative;
-            overflow: hidden;
+        .input-row {
+            display: flex;
+            gap: 15px;
         }
 
-        .upload-zone:hover {
-            border-color: var(--secondary-accent);
-            background: #fffcf0;
+        /* Pills */
+        .pill-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
-        .upload-preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 14px;
+        .pill-radio {
             display: none;
         }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .modern-input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #f0f0f0;
-            border-radius: 12px;
-            font-size: 1rem;
+        .pill-label {
+            padding: 6px 14px;
+            background: #eee;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
             transition: 0.2s;
-            background: #f9f9f9;
+            border: 1px solid transparent;
         }
 
-        .modern-input:focus {
-            border-color: #333;
-            background: white;
-            outline: none;
+        .pill-radio:checked+.pill-label {
+            background: #333;
+            color: white;
         }
 
-        .stock-control {
+        .pill-add-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: #f4f4f4;
-            padding: 10px;
-            border-radius: 12px;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* New Category Input */
+        .new-cat-box {
+            display: none;
+            align-items: center;
+            gap: 5px;
             margin-top: 5px;
         }
 
-        .stock-val {
-            font-size: 1.2rem;
-            font-weight: bold;
+        .new-cat-box.active {
+            display: flex;
+        }
+
+        .btn-submit {
+            background: #222;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: auto;
+            /* Pushes to bottom */
+        }
+
+        .btn-submit:hover {
+            background: #000;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="page-container">
+    <section>
+        <div class="page-container">
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-title">Total Products</span>
-                <div class="stat-value"><?= number_format($total_items) ?></div>
-                <div class="stat-icon">📦</div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-title">Inventory Value</span>
-                <div class="stat-value">$<?= number_format($total_value, 2) ?></div>
-                <div class="stat-icon">💰</div>
-            </div>
-            <div class="stat-card" style="border-bottom: 4px solid <?= $low_stock_count > 0 ? 'var(--danger)' : 'var(--success)' ?>">
-                <span class="stat-title">Low Stock Alerts</span>
-                <div class="stat-value" style="color: <?= $low_stock_count > 0 ? 'var(--danger)' : 'inherit' ?>">
-                    <?= $low_stock_count ?>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Total Products</span>
+                    <div class="stat-value"><?= number_format($total_items) ?></div>
                 </div>
-                <div class="stat-icon">⚠️</div>
+                <div class="stat-card">
+                    <span class="stat-title">Inventory Value</span>
+                    <div class="stat-value">$<?= number_format($total_value, 2) ?></div>
+                </div>
+                <div class="stat-card"
+                    style="border-bottom: 4px solid <?= $low_stock_count > 0 ? 'var(--danger)' : 'var(--success)' ?>">
+                    <span class="stat-title">Low Stock Alerts</span>
+                    <div class="stat-value"><?= $low_stock_count ?></div>
+                </div>
             </div>
-        </div>
 
-        <div class="action-bar">
-            <div>
-                <h2 style="font-weight: 300; font-size: 2rem;">Product <b>Inventory</b></h2>
-                <small style="color: #666;">Manage catalog for Supplier #<?= $supplier_id ?></small>
+            <div class="action-bar">
+                <div>
+                    <h1 style="margin:0; font-weight:300;">Product <b>Inventory</b></h1>
+                    <small style="color:#888;">Supplier ID: <?= $supplier_id ?></small>
+                </div>
+                <button class="btn-main" onclick="openModal('addModal')"><span>+</span> Add Product</button>
             </div>
-            <button class="btn-add" onclick="openModal('addModal')">
-                <span>+</span> Add New Product
-            </button>
-        </div>
 
-        <div class="inventory-panel">
-            <?php if (empty($paginated_products)): ?>
-                <div style="text-align:center; padding:40px; color:#888;">No products found. Add one to get started!</div>
-            <?php else: ?>
+            <div class="inventory-panel">
                 <table class="custom-table">
                     <thead>
                         <tr>
-                            <th width="40%">Product Details</th>
-                            <th>Price</th>
-                            <th>Stock Status</th>
-                            <th>Availability</th>
-                            <th>Action</th>
+                            <th width="45%">Product</th>
+                            <th>Base Price</th>
+                            <th>Total Stock</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($paginated_products as $p): ?>
-                            <tr>
+                            <tr class="product-row" onclick='openVariantModal(<?= json_encode($p) ?>)'>
                                 <td>
-                                    <div class="product-info">
-                                        <img src="../uploads/products/<?= htmlspecialchars($p['image']) ?>"
-                                            class="product-img"
-                                            onerror="this.src='https://via.placeholder.com/50?text=No+Img'">
+                                    <div class="product-flex">
+                                        <img src="../uploads/products/<?= $p['product_id'] ?>_<?= $p['image'] ?>"
+                                            class="thumb-img">
                                         <div>
-                                            <div style="font-weight:bold;"><?= htmlspecialchars($p['name']) ?></div>
-                                            <small style="color:#999;">ID: #<?= $p['id'] ?></small>
+                                            <div style="font-weight:700;"><?= htmlspecialchars($p['product_name']) ?></div>
+                                            <small style="color:#aaa;">#<?= $p['product_id'] ?></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td style="font-weight:600;">$<?= number_format($p['price'], 2) ?></td>
                                 <td>
-                                    <span class="badge <?= $p['stock'] > 10 ? 'instock' : 'lowstock' ?>">
-                                        <?= $p['stock'] ?> Units
+                                    <span class="badge <?= $p['total_stock'] < 10 ? 'low' : 'ok' ?>">
+                                        <?= $p['total_stock'] ?> Units
                                     </span>
                                 </td>
-                                <td>
-                                    <div style="font-size:0.85rem; color: <?= $p['status'] == 'active' ? 'green' : '#aaa' ?>;">
-                                        ● <?= ucfirst($p['status']) ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button class="btn-icon" onclick='openEditModal(<?= json_encode($p) ?>)'>✏️</button>
-                                </td>
+                                <td><span style="color:<?= $p['status'] == 'available' ? 'green' : '#ccc' ?>">●</span>
+                                    <?= ucfirst($p['status']) ?></td>
+                                <td>Edit ✏️</td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            <?php endif; ?>
-
-            <?php if ($total_pages > 1): ?>
-                <div class="pagination">
-                    <?php if ($page > 1): ?>
-                        <a href="?page=<?= $page - 1 ?>" class="page-link">&laquo; Prev</a>
-                    <?php endif; ?>
-
-                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                        <a href="?page=<?= $i ?>" class="page-link <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-                    <?php endfor; ?>
-
-                    <?php if ($page < $total_pages): ?>
-                        <a href="?page=<?= $page + 1 ?>" class="page-link">Next &raquo;</a>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        </div>
-
-    </div>
-
-    <div id="addModal" class="modal-overlay">
-        <div class="modern-modal">
-            <div style="position:absolute; top:20px; right:20px; cursor:pointer; font-size:1.5rem;" onclick="closeModal('addModal')">&times;</div>
-
-            <div class="modal-header">
-                <h2>New Product</h2>
-                <p>Fill in the details below to add to your catalog.</p>
             </div>
 
-            <form method="POST" enctype="multipart/form-data">
-                <div class="upload-zone" onclick="document.getElementById('addFile').click()">
-                    <input type="file" id="addFile" name="image" hidden onchange="previewImage(this, 'addPreview')">
-                    <img id="addPreview" class="upload-preview">
-                    <div style="color:#888;">
-                        <div style="font-size:2rem; margin-bottom:10px;">☁️</div>
-                        <span style="font-weight:600; color:#333; text-decoration:underline;">Click to upload</span> or drag image here
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Product Name</label>
-                    <input type="text" name="product_name" class="modern-input" placeholder="e.g. Summer Dress" required>
-                </div>
-
-                <div style="display:flex; gap:15px;">
-                    <div class="input-group" style="flex:1;">
-                        <label>Price ($)</label>
-                        <input type="number" step="0.01" name="price" class="modern-input" placeholder="0.00" required>
-                    </div>
-                    <div class="input-group" style="flex:1;">
-                        <label>Initial Quantity</label>
-                        <input type="number" name="initial_stock" class="modern-input" placeholder="0" required>
-                    </div>
-                </div>
-
-                <button type="submit" name="add_product" class="btn-add" style="width:100%; justify-content:center; margin-top:10px;">
-                    Create Product
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="editModal" class="modal-overlay">
-        <div class="modern-modal">
-            <div style="position:absolute; top:20px; right:20px; cursor:pointer; font-size:1.5rem;" onclick="closeModal('editModal')">&times;</div>
-
-            <div class="modal-header">
-                <h2>Edit Product</h2>
-                <p>Update stock levels, pricing, or imagery.</p>
+            <div style="margin-top:20px; text-align:center;">
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <a href="?page=<?= $i ?>"
+                        style="padding:10px 15px; margin:0 2px; background:<?= $i == $page ? '#333' : 'white' ?>; color:<?= $i == $page ? 'white' : '#333' ?>; text-decoration:none; border-radius:5px;"><?= $i ?></a>
+                <?php endfor; ?>
             </div>
+        </div>
 
-            <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="edit_id" id="edit_id">
+        <div id="addModal" class="modal-overlay">
+            <div class="modal-box add-product-container">
 
-                <div class="upload-zone" style="height:150px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('editFile').click()">
-                    <input type="file" id="editFile" name="edit_image" hidden onchange="previewImage(this, 'editPreviewImg')">
+                <form method="POST" enctype="multipart/form-data" style="display:contents;">
+                    <input type="hidden" name="add_product_main" value="1">
 
-                    <img id="editPreviewImg" class="upload-preview" style="display:block;">
-                    <div style="position:absolute; bottom:10px; background:rgba(0,0,0,0.6); color:white; padding:5px 15px; border-radius:20px; font-size:0.8rem; pointer-events:none;">
-                        Change Image
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Product Name</label>
-                    <input type="text" id="edit_name" class="modern-input" disabled style="background:#f0f0f0; color:#888;">
-                </div>
-
-                <div class="input-group">
-                    <label>Update Price ($)</label>
-                    <input type="number" step="0.01" name="edit_price" id="edit_price" class="modern-input">
-                </div>
-
-                <div class="input-group">
-                    <label>Stock Management</label>
-                    <div class="stock-control">
-                        <div style="color:#666; font-size:0.9rem;">Current Level: <b id="current_stock_display">0</b></div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:0.9rem;">Add:</span>
-                            <input type="number" name="add_stock" class="modern-input" style="width:80px; padding:8px;" placeholder="+0">
+                    <div class="ap-image-section">
+                        <div style="margin-bottom:10px; font-weight:600; color:#555;">Product Image</div>
+                        <div class="image-drop-zone">
+                            <input type="file" name="image" class="file-input" accept="image/*" required
+                                onchange="previewFile(this)">
+                            <div class="upload-msg" id="uploadPlaceholder">
+                                <div style="font-size:2rem; margin-bottom:10px;">📷</div>
+                                <span>Click to Upload</span><br>
+                                <small style="color:#aaa">Supports PNG, JPG, JPEG</small>
+                            </div>
+                            <img id="imagePreview" class="preview-img">
                         </div>
                     </div>
-                </div>
 
-                <button type="submit" name="edit_product" class="btn-add" style="width:100%; justify-content:center; margin-top:10px;">
-                    Save Changes
-                </button>
-            </form>
+                    <div class="ap-form-section">
+                        <div class="ap-header">
+                            <h2 style="margin:0;">New Product</h2>
+                            <span onclick="closeModal('addModal')"
+                                style="cursor:pointer; font-size:1.5rem; color:#888;">&times;</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Product Name</label>
+                            <input type="text" name="product_name" class="input-std" placeholder="e.g. Air Jordan 1"
+                                required>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Price ($)</label>
+                                <input type="number" step="0.01" name="price" class="input-std" required>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Initial Stock</label>
+                                <input type="number" name="initial_stock" class="input-std" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <div class="pill-container" id="pillContainer">
+                                <?php foreach ($categories as $cat): ?>
+                                    <label>
+                                        <input type="radio" name="category_id" value="<?= $cat['category_id'] ?>"
+                                            class="pill-radio" required>
+                                        <span class="pill-label"><?= htmlspecialchars($cat['category_name']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+
+                                <div class="pill-add-btn" onclick="toggleAddCategory()">+</div>
+                            </div>
+
+                            <div class="new-cat-box" id="newCatInput">
+                                <input type="text" id="newCatName" class="input-std" placeholder="Category Name"
+                                    style="padding:5px; height:30px;">
+                                <button type="button" class="btn-sm" onclick="saveNewCategory()">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="input-std" style="height:100px; resize:none;"
+                                placeholder="Product details..."></textarea>
+                        </div>
+
+                        <button class="btn-submit">Create Product</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+
+        <div id="variantModal" class="modal-overlay">
+            <div class="modal-box">
+                <div style="position:absolute; top:20px; right:20px; cursor:pointer; font-size:1.5rem; z-index:10;"
+                    onclick="closeModal('variantModal')">&times;</div>
+                <div class="modal-left">
+                    <img id="varModalImg" class="modal-big-img">
+                </div>
+                <div class="modal-right">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_existing">
+                        <input type="hidden" name="product_id" id="varModalId">
+                        <div class="modal-header">
+                            <h2 id="varModalTitle" style="margin:0; font-size:1.6rem;">Loading...</h2>
+                            <div class="price-input-group">
+                                <span style="font-size:1.5rem; color:#888;">$</span>
+                                <input type="number" step="0.01" name="product_price" id="varModalPrice"
+                                    class="price-edit-input">
+                            </div>
+                        </div>
+                        <div style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
+                            <table class="var-table">
+                                <thead>
+                                    <tr>
+                                        <th>Color</th>
+                                        <th>Size</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="varModalTable"></tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn-save">Save Changes</button>
+                    </form>
+                    <form method="POST" style="margin-top:20px;">
+                        <input type="hidden" name="action" value="add_variant">
+                        <input type="hidden" name="product_id" id="addVarId">
+                        <div class="add-variant-box">
+                            <div class="add-title"><span>+</span> Add Variant</div>
+                            <div class="add-grid">
+                                <div style="display:flex; align-items:center; gap:5px;">
+                                    <input type="color" name="new_color"
+                                        style="width:40px; height:40px; border:none; cursor:pointer;" required>
+                                </div>
+                                <input type="text" name="new_size" placeholder="Size" class="input-sm" required>
+                                <input type="number" name="new_qty" placeholder="Qty" class="input-sm" required min="0">
+                                <button type="submit" class="btn-sm">Add</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </section>
 
     <script>
-        // --- Modal Logic ---
+        // --- GENERAL MODAL LOGIC ---
         function openModal(id) {
             const el = document.getElementById(id);
             el.style.display = 'flex';
-            // Small timeout to allow display:flex to apply before opacity transition
             setTimeout(() => el.classList.add('open'), 10);
         }
-
         function closeModal(id) {
             const el = document.getElementById(id);
             el.classList.remove('open');
             setTimeout(() => el.style.display = 'none', 300);
         }
-
-        function openEditModal(product) {
-            // Populate fields
-            document.getElementById('edit_id').value = product.id;
-            document.getElementById('edit_name').value = product.name;
-            document.getElementById('edit_price').value = product.price;
-            document.getElementById('current_stock_display').innerText = product.stock;
-
-            // Handle Image
-            const imgPath = "../uploads/products/" + product.image;
-            document.getElementById('editPreviewImg').src = imgPath;
-
-            openModal('editModal');
+        window.onclick = function (e) {
+            if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
         }
 
-        // Close on Outside Click
-        window.onclick = function(e) {
-            if (e.target.classList.contains('modal-overlay')) {
-                closeModal(e.target.id);
-            }
-        }
-
-        // --- Image Preview Logic ---
-        function previewImage(input, imgId) {
-            if (input.files && input.files[0]) {
+        // --- IMAGE PREVIEW (Fixed Aspect Ratio) ---
+        function previewFile(input) {
+            const file = input.files[0];
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById(imgId);
+                reader.onload = function (e) {
+                    const img = document.getElementById('imagePreview');
+                    const msg = document.getElementById('uploadPlaceholder');
                     img.src = e.target.result;
                     img.style.display = 'block';
+                    msg.style.display = 'none';
                 }
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
+        }
+
+        // --- CATEGORY PILLS AJAX ---
+        function toggleAddCategory() {
+            document.getElementById('newCatInput').classList.toggle('active');
+            document.getElementById('newCatName').focus();
+        }
+        function saveNewCategory() {
+            const name = document.getElementById('newCatName').value;
+            if (!name) return;
+            const formData = new FormData();
+            formData.append('ajax_action', 'add_category');
+            formData.append('category_name', name);
+
+            fetch('inventory.php', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const container = document.getElementById('pillContainer');
+                        const btn = document.querySelector('.pill-add-btn');
+                        const label = document.createElement('label');
+                        label.innerHTML = `<input type="radio" name="category_id" value="${data.id}" class="pill-radio" checked><span class="pill-label">${data.name}</span>`;
+                        container.insertBefore(label, btn);
+                        document.getElementById('newCatName').value = '';
+                        document.getElementById('newCatInput').classList.remove('active');
+                    }
+                });
+        }
+
+        // --- EXISTING VARIANT MODAL ---
+        function openVariantModal(p) {
+            document.getElementById('varModalTitle').innerText = p.product_name;
+            document.getElementById('varModalPrice').value = p.price;
+            document.getElementById('varModalId').value = p.product_id;
+            document.getElementById('addVarId').value = p.product_id;
+            document.getElementById('varModalImg').src = "../uploads/products/" + p.product_id + '_' + p.image;
+            const tbody = document.getElementById('varModalTable');
+            tbody.innerHTML = '';
+            if (p.variants && p.variants.length > 0) {
+                p.variants.forEach(v => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td><span style="display:inline-block;width:15px;height:15px;background:${v.color};border-radius:50%;margin-right:5px;vertical-align:middle;border:1px solid #ddd;"></span>${v.color}</td><td style="color:#666;">${v.size}</td><td><input type="number" name="stock[${v.variant_id}]" value="${v.quantity}" class="qty-box" min="0"></td>`;
+                    tbody.appendChild(row);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#999;">No variants.</td></tr>';
+            }
+            openModal('variantModal');
         }
     </script>
 

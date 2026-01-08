@@ -34,7 +34,7 @@ include("partials/nav.php");
             </div>
             <ul class="menu-list">
                 <?php foreach ($bestsellers as $item) { ?>
-            <li> <?= htmlspecialchars($item['product_name']) ?> <span>&rsaquo;</span></li>
+                    <li> <?= htmlspecialchars($item['product_name']) ?> <span>&rsaquo;</span></li>
                 <?php } ?>
             </ul>
 
