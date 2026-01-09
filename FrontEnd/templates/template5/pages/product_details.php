@@ -7,7 +7,7 @@ $product_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if ($product_id <= 0) {
     echo "<div class='container'>Invalid Product ID.</div>";
-    return; // Stop execution
+    return; 
 }
 
 
@@ -64,8 +64,8 @@ while ($v = mysqli_fetch_assoc($variants)) {
             <h1 class="display-5 fw-bold"><?= htmlspecialchars($product['product_name']) ?></h1>
             <h3 class="text-primary mb-4">$<?= number_format($product['price'], 2) ?></h3>
 
-   <form action="../utils/add_to_cart.php" method="Post">
-    <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+   <form action="../utils/add_to_cart.php" method="POST">
+   <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
 
     <div class="options">
         <div class="option-group">
@@ -107,7 +107,7 @@ while ($v = mysqli_fetch_assoc($variants)) {
             </div>
             <div class="col-6">
                 <button type="submit" name="action" value="add_to_wishlist" class="btn btn-outline-dark btn-lg w-100 mb-3">
-                    <i class="fas fa-heart me-1"></i> WISHLIST
+                    <i class="fas fa-heart me-1"></i> ADD TO WISHLIST
                 </button>
             </div>
         </div>
