@@ -1,95 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+if (!isset($_GET['product_id'])) {
+    echo "<p>Product not found.</p>";
+    exit;
+}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Product Detail</title>
+$product_id = (int) $_GET['product_id'];
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-</head>
-
-<body class="productDetail">
-
-    <?php
-    if (!isset($_GET['product_id'])) {
-        echo "<p>Product not found.</p>";
-        exit;
-    }
-
-    $product_id = (int) $_GET['product_id'];
-
-    $stmt = mysqli_prepare(
-        $conn,
-        "SELECT p.*, c.category_name
+$stmt = mysqli_prepare(
+    $conn,
+    "SELECT p.*, c.category_name
      FROM products p
      LEFT JOIN category c ON p.category_id = c.category_id
      WHERE p.product_id = ? AND p.supplier_id = ?
      LIMIT 1"
-    );
+);
 
-    mysqli_stmt_bind_param($stmt, "ii", $product_id, $supplier_id);
-    mysqli_stmt_execute($stmt);
-    $product = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-    mysqli_stmt_close($stmt);
+mysqli_stmt_bind_param($stmt, "ii", $product_id, $supplier_id);
+mysqli_stmt_execute($stmt);
+$product = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+mysqli_stmt_close($stmt);
 
-    if (!$product) {
-        echo "<p>Product not found.</p>";
-        exit;
+if (!$product) {
+    echo "<p>Product not found.</p>";
+    exit;
+}
+$variant_stmt = mysqli_prepare(
+    $conn,
+    "SELECT variant_id, color, size 
+     FROM product_variant 
+     WHERE product_id = ?"
+);
+mysqli_stmt_bind_param($variant_stmt, "i", $product_id);
+mysqli_stmt_execute($variant_stmt);
+$variant_result = mysqli_stmt_get_result($variant_stmt);
+
+$variants = [];
+$colors = [];
+
+while ($row = mysqli_fetch_assoc($variant_result)) {
+    $variants[] = $row;
+    if (!in_array($row['color'], $colors)) {
+        $colors[] = $row['color'];
     }
-    $variant_stmt = mysqli_prepare(
-        $conn,
-        "SELECT color, size FROM product_variant WHERE product_id = ?"
-    );
-    mysqli_stmt_bind_param($variant_stmt, "i", $product_id);
-    mysqli_stmt_execute($variant_stmt);
-    $variant_result = mysqli_stmt_get_result($variant_stmt);
+}
+mysqli_stmt_close($variant_stmt);
+?>
 
-    $variants = [];
-    $colors = [];
-
-    while ($row = mysqli_fetch_assoc($variant_result)) {
-        $variants[] = $row;
-        if (!in_array($row['color'], $colors)) {
-            $colors[] = $row['color'];
-        }
-    }
-    mysqli_stmt_close($variant_stmt);
-    ?>
-
-    <script>
-        const variants = <?= json_encode($variants) ?>;
-    </script>
-
-    <div class="page">
-        <div class="detail_card">
+<script>
+    const variants = <?= json_encode($variants) ?>;
+</script>
+<div class="page">
+    <div class="product-detail-wrapper"
+        style="display: flex; gap: 30px; align-items: flex-start; justify-content: center; width: 100%; max-width: 1300px; margin: 0 auto; padding: 20px; flex-wrap: wrap;">
+        <div class="detail_card" style="margin: 0; flex: 1; min-width: 400px;">
             <div class="img_border">
-                <div class="detail_product_image ">
+                <div class="detail_product_image">
+
                     <?php if (!empty($product['image'])): ?>
-                        <img
-                            src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>">
+                        <img src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>"
+                            alt="<?= htmlspecialchars($product['product_name']) ?>">
                     <?php endif; ?>
                 </div>
             </div>
 
-
             <div class="detail_product">
                 <div class="detail_product_category"><?= htmlspecialchars($product['category_name'] ?? ' ') ?></div>
-
                 <h1 class="detail_product_name"><?= htmlspecialchars($product['product_name']) ?></h1>
-
                 <div class="detail_price">$<?= number_format($product['price'], 2) ?></div>
-
                 <p class="detail_desc"><?= htmlspecialchars($product['description'] ?? 'No description available.') ?>
                 </p>
 
                 <div class="options">
                     <label>Color</label>
-                    <div class="colors">
+                    <div class="colors" id="color-options">
                         <?php foreach ($colors as $color): ?>
+
                             <div class="color" data-color="<?= htmlspecialchars($color) ?>"
-                                style="background-color: <?= htmlspecialchars($color) ?>;">
-                            </div>
+                                style="background-color: <?= htmlspecialchars($color) ?>;"></div>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -106,168 +93,132 @@
                         <button class="qty-btn" id="decrease">-</button>
                         <span id="qty">1</span>
                         <button class="qty-btn" id="increase">+</button>
-                    </div><button type="button" class="addtobag_btn" id="addToCartBtn">
-                        ADD TO BAG
-                    </button>
-
-                    <form id="addToCartForm" action="/cart/add.php" method="POST">
-                        <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
-                        <input type="hidden" name="quantity" id="cart-quantity" value="1">
-                    </form>
-
+                    </div>
+                    <button class="addtobag_btn" id="addToCartBtn">ADD TO BAG</button>
                 </div>
-
             </div>
         </div>
+
+        <div id="basket-container" class="detail_card"
+            style="width: 380px; margin: 0; display: flex; flex-direction: column; min-height: 520px; padding: 25px;">
+            <div class="related-section-header">
+                <h2 style="margin: 0; font-weight: 600;">Your Bag</h2>
+                <div class="related-section-line" style="height: 2px; background: rgba(0,0,0,0.05); margin: 12px 0;">
+                </div>
+            </div>
+
+            <div id="cartItemsContainer" style="flex: 1; overflow-y: auto; max-height: 400px;">
+                <p style="text-align: center; color: #888; margin-top: 50px;">Loading your bag...</p>
+            </div>
+
+            <div id="cartFooter" style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px;">
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        const colorEls = document.querySelectorAll('.color');
-        const sizeButtons = document.getElementById('size-buttons');
+</div>
 
-        colorEls.forEach(colorEl => {
+<script>
+    // 1. VARIANT SELECTION LOGIC
+    const colorEls = document.querySelectorAll('.color');
+    const sizeButtons = document.getElementById('size-buttons');
+    let selectedSize = null;
+    let selectedColor = null;
+
+    colorEls.forEach(colorEl => {
+        colorEl.addEventListener('click', () => {
             colorEls.forEach(c => c.classList.remove('active'));
-            colorEl.addEventListener('click', () => {
-                colorEls.forEach(c => c.classList.remove('active'));
-                colorEl.classList.add('active');
+            colorEl.classList.add('active');
+            selectedColor = colorEl.dataset.color;
 
-                const selectedColor = colorEl.dataset.color;
-                const sizes = variants.filter(v => v.color === selectedColor).map(v => v.size);
-                const uniqueSizes = [...new Set(sizes)];
+            const filteredVariants = variants.filter(v => v.color === selectedColor);
+            const uniqueSizes = [...new Set(filteredVariants.map(v => v.size))];
 
-                sizeButtons.innerHTML = '';
-                if (uniqueSizes.length === 0) {
-                    sizeButtons.textContent = 'No sizes available';
-                } else {
-                    uniqueSizes.forEach(size => {
-                        const btn = document.createElement('button');
-                        btn.textContent = size;
-                        btn.addEventListener('click', () => {
-                            document.querySelectorAll('.sizes button').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                        });
-                        sizeButtons.appendChild(btn);
-                    });
-                }
+            sizeButtons.innerHTML = '';
+            uniqueSizes.forEach(size => {
+                const btn = document.createElement('button');
+                btn.className = 'size-btn';
+                btn.textContent = size;
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.sizes button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedSize = size;
+                });
+                sizeButtons.appendChild(btn);
             });
         });
+    });
 
-        sizeButtons.innerHTML = '<span id="size-placeholder">Select color first</span>';
+    // 2. QUANTITY LOGIC
+    const qtySpan = document.getElementById('qty');
+    document.getElementById('increase').addEventListener('click', () => {
+        qtySpan.textContent = parseInt(qtySpan.textContent) + 1;
+    });
+    document.getElementById('decrease').addEventListener('click', () => {
+        let val = parseInt(qtySpan.textContent);
+        if (val > 1) qtySpan.textContent = val - 1;
+    });
 
-        const qtySpan = document.getElementById('qty');
-        document.getElementById('increase').addEventListener('click', () => {
-            qtySpan.textContent = parseInt(qtySpan.textContent) + 1;
-        });
-        document.getElementById('decrease').addEventListener('click', () => {
-            let val = parseInt(qtySpan.textContent);
-            if (val > 1) qtySpan.textContent = val - 1;
-        });
-    </script>
-    <section class="related-section">
-        <div class="related-section-header">
-            <h2>Related Products</h2>
-            <span class="related-section-line"></span>
-        </div>
-    </section>
-    <section class="related-products-page">
-        <div class="container">
+    // 3. AJAX BAG UPDATE LOGIC
+    function refreshBag() {
+        const container = document.getElementById('cartItemsContainer');
+        const footer = document.getElementById('cartFooter');
+        const supplierId = <?= $supplier_id ?>;
 
-            <div class="related_product_list_grid">
-                <?php
+        fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}`)
+            .then(res => res.json())
+            .then(data => {
+                container.innerHTML = data.html;
+                footer.innerHTML = data.footer;
+            })
+            .catch(err => {
+                console.error('Error fetching bag:', err);
+                container.innerHTML = '<p style="text-align:center;">Failed to load bag.</p>';
+            });
+    }
 
-                if (!isset($_GET['category_id'])) {
-                    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC");
-                    if ($products_stmt) {
-                        mysqli_stmt_bind_param($products_stmt, "i", $supplier_id);
-                        mysqli_stmt_execute($products_stmt);
-                        $products_result = mysqli_stmt_get_result($products_stmt);
-                    } else {
-                        $products_result = false;
-                    }
+    // 4. ADD TO BAG CLICK HANDLER
+    document.getElementById('addToCartBtn').addEventListener('click', function () {
+        const qty = parseInt(qtySpan.textContent);
+        const selection = variants.find(v => v.color === selectedColor && v.size === selectedSize);
+
+        if (!selection) {
+            alert("Please select a color and size first.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('variant_id', selection.variant_id);
+        formData.append('supplier_id', <?= $supplier_id ?>);
+        formData.append('quantity', qty);
+
+        fetch('../utils/add_to_cart.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    // location.reload();
+                    refreshBag(); // Update sidebar without page reload
                 } else {
-                    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? and category_id = ? ORDER BY created_at DESC");
-                    if ($products_stmt) {
-                        mysqli_stmt_bind_param($products_stmt, "ii", $supplier_id, $_GET['category_id']);
-                        mysqli_stmt_execute($products_stmt);
-                        $products_result = mysqli_stmt_get_result($products_stmt);
-                    } else {
-                        $products_result = false;
-                    }
+                    alert("Error: " + data.message);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Check console: add_to_cart.php was not found or failed.");
+            });
+    });
 
-                if ($products_result && mysqli_num_rows($products_result) > 0) {
-                    while ($product = mysqli_fetch_assoc($products_result)) {
-
-                        ?>
-                        <div class="related_product">
-                            <div class="related_product_image">
-                                <?php if (!empty($product['image'])): ?>
-                                    <img
-                                        src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>">
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="related_product_card-body">
-                                <div class="related_product-info">
-                                    <span
-                                        class="related_product_card_title"><?= htmlspecialchars($product['product_name']) ?></span>
-                                    <span class="related_product_price">$<?= number_format($product['price'], 2) ?></span>
-                                </div>
-
-                                <button class="related_product_add-to-cart" title="Add to cart">+</button>
-                            </div>
-                            <a class="detail-link"
-                                href="?supplier_id=<?= $supplier_id ?>&page=productDetail&product_id=<?= $product['product_id'] ?>">
-                                <button class="detail-btn">VIEW DETAILS</button>
-                            </a>
-                        </div>
-
-
-                        <?php
-                    }
-                    if (isset($products_stmt)) {
-                        mysqli_stmt_close($products_stmt);
-                    }
-                } else {
-                    ?>
-                    <div class="col-12">
-                        <p class="text-center">No products available at the moment.</p>
-                    </div>
-                <?php } ?>
-            </div>
-        </div>
-
-    </section>
+    // Initialize bag on page load
+    window.onload = refreshBag;
+</script>
 </body>
 
 </html>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    const qtySpan = document.getElementById('qty');
-    const cartQtyInput = document.getElementById('cart-quantity');
-
-    if (!addToCartBtn) {
-        console.error('ADD TO CART button not found');
-        return;
-    }
-
-    addToCartBtn.addEventListener('click', () => {
-        const selectedColor = document.querySelector('.color.active');
-        const selectedSize = document.querySelector('.sizes button.active');
-
-        if (!selectedColor) {
-            alert('Please select a color');
-            return;
-        }
-
-        if (!selectedSize) {
-            alert('Please select a size');
-            return;
-        }
-
-        cartQtyInput.value = qtySpan.textContent;
-        document.getElementById('addToCartForm').submit();
-    });
-});
-</script>

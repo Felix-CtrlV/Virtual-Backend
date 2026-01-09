@@ -1,10 +1,16 @@
 <?php
+// Start the session at the very top to access login data
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if (!isset($conn)) {
     include '../../../BackEnd/config/dbconfig.php';
 }
 
 $supplier_id = (int)$supplier['supplier_id'];
 
+// --- (Your existing shop_assets logic) ---
 $assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE supplier_id = ?");
 if ($assets_stmt) {
     mysqli_stmt_bind_param($assets_stmt, "i", $supplier_id);
@@ -29,10 +35,35 @@ if($assets_result && mysqli_num_rows($assets_result) > 0){
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'products','productDetail','review', 'contact'];
+$allowed_pages = ['home', 'about', 'products','productDetail','review', 'contact','cart'];
 if(!in_array($page, $allowed_pages)){
     $page = 'home';
 }
+
+// ==========================================
+// NEW CART COUNT LOGIC START
+// ==========================================
+function getCartCount($conn, $customer_id) {
+    $count = 0;
+    // We sum the 'quantity' column from your cart table for this specific user
+    $stmt = mysqli_prepare($conn, "SELECT SUM(quantity) as total_items FROM cart WHERE customer_id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $customer_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    if ($row = mysqli_fetch_assoc($result)) {
+        $count = $row['total_items'] ? $row['total_items'] : 0;
+    }
+    mysqli_stmt_close($stmt);
+    return $count;
+}
+
+$cart_count = 0;
+if (isset($_SESSION['customer_id'])) {
+    $cart_count = getCartCount($conn, $_SESSION['customer_id']);
+}
+// ==========================================
+// NEW CART COUNT LOGIC END
+// ==========================================
 
 $page_path = __DIR__ . "/pages/$page.php";
 ?>
@@ -44,12 +75,12 @@ $page_path = __DIR__ . "/pages/$page.php";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($supplier['company_name']) ?></title>
     <link rel="stylesheet" href="../templates/<?= basename(__DIR__) ?>/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: <?= htmlspecialchars($shop_assets['primary_color']) ?>;
             --secondary: <?= htmlspecialchars($shop_assets['secondary_color']) ?>;
-            /* --text-color: red; */
         }
     </style>
 </head>
@@ -72,4 +103,3 @@ $page_path = __DIR__ . "/pages/$page.php";
     <script src="../templates/<?= basename(__DIR__) ?>/script.js"></script>
 </body>
 </html>
-

@@ -36,8 +36,36 @@
                         href="<?= $base_url ?>&page=contact">Contact</a></li>
                 <li class="nav-item"><a class="nav-link <?= $page === 'about' ? 'active' : '' ?>"
                         href="<?= $base_url ?>&page=about">About</a></li>
+                <li class="nav-item ms-lg-3">
+                    <div class="nav-icons">
+                        <a href="?supplier_id=<?= $supplier_id ?>&page=cart" class="cart-link nav-link">
+                            <i class="bi bi-cart fs-4"></i> <?php if ($cart_count > 0): ?>
+                                <span class="badge rounded-pill bg-danger cart-badge">
+                                    <?= $cart_count ?>
+                                </span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                </li>
             </ul>
         </div>
-
     </div>
 </nav>
+
+<style>
+    .cart-link {
+        position: relative;
+        display: inline-block;
+        padding: 0.5rem;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 0.65rem;
+        padding: 0.35em 0.65em;
+        transform: translate(25%, -25%);
+        /* Adjusts badge position precisely */
+    }
+</style>

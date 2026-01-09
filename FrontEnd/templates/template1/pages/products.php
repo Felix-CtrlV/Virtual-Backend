@@ -3,6 +3,27 @@
     <h2 class="text-center mb-5">Our Products</h2>
 
     <div class="product_list_grid">
+      <div class="product_list_grid">
+
+    <div class="product">
+        <div class="product_image">
+            <img src="shoe.jpg" alt="Running Shoes">
+        </div>
+        <div class="card-body">
+            <div class="product-info">
+                <span class="card_title">Running Shoes</span>
+                <span class="price">$120</span>
+            </div>
+            <button class="add-to-cart" 
+                    data-name="Running Shoes" 
+                    data-price="120" 
+                    data-img="shoe.jpg">
+                +
+            </button>
+        </div>
+    </div>
+    
+    </div>
       <?php
 
       if (!isset($_GET['category_id'])) {
@@ -42,7 +63,8 @@
                 <span class="price">$<?= number_format($product['price'], 2) ?></span>
               </div>
 
-              <button class="add-to-cart" title="Add to cart">+</button>
+              <button class="add-to-cart" data-product-id="<?= $product['product_id'] ?>"
+                data-supplier-id="<?= $supplier_id ?>" title="Add to cart">+</button>
             </div>
             <a class="detail-link"
               href="?supplier_id=<?= $supplier_id ?>&page=productDetail&product_id=<?= $product['product_id'] ?>">
