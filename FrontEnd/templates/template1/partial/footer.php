@@ -1,17 +1,4 @@
-<div id="basket-container" class="detail_card" style="margin: 40px auto; max-width: 1200px; width: 90%;">
-    <div class="related-section-header">
-        <h2>Your Bag</h2>
-        <div class="related-section-line"></div>
-    </div>
 
-    <div id="basket-items" style="margin-top: 20px;">
-    </div>
-
-    <div style="margin-top: 20px; text-align: right; padding-right: 20px;">
-        <h3 style="font-size: 1.5rem;">Total: $<span id="total-price">0</span></h3>
-        <button class="product-page-btn" style="width: auto; margin-top: 15px;">Checkout Now</button>
-    </div>
-</div>
 <footer class="footer">
     <div class="footer-inner">
         <h5><?= htmlspecialchars($supplier['company_name']) ?></h5>
