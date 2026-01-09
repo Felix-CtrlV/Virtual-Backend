@@ -64,7 +64,7 @@ while ($v = mysqli_fetch_assoc($variants)) {
             <h1 class="display-5 fw-bold"><?= htmlspecialchars($product['product_name']) ?></h1>
             <h3 class="text-primary mb-4">$<?= number_format($product['price'], 2) ?></h3>
 
-   <form action="../utils/add_to_cart.php" method="POST">
+  
    <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
 
     <div class="options">
@@ -109,21 +109,5 @@ while ($v = mysqli_fetch_assoc($variants)) {
                 <button type="submit" name="action" value="add_to_wishlist" class="btn btn-outline-dark btn-lg w-100 mb-3">
                     <i class="fas fa-heart me-1"></i> ADD TO WISHLIST
                 </button>
-            </div>
-        </div>
-    </div>
-</form>
-
-    </form>
-
-
-
-        </div>
-    </div>
-</div>
-<?php
-
-
-?>
-
-
+                
+                
