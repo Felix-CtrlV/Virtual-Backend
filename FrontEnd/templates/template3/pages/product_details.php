@@ -112,33 +112,12 @@ while ($row = mysqli_fetch_assoc($result2)) {
                 <button type="submit" class="add-cart" id="addToCartBtn">
                     <i class="fas fa-cart-plus"></i> Add to Cart
                 </button>
-                <button type="button" class="wishlist">
-                    <i class="far fa-heart"></i> 
-                    <span>Save to Wishlist</span>
-                </button>
             </div>
         </form>
 
         <p class="shipping">
             Standard delivery in 2–4 days or Premium delivery in 2–4 hours
         </p>
-    </div>    
-</div>
-
-        <div id="basket-container" class="detail_card"
-            style="width: 380px; margin: 0; display: flex; flex-direction: column; min-height: 520px; padding: 25px;">
-            <div class="related-section-header">
-                <h2 style="margin: 0; font-weight: 600;">Your Bag</h2>
-                <div class="related-section-line" style="height: 2px; background: rgba(0,0,0,0.05); margin: 12px 0;"></div>
-            </div>
-
-            <div id="cartItemsContainer" style="flex: 1; overflow-y: auto; max-height: 400px;">
-                <p style="text-align: center; color: #888; margin-top: 50px;">Loading your bag...</p>
-            </div>
-
-            <div id="cartFooter" style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px;">
-            </div>
-        </div>
     </div>
 </div>
 
