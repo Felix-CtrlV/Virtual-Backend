@@ -1255,3 +1255,40 @@
   background-color: #e5ac00;
   color: #000;
 }
+
+
+
+.checkout-btn{
+    flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            background: #e0e0e0;
+            box-shadow:
+                4px 4px 8px #c8c8c8,
+                -4px -4px 8px #f8f8f8;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-radius: 12px;
+            border: none;
+
+}
+/* Color to appear beside Size */
+/* Container to keep label and circle aligned */
+.selected-color-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+}
+
+/* The actual color circle */
+.color-preview {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%; /* Makes it a circle */
+    border: 1px solid #ddd; /* Adds a border so white colors are visible */
+}
+
+
+
