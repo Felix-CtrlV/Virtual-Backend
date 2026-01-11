@@ -4,7 +4,7 @@ session_start();
 include '../../BackEnd/config/dbconfig.php'; 
 
 // Use card_id to match your database screenshot
-$stmt = mysqli_prepare($conn, "DELETE FROM cart WHERE card_id = ? AND customer_id = ?");
+$stmt = mysqli_prepare($conn, "DELETE FROM cart WHERE cart_id = ? AND customer_id = ?");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_id'])) {
     $cart_id = (int)$_POST['cart_id'];
