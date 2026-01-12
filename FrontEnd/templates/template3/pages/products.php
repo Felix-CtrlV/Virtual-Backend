@@ -2,10 +2,7 @@
     <div class="container">
         <h2 class="text-center">Trendy Stocks</h2>
         <div class="row g-4">
-        <div class="welcome-section text-center py-1">
-            <?php if (!empty($supplier['description'])): ?>                
-            <?php endif; ?>
-        </div>
+        
         
         <div class="featured-section mt-9">
             <div class="row g-4">

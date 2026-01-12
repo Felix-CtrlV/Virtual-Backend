@@ -157,6 +157,7 @@ while ($row = mysqli_fetch_assoc($result2)) {
                         option.value = v.size;
                         option.textContent = v.size;
                         sizeSelect.appendChild(option);
+                  
                     });
                 });
             });

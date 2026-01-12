@@ -42,7 +42,8 @@ if (!defined('PREVIEW_MODE')) {
     include '../../BackEnd/config/dbconfig.php';
 
     $supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
-    if ($supplier_id <= 0) die("Invalid supplier ID.");
+    if ($supplier_id <= 0)
+        die("Invalid supplier ID.");
 
     $stmt = mysqli_prepare($conn, "
         SELECT s.*, t.template_folder 
@@ -50,7 +51,8 @@ if (!defined('PREVIEW_MODE')) {
         JOIN templates t ON s.template_id = t.template_id
         WHERE s.supplier_id = ?
     ");
-    if (!$stmt) die("Database query preparation failed: " . mysqli_error($conn));
+    if (!$stmt)
+        die("Database query preparation failed: " . mysqli_error($conn));
 
     mysqli_stmt_bind_param($stmt, "i", $supplier_id);
     mysqli_stmt_execute($stmt);
@@ -58,5 +60,6 @@ if (!defined('PREVIEW_MODE')) {
     $supplier = mysqli_fetch_assoc($result);
     mysqli_stmt_close($stmt);
 
-    if (!$supplier) die("Supplier not found.");
+    if (!$supplier)
+        die("Supplier not found.");
 }
