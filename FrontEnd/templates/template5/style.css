@@ -371,6 +371,7 @@ html{
     text-decoration: none;
     transition: color 0.3s ease;
     margin: 0;
+    font-size:18px;
 }
 
 
@@ -604,8 +605,6 @@ h1 {
 .feature-card:hover {
   background: linear-gradient(to bottom, #ffffff, #fafafa);
 }
-
-
 
 
 
@@ -851,7 +850,7 @@ h1 {
     letter-spacing: 1px;
 }
 
-/* ခေါင်းစဉ်အောက်က မျဉ်းတိုလေး (Decoration) */
+
 .site-footer h5::after {
     content: '';
     position: absolute;
@@ -859,7 +858,7 @@ h1 {
     bottom: -8px;
     height: 2px;
     width: 40px;
-    background-color: #0d6efd; /* Blue color - သင့် logo အရောင်နဲ့ ပြောင်းနိုင်ပါတယ် */
+    background-color: #0d6efd; 
 }
 
 /* Footer Content များ */
@@ -3291,3 +3290,184 @@ input[name="qty"] {
 }
 
 
+/* logo section css*/
+.header-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+}
+
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+
+.NFlogo {
+    max-height: 70px;     
+    width:auto;
+    object-fit: contain;
+}
+@media (max-width: 768px) {
+    .NFlogo {
+        max-height: 50px;
+    }
+}
+/* ADD TO CART BUTTON */
+#addToCartBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 56px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 14px;
+    background: #1e2328;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+/* Hover */
+#addToCartBtn:hover {
+    background: #000;
+    transform: translateY(-1px);
+}
+
+/* Active / click */
+#addToCartBtn:active {
+    transform: scale(0.98);
+}
+
+/* Icon */
+#addToCartBtn i {
+    font-size: 1rem;
+}
+
+/*Cart css */
+
+.container1 {
+    display: flex;
+    width: 100%;
+    max-width: 1200px; 
+    margin: 0 auto 100px auto;
+    gap: 40px;
+    align-items: flex-start;
+
+
+    
+}
+
+#root {
+    flex: 2;
+}
+
+/* Rolex Inspired Sidebar */
+.sidebar.rolex-cart {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 30px;
+    border: 1px solid #e5e5e5;
+    position: sticky;
+    top: 50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* ခပ်ဖွဖွ shadow */
+}
+
+/* Sidebar Header - Rolex Gold/Dark Green feel */
+.sidebar .head {
+    background-color: transparent;
+    border-bottom: 2px solid #127449; /* Rolex Green */
+    padding: 0 0 15px 0;
+    margin-bottom: 25px;
+    border-radius: 0;
+}
+
+.sidebar .head span {
+    color: #127449;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Cart Items Area */
+#cartitem {
+    min-height: 120px;
+    max-height: 450px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.empty-msg {
+    font-style: italic;
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Individual Cart Row (Inside JS) */
+.cart-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+}
+
+/* Sidebar Footer */
+.sidebar .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 20px;
+    border-top: 1px solid #000;
+    margin-top: 10px;
+}
+
+.total-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #555;
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    font-weight: 300; 
+    color: #000;
+}
+
+/* Checkout Button */
+.btn-checkout {
+    width: 100%;
+    background-color: #127449; /* Rolex Green */
+    color: white;
+    border: none;
+    padding: 15px;
+    margin-top: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-checkout:hover {
+    background-color: #0d5a39;
+    box-shadow: 0 5px 15px rgba(18, 116, 73, 0.3);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .container1 {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+    }
+}
