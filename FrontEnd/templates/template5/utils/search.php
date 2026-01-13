@@ -42,7 +42,7 @@ if ($products_result && mysqli_num_rows($products_result) > 0) {
                     <h4 class="card_title"><?= htmlspecialchars($row['product_name']) ?></h4>
                     <div class="product-price-container">
                         <p class="card-text price mb-3">PRICE: $<?= number_format($row['price'], 2) ?></p>
-                     <a href="?supplier_id=<?= $supplierid ?>&id=<?= $row['product_id'] ?>&page=product_details" class="btn-order-now">View</a>
+                     <a href="?supplier_id=<?= $supplierid ?>&id=<?= $row['product_id'] ?>&page=product_details" class="btn-order-now">View Details</a>
                     </div>
                 </div>
             </div>
