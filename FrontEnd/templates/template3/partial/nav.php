@@ -45,19 +45,19 @@ while ($row = $result->fetch_assoc()) {
             $base_url = "?supplier_id=" . $supplier_id;
             ?>
             <li class="nav-item">
-                <a class="navlink <?= $page === 'home' ? 'active' : '' ?>" href="<?= $base_url ?>&page=home">Home</a>
+                <a class="nav-link <?= $page === 'home' ? 'active' : '' ?>" href="<?= $base_url ?>&page=home">Home</a>
             </li>
             <li class="nav-item">
-                <a class="navlink <?= $page === 'products' ? 'active' : '' ?>" href="<?= $base_url ?>&page=products">Shop</a>
+                <a class="nav-link <?= $page === 'products' ? 'active' : '' ?>" href="<?= $base_url ?>&page=products">Shop</a>
             </li>
             <li class="nav-item">
-                <a class="navlink <?= $page === 'about' ? 'active' : '' ?>" href="<?= $base_url ?>&page=about">About Us</a>
+                <a class="nav-link <?= $page === 'about' ? 'active' : '' ?>" href="<?= $base_url ?>&page=about">About Us</a>
             </li>
             <li class="nav-item">
-                <a class="navlink <?= $page === 'collection' ? 'active' : '' ?>" href="<?= $base_url ?>&page=collection">Collection</a>
+                <a class="nav-link <?= $page === 'collection' ? 'active' : '' ?>" href="<?= $base_url ?>&page=collection">Collection</a>
             </li>
             <li class="nav-item">
-                <a class="navlink <?= $page === 'review' ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">Review</a>
+                <a class="nav-link <?= $page === 'review' ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">Review</a>
             </li>
 
             <li class="nav-item ms-lg-3">
@@ -77,7 +77,6 @@ while ($row = $result->fetch_assoc()) {
 </nav>
 <style>
     .cart-link {
-    color: #2A0001;
     position: relative;
     display: inline-block;
     padding: 0.5rem;

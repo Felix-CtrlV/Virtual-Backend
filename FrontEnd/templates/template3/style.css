@@ -12,6 +12,11 @@ body {
     line-height: 1.6;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 .header {
     background-color: #7a1515;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -70,12 +75,13 @@ body {
 
 /* Nav Page */
 .main-nav {
-    background: #D7CDAC;
+    background: rgba(210, 202, 186, 0.9);
     backdrop-filter: blur(12px);
     position: sticky;
     top: 0;
     z-index: 1000;
-    padding: 30px 0;
+    padding: 10px 0;
+    padding: 15px 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -87,7 +93,7 @@ body {
     padding: 0 5%;
     max-width: 1400px;
     margin: 0 auto;
-    height: 90px; 
+    height: 70px;
 }
 
 .navbar-nav {
@@ -96,56 +102,46 @@ body {
     gap: 25px;
 }
 
-.nav-menu {
-    display: flex;
-    align-items: center;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.navlink {
+.nav-link {
     text-decoration: none;
     font-family: 'Playfair Display', serif;
+    font-style: inherit;
     font-weight: bold;
-    font-size: 16px;
-    color: #2A0001;
+    font-size: 20px;
+    color: #644444;
     padding: 8px 15px;
     transition: all 0.4s ease-in-out;
     position: relative;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    display: inline-block; 
 }
 
-.navlink:hover {
-    color: #5F2119;
-    transform: translateY(-3px);
+.nav-link:hover {
+    color: #000000;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
 }
 
-.navlink.active {
-    color: #B8262A;
-    font-weight: 800;
+.nav-link.active {
+    color: #fff;
+    border-radius: 10px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(181, 147, 91, 0.5);
+    box-shadow: 0 10px 20px rgba(9, 9, 8, 0.2);
 }
 
-.navlink.active::after {
-    width: 70%;
-    background: #2A0001;
-}
-
-.navlink::after {
+.nav-link::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 50%;
+    bottom: -5px;
+    left: 0;
     width: 0;
-    height: 1.5px;
-    background: #260D08;
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
+    height: 2px;
+    background: #644444;
+    box-shadow: 0 0 10px #f4d477;
+    transition: width 0.4s ease;
 }
 
-.navlink:hover::after {
+.nav-link:hover::after {
     width: 100%;
 }
 
@@ -381,17 +377,16 @@ body {
 .page-content h2 {
     text-align: center;
     font-family: 'Playfair Display', serif;
-    color: #5F2119;
     font-style: oblique;
     font-size: 2.7rem;
-    margin-top: 30px;
+    margin-top: 50px;
     position: relative;
     display: inline-block;
     left: 50%;
     transform: translateX(-50%);
 }
 
-/* .page-content h2::after {
+.page-content h2::after {
     content: '';
     position: absolute;
     bottom: -10px;
@@ -400,7 +395,7 @@ body {
     width: 50px;
     height: 3px;
     background-color: black;
-} */
+}
 
 .product-grid {
     display: grid;
@@ -459,11 +454,26 @@ body {
     border-color: var(--secondary);
 }
 
-/* Collection for Products */
+/* Collection Page */
+.collectionContainer {
+    height: 80vh;
+    background-image: url('../../uploads/shops/3/collection.png');
+    background-size: cover;
+    background-position: center;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    color: var(--white);
+    text-align: center;
+    position: relative;
+    width: 100%;
+}
+
 .category_name {
     text-align: center;
 }
 
+/* Collection for Products */
 .products {
     padding: 5rem 5%;
     background-color: #fff;
@@ -638,7 +648,7 @@ body {
         padding: 1rem;
     }
 
-    .navlink {
+    .nav-link {
         margin: 1.5rem 0;
     }
 
@@ -755,7 +765,6 @@ body {
 .main-content {
     background-color: #ffffff;
     padding-bottom: 50px;
-    min-height: 25vh;
 }
 
 .reviews-container {

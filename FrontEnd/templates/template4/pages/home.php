@@ -283,7 +283,7 @@ $tagline = $supplier['tagline'] ?? 'Redefine Your Limits.';
         <h1 class="hero-title"><?= htmlspecialchars($company_name) ?></h1>
         <p class="hero-sub"><?= htmlspecialchars($tagline) ?></p>
 
-        <div style="margin-top: 40px; opacity: 0; animation: heroTextReveal 1.2s ease 0.6s forwards; margin-right: 860px;">
+        <div style="margin-top: 40px; opacity: 0; animation: heroTextReveal 1.2s ease 0.6s forwards; margin-right: 770px;">
             <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="magnet-btn" style="background: white; color: black;">
                 Explore Collection
             </a>

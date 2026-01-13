@@ -1,9 +1,9 @@
 <section class="page-content collection-page">
-    <div class="container" style="padding-top: 0;">
-        <!-- <div class="collectionContainer"></div> -->
-        <h2 class="text-center">Latest Stock Items</h2>
+    <div class="container" style="padding-top: 20px;">
+        <div class="collectionContainer"></div>
+        <h2 class="text-center mb-5">Latest Stock Items</h2>
         <div class="search-bar">
-            <input type="text" name="search_product" id="searchBar" placeholder="Search items.....">
+            <input type="text" name="search_product" id="searchBar" placeholder="Search.....">
             <i class="fas fa-search"></i>
         </div>
         <div class="row g-4" id="productResults">
