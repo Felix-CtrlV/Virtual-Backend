@@ -25,7 +25,7 @@ if ($customer_id && $supplier_id) {
 
     while ($row = mysqli_fetch_assoc($result)) {
         $image_name = $row['product_id'] . "_" . $row['image'];
-        $image_url = "/knp/FrontEnd/uploads/products/" . rawurlencode($image_name); 
+        $image_url = "../uploads/products/" . rawurlencode($image_name); 
 
         $items[] = [
             'cart_id'    => $row['cart_id'],
