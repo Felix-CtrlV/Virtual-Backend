@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Mall Platform</title>
 
   <!-- CSS -->
@@ -25,371 +26,427 @@
 
   <!--Websie Icon-->
   <link rel="website icon" href="..//FrontEnd/assets/images/websiteicon.jpg">
-  
-  
+
+
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-  
+
 
   <!-- 3D Background -->
-  <spline-viewer class="background"
-    url="https://prod.spline.design/t2YIwW1EsI2cSOEN/scene.splinecode">
+  <spline-viewer class="background" url="https://prod.spline.design/t2YIwW1EsI2cSOEN/scene.splinecode">
   </spline-viewer>
 
 
 
-  
+
 
   <!--Arrow Scroll-->
 
- <!--Arrow Scroll Start-->
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!--Arrow Scroll Start-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <button id="scrollToTop" class="scroll-top-btn">
     <i class="fas fa-arrow-up"></i>
   </button>
   <script>
-  const scrollBtn = document.getElementById("scrollToTop");
+    const scrollBtn = document.getElementById("scrollToTop");
 
-  // Show/Hide button based on scroll position
-  window.addEventListener("scroll", () => {
-    if (window.pageYOffset > 400) {
+    // Show/Hide button based on scroll position
+    window.addEventListener("scroll", () => {
+      if (window.pageYOffset > 400) {
         scrollBtn.classList.add("show");
-    } else {
+      } else {
         scrollBtn.classList.remove("show");
-    }
+      }
     });
 
-  // Smooth scroll to top
-  scrollBtn.addEventListener("click", () => {
-    window.scrollTo({
+    // Smooth scroll to top
+    scrollBtn.addEventListener("click", () => {
+      window.scrollTo({
         top: 0,
         behavior: "smooth"
+      });
     });
-    });
-    </script>
+  </script>
   <!--Arrow Section End-->
- 
 
 
-   <!--Logo Section-->
+
+  <!--Logo Section-->
   <header>
-  <nav class="home">
-    <div class="mall-logo">
-      <div class="logo-icon">
-        <i class="fas fa-vr-cardboard"></i>
+    <nav class="home">
+      <div class="mall-logo">
+        <div class="logo-icon">
+          <i class="fas fa-vr-cardboard"></i>
+        </div>
+        <div class="logo-text">
+          <span class="v-text">Malltiverse</span>
+          <span class="m-text">Virtual MALL</span>
+        </div>
       </div>
-      <div class="logo-text">
-        <span class="v-text">Malltiverse</span>
-        <span class="m-text">Virtual MALL</span>
-      </div>
-    </div>
 
-    <div class="nav-links">
-      <a href="#home"><i class="fa fa-house"></i>Home</a>
-     <a href="#aboutus" class="nav-link">
-      <i class="fas fa-users"></i> About
-    </a>
-     
-      <a href="#contact">
-      <i class="fa-solid fa-shop"></i> Contact
-    </a>
-     <a href="login.php" class="login-link">
-    <i class="fas fa-sign-in-alt"></i> Login</a>
-    </div>
-  </nav>
-</header>
+      <div class="nav-links">
+        <a href="#home"><i class="fa fa-house"></i>Home</a>
+        <a href="#aboutus" class="nav-link">
+          <i class="fas fa-users"></i> About
+        </a>
+
+        <a href="#contact">
+          <i class="fa-solid fa-shop"></i> Contact
+        </a>
+        <a href="login.php" class="login-link">
+          <i class="fas fa-sign-in-alt"></i> Login</a>
+      </div>
+    </nav>
+  </header>
 
 
   <!--Virtual Mall Platform Floating Image Section-->
- <section class="virtual-mall-hero" id="home">
+  <section class="virtual-mall-hero" id="home">
     <div class="hero-content">
-        <span class="badge">Next-Gen Shopping</span>
-        <h2><span class="gradient-text">Virtual Mall Platform</span><br><span class="gradient-text">Warmely Welcome to Visit Malltiverse</span></h2>
-        <p>Step into the future of e-commerce. Remix, build, and explore virtual mall website by our global community.</p>
-        <div class="hero-btns">
-           <a href="supplierLogin.php" style="text-decoration: none;" class="btn1 Hdr_box__Djvoy">Rent a Shop</a>
-           <a href="customer/index.html" style="text-decoration: none;" class="btn2 Hdr_box__Djvoy">Buy Product</a>
-        </div>
+      <span class="badge">Next-Gen Shopping</span>
+      <h2><span class="gradient-text">Virtual Mall Platform</span><br><span class="gradient-text">Warmely Welcome to
+          Visit Malltiverse</span></h2>
+      <p>Step into the future of e-commerce. Remix, build, and explore virtual mall website by our global community.</p>
+      <div class="hero-btns">
+        <a href="supplierLogin.php" style="text-decoration: none;" class="btn1 Hdr_box__Djvoy">Rent a Shop</a>
+        <a href="customer/index.html" style="text-decoration: none;" class="btn2 Hdr_box__Djvoy">Buy Product</a>
+      </div>
     </div>
 
     <div class="hero-visual">
-        <div class="floating-card">
-            <div class="card-inner">
-                <div class="card-front">
-                    <img src="..//FrontEnd/assets/images/virtual mall image.jpg" alt="3D Mall Preview">
-                </div>
-            </div>
+      <div class="floating-card">
+        <div class="card-inner">
+          <div class="card-front">
+            <img src="..//FrontEnd/assets/images/virtual mall image.jpg" alt="3D Mall Preview">
+          </div>
         </div>
+      </div>
     </div>
-</section>
-<!--Floating End Section-->
+  </section>
+  <!--Floating End Section-->
 
   <div class="brand-section">
-  <div class="logo-grid">
-    <div class="logo-track2">
-      <div class="logo-item"><p class="nike-text">Nike</p></div>
-      <div class="logo-item"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item"><p class="dior">Dior</p></div>
-      <div class="logo-item"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item"><p class="SkinCate-text">SkinCare</p></div>
-      <div class="logo-item"><p class="nike-text">Nike</p></div>
-      <div class="logo-item"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item"><p class="dior">Dior</p></div>
-      <div class="logo-item"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item"><p class="SkinCate-text">SkinCare</p></div>
+    <div class="logo-grid">
+      <div class="logo-track2">
+        <div class="logo-item">
+          <p class="nike-text">Nike</p>
+        </div>
+        <div class="logo-item">
+          <p class="burger-king">Burger King</p>
+        </div>
+        <div class="logo-item">
+          <p class="cosmetics">Cosmectics</p>
+        </div>
+        <div class="logo-item">
+          <p class="dior">Dior</p>
+        </div>
+        <div class="logo-item">
+          <p class="sport-text">Sports Wear</p>
+        </div>
+        <div class="logo-item">
+          <p class="SkinCate-text">SkinCare</p>
+        </div>
+        <div class="logo-item">
+          <p class="nike-text">Nike</p>
+        </div>
+        <div class="logo-item">
+          <p class="burger-king">Burger King</p>
+        </div>
+        <div class="logo-item">
+          <p class="cosmetics">Cosmectics</p>
+        </div>
+        <div class="logo-item">
+          <p class="dior">Dior</p>
+        </div>
+        <div class="logo-item">
+          <p class="sport-text">Sports Wear</p>
+        </div>
+        <div class="logo-item">
+          <p class="SkinCate-text">SkinCare</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="logo-grid1" id="aboutus">
+      <div class="logo-track">
+        <div class="logo-item1">
+          <p class="nike-text">Nike</p>
+        </div>
+        <div class="logo-item1">
+          <p class="burger-king">Burger King</p>
+        </div>
+        <div class="logo-item1">
+          <p class="cosmetics">Cosmectics</p>
+        </div>
+        <div class="logo-item1">
+          <p class="dior">Dior</p>
+        </div>
+        <div class="logo-item1">
+          <p class="sport-text">Sports Wear</p>
+        </div>
+        <div class="logo-item1">
+          <p class="SkinCate-text">SkinCare</p>
+        </div>
+        <div class="logo-item1">
+          <p class="nike-text">Nike</p>
+        </div>
+        <div class="logo-item1">
+          <p class="burger-king">Burger King</p>
+        </div>
+        <div class="logo-item1">
+          <p class="cosmetics">Cosmectics</p>
+        </div>
+        <div class="logo-item1">
+          <p class="dior">Dior</p>
+        </div>
+        <div class="logo-item1">
+          <p class="sport-text">Sports Wear</p>
+        </div>
+        <div class="logo-item1">
+          <p class="SkinCate-text">SkinCare</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="logo-grid1" id="aboutus">
-    <div class="logo-track">
-      <div class="logo-item1"><p class="nike-text">Nike</p></div>
-      <div class="logo-item1"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item1"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item1"><p class="dior">Dior</p></div>
-      <div class="logo-item1"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item1"><p class="SkinCate-text">SkinCare</p></div>
-      <div class="logo-item1"><p class="nike-text">Nike</p></div>
-      <div class="logo-item1"><p class="burger-king">Burger King</p></div>
-      <div class="logo-item1"><p class="cosmetics">Cosmectics</p></div>
-      <div class="logo-item1"><p class="dior">Dior</p></div>
-      <div class="logo-item1"><p class="sport-text">Sports Wear</p></div>
-      <div class="logo-item1"><p class="SkinCate-text">SkinCare</p></div>
-    </div>
-  </div>
-</div>
-  
 
-     <br><br><br>
+  <br><br><br>
 
 
-    
-   <section id="aboutus">
-      <!--Future Shopping Malls Section-->
-  <div class="vr-container">
-  <h1 class="main-title">WHY VIRTUAL MALL REALITY IS<br>THE FUTURE FOR SHOPPING MALLS</h1>
-  
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="icon">↗</div>
-      <h2>Interactive Storefront</h2>
-      <p>Create a metaverse shopping centre with customers able to enter virtual storefronts, interact with products, and try on clothing or accessories in a virtual fitting room.</p>
-    </div>
 
-    <div class="feature-card">
-      <div class="icon">⊞</div>
-      <h2>Virtual Shopping Mall</h2>
-      <p>Allow shoppers to wander through a fully immersive 3D shopping mall, from the comfort of their home, browsing shops and products as if they were really there.</p>
-    </div>
+  <section id="aboutus">
+    <!--Future Shopping Malls Section-->
+    <div class="vr-container">
+      <h1 class="main-title">WHY VIRTUAL MALL REALITY IS<br>THE FUTURE FOR SHOPPING MALLS</h1>
 
-    <div class="feature-card">
-      <div class="icon">⬡</div>
-      <h2>Personalized Virtual Shopping Experience</h2>
-      <p>Based on a customers shopping history, you can help customers discover new items, new stores and introduce them to exclusive offers.</p>
-    </div>
-  </div>  
-</section>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon">↗</div>
+          <h2>Interactive Storefront</h2>
+          <p>Create a metaverse shopping centre with customers able to enter virtual storefronts, interact with
+            products, and try on clothing or accessories in a virtual fitting room.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">⊞</div>
+          <h2>Virtual Shopping Mall</h2>
+          <p>Allow shoppers to wander through a fully immersive 3D shopping mall, from the comfort of their home,
+            browsing shops and products as if they were really there.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">⬡</div>
+          <h2>Personalized Virtual Shopping Experience</h2>
+          <p>Based on a customers shopping history, you can help customers discover new items, new stores and introduce
+            them to exclusive offers.</p>
+        </div>
+      </div>
+  </section>
 
 
-    <!--Main Style-->
-      <section class="collection-section">
+  <!--Main Style-->
+  <section class="collection-section">
     <h2 class="section-title"><i>COLLECTION</i></h2>
-    
+
     <div class="collection-container">
-        <div class="collection-card">
-            <div class="image-wrapper">
-                <img src="..//FrontEnd/assets/images/men collection.webp" alt="Mens Collection">
-            </div>
-            <h3>MEN'S Collection</h3>
-            <p><b><i>Shop for trendy men's clothing at The Virtual Mall. Keep your look fresh with the latest arrivals in men's clothing, accessories and shoes.</i></b></p>
-          <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
+      <div class="collection-card">
+        <div class="image-wrapper">
+          <img src="..//FrontEnd/assets/images/men collection.webp" alt="Mens Collection">
         </div>
+        <h3>MEN'S Collection</h3>
+        <p><b><i>Shop for trendy men's clothing at The Virtual Mall. Keep your look fresh with the latest arrivals in
+              men's clothing, accessories and shoes.</i></b></p>
+        <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
+      </div>
 
-     
 
-            <div class="collection-card">
-            <div class="image-wrapper">
-                <img src="..//FrontEnd/assets/images/women collection.webp" alt="Womens Collection">
-            </div>
-            <h3>WOMEN'S Collection</h3>
-            <p><b><i>Discover 2021 Women's Collection. Shop dresses, tops, jackets, jeans, sweaters and more from a variety of brands and designers.</i></b></p>
-           <!--<a href="#" class="btn">OUR LATEST STYLES</a>-->
+
+      <div class="collection-card">
+        <div class="image-wrapper">
+          <img src="..//FrontEnd/assets/images/women collection.webp" alt="Womens Collection">
         </div>
+        <h3>WOMEN'S Collection</h3>
+        <p><b><i>Discover 2021 Women's Collection. Shop dresses, tops, jackets, jeans, sweaters and more from a variety
+              of brands and designers.</i></b></p>
+        <!--<a href="#" class="btn">OUR LATEST STYLES</a>-->
+      </div>
 
-        <div class="collection-card">
-            <div class="image-wrapper">
-                <img src="..//FrontEnd/assets/images/accessories2.jpg" alt="Accessories Collection">
-            </div>
-            <h3>ACCESSORIES Collection</h3>
-            <p><b><i>Discover our newest accessories at The Virtual Mall, including handbags, watches, jewelry, sunglasses and more.</i></b></p><br>
-          <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
+      <div class="collection-card">
+        <div class="image-wrapper">
+          <img src="..//FrontEnd/assets/images/accessories2.jpg" alt="Accessories Collection">
         </div>
+        <h3>ACCESSORIES Collection</h3>
+        <p><b><i>Discover our newest accessories at The Virtual Mall, including handbags, watches, jewelry, sunglasses
+              and more.</i></b></p><br>
+        <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
+      </div>
     </div>
-</section>
+  </section>
 
-
-
-
-
-    <div class="main-wrapper">
+  <div class="main-wrapper">
     <section class="feature-card">
-        <div class="text-content">
-            <h2 class="title">Virtual Mall Advandages</h2>
-            <p class="description">Welcome to The Virtual Mall We bridge the gap between high-end boutique shopping and the digital world.</p>
-            <ul class="check-list">
-                <li>"The Future of Retail, Redefined."</li>
-                <li>"Your Global Boutique, Just a Click Away."</li>
-                <li>"Elevate Your Lifestyle. Explore the Virtual Mall."</li>
-                <li>"Luxury Fashion. Digital Convenience.</li>
-                
-            </ul>
+      <div class="text-content">
+        <h2 class="title">Virtual Mall Advandages</h2>
+        <p class="description">Welcome to The Virtual Mall We bridge the gap between high-end boutique shopping and the
+          digital world.</p>
+        <ul class="check-list">
+          <li>"The Future of Retail, Redefined."</li>
+          <li>"Your Global Boutique, Just a Click Away."</li>
+          <li>"Elevate Your Lifestyle. Explore the Virtual Mall."</li>
+          <li>"Luxury Fashion. Digital Convenience.</li>
+
+        </ul>
+      </div>
+      <div class="graphic-area">
+        <div class="button-3d">
+          <div class="icon-ring"></div>
         </div>
-        <div class="graphic-area">
-            <div class="button-3d">
-                <div class="icon-ring"></div>
-            </div>
-        </div>
+      </div>
     </section>
 
-    <section class="feature-card data-card">   
-        <div class="text-content">
-            <h2 class="title">Benefits of using this virtual mall</h2>
-            <ul class="check-list">
-              <li>You spend less time scrolling through low-quality items and more time looking at "trendy" and "fresh" styles that fit your aesthetic.</li>
-              <li>Whether it’s 2 AM or during your lunch break, you can shop for the latest Mens, Womens, and Accessory collections from the comfort of your home.</li>
-              <li>With descriptions that highlight specific trends (like the "2021 Collection" or "Trendy Men's Clothing"), you get a mini-stylist experience that helps you put outfits together easily.</li>
-            </ul>
+    <section class="feature-card data-card">
+      <div class="text-content">
+        <h2 class="title">Benefits of using this virtual mall</h2>
+        <ul class="check-list">
+          <li>You spend less time scrolling through low-quality items and more time looking at "trendy" and "fresh"
+            styles that fit your aesthetic.</li>
+          <li>Whether it’s 2 AM or during your lunch break, you can shop for the latest Mens, Womens, and Accessory
+            collections from the comfort of your home.</li>
+          <li>With descriptions that highlight specific trends (like the "2021 Collection" or "Trendy Men's Clothing"),
+            you get a mini-stylist experience that helps you put outfits together easily.</li>
+        </ul>
+      </div>
+      <div class="graphic-area">
+        <div class="data-node">
+          <div class="glow-core"></div>
         </div>
-        <div class="graphic-area"> 
-            <div class="data-node">
-                <div class="glow-core"></div>
-            </div>
-            <div class="floating-icon cloud"></div>
-            <div class="floating-icon ai"></div>
-        </div>
+        <div class="floating-icon cloud"></div>
+        <div class="floating-icon ai"></div>
+      </div>
     </section>
-</div>
-      <br><br>
+  </div>
+  <br><br>
 
-      <!--Contact Section-->
+  <!--Contact Section-->
 
-     
-    <section id="contact" class="contact-section">
+
+  <section id="contact" class="contact-section">
     <div class="contact-wrapper">
-        <div class="contact-content">
-            <div class="contact-text">
-                <div class="mall-logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-vr-cardboard"></i>
-                    </div>
-                    <div class="logo-text">
-                        <span class="v-text">Malltiverse</span>
-                        <span class="m-text">Virtual MALL</span>
-                    </div>
-                </div>
-                <h2>Get in Touch</h2>
-                <p>Have questions about our VR shopping experience? Our team is available 24/7 to help you navigate the mall.</p>
-                
-                <ul class="contact-details">
-                    <li><i class="fa-solid fa-location-dot"></i> Metro IT and Japanese Language Centre, Yangon City</li>
-                    <li><i class="fa-solid fa-envelope"></i> support@kaungpyaesone@gmail.com</li>
-                    <li><i class="fa-solid fa-phone"></i> +95123456 VR-MALL</li>
-                </ul>
+      <div class="contact-content">
+        <div class="contact-text">
+          <div class="mall-logo">
+            <div class="logo-icon">
+              <i class="fas fa-vr-cardboard"></i>
             </div>
+            <div class="logo-text">
+              <span class="v-text">Malltiverse</span>
+              <span class="m-text">Virtual MALL</span>
+            </div>
+          </div>
+          <h2>Get in Touch</h2>
+          <p>Have questions about our VR shopping experience? Our team is available 24/7 to help you navigate the mall.
+          </p>
 
-            <div class="contact-form-container">
-                <form class="contact-main-form">
-                    <div class="form-row">
-                        <input type="text" placeholder="Your Name" required>
-                        <input type="email" placeholder="Your Email" required>
-                    </div>
-                    <input type="text" placeholder="Subject">
-                    <textarea placeholder="Message" rows="5" required></textarea>
-                    <button type="submit" class="contact-submit">SEND MESSAGE</button>
-                </form>
-            </div>
+          <ul class="contact-details">
+            <li><i class="fa-solid fa-location-dot"></i> Metro IT and Japanese Language Centre, Yangon City</li>
+            <li><i class="fa-solid fa-envelope"></i> support@kaungpyaesone@gmail.com</li>
+            <li><i class="fa-solid fa-phone"></i> +95123456 VR-MALL</li>
+          </ul>
         </div>
-    </div>
-</section>
 
-
-    <!--Footer Section-->
-    <footer class="spline-footer">
-  <div class="footer-main">
-    <div class="footer-brand">
-     
-         <div class="mall-logo">
-      <div class="logo-icon">
-        <i class="fas fa-vr-cardboard"></i>
-      </div>
-      <div class="logo-text">
-        <span class="v-text">Malltiverse</span>
-        <span class="m-text">Virtual MALL</span>
+        <div class="contact-form-container">
+          <form class="contact-main-form">
+            <div class="form-row">
+              <input type="text" placeholder="Your Name" required>
+              <input type="email" placeholder="Your Email" required>
+            </div>
+            <input type="text" placeholder="Subject">
+            <textarea placeholder="Message" rows="5" required></textarea>
+            <button type="submit" class="contact-submit">SEND MESSAGE</button>
+          </form>
+        </div>
       </div>
     </div>
+  </section>
+
+
+  <!--Footer Section-->
+  <footer class="spline-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+
+        <div class="mall-logo">
+          <div class="logo-icon">
+            <i class="fas fa-vr-cardboard"></i>
+          </div>
+          <div class="logo-text">
+            <span class="v-text">Malltiverse</span>
+            <span class="m-text">Virtual MALL</span>
+          </div>
+        </div>
       </div>
 
-    <div class="footer-nav">
-      <div class="nav-col">
-        <h3>Reference</h3>
-        <ul>
-          <li><a href="#">3D Design Virtual Mall</a></li>
-          <li><a href="#">Vitual Mall Builder</a></li>
-          <li><a href="#">Spline</a></li>
-         
-         
-        </ul>
-      </div>
+      <div class="footer-nav">
+        <div class="nav-col">
+          <h3>Reference</h3>
+          <ul>
+            <li><a href="#">3D Design Virtual Mall</a></li>
+            <li><a href="#">Vitual Mall Builder</a></li>
+            <li><a href="#">Spline</a></li>
 
-      <div class="nav-col">
-        <h3>Resources</h3>
-        <ul>
-          <li><a href="#">Contra</a></li>
-          <li><a href="#">Hackathon</a></li>
-          <li><a href="#">Education</a></li>
-          <li><a href="#">Enterprise</a></li>
-          <li><a href="#">Solutions</a></li>
-        </ul>
-      </div>
 
-      <div class="nav-col">
-        <h3>Company</h3>
-        <ul>
-          <li><a href="#">Metro IT&Japanese Language Center</a></li>
-          <li><a href="#">Careers</a></li>
-          <li><a href="#">Terms & Conditions</a></li>
-          <li><a href="#">Privacy</a></li>
-          <li><a href="#">Security</a></li>
-        </ul>
-      </div>
+          </ul>
+        </div>
 
-      <div class="nav-col">
-        <h3>Contact</h3>
-        <ul>
-          <li><a href="">kaungpyaesone@gmail.com</a></li>
-          <li><a href="">kaungswan59@gmail.com</a></li>
-          <li><a href="">aungkgmyat@gmail.com</a></li>
-          
+        <div class="nav-col">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="#">Contra</a></li>
+            <li><a href="#">Hackathon</a></li>
+            <li><a href="#">Education</a></li>
+            <li><a href="#">Enterprise</a></li>
+            <li><a href="#">Solutions</a></li>
+          </ul>
+        </div>
 
-        </ul>
+        <div class="nav-col">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="#">Metro IT&Japanese Language Center</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Terms & Conditions</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-col">
+          <h3>Contact</h3>
+          <ul>
+            <li><a href="">kaungpyaesone@gmail.com</a></li>
+            <li><a href="">kaungswan59@gmail.com</a></li>
+            <li><a href="">aungkgmyat@gmail.com</a></li>
+
+
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="footer-bottom">
-    <div class="copyright">© 2026 Malltiverse. Powered by immersive digital experiences.</div>
-    <div class="social-icons">
-      <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-      <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-      <a href="#" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+    <div class="footer-bottom">
+      <div class="copyright">© 2026 Malltiverse. Powered by immersive digital experiences.</div>
+      <div class="social-icons">
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="#" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
+      </div>
     </div>
-  </div>
-</footer>
-    </section>
+  </footer>
+  </section>
 
-</body>
+  </body>
+
 </html>

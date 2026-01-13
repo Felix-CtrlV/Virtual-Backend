@@ -105,8 +105,4 @@ $page_path = __DIR__ . "/pages/$page.php";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../templates/<?= basename(__DIR__) ?>/script.js"></script>
 </body>
-<<<<<<< HEAD
-=======
-
->>>>>>> b1bcd8dc3cc40d89c373929b224724043c934b3a
 </html>

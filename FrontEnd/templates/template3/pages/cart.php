@@ -13,7 +13,7 @@ $cart_query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p
                FROM cart c 
                JOIN product_variant v ON c.variant_id = v.variant_id 
                JOIN products p ON v.product_id = p.product_id 
-               WHERE c.customer_id = ? AND c.supplier_id = ?";
+               WHERE c.customer_id = ? AND c.supplier_id = ?"; 
 
 $stmt = mysqli_prepare($conn, $cart_query);
 mysqli_stmt_bind_param($stmt, "ii", $customer_id, $supplier_id);
@@ -21,6 +21,21 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $cart_count = mysqli_num_rows($result);
 $total_price = 0;
+
+$customer_id = 1; // testing
+$total_price = 150.00;
+$my_store_name = $supplier['company_name'];
+$callback_url = "http://localhost/malltiverse/frontend/shop/?supplier_id=$supplier_id&page=collections";
+
+$bank_url = "http://localhost/virtual_bank/pay.php?" . http_build_query([
+    'amount' => $total_price,
+    'merchant' => $my_store_name,
+    'return_url' => $callback_url
+]);
+
+// Redirect immediately
+header("Location: " . $bank_url);
+exit();
 ?>
 
 <div class="container mt-5 mb-5">
