@@ -7,7 +7,7 @@ function refreshCartDrawer(supplierId) {
     if (!container || !supplierId) return;
 
     // We use get_cart_data.php because it returns the data we need to build the UI
-    fetch(`/knp/FrontEnd/utils/get_cart_data.php?supplier_id=${supplierId}`)
+    fetch(`../utils/get_cart_data.php?supplier_id=${supplierId}`)
         .then(res => res.json())
         .then(data => {
             let html = '';
@@ -64,7 +64,7 @@ window.removeItem = function (cartId, supplierId) {
     const formData = new FormData();
     formData.append('cart_id', cartId);
 
-    fetch('/knp/FrontEnd/utils/removeFromCart.php', {
+    fetch('../utils/removeFromCart.php', {
         method: 'POST',
         body: formData
     })
