@@ -46,7 +46,7 @@ for ($i = 0; $i < $about_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'products', 'about', 'contact', 'review','product_details'];
+$allowed_pages = ['home', 'products', 'about', 'contact', 'review','product_details','cart'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
