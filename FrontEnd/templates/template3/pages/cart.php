@@ -16,20 +16,7 @@ $result = mysqli_stmt_get_result($stmt);
 $cart_count = mysqli_num_rows($result);
 $total_price = 0;
 
-$customer_id = 1; // testing
-$total_price = 150.00;
-$my_store_name = $supplier['company_name'];
-$callback_url = "http://localhost/malltiverse/frontend/shop/?supplier_id=$supplier_id&page=collections";
 
-$bank_url = "http://localhost/virtual_bank/pay.php?" . http_build_query([
-    'amount' => $total_price,
-    'merchant' => $my_store_name,
-    'return_url' => $callback_url
-]);
-
-// Redirect immediately
-header("Location: " . $bank_url);
-exit();
 ?>
 
 <div class="container mt-5 mb-5">
