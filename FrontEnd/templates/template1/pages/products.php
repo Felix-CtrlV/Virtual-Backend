@@ -5,23 +5,6 @@
     <div class="product_list_grid">
       <div class="product_list_grid">
 
-    <div class="product">
-        <div class="product_image">
-            <img src="shoe.jpg" alt="Running Shoes">
-        </div>
-        <div class="card-body">
-            <div class="product-info">
-                <span class="card_title">Running Shoes</span>
-                <span class="price">$120</span>
-            </div>
-            <button class="add-to-cart" 
-                    data-name="Running Shoes" 
-                    data-price="120" 
-                    data-img="shoe.jpg">
-                +
-            </button>
-        </div>
-    </div>
     
     </div>
       <?php
