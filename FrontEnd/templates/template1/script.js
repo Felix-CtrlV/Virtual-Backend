@@ -69,14 +69,15 @@ function refreshCartDrawer(supplierId) {
                 });
 
                 container.innerHTML = html;
+                // Inside refreshCartDrawer function, find where footer.innerHTML is set:
                 footer.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="fs-5">Total:</span>
-                        <span class="fs-5 fw-bold">$${data.total}</span>
-                    </div>
-                    <button class="btn w-100 py-3 fw-bold rounded-3 shadow-sm" style="background-color: #f0f0f0; color: #333; border: none;" onclick="window.location.href='?supplier_id=${supplierId}&page=checkout'">
-                        Checkout
-                    </button>`;
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="fs-5">Total:</span>
+        <span class="fs-5 fw-bold">$${data.total}</span>
+    </div>
+    <button class="addtobag_btn w-100" onclick="window.location.href='?supplier_id=${supplierId}&page=checkout'">
+        Checkout
+    </button>`;
 
                 if (badge) badge.innerText = data.itemCount;
             } else {
