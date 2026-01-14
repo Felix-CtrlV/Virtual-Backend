@@ -26,7 +26,7 @@
 
     <div class="categories-grid">
         <?php
-$category_stmt = mysqli_prepare(
+/*$category_stmt = mysqli_prepare(
     $conn,
     "SELECT c.category_id, c.category_name, 
             MIN(p.image) AS image, 
@@ -36,7 +36,23 @@ $category_stmt = mysqli_prepare(
      WHERE c.supplier_id = ?
      GROUP BY c.category_id
      LIMIT 4"
+);*/
+$category_stmt = mysqli_prepare(
+    $conn,
+    "SELECT c.category_id, c.category_name, p.image, p.product_id
+     FROM category c
+     JOIN products p 
+       ON p.product_id = (
+           SELECT p2.product_id
+           FROM products p2
+           WHERE p2.category_id = c.category_id
+           ORDER BY p2.created_at DESC
+           LIMIT 1
+       )
+     WHERE c.supplier_id = ?
+     LIMIT 4"
 );
+
 
 mysqli_stmt_bind_param($category_stmt, "i", $supplier_id);
 mysqli_stmt_execute($category_stmt);
