@@ -24,7 +24,7 @@ if (!$product) {
     exit("<div class='container mt-5 text-center'><h4>Product not found.</h4><a href='index.php' class='btn btn-outline-dark'>Back to Shop</a></div>");
 }
 
-// Fetch Variants and Sizes
+
 $stmt2 = mysqli_prepare($conn, "SELECT variant_id, color, size FROM product_variant WHERE product_id = ?");
 mysqli_stmt_bind_param($stmt2, "i", $product_id);
 mysqli_stmt_execute($stmt2);
@@ -48,42 +48,54 @@ $sizes = array_unique($sizes);
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.php" class="text-muted">Shop</a></li>
-                    <li class="breadcrumb-item active"><?= htmlspecialchars($product['category_name']) ?></li>
-                </ol>
-            </nav>
+        <div class="col-lg-5 ps-lg-5"> <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb bg-transparent p-0">
+            <li class="breadcrumb-item"><a href="index.php" class="text-secondary text-uppercase small fw-semibold">Shop</a></li>
+            <li class="breadcrumb-item active text-uppercase small" aria-current="page">
+                <?= htmlspecialchars($product['category_name']) ?>
+            </li>
+        </ol>
+    </nav>
 
-            <h1 class="h2 fw-bold mb-2"><?= htmlspecialchars($product['product_name']) ?></h1>
-            <p class="price-tag mb-4">$<?= number_format($product['price'], 2) ?></p>
-            
-            <p class="text-muted small mb-4"><?= nl2br(htmlspecialchars($product['description'] ?? '')) ?></p>
+    <h1 class="display-6 fw-bold mb-2 text-dark"><?= htmlspecialchars($product['product_name']) ?></h1>
+    <p class="price-tag mb-4 text-primary">$<?= number_format($product['price'], 2) ?></p>
+    
+    <div class="mb-4">
+        <label class="fw-bold small text-uppercase text-muted mb-2">Description</label>
+        <p class="text-muted lh-base" style="font-size: 0.95rem;">
+            <?= nl2br(htmlspecialchars($product['description'] ?? 'No description available.')) ?>
+        </p>
+    </div>
+    <br>
+    <div class="row g-3 mb-4">
+        <div class="col-7">
+            <label class="fw-bold small text-uppercase text-muted mb-2">Select Size</label>
+            <select id="sizeSelect" class="form-select shadow-sm">
+                <option value="" selected disabled>Choose your size</option>
+                <?php foreach ($sizes as $size): ?>
+                    <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <br>
+        <div class="col-5">
+            <label class="fw-bold small text-uppercase text-muted mb-2">Quantity</label>
+            <input type="number" id="qtyInput" class="form-control shadow-sm text-center" value="1" min="1">
+        </div>
+    </div>
+    <br>
 
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <label class="fw-bold small text-uppercase">Size</label>
-                    <select id="sizeSelect" class="form-select border-dark-subtle">
-                        <option value="">Select Size</option>
-                        <?php foreach ($sizes as $size): ?>
-                            <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-6">
-                    <label class="fw-bold small text-uppercase">Qty</label>
-                    <input type="number" id="qtyInput" class="form-control border-dark-subtle" value="1" min="1">
-                </div>
-            </div>
+    <input type="hidden" id="supplier_id" value="<?= htmlspecialchars($product['supplier_id']) ?>">
+    <br>
+    <button id="addToCartBtn" class="btn btn-dark btn-lg w-100 shadow-sm border-0 py-3 mt-2">
+        <i class="fas fa-shopping-bag me-2"></i> ADD TO CART
+    </button>
 
-            <input type="hidden" id="supplier_id" value="<?= htmlspecialchars($product['supplier_id']) ?>">
-            
-            <button id="addToCartBtn" class="btn btn-dark btn-lg w-100 mb-5">
-                <i class="fas fa-shopping-bag me-2"></i> ADD TO CART
-            </button>
+   
+</div>
+       
                             
-          <div class="rolex-cart shadow-lg">
+         
     
     <!-- <div class="cart-header d-flex justify-content-between align-items-center">
         <span class="header-title">My Selection</span>
@@ -148,7 +160,7 @@ $sizes = array_unique($sizes);
                     showConfirmButton: false,
                     timer: 1500 
                 });
-                // Cart Drawer နဲ့ Navbar Badge နှစ်ခုလုံးကို update လုပ်မယ်
+                
                 refreshBag();
             } else {
                 Swal.fire({ icon: 'error', title: 'Error', text: data.message });
@@ -157,12 +169,12 @@ $sizes = array_unique($sizes);
         .catch(error => console.error('Error:', error));
     });
 
-    // 2. Refresh Cart UI (Drawer + Badge)
+    
     function refreshBag() {
         const supplierId = document.getElementById('supplier_id').value;
         const cartContainer = document.getElementById('cartitem');
 
-        // Drawer ရှိရင် loading ပြမယ်
+    
         if (cartContainer) {
             cartContainer.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-warning" role="status"></div></div>`;
         }
@@ -170,7 +182,7 @@ $sizes = array_unique($sizes);
         fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
             .then(res => res.json())
             .then(data => {
-                // Navbar Badge Update လုပ်ခြင်း
+               
                 const cartBadge = document.getElementById('cart-badge-count');
                 if (cartBadge) {
                     const count = parseInt(data.total_count) || 0;
@@ -178,7 +190,7 @@ $sizes = array_unique($sizes);
                     cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
                 }
 
-                // Drawer (My Selection) Update လုပ်ခြင်း
+             
                 if (cartContainer) {
                     if (data.drawer_html && data.drawer_html.trim() !== "") {
                         cartContainer.innerHTML = data.drawer_html;
@@ -187,7 +199,7 @@ $sizes = array_unique($sizes);
                     }
                 }
 
-                // Subtotal Update လုပ်ခြင်း
+              
                 const totalElement = document.getElementById('cart-subtotal');
                 if (totalElement) {
                     const total = parseFloat(data.total) || 0;
@@ -197,7 +209,7 @@ $sizes = array_unique($sizes);
             .catch(err => console.error("Error fetching cart:", err));
     }
 
-    // 3. Remove Item Logic
+    
     function handleRemove(cartId) {
         Swal.fire({
             title: 'Are You Sure?',
@@ -224,6 +236,6 @@ $sizes = array_unique($sizes);
         });
     }
 
-    // Page load ဖြစ်ချိန်မှာ တစ်ခါ ခေါ်ထားမယ်
+    
     window.addEventListener('DOMContentLoaded', refreshBag);
 </script>
