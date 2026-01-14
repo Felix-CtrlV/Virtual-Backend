@@ -322,12 +322,15 @@ $item_count = 0;
         </div>
         
         <!-- Order Summary -->
-        <div class="col-lg-4">
-            <div class="selection-card p-4 sticky-top" style="top: 20px;">
-                <h4 class="fw-bold mb-4 pb-3 border-bottom">
-                    <i class="fas fa-receipt me-2"></i>
-                    Order Summary
-                </h4>
+       <div class="col-lg-4">
+    <div class="selection-card p-4 sticky-top" style="top: 20px; z-index: 0;">
+        <h4 class="fw-bold mb-4 pb-3 border-bottom">
+            <i class="fas fa-receipt me-2"></i>
+            Order Summary
+        </h4>
+        
+        </div>
+
                 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -361,7 +364,7 @@ $item_count = 0;
                     PROCEED TO SECURE CHECKOUT
                 </button>
                 
-             
+             </div>
 
 
 <!-- Floating Action Button for Mobile -->
