@@ -539,6 +539,10 @@
 
 }
 
+.section-header {
+    text-align: center;
+    padding: 20px;
+}
 
 
 .about-content {
@@ -640,12 +644,6 @@
     display: inline-block;
 
     margin-right: 15px;
-
-
-
-
-
-
 
     box-shadow:
 
@@ -1972,33 +1970,20 @@ body.productDetail {
 
 
 
-.related-section-header h2 {
-
-    font-size: 26px;
-
-    margin: 0;
-
+.related-section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
-
-
 
 .related-section-line {
-
-    height: 1px !important;
-
-    /* Force it to be a thin line */
-
-    background: rgba(0, 0, 0, 0.1) !important;
-
-    margin: 10px 0 20px 0 !important;
-
-    padding: 0 !important;
-
-    /* Remove any padding causing the 'blue' height */
-
-    width: 100%;
-
+    flex: 1;
+    height: 2px;
+    background: #000;
+    opacity: 0.3;
+    display: block;
 }
+
 
 
 
