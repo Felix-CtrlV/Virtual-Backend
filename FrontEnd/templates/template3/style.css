@@ -1,5 +1,5 @@
 /* Reset and Base Styles */
-* {
+/* * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -18,7 +18,7 @@ body {
     width: 100%;
     top: 0;
     z-index: 1000;
-}
+} */
 
 .site-header {
     padding: 20px 0;

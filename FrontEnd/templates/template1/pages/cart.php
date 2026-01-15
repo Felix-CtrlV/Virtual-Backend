@@ -99,9 +99,7 @@ $total_price = 0;
                                             <div class="d-flex align-items-center">
 
                                                 <img src="../uploads/products/<?= $item['product_id'] ?>_<?= $item['image'] ?>"
-
                                                     alt="<?= $item['product_name'] ?>"
-
                                                     style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;">
 
                                                 <span>
@@ -117,7 +115,6 @@ $total_price = 0;
                                                         <small class="text-muted">Color: </small>
 
                                                         <span class="color-preview"
-
                                                             style="background-color: <?= htmlspecialchars($item['color']) ?>;"></span>
 
                                                     </div>
@@ -137,11 +134,8 @@ $total_price = 0;
                                         <td>
 
                                             <button class="btn btn-sm btn-outline-danger"
-
-                                                onclick="removeFromCart(<?= $item['cart_id'] ?>)">
-
+                                                onclick="removeItem(<?= $item['cart_id'] ?>, <?= $supplier_id ?>)">
                                                 <i class="bi bi-trash"></i>
-
                                             </button>
 
                                         </td>
@@ -189,7 +183,6 @@ $total_price = 0;
                         </div>
 
                         <button class="btn btn-primary w-100 py-2 mt-3"
-
                             style="background-color: var(--primary); border: none;">
 
                             PROCEED TO CHECKOUT
@@ -197,7 +190,6 @@ $total_price = 0;
                         </button>
 
                         <a href="?supplier_id=<?= $supplier_id ?>&page=products"
-
                             class="btn btn-link w-100 text-center mt-2">
 
                             Continue Shopping
@@ -221,7 +213,6 @@ $total_price = 0;
             <p class="mt-3">Your cart is empty.</p>
 
             <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="btn btn-primary"
-
                 style="background-color: var(--primary); border: none;">
 
                 Shop Now
@@ -235,47 +226,3 @@ $total_price = 0;
 </div>
 
 
-
-<script>
-
-    function removeFromCart(cartId) {
-
-        if (confirm('Remove this item?')) {
-
-            // Go up 3 levels to FrontEnd root, then into utils
-
-            fetch('../../../utils/removeFromCart.php', {
-
-                method: 'POST',
-
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-
-                body: new URLSearchParams({ 'cart_id': cartId })
-
-            })
-
-                // ... rest of code
-
-                .then(res => res.json())
-
-                .then(data => {
-
-                    if (data.status === 'success') {
-
-                        location.reload(); // Refresh to update list and total
-
-                    } else {
-
-                        alert(data.message);
-
-                    }
-
-                })
-
-                .catch(err => console.error('Error:', err));
-
-        }
-
-    }
-
-</script>

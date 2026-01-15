@@ -1,3 +1,13 @@
+html, body,
+body.home,
+body.contact,
+body.product,
+body.productDetail,
+body.about {
+    background-color: #cecdcdff !important;
+}
+
+
 .homeimg {
 
     width: 100%;
@@ -371,7 +381,7 @@
 }
 
 /*==Hero Section==*/
- .hero-section {
+.hero-section {
     position: relative;
     width: 100%;
     min-height: 100svh;
@@ -381,21 +391,21 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-  }
+}
 
-  .hero-media {
+.hero-media {
     max-width: 100%;
     max-height: 100%;
     width: auto;
     height: auto;
     object-fit: contain;
     /* 🔑 no crop ever */
-  }
+}
 
 
 
-  /* Overlay container */
-  .hero-overlay {
+/* Overlay container */
+.hero-overlay {
     position: absolute;
     inset: 0;
     display: flex;
@@ -404,11 +414,11 @@
     justify-content: center;
     z-index: 2;
     pointer-events: none;
-  }
+}
 
 
-  /* Title */
-  .hero-title {
+/* Title */
+.hero-title {
     font-family: 'Bebas Neue', 'Oswald', sans-serif;
     font-size: clamp(3rem, 8vw, 6rem);
     letter-spacing: 0.15em;
@@ -416,26 +426,26 @@
     display: flex;
     gap: 1.2rem;
     text-transform: uppercase;
-  }
+}
 
-  .hero-title span {
+.hero-title span {
     display: inline-block;
     opacity: 0;
     transform: translateY(40px);
     animation:
-      heavyLift 1.4s ease-out forwards,
-      glowFlicker 6s ease-in-out infinite;
+        heavyLift 1.4s ease-out forwards,
+        glowFlicker 6s ease-in-out infinite;
     animation-delay: 0s, 1.6s;
     animation-timing-function: cubic-bezier(.4, 0, .6, 1);
-  }
+}
 
-  .hero-title span:nth-child(2) {
+.hero-title span:nth-child(2) {
     animation-delay: 0.35s, 2s;
-  }
+}
 
 
-  /* Tagline */
-  .hero-tagline {
+/* Tagline */
+.hero-tagline {
     margin-top: 1rem;
     font-size: 0.9rem;
     letter-spacing: 0.3em;
@@ -444,92 +454,92 @@
     opacity: 0;
     animation: fadeIn 1s ease forwards;
     animation-delay: 1.2s;
-  }
+}
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
     .hero-section {
-      aspect-ratio: 4 / 5;
+        aspect-ratio: 4 / 5;
     }
 
     .hero-media {
-      object-position: center top;
+        object-position: center top;
     }
-  }
+}
 
 
-  /* Animations */
-  @keyframes heavyLift {
+/* Animations */
+@keyframes heavyLift {
     0% {
-      opacity: 0;
-      transform: translateY(40px);
-      text-shadow: none;
+        opacity: 0;
+        transform: translateY(40px);
+        text-shadow: none;
     }
 
     60% {
-      opacity: 1;
-      transform: translateY(-6px);
+        opacity: 1;
+        transform: translateY(-6px);
     }
 
     100% {
-      opacity: 1;
-      transform: translateY(0);
-      text-shadow:
-        0 0 8px rgba(255, 255, 255, 0.25),
-        0 0 25px rgba(255, 255, 255, 0.08);
+        opacity: 1;
+        transform: translateY(0);
+        text-shadow:
+            0 0 8px rgba(255, 255, 255, 0.25),
+            0 0 25px rgba(255, 255, 255, 0.08);
     }
-  }
+}
 
-  @keyframes fadeIn {
+@keyframes fadeIn {
     to {
-      opacity: 1;
+        opacity: 1;
     }
 
-  }
+}
 
-  /* Slow glowing blink effect */
-  @keyframes glowFlicker {
+/* Slow glowing blink effect */
+@keyframes glowFlicker {
     0% {
-      text-shadow:
-        0 0 10px rgba(255, 255, 255, 0.45),
-        0 0 28px rgba(255, 255, 255, 0.28);
-      opacity: 1;
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, 0.45),
+            0 0 28px rgba(255, 255, 255, 0.28);
+        opacity: 1;
     }
 
     20% {
-      text-shadow:
-        0 0 14px rgba(255, 255, 255, 0.6),
-        0 0 40px rgba(255, 255, 255, 0.38);
-      opacity: 0.95;
+        text-shadow:
+            0 0 14px rgba(255, 255, 255, 0.6),
+            0 0 40px rgba(255, 255, 255, 0.38);
+        opacity: 0.95;
     }
 
     40% {
-      text-shadow:
-        0 0 8px rgba(255, 255, 255, 0.4),
-        0 0 22px rgba(255, 255, 255, 0.22);
-      opacity: 0.9;
+        text-shadow:
+            0 0 8px rgba(255, 255, 255, 0.4),
+            0 0 22px rgba(255, 255, 255, 0.22);
+        opacity: 0.9;
     }
 
     60% {
-      text-shadow:
-        0 0 16px rgba(255, 255, 255, 0.7),
-        0 0 48px rgba(255, 255, 255, 0.45);
-      opacity: 1;
+        text-shadow:
+            0 0 16px rgba(255, 255, 255, 0.7),
+            0 0 48px rgba(255, 255, 255, 0.45);
+        opacity: 1;
     }
 
     80% {
-      text-shadow:
-        0 0 12px rgba(255, 255, 255, 0.55),
-        0 0 36px rgba(255, 255, 255, 0.32);
-      opacity: 0.94;
+        text-shadow:
+            0 0 12px rgba(255, 255, 255, 0.55),
+            0 0 36px rgba(255, 255, 255, 0.32);
+        opacity: 0.94;
     }
 
     100% {
-      text-shadow:
-        0 0 10px rgba(255, 255, 255, 0.45),
-        0 0 28px rgba(255, 255, 255, 0.28);
-      opacity: 1;
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, 0.45),
+            0 0 28px rgba(255, 255, 255, 0.28);
+        opacity: 1;
     }
-  }
+}
 
 .about body {
 
@@ -1911,95 +1921,55 @@ body.productDetail {
 }
 
 
-
 .addtobag_btn {
-
     flex: 1;
-
+    width: 100%; /* Added to ensure it fills the drawer width */
     padding: 12px;
-
     font-size: 16px;
-
+    font-weight: 600;
+    color: #333;
     background: #e0e0e0;
-
     box-shadow:
-
         4px 4px 8px #c8c8c8,
-
         -4px -4px 8px #f8f8f8;
-
     transition: all 0.2s ease;
-
     cursor: pointer;
-
     border-radius: 12px;
-
     border: none;
-
+    text-align: center;
 }
-
-
 
 .addtobag_btn:active {
-
-    box-shadow: inset 5px 5px 15px #bebebe, inset -5px -5px 15px #ffffff;
-
-
-
+    box-shadow: inset 5px 5px 15px #fcfbfb, inset -5px -5px 15px #ffffff;
+    transform: scale(0.98);
 }
 
 
 
-.related-section {
+   .related-section {
+            padding: 5px 80px;
+        }
 
-    padding: 5px 80px;
-
-}
-
-
-
-.related-section-header {
-
+      .related-section-header {
     display: flex;
-
     align-items: center;
-
     gap: 16px;
-
-    margin-bottom: 2px;
-
 }
-
-
-
-.related-section-header h2 {
-
-    font-size: 26px;
-
-    margin: 0;
-
-}
-
-
 
 .related-section-line {
-
-    height: 1px !important;
-
-    /* Force it to be a thin line */
-
-    background: rgba(0, 0, 0, 0.1) !important;
-
-    margin: 10px 0 20px 0 !important;
-
-    padding: 0 !important;
-
-    /* Remove any padding causing the 'blue' height */
-
-    width: 100%;
-
+    flex: 1;     
+    height: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    display: block;   
 }
 
+
+        .related-section-header h2 {
+            font-size: 26px;
+            margin: 0;
+        }
+
+        
 
 
 @media (max-width: 950px) {
@@ -2690,9 +2660,9 @@ body.productDetail {
 
     box-shadow:
 
-        4px 4px 8px #c8c8c8,
+        4px 4px 8px #b7b6b6,
 
-        -4px -4px 8px #f8f8f8;
+        -4px -4px 8px #eae9e9;
 
     transition: all 0.2s ease;
 
@@ -3133,4 +3103,108 @@ body.productDetail {
 
     background: #333;
 
+}
+
+/* Custom Delete Confirmation Modal */
+#deleteConfirmModal .modal-content {
+    border-radius: 12px;
+    /* Smooth rounded corners */
+    border: none;
+}
+
+#deleteConfirmModal .modal-header {
+    padding: 20px 20px 10px;
+}
+
+#deleteConfirmModal .modal-title {
+    font-size: 1.25rem;
+    color: #333;
+}
+
+#deleteConfirmModal .modal-body {
+    font-size: 1rem;
+    color: #666;
+    /* Matching the muted text in your image */
+    padding: 10px 20px 25px;
+}
+
+#deleteConfirmModal .modal-footer {
+    padding: 0 20px 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* "Yes, Remove" Button (The Blue Button) */
+#deleteConfirmModal .btn-primary {
+    background-color: #2196F3;
+    /* Bright blue from your screenshot */
+    border: none;
+    font-weight: 500;
+    padding: 8px 24px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+#deleteConfirmModal .btn-primary:hover {
+    background-color: #1976D2;
+    /* Slightly darker blue on hover */
+}
+
+/* "Cancel" Button (The Grey Button) */
+#deleteConfirmModal .btn-light {
+    background-color: #e0e0e0;
+    border: none;
+    color: #444;
+    font-weight: 500;
+    padding: 8px 24px;
+    border-radius: 6px;
+}
+
+#deleteConfirmModal .btn-light:hover {
+    background-color: #d5d5d5;
+}
+
+/* Style for the 'X' close button */
+#deleteConfirmModal .btn-close {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+#cartOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Change the 0.5 to a lower number like 0.1 if you want it even lighter */
+    background: rgba(0, 0, 0, 0.3);
+
+    /* This line explicitly removes the blur effect */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+
+    z-index: 998;
+    display: none;
+    cursor: pointer;
+}
+
+#cartOverlay.active {
+    display: block;
+}
+
+#cartDrawer {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    /* Adjust based on your drawer width */
+    width: 400px;
+    height: 100vh;
+    z-index: 999;
+    /* Higher than overlay */
+    transition: 0.3s ease;
+    background: rgb(233, 231, 231);
+}
+
+#cartDrawer.open {
+    right: 0;
 }

@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 include '../../BackEnd/config/dbconfig.php';
@@ -22,17 +23,31 @@ $result = mysqli_stmt_get_result($stmt);
 $html = "";         
 $drawer_html = "";  
 $total = 0;
+$total_quantity = 0; /*Shopping cart sum(KPS)*/
 
 
 while ($item = mysqli_fetch_assoc($result)) {
     $subtotal = $item['price'] * $item['quantity'];
     $total += $subtotal;
 
+    $total_quantity += (int)$item['quantity'];/* Shopping cart sum(KPS)*/
+
+
     
 
 
-    $drawer_html .= "
-<div class='cart-row mb-3 border-bottom pb-2' style='display: flex !important; align-items: center; justify-content: space-between; width: 100%; min-height: 70px; background: #fff;'>
+     $html .= "
+    <div class='cart-item'> 
+        <img src='../uploads/products/{$item['product_id']}_{$item['image']}' width='50'>
+        <div>
+            <h6>{$item['product_name']}</h6>
+            <small>Qty: {$item['quantity']} | Size: {$item['size']}</small>
+            <p>$" . number_format($subtotal, 2) . "</p>
+        </div>
+    </div>";
+
+       $drawer_html .= "
+    <div class='cart-row mb-3 border-bottom pb-2' style='display: flex !important; align-items: center; justify-content: space-between; width: 100%; min-height: 70px; background: #fff;'>
     
     <div style='display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;'>
         <img src='../uploads/products/{$item['product_id']}_{$item['image']}' 
@@ -44,24 +59,21 @@ while ($item = mysqli_fetch_assoc($result)) {
             </h6>
             <small style='color: #666; font-size: 0.65rem; display: block;'>Qty: {$item['quantity']} | Size: {$item['size']}</small>
             <div style='font-weight: bold; font-size: 0.8rem; color: #bf953f; margin-top: 2px;'>$" . number_format($subtotal, 2) . "</div>
->>>>>>> 9582d6ec63f138bbb4b4e38c2332957e675ecebf
+
         </div>
     </div>
 
-    <div style='flex-shrink: 0; margin-left: 10px; width: 30px; display: flex; justify-content: center;'>
-        <button type='button' 
-                class='remove-action-btn'
-                style='border: none !important; background: red !important; color: #dc3545 !important; cursor: pointer; padding: 10px; display: block !important; opacity: 1 !important; visibility: visible !important;'
-                onclick='handleRemove({$item['cart_id']})'>
-            <i class='fas fa-times-circle' style='font-size: 1.2rem;'></i>
-        </button>
-    </div>
-
+   <div style='flex-shrink: 0; margin-left: 10px; width: 30px; display: flex; justify-content: center; align-items: center;'>
+    <button type='button' 
+            class='remove-action-btn'
+            style='border: none; background:white; color: #999; cursor: pointer; padding: 15px; transition: all 0.3s ease;'
+            onclick='handleRemove({$item['cart_id']})'
+            title='Remove Item'>
+      <i class='fa-solid fa-trash' style='font-size: 24px;'></i>
+    </button>
+</div>
 </div>";
 }
-
-
-
 
 // ... (Rest of the code)
 
@@ -72,6 +84,7 @@ echo json_encode([
     'html' => $html,
     'drawer_html' => $drawer_html,
     'footer' => $footer,
-    'total' => $total
+    'total' => $total,
+    'total_count' => $total_quantity /*Shopping_cart sum(KPS)*/
 ]);
 ?>

@@ -1,4 +1,36 @@
-// This function is now the ONLY source for building the Bag UI
+// Global Toast Notification Helper
+window.showNotification = function (message, type = 'success') {
+    // Check if a container already exists, if not create one
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'primary' : 'danger'} shadow-lg`;
+    toast.style.cssText = 'min-width: 250px; border-radius: 10px; border: none; margin-bottom: 10px; animation: slideIn 0.3s ease-out;';
+    toast.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i>
+            <div>${message}</div>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = '0.5s';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+};
+
+// Add this CSS animation to your style.css
+// @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 function refreshCartDrawer(supplierId) {
     const container = document.getElementById('cartItemsContainer');
     const footer = document.getElementById('cartFooter');
@@ -37,14 +69,15 @@ function refreshCartDrawer(supplierId) {
                 });
 
                 container.innerHTML = html;
+                // Inside refreshCartDrawer function, find where footer.innerHTML is set:
                 footer.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="fs-5">Total:</span>
-                        <span class="fs-5 fw-bold">$${data.total}</span>
-                    </div>
-                    <button class="btn w-100 py-3 fw-bold rounded-3 shadow-sm" style="background-color: #f0f0f0; color: #333; border: none;" onclick="window.location.href='?supplier_id=${supplierId}&page=checkout'">
-                        Checkout
-                    </button>`;
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="fs-5">Total:</span>
+        <span class="fs-5 fw-bold">$${data.total}</span>
+    </div>
+    <button class="addtobag_btn w-100" onclick="window.location.href='?supplier_id=${supplierId}&page=checkout'">
+        Checkout
+    </button>`;
 
                 if (badge) badge.innerText = data.itemCount;
             } else {
@@ -55,34 +88,58 @@ function refreshCartDrawer(supplierId) {
         })
         .catch(err => console.error('Error fetching cart:', err));
 }
+// Variable to store the IDs temporarily while the modal is open
+let itemToDelete = null;
+let supplierToDelete = null;
 
-// MAKE REMOVE ITEM GLOBAL SO ONCLICK CAN FIND IT
-// Keep this at the very top of script.js (outside any other functions)
 window.removeItem = function (cartId, supplierId) {
-    if (!confirm('Remove this item?')) return;
+    itemToDelete = cartId;
+    supplierToDelete = supplierId;
 
-    const formData = new FormData();
-    formData.append('cart_id', cartId);
-
-    fetch('../utils/removeFromCart.php', {
-        method: 'POST',
-        body: formData
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                refreshCartDrawer(supplierId); // Refresh the UI
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(err => console.error('Error:', err));
+    const modalBtn = document.getElementById('confirmDeleteBtn');
+    if (modalBtn) {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        deleteModal.show();
+    }
 };
 
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const supplierId = urlParams.get('supplier_id');
 
+    // --- MOVE THE MODAL LISTENER INSIDE HERE ---
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            if (!itemToDelete) return;
+
+            const formData = new FormData();
+            formData.append('cart_id', itemToDelete);
+
+            fetch('../utils/removeFromCart.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const modalElement = document.getElementById('deleteConfirmModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) modalInstance.hide();
+
+                        if (window.location.search.includes('page=cart')) {
+                            location.reload();
+                        } else {
+                            refreshCartDrawer(supplierToDelete);
+                        }
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        });
+    }
+    // --- YOUR EXISTING DRAWER CODE ---
     const trigger = document.getElementById('cartIconTrigger');
     const closeBtn = document.getElementById('closeCart');
     const drawer = document.getElementById('cartDrawer');
@@ -98,6 +155,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
+            drawer.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+    // --- NEW: This handles clicking outside the bag ---
+    if (overlay) {
+        overlay.addEventListener('click', function () {
+            console.log("Overlay clicked - closing drawer"); // This helps you debug
             drawer.classList.remove('open');
             overlay.classList.remove('active');
         });

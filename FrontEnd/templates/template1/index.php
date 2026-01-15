@@ -203,6 +203,26 @@ $page_path = __DIR__ . "/pages/$page.php";
 
     <script src="../templates/<?= basename(__DIR__) ?>/script.js"></script>
 
+
+
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-muted">
+        Are you sure you want to remove this product from your bag?
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-primary px-4" id="confirmDeleteBtn">Yes, Remove</button>
+        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 
 </html>
