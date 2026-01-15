@@ -183,7 +183,7 @@ $colors = array_unique($colors);
 
 
     
-    document.getElementById('addToCartBtn').addEventListener('click', function () {
+ document.getElementById('addToCartBtn').addEventListener('click', function () {
         const selectedSize = sizeSelect.value;
         const colorInput = document.querySelector('input[name="color_option"]:checked');
         const selectedColor = colorInput ? colorInput.value : null;
@@ -192,6 +192,10 @@ $colors = array_unique($colors);
         const supplierId = document.getElementById('supplier_id').value;
 
        
+        console.log("Selected Color:", selectedColor);
+        console.log("Selected Size:", selectedSize);
+        console.log("All Variants:", allVariants);
+
         if (!selectedColor) {
             Swal.fire({ icon: 'warning', title: 'Select Color', text: 'Please choose a color.' });
             return; 
@@ -202,15 +206,21 @@ $colors = array_unique($colors);
             return; 
         }
 
-       
-        const variant = allVariants.find(v => v.size === selectedSize && v.color === selectedColor);
+        
+        const variant = allVariants.find(v => 
+            String(v.size).trim() === String(selectedSize).trim() && 
+            String(v.color).trim() === String(selectedColor).trim()
+        );
 
         if (!variant) {
+            
+            console.error("No matching variant found for:", selectedColor, selectedSize);
+            
             Swal.fire({ icon: 'error', title: 'Not Available', text: 'This combination is out of stock.' });
             return;
         }
+        // ------------------------------------------
 
-      
         const formData = new FormData();
         formData.append('variant_id', variant.variant_id);
         formData.append('supplier_id', supplierId);
@@ -297,4 +307,31 @@ $colors = array_unique($colors);
 
     
     window.addEventListener('DOMContentLoaded', refreshBag);
+</script>
+<script>
+function updateCartQty(cartId, newQty) {
+    if (newQty < 1) {
+        handleRemove(cartId); 
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('cart_id', cartId);
+    formData.append('quantity', newQty);
+
+    fetch('../utils/update_cart_qty.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            
+            refreshBag(); 
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
+    })
+    .catch(err => console.error("Error updating quantity:", err));
+}
 </script>

@@ -1,4 +1,6 @@
+
 <?php
+
 include '../../BackEnd/config/dbconfig.php';
 
 $customer_id = $_SESSION['customer_id'] ?? 1; 
@@ -16,12 +18,16 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 $grand_total = 0;
-$item_count = 0;
+$item_count = mysqli_num_rows($result);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Selection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --primary: #2c3e50;
@@ -45,66 +51,38 @@ $item_count = 0;
             transition: transform 0.2s ease;
         }
         
-        .selection-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .supplier-badge {
-            background: linear-gradient(135deg, var(--accent), #2980b9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
         .product-image {
             width: 100px;
             height: 100px;
             border-radius: 12px;
             object-fit: cover;
             border: 1px solid var(--border);
-            transition: transform 0.3s ease;
-        }
-        
-        .product-image:hover {
-            transform: scale(1.05);
         }
         
         .quantity-badge {
             background: var(--light-bg);
             border: 2px solid var(--accent);
             color: var(--accent);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         
         .remove-btn {
             color: var(--danger);
             background: none;
             border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            padding: 8px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            transition: 0.2s;
         }
-        
-        .remove-btn:hover {
-            background: rgba(231, 76, 60, 0.1);
-            transform: scale(1.05);
-        }
+
+        .remove-btn:hover { transform: scale(1.1); }
         
         .checkout-btn {
             background: linear-gradient(135deg, var(--primary), #1a2530);
@@ -113,92 +91,33 @@ $item_count = 0;
             padding: 16px;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
+            transition: 0.3s;
         }
         
         .checkout-btn:hover {
             background: linear-gradient(135deg, var(--accent), #2980b9);
-            transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
         }
-        
-        .checkout-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .empty-state {
-            padding: 60px 20px;
-            text-align: center;
-            color: #7f8c8d;
-        }
-        
-        .empty-state-icon {
-            font-size: 4rem;
-            color: #bdc3c7;
-            margin-bottom: 20px;
-        }
-        
-        .price-tag {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .variant-info {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        
-        .variant-badge {
-            background: var(--light-bg);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #5d6d7e;
-        }
-        
+
         .header-gradient {
-            background-color: gainsboro;
-            padding: 30px 0;
+            background: #e9ecef;
+            padding: 40px 0;
             margin-bottom: 30px;
-            border-radius: 0 0 20px 20px;
+            border-radius: 0 0 25px 25px;
         }
-        
-        .floating-action {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-        }
-        
-        @media (max-width: 768px) {
-            .product-image {
-                width: 80px;
-                height: 80px;
-            }
+
+        .variant-badge {
+            background: #f0f2f5;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            color: #666;
             
-            .header-gradient {
-                padding: 20px 0;
-                margin-bottom: 20px;
-            }
-            
-            .floating-action {
-                bottom: 20px;
-                right: 20px;
-            }
         }
     </style>
 </head>
@@ -208,96 +127,60 @@ $item_count = 0;
     <div class="container">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-              <h1 class="mb-2 text-white" style="font-size: 2.5rem;">My Selection</h1>
-                <div class="d-flex align-items-center gap-3">
-                    <!--<span class="supplier-badge">
-                        <i class="fas fa-store"></i>
-                        Supplier #<?= $supplier_id ?>
-                    </span>-->
-                    <span class="text-black-60">
-                        <i class="fas fa-shopping-bag me-2"></i>
-                        <?= mysqli_num_rows($result) ?> items
-                    </span>
-                </div>
+                <h1 class="mb-1 fw-bold">My Selection</h1>
+                <span class="text-muted">
+                    <i class="fas fa-shopping-bag me-2"></i><?= $item_count ?> items in your bag
+                </span>
             </div>
-            <a href="javascript:history.back()" class="btn btn-light rounded-pill px-4">
+            <a href="javascript:history.back()" class="btn btn-white shadow-sm rounded-pill px-4">
                 <i class="fas fa-arrow-left me-2"></i>Back
             </a>
         </div>
     </div>
 </div>
 
-<div class="container">
+<div class="container mb-5">
     <div class="row g-4">
-        <!-- Items List -->
         <div class="col-lg-8">
-            <?php if (mysqli_num_rows($result) > 0): ?>
-                <div class="selection-card p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="mb-0">Selected Items</h3>
-                        <span class="price-tag">
-                            <i class="fas fa-tag me-2"></i>
-                            <?= mysqli_num_rows($result) ?> Products
-                        </span>
-                    </div>
-                    
-                    <div class="row g-4">
+            <?php if ($item_count > 0): ?>
+                <div class="selection-card p-4">
+                    <h4 class="fw-bold mb-4">Selected Items</h4>
+                    <div class="row g-3">
                         <?php while ($item = mysqli_fetch_assoc($result)): 
                             $subtotal = $item['price'] * $item['quantity'];
                             $grand_total += $subtotal;
-                            $item_count++;
                         ?>
-                        <div class="col-12">
-                            <div class="d-flex align-items-center p-3 border rounded-3 bg-white position-relative">
-                                <!-- Product Image -->
+                        <div class="col-12 border-bottom pb-3 mb-3">
+                            <div class="d-flex align-items-center position-relative">
                                 <div class="position-relative me-3">
-                                    <img src="../uploads/products/<?= $item['product_id'] ?>_<?= $item['image'] ?>" 
-                                         class="product-image" 
-                                         alt="<?= htmlspecialchars($item['product_name']) ?>">
-                                    <div class="quantity-badge position-absolute top-0 start-100 translate-middle">
+                                    <img src="../uploads/products/<?= $item['product_id'] ?>_<?= $item['image'] ?>" class="product-image">
+                                    <div class="quantity-badge position-absolute top-0 start-100 translate-middle shadow-sm">
                                         <?= $item['quantity'] ?>
                                     </div>
                                 </div>
                                 
-                                <!-- Product Details -->
                                 <div class="flex-grow-1">
-                                    <h5 class="fw-bold mb-1"><?= htmlspecialchars($item['product_name']) ?></h5>
-                                    
-                                    <div class="variant-info">
-                                        <?php if ($item['size']): ?>
-                                            <span class="variant-badge">
-                                                <i class="fas fa-ruler me-1"></i><?= $item['size'] ?>
-                                            </span>
-                                        <?php endif; ?>
-                                        <?php if ($item['color']): ?>
-                                            <span class="variant-badge">
-                                                <i class="fas fa-palette me-1"></i><?= $item['color'] ?>
-                                            </span>
-                                        <?php endif; ?>
+                                    <h6 class="fw-bold mb-1"><?= htmlspecialchars($item['product_name']) ?></h6>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <?php if ($item['size']): ?> <span class="variant-badge">Size: <?= $item['size'] ?></span> <?php endif; ?>
+                                        <?php if ($item['color']): ?> <span class="variant-badge">Color: <?= $item['color'] ?></span> <?php endif; ?>
                                     </div>
                                     
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <div class="h5 fw-bold text-accent mb-0">
-                                            $<?= number_format($item['price'], 2) ?>
-                                            <small class="text-muted d-block fs-6 fw-normal">
-                                                Each
-                                            </small>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center border rounded-pill bg-light">
+                                            <button onclick="updateCartQty(<?= $item['cart_id'] ?>, <?= $item['quantity'] - 1 ?>)" class="btn btn-sm px-3"><i class="fas fa-minus small"></i></button>
+                                            <span class="fw-bold px-2"><?= $item['quantity'] ?></span>
+                                            <button onclick="updateCartQty(<?= $item['cart_id'] ?>, <?= $item['quantity'] + 1 ?>)" class="btn btn-sm px-3"><i class="fas fa-plus small"></i></button>
                                         </div>
-                                        
-                                        <div class="h5 fw-bold mb-0">
-                                            $<?= number_format($subtotal, 2) ?>
-                                            <small class="text-muted d-block fs-6 fw-normal text-end">
-                                                Total
-                                            </small>
+                                        <div class="text-end">
+                                            <span class="text-muted small d-block">Subtotal</span>
+                                            <span class="fw-bold text-primary">$<?= number_format($subtotal, 2) ?></span>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Remove Button -->
-                                <button onclick="handleRemove(<?= $item['cart_id'] ?>)" 
-                                        class="remove-btn position-absolute top-0 end-0 m-3">
-                                    <i class="fas fa-trash"></i>
-                                    <span class="d-none d-md-inline">Remove</span>
+
+                                <button onclick="handleRemove(<?= $item['cart_id'] ?>)" class="remove-btn ms-3">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
@@ -305,149 +188,232 @@ $item_count = 0;
                     </div>
                 </div>
             <?php else: ?>
-                <div class="selection-card">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
-                        <h3 class="mb-3">Your Selection is Empty</h3>
-                        <p class="text-muted mb-4">No items found from this supplier.</p>
-                       <!-- <a href="products.php" class="btn btn-primary px-4 py-2 rounded-pill">
-                            <i class="fas fa-store me-2"></i>
-                            Browse Products
-                        </a>-->
-                    </div>
+                <div class="selection-card p-5 text-center">
+                    <i class="fas fa-shopping-cart fa-3x text-light mb-3"></i>
+                    <h4>Your cart is empty</h4>
+                    <p class="text-muted">Looks like you haven't added anything yet.</p>
                 </div>
             <?php endif; ?>
         </div>
         
-        <!-- Order Summary -->
-       <div class="col-lg-4">
-    <div class="selection-card p-4 sticky-top" style="top: 20px; z-index: 0;">
-        <h4 class="fw-bold mb-4 pb-3 border-bottom">
-            <i class="fas fa-receipt me-2"></i>
-            Order Summary
-        </h4>
-        
-        </div>
-
+        <div class="col-lg-4">
+            <div class="selection-card p-4 sticky-top" style="z-index:0;">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom">Order Summary</h4>
                 
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted">Items (<?= $item_count ?>)</span>
-                        <span class="fw-semibold">$<?= number_format($grand_total, 2) ?></span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-muted">Shipping</span>
-                        <span class="fw-semibold text-success">
-                            <i class="fas fa-check-circle me-1"></i>
-                            Calculated at checkout
-                        </span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                        <span class="text-muted">Tax</span>
-                        <span class="fw-semibold">$0.00</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-4 pt-3">
-                        <span class="h5 fw-bold">Total Amount</span>
-                        <span class="h3 fw-bold text-primary">$<?= number_format($grand_total, 2) ?></span>
-                    </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Subtotal (<?= $item_count ?> items)</span>
+                    <span class="fw-bold">$<?= number_format($grand_total, 2) ?></span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Shipping</span>
+                    <span class="text-success small">Calculated at checkout</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="h5 fw-bold mb-0">Total</span>
+                    <span class="h4 fw-bold text-primary mb-0">$<?= number_format($grand_total, 2) ?></span>
                 </div>
                 
-                <button class="checkout-btn mb-3" 
+                <button class="checkout-btn mb-2" 
                         onclick="location.href='checkout.php?supplier_id=<?= $supplier_id ?>'"
                         <?= $grand_total == 0 ? 'disabled' : '' ?>>
-                    <i class="fas fa-lock"></i>
-                    PROCEED TO SECURE CHECKOUT
+                    <i class="fas fa-shield-alt"></i> PROCEED TO CHECKOUT
                 </button>
                 
-             </div>
-
-
-<!-- Floating Action Button for Mobile -->
-<?php if ($grand_total > 0): ?>
-<div class="floating-action d-lg-none">
-    <div class="card shadow-lg border-0 rounded-3">
-        <div class="card-body p-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">Total:</span>
-                <span class="h5 mb-0 fw-bold text-primary">$<?= number_format($grand_total, 2) ?></span>
             </div>
-            <button class="checkout-btn" 
-                    onclick="location.href='checkout.php?supplier_id=<?= $supplier_id ?>'">
-                <i class="fas fa-bolt"></i>
-                CHECKOUT
-            </button>
         </div>
     </div>
 </div>
-<?php endif; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function handleRemove(cartId) {
-        Swal.fire({
-            title: 'Remove Item?',
-            text: "This item will be removed from your selection",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#e74c3c',
-            cancelButtonColor: '#95a5a6',
-            confirmButtonText: 'Yes, remove it',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true,
-            background: '#fff',
-            iconColor: '#e74c3c'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const formData = new FormData();
-                formData.append('cart_id', cartId);
-                formData.append('supplier_id', <?= $supplier_id ?>);
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
 
-                fetch('../utils/removeFromCart.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Show success message
-                        Swal.fire({
-                            title: 'Removed!',
-                            text: 'Item has been removed',
-                            icon: 'success',
-                            confirmButtonColor: '#27ae60',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('Error', data.message || 'Something went wrong', 'error');
-                    }
-                })
-                .catch(error => {
-                    Swal.fire('Error', 'Network error occurred', 'error');
-                });
-            }
-        });
+<script>
+function updateCartQty(cartId, newQty) {
+    if (newQty < 1) {
+        handleRemove(cartId);
+        return;
     }
-    
-    // Add animation on scroll
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.selection-card');
-        cards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            card.classList.add('animate__animated',);
-        });
+
+    const formData = new FormData();
+    formData.append('cart_id', cartId);
+    formData.append('quantity', newQty);
+
+    // Path ကို သေချာစစ်ပါ။ /malltiverse/frontend/ ဆိုတာ Project folder အမည်ဖြစ်ရပါမယ်။
+    // အကယ်၍ 404 ပြနေသေးရင် 'utils/update_cart_qty.php' (သို့) '/malltiverse/frontend/utils/update_cart_qty.php' စမ်းကြည့်ပါ
+    fetch('../utils/update_cart_qty.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => {
+        if(!res.ok) throw new Error('File not found (404)');
+        return res.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload(); 
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
+    })
+    .catch(err => {
+        console.error("Error details:", err);
+        Swal.fire('Error', 'Could not update quantity. Please check if the file exists.', 'error');
     });
+}
+
+function handleRemove(cartId) {
+    Swal.fire({
+        title: 'Remove Item?',
+        text: "Are you sure you want to remove this?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        confirmButtonText: 'Yes, remove it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('cart_id', cartId);
+            fetch('../utils/removeFromCart.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                }
+            });
+        }
+    });
+}
 </script>
 
-<!-- Add animate.css for animations -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</body>
+</html>
+<!DOCTYPE html><!--Toast Notification-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Selection</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
+    <style>
+     
+        .swal2-popup { font-family: 'Segoe UI', sans-serif !important; }
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --light-bg: #f8f9fa;
+            --border: #eaeaea;
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+      
+        body { background-color: #fafafa; font-family: 'Segoe UI', sans-serif; }
+        .selection-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .product-image { width: 100px; height: 100px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); }
+        .quantity-badge { background: var(--light-bg); border: 2px solid var(--accent); color: var(--accent); width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; }
+        .checkout-btn { background: linear-gradient(135deg, var(--primary), #1a2530); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 600; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .header-gradient { background: #e9ecef; padding: 40px 0; margin-bottom: 30px; border-radius: 0 0 25px 25px; }
+        .variant-badge { background: #f0f2f5; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; color: #666; }
+        .remove-btn { color: var(--danger); background: none; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<script>
+
+function updateCartQty(cartId, newQty) {
+    
+    if (newQty < 1) {
+       
+        handleRemove(cartId);
+        return;
+    }
+
+   
+    Swal.fire({
+        title: 'Updating...',
+        text: 'Please wait a moment',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    const formData = new FormData();
+    formData.append('cart_id', cartId);
+    formData.append('quantity', newQty);
+
+    fetch('../utils/update_cart_qty.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 800,
+                timerProgressBar: true
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Updated!'
+            }).then(() => {
+                location.reload();
+                
+                
+            });
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire('Error', 'Connection failed', 'error');
+    });
+}
+// ၂။ Remove Item Function
+function handleRemove(cartId) {
+    Swal.fire({
+        title: 'Remove Item?',
+        text: "Are you sure you want to delete this?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#2c3e50',
+        confirmButtonText: 'Yes, remove it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.showLoading(); 
+            const formData = new FormData();
+            formData.append('cart_id', cartId);
+
+            fetch('../utils/removeFromCart.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    Swal.fire('Error', 'Could not remove item', 'error');
+                }
+            });
+        }
+    });
+}
+</script>
 </body>
 </html>
