@@ -1,4 +1,4 @@
-<?php?>
+
 
 <section class="hero-container <?= htmlspecialchars($supplier['description']) ?>">
     <div class="hero-content">
@@ -20,8 +20,16 @@
 
     <div class="hero-banner">
         <div class="banner-shape-wrapper">
-            <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>"
-                alt="<?= htmlspecialchars($supplier['company_name']) ?> banner" class="fashion-banner">
+
+
+            <?php if ($shop_assets['template_type'] == 'video'): ?>
+                <video class="fashion-banner" autoplay muted loop playsinline
+                    src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1?>"></video>
+
+            <?php else: ?>
+                <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>" alt="Hero Banner" class="fashion-banner"
+                    style="transform: scale(1.1);">
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -30,24 +38,20 @@
     <div class="container">
         <div class="row align-items-center">
 
-                        <ul class="section-features mt-4">
-                        <?php foreach (($section['features'] ?? []) as $feature): ?>
-                            <li>
-                                <span class="check-icon"><i class="fa-solid fa-check"></i></span>
-                                <?= htmlspecialchars($feature) ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+            <ul class="section-features mt-4">
+                <?php foreach (($section['features'] ?? []) as $feature): ?>
+                    <li>
+                        <span class="check-icon"><i class="fa-solid fa-check"></i></span>
+                        <?= htmlspecialchars($feature) ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
 
-                    
-                </div>
-            </div>
+
         </div>
+    </div>
+    </div>
 
     </div>
     </div>
 </section>
-
-        
-
-

@@ -171,7 +171,7 @@ $item_count = 0;
         }
         
         .header-gradient {
-            background: linear-gradient(135deg, var(--primary), #34495e);
+            background-color: gainsboro;
             padding: 30px 0;
             margin-bottom: 30px;
             border-radius: 0 0 20px 20px;
@@ -214,7 +214,7 @@ $item_count = 0;
                         <i class="fas fa-store"></i>
                         Supplier #<?= $supplier_id ?>
                     </span>-->
-                    <span class="text-white-50">
+                    <span class="text-black-60">
                         <i class="fas fa-shopping-bag me-2"></i>
                         <?= mysqli_num_rows($result) ?> items
                     </span>
@@ -441,7 +441,7 @@ $item_count = 0;
         const cards = document.querySelectorAll('.selection-card');
         cards.forEach((card, index) => {
             card.style.animationDelay = `${index * 0.1}s`;
-            card.classList.add('animate__animated', 'animate__fadeInUp');
+            card.classList.add('animate__animated',);
         });
     });
 </script>

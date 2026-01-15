@@ -13,7 +13,6 @@
         <div class="visual-side">
             <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner5?>">
             <div class="overlay">
-                <h2><?= htmlspecialchars($supplier['tags']) ?></h2>
                 <p><?= htmlspecialchars($supplier['description']) ?></p>
             </div>
         </div>
