@@ -1,3 +1,13 @@
+html, body,
+body.home,
+body.contact,
+body.product,
+body.productDetail,
+body.about {
+    background-color: #cecdcdff !important;
+}
+
+
 .homeimg {
 
     width: 100%;
@@ -1936,56 +1946,30 @@ body.productDetail {
 
 
 
-.related-section {
+   .related-section {
+            padding: 5px 80px;
+        }
 
-    padding: 5px 80px;
-
-}
-
-
-
-.related-section-header {
-
+      .related-section-header {
     display: flex;
-
     align-items: center;
-
     gap: 16px;
-
-    margin-bottom: 2px;
-
 }
-
-
-
-.related-section-header h2 {
-
-    font-size: 26px;
-
-    margin: 0;
-
-}
-
-
 
 .related-section-line {
-
-    height: 1px !important;
-
-    /* Force it to be a thin line */
-
-    background: rgba(0, 0, 0, 0.1) !important;
-
-    margin: 10px 0 20px 0 !important;
-
-    padding: 0 !important;
-
-    /* Remove any padding causing the 'blue' height */
-
-    width: 100%;
-
+    flex: 1;     
+    height: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    display: block;   
 }
 
+
+        .related-section-header h2 {
+            font-size: 26px;
+            margin: 0;
+        }
+
+        
 
 
 @media (max-width: 950px) {
