@@ -1,3 +1,5 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 <?php
 // product_details.php - Logic Header
@@ -22,7 +24,7 @@ if (!$product) {
     exit("<div class='container mt-5 text-center'><h4>Product not found.</h4><a href='index.php' class='btn btn-outline-dark'>Back to Shop</a></div>");
 }
 
-// Fetch Variants and Sizes
+
 $stmt2 = mysqli_prepare($conn, "SELECT variant_id, color, size FROM product_variant WHERE product_id = ?");
 mysqli_stmt_bind_param($stmt2, "i", $product_id);
 mysqli_stmt_execute($stmt2);
@@ -46,44 +48,54 @@ $sizes = array_unique($sizes);
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.php" class="text-muted">Shop</a></li>
-                    <li class="breadcrumb-item active"><?= htmlspecialchars($product['category_name']) ?></li>
-                </ol>
-            </nav>
+        <div class="col-lg-5 ps-lg-5"> <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb bg-transparent p-0">
+            <li class="breadcrumb-item"><a href="index.php" class="text-secondary text-uppercase small fw-semibold">Shop</a></li>
+            <li class="breadcrumb-item active text-uppercase small" aria-current="page">
+                <?= htmlspecialchars($product['category_name']) ?>
+            </li>
+        </ol>
+    </nav>
 
-            <h1 class="h2 fw-bold mb-2"><?= htmlspecialchars($product['product_name']) ?></h1>
-            <p class="price-tag mb-4">$<?= number_format($product['price'], 2) ?></p>
-            
-            <p class="text-muted small mb-4"><?= nl2br(htmlspecialchars($product['description'] ?? '')) ?></p>
-
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <label class="fw-bold small text-uppercase">Size</label>
-                    <select id="sizeSelect" class="form-select border-dark-subtle">
-                        <option value="">Select Size</option>
-                        <?php foreach ($sizes as $size): ?>
-                            <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-6">
-                    <label class="fw-bold small text-uppercase">Qty</label>
-                    <input type="number" id="qtyInput" class="form-control border-dark-subtle" value="1" min="1">
-                </div>
-            </div>
-
-            <input type="hidden" id="supplier_id" value="<?= htmlspecialchars($product['supplier_id']) ?>">
-            
-            <button id="addToCartBtn" class="btn btn-dark btn-lg w-100 mb-5">
-                <i class="fas fa-shopping-bag me-2"></i> ADD TO CART
-            </button>
-                            
-          <div class="rolex-cart shadow-lg">
+    <h1 class="display-6 fw-bold mb-2 text-dark"><?= htmlspecialchars($product['product_name']) ?></h1>
+    <p class="price-tag mb-4 text-primary">$<?= number_format($product['price'], 2) ?></p>
     
-    <div class="cart-header d-flex justify-content-between align-items-center">
+    <div class="mb-4">
+        <label class="fw-bold small text-uppercase text-muted mb-2">Description</label>
+        <p class="text-muted lh-base" style="font-size: 0.95rem;">
+            <?= nl2br(htmlspecialchars($product['description'] ?? 'No description available.')) ?>
+        </p>
+    </div>
+    <br>
+    <div class="row g-3 mb-4">
+        <div class="col-7">
+            <label class="fw-bold small text-uppercase text-muted mb-2">Select Size</label>
+            <select id="sizeSelect" class="form-select shadow-sm">
+                <option value="" selected disabled>Choose your size</option>
+                <?php foreach ($sizes as $size): ?>
+                    <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <br>
+        <div class="col-5">
+            <label class="fw-bold small text-uppercase text-muted mb-2">Quantity</label>
+            <input type="number" id="qtyInput" class="form-control shadow-sm text-center" value="1" min="1">
+        </div>
+    </div>
+    <br>
+
+    <input type="hidden" id="supplier_id" value="<?= htmlspecialchars($product['supplier_id']) ?>">
+    <br>
+    <button id="addToCartBtn" class="btn btn-dark btn-lg w-100 shadow-sm border-0 py-3 mt-2">
+        <i class="fas fa-shopping-bag me-2"></i> ADD TO CART
+    </button>
+</div>
+       
+                            
+         
+    
+    <!-- <div class="cart-header d-flex justify-content-between align-items-center">
         <span class="header-title">My Selection</span>
         <i class="fas fa-shopping-bag" style="color: var(--gold-dark);"></i>
     </div>
@@ -105,8 +117,8 @@ $sizes = array_unique($sizes);
         </button>
     </div>
 
-</div>
-
+</div> -->
+                       
 <script>
     const allVariants = <?= json_encode($variants_data) ?>;
 
@@ -115,11 +127,15 @@ $sizes = array_unique($sizes);
         const selectedSize = document.getElementById('sizeSelect').value;
         const qty = parseInt(document.getElementById('qtyInput').value) || 1;
         const supplierId = document.getElementById('supplier_id').value;
-
         const variant = allVariants.find(v => v.size === selectedSize);
 
         if (!selectedSize || !variant) {
-            alert("Please select a size first!");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Choose a Size',
+                text: 'Please Choose a Size',
+                confirmButtonColor: '#212529'
+            });
             return;
         }
 
@@ -132,79 +148,92 @@ $sizes = array_unique($sizes);
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    refreshBag();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
-
-
- function refreshBag() {
-    const supplierId = document.getElementById('supplier_id').value;
-
-    fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
-        .then(res => res.json())
+        .then(response => response.json())
         .then(data => {
-          
-            if (data.drawer_html) {
-                document.getElementById('cartitem').innerHTML = data.drawer_html;
-            } else if (data.html) {
-                document.getElementById('cartitem').innerHTML = data.html;
-            }
-
-           
-            const totalElement = document.getElementById('cart-subtotal');
-            if (totalElement && data.total !== undefined) {
-                totalElement.textContent = parseFloat(data.total).toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Items added to the cart',
+                    showConfirmButton: false,
+                    timer: 1500 
                 });
+                
+                refreshBag();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message });
             }
         })
-        .catch(err => console.error("Error fetching cart:", err));
-}
-
-
-    window.onload = refreshBag;
-
-</script>
-
-
- <script>
- function handleRemove(cartId) {
-    if (!confirm('Are you Sure Delete this items?')) return;
-
-    const supplierId = document.getElementById('supplier_id').value;
-    const formData = new FormData();
-    formData.append('cart_id', cartId);
-    formData.append('supplier_id', supplierId);
+        .catch(error => console.error('Error:', error));
+    });
 
     
-    fetch('../utils/removeFromCart.php', { 
-        method: 'POST',
-        body: formData
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("File not found (404)"); 
-        return res.json();
-    })
-    .then(data => {
-        if (data.status === 'success') {
-            refreshBag(); 
-        } else {
-            alert("Error: " + data.message);
+    function refreshBag() {
+        const supplierId = document.getElementById('supplier_id').value;
+        const cartContainer = document.getElementById('cartitem');
+
+    
+        if (cartContainer) {
+            cartContainer.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-warning" role="status"></div></div>`;
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Path Error: " + err.message);
-    });
-}
+
+        fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
+            .then(res => res.json())
+            .then(data => {
+               
+                const cartBadge = document.getElementById('cart-badge-count');
+                if (cartBadge) {
+                    const count = parseInt(data.total_count) || 0;
+                    cartBadge.innerText = count;
+                    cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
+                }
+
+             
+                if (cartContainer) {
+                    if (data.drawer_html && data.drawer_html.trim() !== "") {
+                        cartContainer.innerHTML = data.drawer_html;
+                    } else {
+                        cartContainer.innerHTML = `<div class="text-center py-5"><p class="text-muted">Your selection is empty</p></div>`;
+                    }
+                }
+
+              
+                const totalElement = document.getElementById('cart-subtotal');
+                if (totalElement) {
+                    const total = parseFloat(data.total) || 0;
+                    totalElement.textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                }
+            })
+            .catch(err => console.error("Error fetching cart:", err));
+    }
+
+    
+    function handleRemove(cartId) {
+        Swal.fire({
+            title: 'Are You Sure?',
+            text: "Delete this item from your selection?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#212529',
+            confirmButtonText: 'Delete'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const supplierId = document.getElementById('supplier_id').value;
+                const formData = new FormData();
+                formData.append('cart_id', cartId);
+                formData.append('supplier_id', supplierId);
+
+                fetch('../utils/removeFromCart.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        refreshBag(); // Update Badge & Drawer
+                    }
+                });
+            }
+        });
+    }
+
+    
+    window.addEventListener('DOMContentLoaded', refreshBag);
 </script>

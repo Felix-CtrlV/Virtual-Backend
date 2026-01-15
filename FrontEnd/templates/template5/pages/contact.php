@@ -19,10 +19,6 @@
         </div>
 
         <div class="content-side">
-            <nav class="mini-nav">
-                <a href="#"><?= htmlspecialchars($supplier['description']) ?></a>
-            </nav>
-
             <div class="form-wrapper">
                 <header>
                     <h1><?= htmlspecialchars($supplier['tags'] ?? '') ?></h1>
