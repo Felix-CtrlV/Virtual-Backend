@@ -97,7 +97,7 @@
             
             <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5"> 
                 <h2 class="about-heading">
-                   <?= htmlspecialchars($supplier['description']) ?><br>
+                   <?= htmlspecialchars($supplier['company_name']) ?><br>
     
                 </h2>
                 

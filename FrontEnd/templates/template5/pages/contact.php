@@ -12,9 +12,6 @@
     <main class="split-screen">
         <div class="visual-side">
             <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner5?>">
-            <div class="overlay">
-                <p><?= htmlspecialchars($supplier['description']) ?></p>
-            </div>
         </div>
 
         <div class="content-side">
@@ -46,22 +43,7 @@
                     <button type="submit" class="submit-btn">Send Message</button>
                 </form>
 
-                <footer>
-                    <div class="footer-item">
-                        <span> <?= htmlspecialchars($supplier['email']) ?></span>
-        
-                    </div>
-                    <div class="footer-item">
-                        <span><?= htmlspecialchars($supplier['phone']) ?></span>
-                       </div>
-
-                       <div class="footer-item">
-                        <span><?= htmlspecialchars($supplier['address']) ?></span>
-                       </div>
-                </footer>
-            </div>
-        </div>
-    </main>
+               
 
 </body>
 </html>
