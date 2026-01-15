@@ -30,13 +30,18 @@ mysqli_stmt_bind_param($stmt2, "i", $product_id);
 mysqli_stmt_execute($stmt2);
 $variants_result = mysqli_stmt_get_result($stmt2);
 
+
 $variants_data = [];
 $sizes = [];
+$colors = []; 
+
 while ($v = mysqli_fetch_assoc($variants_result)) {
     $variants_data[] = $v;
     if (!empty($v['size'])) $sizes[] = $v['size'];
+    if (!empty($v['color'])) $colors[] = $v['color']; 
 }
 $sizes = array_unique($sizes);
+$colors = array_unique($colors); 
 ?>
 
 <div class="container mt-5">
@@ -66,6 +71,22 @@ $sizes = array_unique($sizes);
             <?= nl2br(htmlspecialchars($product['description'] ?? 'No description available.')) ?>
         </p>
     </div>
+    <div class="mb-4">
+    <label class="fw-bold small text-uppercase text-muted mb-2">Select Color</label>
+    <div class="d-flex align-items-center">
+        <?php foreach ($colors as $color): ?>
+            <?php $uniqueId = 'color_' . preg_replace('/[^a-zA-Z0-9]/', '', $color); ?>
+            
+            <input type="radio" name="color_option" id="<?= $uniqueId ?>" value="<?= htmlspecialchars($color) ?>" class="color-radio">
+            
+            <label for="<?= $uniqueId ?>" 
+                   class="color-label" 
+                   style="background-color: <?= htmlspecialchars($color) ?>;" 
+                   title="<?= htmlspecialchars($color) ?>">
+            </label>
+        <?php endforeach; ?>
+    </div>
+</div>
     <br>
     <div class="row g-3 mb-4">
         <div class="col-7">
@@ -95,7 +116,7 @@ $sizes = array_unique($sizes);
                             
          
     
-    <!-- <div class="cart-header d-flex justify-content-between align-items-center">
+     <!--<div class="cart-header d-flex justify-content-between align-items-center">
         <span class="header-title">My Selection</span>
         <i class="fas fa-shopping-bag" style="color: var(--gold-dark);"></i>
     </div>
@@ -117,28 +138,79 @@ $sizes = array_unique($sizes);
         </button>
     </div>
 
-</div> -->
+</div>-->
                        
 <script>
+   
     const allVariants = <?= json_encode($variants_data) ?>;
+    const sizeSelect = document.getElementById('sizeSelect');
+    const colorRadios = document.querySelectorAll('input[name="color_option"]');
 
-    // 1. Add to Cart Logic
+    
+    function updateSizes() {
+        const colorInput = document.querySelector('input[name="color_option"]:checked');
+        if (!colorInput) return;
+
+        const selectedColor = colorInput.value;
+        
+      
+        sizeSelect.innerHTML = '<option value="" selected disabled>Choose your size</option>';
+
+       
+        const availableVariants = allVariants.filter(v => v.color === selectedColor);
+
+        availableVariants.forEach(v => {
+            const option = document.createElement('option');
+            option.value = v.size;
+            option.textContent = v.size;
+            sizeSelect.appendChild(option);
+        });
+
+        if (availableVariants.length === 1) {
+            sizeSelect.selectedIndex = 1;
+        }
+    }
+
+      colorRadios.forEach(radio => {
+        radio.addEventListener('change', updateSizes);
+    });
+
+   
+    window.addEventListener('DOMContentLoaded', () => {
+        updateSizes();
+        refreshBag();
+    });
+
+
+    
     document.getElementById('addToCartBtn').addEventListener('click', function () {
-        const selectedSize = document.getElementById('sizeSelect').value;
+        const selectedSize = sizeSelect.value;
+        const colorInput = document.querySelector('input[name="color_option"]:checked');
+        const selectedColor = colorInput ? colorInput.value : null;
+        
         const qty = parseInt(document.getElementById('qtyInput').value) || 1;
         const supplierId = document.getElementById('supplier_id').value;
-        const variant = allVariants.find(v => v.size === selectedSize);
 
-        if (!selectedSize || !variant) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Choose a Size',
-                text: 'Please Choose a Size',
-                confirmButtonColor: '#212529'
-            });
+       
+        if (!selectedColor) {
+            Swal.fire({ icon: 'warning', title: 'Select Color', text: 'Please choose a color.' });
+            return; 
+        }
+
+        if (!selectedSize) {
+            Swal.fire({ icon: 'warning', title: 'Select Size', text: 'Please choose a size.' });
+            return; 
+        }
+
+       
+        const variant = allVariants.find(v => v.size === selectedSize && v.color === selectedColor);
+
+        if (!variant) {
+            Swal.fire({ icon: 'error', title: 'Not Available', text: 'This combination is out of stock.' });
             return;
         }
 
+      
         const formData = new FormData();
         formData.append('variant_id', variant.variant_id);
         formData.append('supplier_id', supplierId);
@@ -153,18 +225,20 @@ $sizes = array_unique($sizes);
             if (data.status === 'success') {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
-                    text: 'Items added to the cart',
+                    title: 'Added to Cart',
+                    text: 'The item has been added.',
                     showConfirmButton: false,
                     timer: 1500 
                 });
-                
-                refreshBag();
+                refreshBag(); 
             } else {
                 Swal.fire({ icon: 'error', title: 'Error', text: data.message });
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong.' });
+        });
     });
 
     
@@ -172,32 +246,18 @@ $sizes = array_unique($sizes);
         const supplierId = document.getElementById('supplier_id').value;
         const cartContainer = document.getElementById('cartitem');
 
-    
-        if (cartContainer) {
-            cartContainer.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-warning" role="status"></div></div>`;
-        }
-
         fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
             .then(res => res.json())
             .then(data => {
-               
                 const cartBadge = document.getElementById('cart-badge-count');
                 if (cartBadge) {
                     const count = parseInt(data.total_count) || 0;
                     cartBadge.innerText = count;
                     cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
                 }
-
-             
                 if (cartContainer) {
-                    if (data.drawer_html && data.drawer_html.trim() !== "") {
-                        cartContainer.innerHTML = data.drawer_html;
-                    } else {
-                        cartContainer.innerHTML = `<div class="text-center py-5"><p class="text-muted">Your selection is empty</p></div>`;
-                    }
+                    cartContainer.innerHTML = data.drawer_html || '<p class="text-center text-muted">Empty</p>';
                 }
-
-              
                 const totalElement = document.getElementById('cart-subtotal');
                 if (totalElement) {
                     const total = parseFloat(data.total) || 0;
@@ -206,6 +266,7 @@ $sizes = array_unique($sizes);
             })
             .catch(err => console.error("Error fetching cart:", err));
     }
+
 
     
     function handleRemove(cartId) {
