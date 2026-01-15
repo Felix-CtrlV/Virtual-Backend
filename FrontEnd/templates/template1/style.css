@@ -3208,3 +3208,32 @@ body.productDetail {
 #cartDrawer.open {
     right: 0;
 }
+
+
+
+
+
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 50px;    /* Space between products and paging */
+    margin-bottom: 80px; /* Space between paging and footer */
+    text-align: center;
+}
+
+.pag-btn { 
+    padding: 10px 16px; 
+    border: 1px solid #ccc; 
+    text-decoration: none; 
+    color: #333; 
+    border-radius: 4px; 
+    background-color: white;
+}
+
+.pag-btn.active { 
+    background-color: #333; 
+    color: #fff; 
+    border-color: #333; 
+}
