@@ -10,8 +10,8 @@ if ($isPreview) {
     $shop_assets = [
         'logo' => '',
         'banner' => '',
-        'primary_color' => '#7d6de3', 
-        'secondary_color' => '#ff00e6' 
+        'primary_color' => '#7d6de3',
+        'secondary_color' => '#ff00e6'
     ];
 } else {
     if (!isset($conn)) {
@@ -47,6 +47,14 @@ if (!in_array($page, $allowed_pages)) {
 }
 
 $page_path = __DIR__ . "/pages/$page.php";
+
+$banner_string = $shop_assets["banner"];
+$banners = explode(",", $banner_string);
+$banner_count = count($banners);
+
+for ($i = 0; $i < $banner_count; $i++) {
+    ${"banner" . ($i + 1)} = $banners[$i];
+}
 
 ?>
 
@@ -85,8 +93,15 @@ $page_path = __DIR__ . "/pages/$page.php";
             </div>
         </div>
         <?php if (!empty($shop_assets['banner'])): ?>
-            <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['banner']) ?>"
-                alt="Shop Banner" class="banner-image">
+
+            <?php if ($shop_assets['template_type'] == 'video'): ?>
+                <video class="banner-image" autoplay muted loop playsinline
+                    src="../uploads/shops/<?= $supplier_id ?>/<?= $shop_assets['banner'] ?>"></video>
+
+            <?php else: ?>
+                <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>" alt="Hero Banner" class="banner-image"
+                    style="transform: scale(1.1);">
+            <?php endif; ?>
         <?php endif; ?>
     </section>
 
@@ -105,4 +120,5 @@ $page_path = __DIR__ . "/pages/$page.php";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../templates/<?= basename(__DIR__) ?>/script.js"></script>
 </body>
+
 </html>
