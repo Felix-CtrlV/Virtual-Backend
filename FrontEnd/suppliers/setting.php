@@ -47,7 +47,7 @@ if ($templatesResult->num_rows > 0) {
 }
 
 // Define paths for banner display logic
-$bannerPathRel = '../uploads/shops/' . $supplierid . '/' . $banner1 ?? '';
+$bannerPathRel = '../uploads/shops/' . $supplierid . '/' . ($banner1 ?? '');
 // Check if file actually exists on server to avoid broken links
 $bannerExists = !empty($user['banner']) && file_exists($_SERVER['DOCUMENT_ROOT'] . dirname($_SERVER['PHP_SELF']) . '/' . $bannerPathRel);
 
@@ -141,58 +141,90 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $s_color = $_POST['secondary_color'];
         $shop_about = $_POST['shop_about'];
         $shop_desc = $_POST['shop_description'];
-        $media_mode = $_POST['media_mode']; // 'image' or 'video' from segmented control
+        $media_mode = $_POST['media_mode']; // 'image' or 'video'
         $selected_template = $_POST['template_id'] ?? $user['template_id'];
 
         $target_dir = "../uploads/shops/" . $supplierid . "/";
         if (!is_dir($target_dir))
             mkdir($target_dir, 0777, true);
 
-        // Handle Logo Upload
+        // 1. Handle Logo Upload
         $logo_sql = "";
         if (!empty($_FILES['logo']['name'])) {
-            $logo_name = time() . "_logo_" . basename($_FILES['logo']['name']);
-            move_uploaded_file($_FILES['logo']['tmp_name'], $target_dir . $logo_name);
-            $logo_sql = ", logo = '$logo_name'";
-            $user['logo'] = $logo_name; // Update local var for display
+            if ($_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $logo_name = time() . "_logo_" . basename($_FILES['logo']['name']);
+                if (move_uploaded_file($_FILES['logo']['tmp_name'], $target_dir . $logo_name)) {
+                    $logo_sql = ", logo = '$logo_name'";
+                    $user['logo'] = $logo_name; // Update local var
+                } else {
+                    $msg = "Error moving logo file. Check folder permissions.";
+                    $msg_type = "error";
+                }
+            } else {
+                $msg = "Logo upload error code: " . $_FILES['logo']['error'];
+                $msg_type = "error";
+            }
         }
 
-        // Handle Banner Upload (Image OR Video)
+        // 2. Handle Banner Upload (Image OR Video)
         $banner_sql = "";
         if (!empty($_FILES['banner']['name'])) {
-            $banner_name = time() . "_bn_" . basename($_FILES['banner']['name']);
-            move_uploaded_file($_FILES['banner']['tmp_name'], $target_dir . $banner_name);
-            $banner_sql = ", banner = '$banner_name'";
-            $user['banner'] = $banner_name; // Update local var
-            // Re-evaluate banner existence for display
-            $bannerPathRel = '../uploads/shops/' . $supplierid . '/' . $banner_name;
-            $bannerExists = true;
+            // Check specifically for file size errors
+            if ($_FILES['banner']['error'] === UPLOAD_ERR_INI_SIZE || $_FILES['banner']['error'] === UPLOAD_ERR_FORM_SIZE) {
+                $msg = "File is too large! Check 'upload_max_filesize' in php.ini.";
+                $msg_type = "error";
+            } elseif ($_FILES['banner']['error'] === UPLOAD_ERR_OK) {
+                $banner_name = time() . "_bn_" . basename($_FILES['banner']['name']);
+                // Only update SQL if file move SUCCEEDS
+                if (move_uploaded_file($_FILES['banner']['tmp_name'], $target_dir . $banner_name)) {
+                    $banner_sql = ", banner = '$banner_name'";
+                    $user['banner'] = $banner_name; 
+                    // Update display logic for this request
+                    $bannerPathRel = '../uploads/shops/' . $supplierid . '/' . $banner_name;
+                    $bannerExists = true;
+                } else {
+                    $msg = "Failed to save file. Check folder permissions.";
+                    $msg_type = "error";
+                }
+            } else {
+                $msg = "Banner upload error code: " . $_FILES['banner']['error'];
+                $msg_type = "error";
+            }
         }
 
-        // Update shop_assets table (Using prepared statement for safe inputs, injected SQL for file names)
-        // Note: In a strict production environment, build the query dynamically and bind ALL parameters.
-        $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_type=? $logo_sql $banner_sql WHERE supplier_id=?";
-        $stmt2 = $conn->prepare($sql_final);
-        $stmt2->bind_param("sssssi", $p_color, $s_color, $shop_about, $shop_desc, $media_mode, $supplierid);
-        $stmt2->execute();
-        $stmt2->close();
+        // 3. Update Database (Only if no critical upload error occurred)
+        if ($msg_type !== "error") {
+            // Safe update using Prepared Statement
+            // Note: We inject the file names ($logo_sql, $banner_sql) directly into query structure 
+            // because they are built internally with time() and are safe, 
+            // but for max security, you could bind them too.
+            $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_type=? $logo_sql $banner_sql WHERE supplier_id=?";
+            $stmt2 = $conn->prepare($sql_final);
+            $stmt2->bind_param("sssssi", $p_color, $s_color, $shop_about, $shop_desc, $media_mode, $supplierid);
+            
+            if ($stmt2->execute()) {
+                $msg = "Shop customization saved!";
+                $msg_type = "success";
+                
+                // Refresh local variables for immediate UI update
+                $user['primary_color'] = $p_color;
+                $user['secondary_color'] = $s_color;
+                $user['shop_about'] = $shop_about;
+                $user['shop_description'] = $shop_desc;
+                $user['template_type'] = $media_mode;
+                $user['template_id'] = $selected_template;
+            } else {
+                $msg = "Database Error: " . $stmt2->error;
+                $msg_type = "error";
+            }
+            $stmt2->close();
 
-        // Update template_id in suppliers table
-        $stmt3 = $conn->prepare("UPDATE suppliers SET template_id=? WHERE supplier_id=?");
-        $stmt3->bind_param("ii", $selected_template, $supplierid);
-        $stmt3->execute();
-        $stmt3->close();
-
-        $msg = "Shop customization saved!";
-        $msg_type = "success";
-
-        // Refresh local variables for immediate UI update
-        $user['primary_color'] = $p_color;
-        $user['secondary_color'] = $s_color;
-        $user['shop_about'] = $shop_about;
-        $user['shop_description'] = $shop_desc;
-        $user['template_type'] = $media_mode;
-        $user['template_id'] = $selected_template;
+            // Update template_id in suppliers table
+            $stmt3 = $conn->prepare("UPDATE suppliers SET template_id=? WHERE supplier_id=?");
+            $stmt3->bind_param("ii", $selected_template, $supplierid);
+            $stmt3->execute();
+            $stmt3->close();
+        }
     }
 }
 ?>
@@ -204,22 +236,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         /* --- SCOPED CSS FOR SETTINGS PAGE --- */
         :root {
             --glass-bg: rgba(255, 255, 255, 0.95);
-            --accent:
-                <?= $user['primary_color'] ?? '#333' ?>
-            ;
+            --accent: <?= $user['primary_color'] ?? '#333' ?>;
             --accent-hover: color-mix(in srgb, var(--accent) 80%, black);
             --pill-bg: #e0e0e0;
         }
 
         body {
             background-color: #f4f7f6;
-            /* Light neutral background */
         }
 
-        /* 1. Main Container - WIDER Layout */
+        /* 1. Main Container */
         .settings-wrapper {
             width: 100%;
-            /* occupy most of screen width */
             margin: 0px;
             background-image: radial-gradient(circle at 5% 10%, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 35%), radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--primary) 30%, transparent) 0%, transparent 40%);
             overflow: hidden;
@@ -228,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             min-height: 85vh;
         }
 
-        /* 2. CHANNEL HEADER (Flexible Video/Image) */
+        /* 2. CHANNEL HEADER */
         .channel-header {
             position: relative;
             background: #f0f0f0;
@@ -237,13 +265,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .banner-area {
             width: 100%;
             height: 280px;
-            /* Slightly taller banner */
             background-color: #ddd;
             position: relative;
             overflow: hidden;
         }
 
-        /* The actual media element (img or video) fits the area */
         .banner-media {
             width: 100%;
             height: 100%;
@@ -259,7 +285,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: flex-end;
             padding: 0 50px;
             margin-top: -75px;
-            /* Overlap banner */
             position: relative;
             z-index: 2;
             margin-bottom: 25px;
@@ -287,7 +312,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 20px;
             color: #222;
             text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
-            /* Ensure readability against banner overlap */
         }
 
         .channel-info h1 {
@@ -354,15 +378,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .form-grid {
@@ -381,7 +398,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .input-group label {
             display: block;
-            /* margin-bottom: 10px; */
             font-weight: 600;
             color: #333;
             font-size: 0.95rem;
@@ -436,14 +452,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-
-        input[type="color"]::-webkit-color-swatch {
-            border: none;
-            border-radius: 18px;
-        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 18px; }
 
         .upload-row {
             display: flex;
@@ -461,6 +471,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             cursor: pointer;
             background: #fdfdfd;
             transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .upload-box:hover {
@@ -476,7 +490,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: block;
         }
 
-        /* --- NEW: Segmented Control (Animated Toggle) --- */
+        /* Media Preview Styles */
+        .preview-media {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Segmented Control */
         .segmented-control {
             display: inline-grid;
             grid-template-columns: 1fr 1fr;
@@ -486,15 +510,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             position: relative;
             user-select: none;
             width: 300px;
-            /* Fixed width for the control */
         }
 
-        /* Hide actual radio inputs */
-        .segmented-control input[type="radio"] {
-            display: none;
-        }
+        .segmented-control input[type="radio"] { display: none; }
 
-        /* The clickable labels */
         .seg-label {
             text-align: center;
             padding: 10px 20px;
@@ -506,7 +525,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 50px;
         }
 
-        /* The sliding highlight pill */
         .seg-pill {
             position: absolute;
             top: 5px;
@@ -517,21 +535,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 50px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-            /* Smooth cubic bezier */
             z-index: 1;
         }
 
-        /* Logic: Move pill based on checked radio */
-        /* If first radio checked, pill stays left. If second checked, move right. */
-        #mode-video:checked~.seg-pill {
-            transform: translateX(100%);
-        }
-
-        /* Change label color when active */
-        #mode-image:checked+.seg-label,
-        #mode-video:checked+.seg-label {
-            color: var(--accent);
-        }
+        #mode-video:checked~.seg-pill { transform: translateX(100%); }
+        #mode-image:checked+.seg-label, #mode-video:checked+.seg-label { color: var(--accent); }
 
         /* Template Grid */
         .template-grid {
@@ -576,9 +584,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #444;
         }
 
-        .template-radio {
-            display: none;
-        }
+        .template-radio { display: none; }
 
         /* Action Buttons & Alerts */
         .action-bar {
@@ -616,17 +622,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: center;
         }
 
-        .success {
-            background: #d1e7dd;
-            color: #0f5132;
-            border: 1px solid #badbcc;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #842029;
-            border: 1px solid #f5c2c7;
-        }
+        .success { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
     </style>
     
     <div class="settings-wrapper">
@@ -793,17 +790,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <hr style="border:0; border-top:2px solid #f0f0f0; margin:30px 0;">
 
                 <div class="upload-row">
-                    <div class="upload-box" onclick="document.getElementById('upl_logo').click()">
-                        <span class="upload-icon">📸</span>
-                        <input type="file" name="logo" id="upl_logo" hidden accept="image/png, image/jpeg">
-                        <h4>Upload New Logo</h4>
-                        <small class="text-muted">Square, PNG/JPG (e.g., 500x500px)</small>
+                    <div class="upload-box" id="logo_box" onclick="document.getElementById('upl_logo').click()">
+                        <input type="file" name="logo" id="upl_logo" hidden accept="image/png, image/jpeg" 
+                               onchange="handleFileSelect(this, 'logo_preview', 'image')">
+                        
+                        <div id="logo_preview">
+                            <span class="upload-icon">📸</span>
+                            <h4>Upload New Logo</h4>
+                            <small class="text-muted">Square, PNG/JPG</small>
+                        </div>
                     </div>
-                    <div class="upload-box" onclick="document.getElementById('upl_banner').click()">
-                        <span class="upload-icon">🖼️🎥</span>
-                        <input type="file" name="banner" id="upl_banner" hidden accept="image/*,video/mp4,video/webm">
-                        <h4>Upload New Banner</h4>
-                        <small class="text-muted">Wide Image or Video (e.g., 1920x400px)</small>
+
+                    <div class="upload-box" id="banner_box" onclick="document.getElementById('upl_banner').click()">
+                        <input type="file" name="banner" id="upl_banner" hidden accept="image/*,video/mp4,video/webm" 
+                               onchange="handleFileSelect(this, 'banner_preview', 'mixed')">
+                        
+                        <div id="banner_preview">
+                            <span class="upload-icon">🖼️🎥</span>
+                            <h4>Upload New Banner</h4>
+                            <small class="text-muted">Wide Image or Video</small>
+                        </div>
                     </div>
                 </div>
 
@@ -904,6 +910,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 alertBox.style.transition = 'opacity 0.5s ease';
                 setTimeout(() => alertBox.remove(), 500);
             }, 4000);
+        }
+
+        // --- NEW: Preview Logic for File Uploads ---
+        function handleFileSelect(input, previewId, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const container = document.getElementById(previewId);
+            const fileUrl = URL.createObjectURL(file);
+            
+            // Clear existing content in the upload box
+            container.innerHTML = ''; 
+
+            // Determine if file is video or image
+            const isVideo = file.type.startsWith('video/');
+            let mediaElem;
+
+            if (isVideo) {
+                mediaElem = document.createElement('video');
+                mediaElem.src = fileUrl;
+                mediaElem.autoplay = true;
+                mediaElem.muted = true;
+                mediaElem.loop = true;
+                mediaElem.className = 'preview-media'; // Used new CSS class
+            } else {
+                mediaElem = document.createElement('img');
+                mediaElem.src = fileUrl;
+                mediaElem.className = 'preview-media'; // Used new CSS class
+            }
+
+            // Add filename text below preview
+            const nameInfo = document.createElement('div');
+            nameInfo.style.fontWeight = 'bold';
+            nameInfo.style.color = 'var(--accent)';
+            nameInfo.style.fontSize = '0.9rem';
+            nameInfo.textContent = "Selected: " + file.name;
+
+            container.appendChild(mediaElem);
+            container.appendChild(nameInfo);
         }
     </script>
 </body>

@@ -789,7 +789,6 @@
 
     .input-group label {
         display: block;
-        margin-bottom: 10px;
         font-size: 0.9rem;
         opacity: 0.8;
     }
@@ -908,3 +907,5 @@
         font-size: 0.8rem;
         font-weight: bold;
     }
+
+    

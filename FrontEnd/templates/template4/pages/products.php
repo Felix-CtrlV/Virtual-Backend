@@ -363,10 +363,10 @@ function getColorHex($colorName) {
                     formData.append('offset', offset);
                     formData.append('supplier_id', supplierId);
                     if (categoryFilter !== 'all') {
-                        formData.append('category_id', categoryFilter);
+                        formData.append('category_id', categoryFilter);N
                     }
                     
-                    const response = await fetch('../templates/template4/fetch_products.php', {
+                    const response = await fetch('/Malltiverse/FrontEnd/templates/template4/fetch_products.php', {
                         method: 'POST',
                         body: formData
                     });
