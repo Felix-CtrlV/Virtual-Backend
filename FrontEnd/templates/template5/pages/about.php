@@ -4,10 +4,11 @@
 
     .about-luxury-section {
         background-color:white;
-        color:var(--gold-primary);
+        color: #2980b9;
         padding: 120px 0;
         overflow: hidden;
         font-family: 'Inter', sans-serif;
+        letter-spacing:1px;
     }
 
     .about-label {
@@ -25,7 +26,7 @@
         font-size: 3.2rem;
         line-height: 1.1;
         margin-bottom: 35px;
-        color:var(--gold-primary);
+        color:#2980b9;
     }
 
     .about-description {
@@ -45,7 +46,7 @@
     .stat-number {
         font-family: 'Playfair Display', serif;
         font-size: 2.2rem;
-        color:var(--gold-primary);
+        color:#2980b9;
         display: block;
         line-height: 1;
         margin-bottom: 5px;
@@ -79,8 +80,8 @@
         position: absolute;
         top: -30px;
         left: -10px;
-        background:black;
-        color:var(--gold-primary);
+        background:white;
+        color:#2980b9;
         padding: 25px 15px;
         z-index: 4;
         font-family: 'Playfair Display', serif;
@@ -104,8 +105,8 @@
             At <?= htmlspecialchars($supplier['tags'] ?? '') ?>  <strong>
         <?= htmlspecialchars($shop_assets['about'] ?? '') ?>  
     </strong> 
-
-                <div class="row">
+                <br>
+                  <div class="row">
                     <div class="col-sm-6">
                         <div class="stat-box">
                             <span class="stat-number"><?= htmlspecialchars($supplier['tags']) ?></span>
@@ -128,8 +129,8 @@
                         <span style="font-size: 1.5rem;">2026</span>
                     </div>
                     
-                    <?php if (!empty($banner1)): ?>
-                        <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>" 
+                    <?php if (!empty($banner4)): ?>
+                        <img src="../uploads/shops/<?= $supplier_id ?>/<?= $banner4 ?>" 
                              alt="Luxury Craftsmanship" 
                              class="main-img img-fluid shadow-lg">
                     <?php endif; ?>

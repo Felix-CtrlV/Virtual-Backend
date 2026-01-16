@@ -239,8 +239,7 @@ function updateCartQty(cartId, newQty) {
     formData.append('cart_id', cartId);
     formData.append('quantity', newQty);
 
-    // Path ကို သေချာစစ်ပါ။ /malltiverse/frontend/ ဆိုတာ Project folder အမည်ဖြစ်ရပါမယ်။
-    // အကယ်၍ 404 ပြနေသေးရင် 'utils/update_cart_qty.php' (သို့) '/malltiverse/frontend/utils/update_cart_qty.php' စမ်းကြည့်ပါ
+   
     fetch('../utils/update_cart_qty.php', {
         method: 'POST',
         body: formData
@@ -329,14 +328,12 @@ function handleRemove(cartId) {
 <script>
 
 function updateCartQty(cartId, newQty) {
-    
     if (newQty < 1) {
-       
         handleRemove(cartId);
         return;
     }
 
-   
+    
     Swal.fire({
         title: 'Updating...',
         text: 'Please wait a moment',
@@ -358,21 +355,29 @@ function updateCartQty(cartId, newQty) {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 800,
-                timerProgressBar: true
-            });
-
-            Toast.fire({
+            
+            let timerInterval;
+            Swal.fire({
                 icon: 'success',
-                title: 'Updated!'
-            }).then(() => {
-                location.reload();
-                
-                
+                title: 'Updated Successfully!',
+                html: 'Refreshing in <b></b> milliseconds.',
+                timer: 1000, 
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const b = Swal.getHtmlContainer().querySelector('b');
+                    timerInterval = setInterval(() => {
+                        b.textContent = Swal.getTimerLeft();
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            }).then((result) => {
+               
+                if (result.dismiss === Swal.DismissReason.timer || result.isConfirmed) {
+                    location.reload();
+                }
             });
         } else {
             Swal.fire('Error', data.message, 'error');
@@ -383,6 +388,7 @@ function updateCartQty(cartId, newQty) {
         Swal.fire('Error', 'Connection failed', 'error');
     });
 }
+
 // ၂။ Remove Item Function
 function handleRemove(cartId) {
     Swal.fire({
@@ -395,7 +401,15 @@ function handleRemove(cartId) {
         confirmButtonText: 'Yes, remove it'
     }).then((result) => {
         if (result.isConfirmed) {
-            Swal.showLoading(); 
+            
+            Swal.fire({
+                title: 'Removing...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             const formData = new FormData();
             formData.append('cart_id', cartId);
 
@@ -406,10 +420,34 @@ function handleRemove(cartId) {
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    location.reload();
+                    
+                    let timerInterval;
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Removed!',
+                        html: 'Item has been removed. Refreshing in <b></b> ms.',
+                        timer: 1000, 
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            const b = Swal.getHtmlContainer().querySelector('b');
+                            timerInterval = setInterval(() => {
+                                b.textContent = Swal.getTimerLeft();
+                            }, 100);
+                        },
+                        willClose: () => {
+                            clearInterval(timerInterval);
+                        }
+                    }).then(() => {
+                        location.reload();
+                    });
                 } else {
                     Swal.fire('Error', 'Could not remove item', 'error');
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Connection failed', 'error');
             });
         }
     });

@@ -3,16 +3,16 @@
 
 <nav class="main-nav navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top">
     <div class="container">
-        <a href="<?= $base_url ?>&page=home" class="brand-link navbar-brand py-0">
+        <a href="<?= $base_url ?>&page=home" class="brand-link navbar-brand py-0 d-flex align-items-center">
+            
             <?php if (!empty($shop_assets['logo'])): ?>
                 <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
                      alt="Logo" 
-                     class="NFlogo rounded-circle" 
-                     style="height: 50px; width: 60px; object-fit: cover; display: block;">
+                     class="NFlogo rounded-circle me-2"  style="height: 50px; width: 50px; object-fit: cover; display: block;">
             <?php endif; ?>
             
             <div class="header-text d-flex flex-column justify-content-center">
-                <h1 class="site-title-text fs-4">
+                <h1 class="site-title-text fs-5 mb-0" style="line-height: 1;">
                     <?= htmlspecialchars($supplier['tags']) ?>
                 </h1>
                 <?php if (!empty($supplier['tagline'])): ?>
@@ -26,7 +26,8 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav mx-auto"> <?php
+            <ul class="navbar-nav mx-auto">
+                <?php
                 $base_url = "?supplier_id=" . $supplier_id;
                 $nav_items = [
                     'home' => 'Home',
