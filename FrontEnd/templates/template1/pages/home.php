@@ -20,23 +20,12 @@
 
 <section class="featured-section">
     <div class="section-header">
-        <h2>Featured Products</h2>
+        <h2>Our Featured Products</h2>
         <span class="section-line"></span>
     </div>
 
     <div class="categories-grid">
         <?php
-/*$category_stmt = mysqli_prepare(
-    $conn,
-    "SELECT c.category_id, c.category_name, 
-            MIN(p.image) AS image, 
-            MIN(p.product_id) AS product_id
-     FROM category c
-     JOIN products p ON p.category_id = c.category_id
-     WHERE c.supplier_id = ?
-     GROUP BY c.category_id
-     LIMIT 4"
-);*/
 $category_stmt = mysqli_prepare(
     $conn,
     "SELECT c.category_id, c.category_name, p.image, p.product_id
@@ -49,20 +38,24 @@ $category_stmt = mysqli_prepare(
            ORDER BY p2.created_at DESC
            LIMIT 1
        )
-     WHERE c.supplier_id = ?
+     WHERE c.supplier_id = ? 
      LIMIT 4"
 );
-
 
 mysqli_stmt_bind_param($category_stmt, "i", $supplier_id);
 mysqli_stmt_execute($category_stmt);
 $category_result = mysqli_stmt_get_result($category_stmt);
 
 if ($category_result && mysqli_num_rows($category_result) > 0):
+    $i = 1;  // Counter to assign unique images
     while ($row = mysqli_fetch_assoc($category_result)):
+        // Image path based on category
+        $imagePath = "../uploads/shops/{$supplier_id}/category_{$i}.jpg"; // Assuming you have category_1.jpg, category_2.jpg, etc.
+
+
 ?>
         <div class="category-card">
-            <img src="../uploads/products/<?= $row['product_id'] ?>_<?= htmlspecialchars($row['image']) ?>"
+            <img src="<?= $imagePath ?>"
                  alt="<?= htmlspecialchars($row['category_name']) ?>">
 
             <div class="category-overlay">
@@ -73,6 +66,7 @@ if ($category_result && mysqli_num_rows($category_result) > 0):
             </div>
         </div>
 <?php
+        $i++;  // Increment the counter for the next category
     endwhile;
 else:
     echo "<p>No categories available.</p>";

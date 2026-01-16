@@ -777,7 +777,6 @@ h1 {
 .btn-order-now:hover {
     background-position: 5px 5px, 10px 10px;
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     letter-spacing: 3px;
 }
 .card-product {
@@ -1981,7 +1980,7 @@ h1, h2, h3, .footer-logo {
         .submit-btn:hover {
             background: #c5a059;
             color: #111;
-            box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+
         }
 
         /* Mobile Responsive */
@@ -2643,11 +2642,11 @@ footer css
     .page-title {
         font-family: var(--font-serif);
         font-size: clamp(3rem, 6vw, 4.5rem);
-        font-weight: 400; /* Luxury brands typically use lighter weight fonts */
+        font-weight: 300; 
         letter-spacing: 4px;
         text-transform: uppercase;
-        color: var(--watch-silver);
-        margin: 0;
+        color: var(--gold-primary);
+       margin: 0;
         background: linear-gradient(to bottom, #ffffff 0%, #a2a2a2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -2659,7 +2658,7 @@ footer css
         font-size: 15px;
         letter-spacing: 8px;
         text-transform: uppercase;
-        color:whitesmoke;
+        color:var(--gold-primary);
         margin-top: 15px;
         font-weight: 300;
         
@@ -2823,6 +2822,7 @@ body {
 .form-wrapper {
     max-width: 500px;
     margin: 0 auto;
+
 }
 
 
@@ -2855,7 +2855,7 @@ header p {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     margin-bottom: 10px;
-    color: #999;
+    color: black;
 }
 
 .field input, 
@@ -2870,6 +2870,7 @@ header p {
     background: transparent;
     outline: none;
     transition: border-color 0.3s;
+    color: black;
 }
 
 .field input:focus, 
@@ -3023,6 +3024,7 @@ footer {
 }
 .hud-value{
     color: var(--gray);
+    font-size:1.5rem;
 }
 
 .hud-fill {
@@ -3145,10 +3147,11 @@ footer {
     letter-spacing: 4px;
     cursor: pointer;
     transition: 0.4s;
+    color:white;
 }
 
 .submit-btn:hover {
-    color: var(--gold-primary);
+   color:wheat;
     letter-spacing: 6px;
 }
 .star-rating-select {
@@ -3525,3 +3528,4 @@ input[name="qty"] {
         transform: scale(1.1); 
         box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
+    

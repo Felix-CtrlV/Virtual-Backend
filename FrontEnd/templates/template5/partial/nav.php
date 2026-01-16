@@ -8,7 +8,7 @@
                 <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
                      alt="Logo" 
                      class="NFlogo rounded-circle" 
-                     style="height: 50px; width: 50px; object-fit: cover; display: block;">
+                     style="height: 50px; width: 60px; object-fit: cover; display: block;">
             <?php endif; ?>
             
             <div class="header-text d-flex flex-column justify-content-center">

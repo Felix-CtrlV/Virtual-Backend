@@ -71,9 +71,9 @@
         transition: transform 0.5s ease;
     }
 
-    .main-img:hover {
+    /*.main-img:hover {
         transform: scale(1.02);
-    }
+    }*/
 
     .experience-badge {
         position: absolute;
@@ -97,7 +97,7 @@
             
             <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5"> 
                 <h2 class="about-heading">
-                   <?= htmlspecialchars($supplier['description']) ?><br>
+                   <?= htmlspecialchars($supplier['company_name']) ?><br>
     
                 </h2>
                 
@@ -134,7 +134,7 @@
                              class="main-img img-fluid shadow-lg">
                     <?php endif; ?>
                     
-                    <div style="position: absolute; bottom: -15px; left: -15px; width: 120px; height: 120px; border-bottom: 3px solid #D4AF37; border-left: 3px solid #D4AF37; z-index: 1;"></div>
+                   <!-- <div style="position: absolute; bottom: -15px; left: -15px; width: 120px; height: 120px; border-bottom: 3px solid black; border-left: 3px solid black; z-index: 1;"></div>-->
                 </div>
             </div>
 

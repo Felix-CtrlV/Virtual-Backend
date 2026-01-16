@@ -33,10 +33,7 @@ while ($item = mysqli_fetch_assoc($result)) {
     $total_quantity += (int)$item['quantity'];/* Shopping cart sum(KPS)*/
 
 
-    
-
-
-     $html .= "
+    $html .= "
     <div class='cart-item'> 
         <img src='../uploads/products/{$item['product_id']}_{$item['image']}' width='50'>
         <div>
@@ -46,33 +43,44 @@ while ($item = mysqli_fetch_assoc($result)) {
         </div>
     </div>";
 
-       $drawer_html .= "
+
+    $drawer_html .= "
     <div class='cart-row mb-3 border-bottom pb-2' style='display: flex !important; align-items: center; justify-content: space-between; width: 100%; min-height: 70px; background: #fff;'>
-    
-    <div style='display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;'>
-        <img src='../uploads/products/{$item['product_id']}_{$item['image']}' 
-             style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #eee;'>
-        
-        <div style='min-width: 0; flex: 1;'>
-            <h6 style='margin: 0; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1a1a1a;'>
-                {$item['product_name']}
-            </h6>
-            <small style='color: #666; font-size: 0.65rem; display: block;'>Qty: {$item['quantity']} | Size: {$item['size']}</small>
-            <div style='font-weight: bold; font-size: 0.8rem; color: #bf953f; margin-top: 2px;'>$" . number_format($subtotal, 2) . "</div>
+        <div style='display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;'>
+            <img src='../uploads/products/{$item['product_id']}_{$item['image']}' 
+                 style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px; flex-shrink: 0; border: 1px solid #eee;'>
+            
+            <div style='min-width: 0; flex: 1;'>
+                <h6 style='margin: 0; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1a1a1a;'>
+                    {$item['product_name']}
+                </h6>
+                <small style='color: #666; font-size: 0.65rem; display: block;'>Size: {$item['size']}</small>
+                
+                <div style='display: flex; align-items: center; gap: 8px; margin-top: 5px;'>
+                    <button onclick='updateCartQty({$item['cart_id']}, " . ($item['quantity'] - 1) . ")' 
+                            style='border: 1px solid #ddd; background: #f9f9f9; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 3px;'>-</button>
+                    
+                    <span style='font-size: 0.75rem; font-weight: bold;'>{$item['quantity']}</span>
+                    
+                    <button onclick='updateCartQty({$item['cart_id']}, " . ($item['quantity'] + 1) . ")' 
+                            style='border: 1px solid #ddd; background: #f9f9f9; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 3px;'>+</button>
+                </div>
 
+                <div style='font-weight: bold; font-size: 0.8rem; color: #bf953f; margin-top: 2px;'>$" . number_format($subtotal, 2) . "</div>
+            </div>
         </div>
-    </div>
 
-   <div style='flex-shrink: 0; margin-left: 10px; width: 30px; display: flex; justify-content: center; align-items: center;'>
-    <button type='button' 
-            class='remove-action-btn'
-            style='border: none; background:white; color: #999; cursor: pointer; padding: 15px; transition: all 0.3s ease;'
-            onclick='handleRemove({$item['cart_id']})'
-            title='Remove Item'>
-      <i class='fa-solid fa-trash' style='font-size: 24px;'></i>
-    </button>
-</div>
-</div>";
+        <div style='flex-shrink: 0; margin-left: 10px; width: 30px; display: flex; justify-content: center; align-items: center;'>
+            <button type='button' 
+                    class='remove-action-btn'
+                    style='border: none; background:white; color: #999; cursor: pointer; padding: 5px; transition: all 0.3s ease;'
+                    onclick='handleRemove({$item['cart_id']})'
+                    title='Remove Item'>
+              <i class='fa-solid fa-trash' style='font-size: 18px;'></i>
+            </button>
+        </div>
+    </div>";
+
 }
 
 // ... (Rest of the code)
