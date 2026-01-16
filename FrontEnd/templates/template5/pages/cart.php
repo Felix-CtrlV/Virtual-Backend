@@ -217,7 +217,7 @@ $item_count = mysqli_num_rows($result);
                 <button class="checkout-btn mb-2" 
                         onclick="location.href='checkout.php?supplier_id=<?= $supplier_id ?>'"
                         <?= $grand_total == 0 ? 'disabled' : '' ?>>
-                    <i class="fas fa-shield-alt"></i> PROCEED TO CHECKOUT
+                    <i class="fas fa-shield-alt"></i>CheckOut
                 </button>
                 
             </div>
