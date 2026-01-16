@@ -45,19 +45,23 @@ while ($row = mysqli_fetch_assoc($variant_result)) {
     }
 }
 mysqli_stmt_close($variant_stmt);
+if (isset($_GET['status']) && $_GET['status'] === 'success') {
+    echo "<div class='alert alert-success text-center'>Payment Successful! Thank you for your purchase.</div>";
+}
 ?>
-
 <script>
     const variants = <?= json_encode($variants) ?>;
 </script>
 
 <div class="page">
-    <div class="product-detail-wrapper" style="display: flex; gap: 30px; align-items: flex-start; justify-content: center; width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; flex-wrap: wrap;">
+    <div class="product-detail-wrapper"
+        style="display: flex; gap: 30px; align-items: flex-start; justify-content: center; width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; flex-wrap: wrap;">
         <div class="detail_card" style="margin: 0; flex: 1; min-width: 400px;">
             <div class="img_border">
                 <div class="detail_product_image">
                     <?php if (!empty($product['image'])): ?>
-                        <img src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['product_name']) ?>">
+                        <img src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>"
+                            alt="<?= htmlspecialchars($product['product_name']) ?>">
                     <?php endif; ?>
                 </div>
             </div>
@@ -66,13 +70,15 @@ mysqli_stmt_close($variant_stmt);
                 <div class="detail_product_category"><?= htmlspecialchars($product['category_name'] ?? ' ') ?></div>
                 <h1 class="detail_product_name"><?= htmlspecialchars($product['product_name']) ?></h1>
                 <div class="detail_price">$<?= number_format($product['price'], 2) ?></div>
-                <p class="detail_desc"><?= htmlspecialchars($product['description'] ?? 'No description available.') ?></p>
+                <p class="detail_desc"><?= htmlspecialchars($product['description'] ?? 'No description available.') ?>
+                </p>
 
                 <div class="options">
                     <label>Color</label>
                     <div class="colors" id="color-options">
                         <?php foreach ($colors as $color): ?>
-                            <div class="color" data-color="<?= htmlspecialchars($color) ?>" style="background-color: <?= htmlspecialchars($color) ?>;"></div>
+                            <div class="color" data-color="<?= htmlspecialchars($color) ?>"
+                                style="background-color: <?= htmlspecialchars($color) ?>;"></div>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -161,38 +167,38 @@ mysqli_stmt_close($variant_stmt);
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // 1. Show the success notification only
-                if (typeof showNotification === "function") {
-                    showNotification(data.message, "success");
-                }
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 1. Show the success notification only
+                    if (typeof showNotification === "function") {
+                        showNotification(data.message, "success");
+                    }
 
-                // 2. Refresh cart data (updates the badge/icon) without opening the drawer
-                if (typeof refreshCartDrawer === "function") {
-                    refreshCartDrawer(<?= $supplier_id ?>);
-                }
-                
-                // --- AUTO-OPEN LOGIC REMOVED FROM HERE ---
-                
-            } else {
-                if (typeof showNotification === "function") {
-                    showNotification("Error: " + data.message, "error");
+                    // 2. Refresh cart data (updates the badge/icon) without opening the drawer
+                    if (typeof refreshCartDrawer === "function") {
+                        refreshCartDrawer(<?= $supplier_id ?>);
+                    }
+
+                    // --- AUTO-OPEN LOGIC REMOVED FROM HERE ---
+
                 } else {
-                    alert("Error: " + data.message);
+                    if (typeof showNotification === "function") {
+                        showNotification("Error: " + data.message, "error");
+                    } else {
+                        alert("Error: " + data.message);
+                    }
                 }
-            }
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            if (typeof showNotification === "function") {
-                showNotification("Something went wrong. Please try again.", "error");
-            }
-        });
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                if (typeof showNotification === "function") {
+                    showNotification("Something went wrong. Please try again.", "error");
+                }
+            });
     });
 
-    window.onload = function() {
+    window.onload = function () {
         if (typeof refreshCartDrawer === "function") {
             refreshCartDrawer(<?= $supplier_id ?>);
         }
@@ -205,73 +211,73 @@ mysqli_stmt_close($variant_stmt);
     </div>
 </section>
 
-    
-    <section class="related-products-page">
-        <div class="container">
 
-            <div class="related_product_list_grid">
-                <?php
+<section class="related-products-page">
+    <div class="container">
 
-                if (!isset($_GET['category_id'])) {
-                    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC");
-                    if ($products_stmt) {
-                        mysqli_stmt_bind_param($products_stmt, "i", $supplier_id);
-                        mysqli_stmt_execute($products_stmt);
-                        $products_result = mysqli_stmt_get_result($products_stmt);
-                    } else {
-                        $products_result = false;
-                    }
+        <div class="related_product_list_grid">
+            <?php
+
+            if (!isset($_GET['category_id'])) {
+                $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC");
+                if ($products_stmt) {
+                    mysqli_stmt_bind_param($products_stmt, "i", $supplier_id);
+                    mysqli_stmt_execute($products_stmt);
+                    $products_result = mysqli_stmt_get_result($products_stmt);
                 } else {
-                    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? and category_id = ? ORDER BY created_at DESC");
-                    if ($products_stmt) {
-                        mysqli_stmt_bind_param($products_stmt, "ii", $supplier_id, $_GET['category_id']);
-                        mysqli_stmt_execute($products_stmt);
-                        $products_result = mysqli_stmt_get_result($products_stmt);
-                    } else {
-                        $products_result = false;
-                    }
+                    $products_result = false;
                 }
+            } else {
+                $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? and category_id = ? ORDER BY created_at DESC");
+                if ($products_stmt) {
+                    mysqli_stmt_bind_param($products_stmt, "ii", $supplier_id, $_GET['category_id']);
+                    mysqli_stmt_execute($products_stmt);
+                    $products_result = mysqli_stmt_get_result($products_stmt);
+                } else {
+                    $products_result = false;
+                }
+            }
 
-                if ($products_result && mysqli_num_rows($products_result) > 0) {
-                    while ($product = mysqli_fetch_assoc($products_result)) {
+            if ($products_result && mysqli_num_rows($products_result) > 0) {
+                while ($product = mysqli_fetch_assoc($products_result)) {
 
-                        ?>
-                        <div class="related_product">
-                            <div class="related_product_image">
-                                <?php if (!empty($product['image'])): ?>
-                                    <img
-                                        src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>">
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="related_product_card-body">
-                                <div class="related_product-info">
-                                    <span
-                                        class="related_product_card_title"><?= htmlspecialchars($product['product_name']) ?></span>
-                                    <span class="related_product_price">$<?= number_format($product['price'], 2) ?></span>
-                                </div>
-
-                                <button class="related_product_add-to-cart" title="Add to cart">+</button>
-                            </div>
-                            <a class="detail-link"
-                                href="?supplier_id=<?= $supplier_id ?>&page=productDetail&product_id=<?= $product['product_id'] ?>">
-                                <button class="detail-btn">VIEW DETAILS</button>
-                            </a>
+                    ?>
+                    <div class="related_product">
+                        <div class="related_product_image">
+                            <?php if (!empty($product['image'])): ?>
+                                <img
+                                    src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>">
+                            <?php endif; ?>
                         </div>
 
+                        <div class="related_product_card-body">
+                            <div class="related_product-info">
+                                <span
+                                    class="related_product_card_title"><?= htmlspecialchars($product['product_name']) ?></span>
+                                <span class="related_product_price">$<?= number_format($product['price'], 2) ?></span>
+                            </div>
 
-                        <?php
-                    }
-                    if (isset($products_stmt)) {
-                        mysqli_stmt_close($products_stmt);
-                    }
-                } else {
-                    ?>
-                    <div class="col-12">
-                        <p class="text-center">No products available at the moment.</p>
+                            <button class="related_product_add-to-cart" title="Add to cart">+</button>
+                        </div>
+                        <a class="detail-link"
+                            href="?supplier_id=<?= $supplier_id ?>&page=productDetail&product_id=<?= $product['product_id'] ?>">
+                            <button class="detail-btn">VIEW DETAILS</button>
+                        </a>
                     </div>
-                <?php } ?>
-            </div>
-        </div>
 
-    </section>
+
+                    <?php
+                }
+                if (isset($products_stmt)) {
+                    mysqli_stmt_close($products_stmt);
+                }
+            } else {
+                ?>
+                <div class="col-12">
+                    <p class="text-center">No products available at the moment.</p>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+
+</section>

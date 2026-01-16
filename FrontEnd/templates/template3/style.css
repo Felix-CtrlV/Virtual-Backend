@@ -130,22 +130,25 @@ body {
 
 .navlink.active::after {
     width: 70%;
-    background: #2A0001;
+    background: #5F2119;
 }
 
 .navlink::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 1.5px;
-    background: #260D08;
-    transform: translateX(-50%);
+  content: "";
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #5F2119;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
 }
 
 .navlink:hover::after {
-    width: 100%;
+  transform: scaleX(1);
+  transform-origin: bottom left;
 }
 
 /* Collection Search bar */

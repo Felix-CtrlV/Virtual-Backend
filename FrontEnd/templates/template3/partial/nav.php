@@ -40,7 +40,7 @@ while ($row = $result->fetch_assoc()) {
             </div>
         </div>
 
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav">
             <?php
             $base_url = "?supplier_id=" . $supplier_id;
             ?>
