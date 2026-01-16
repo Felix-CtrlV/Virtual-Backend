@@ -1,4 +1,5 @@
 <?php
+
 // 1. Redirect if not logged in
 $customer_id = 1; //testing 
 
@@ -98,10 +99,7 @@ $total_price = 0;
                             <span>Grand Total:</span>
                             <strong class="text-primary fs-4">$<?= number_format($total_price, 2) ?></strong>
                         </div>
-                        <!-- <button class="btn btn-primary w-100 py-2 mt-3"
-                            style="background-color: var(--primary); border: none;">
-                            PROCEED TO CHECKOUT
-                        </button> -->
+
                         <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" 
                            class="btn btn-primary w-100 py-2 mt-3"
                            style="background-color: var(--primary); border: none; text-decoration: none; display: block; text-align: center; color: white;">
@@ -115,7 +113,7 @@ $total_price = 0;
                     </div>
                 </div>
             </div>
-        </div>ူ
+        </div>
     <?php else: ?>
         <div class="text-center py-5">
             <i class="bi bi-cart-x fs-1 text-muted"></i>

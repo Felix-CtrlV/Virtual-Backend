@@ -30,7 +30,7 @@ if ($supplier_id > 0) {
     
     $total_price = $price_data['grand_total'] ?? 0.00;
 
-    $callback_url = "http://localhost/malltiverse/FrontEnd/shop/?supplier_id=$supplier_id&page=cart";
+    $callback_url = $_SERVER['HTTP_REFERER'] ?? "http://localhost/malltiverse/FrontEnd/shop/?supplier_id=$supplier_id";
 
     $bank_url = "https://crediverse.base44.app/payment?" . http_build_query([
         'amount'     => $total_price,
