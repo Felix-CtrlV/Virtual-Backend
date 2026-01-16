@@ -182,9 +182,12 @@ $total_price = 0;
 
                         </div>
 
-                        <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>">
-                            <button class="checkout-btn">Checkout</button>
-                        </a>
+                        <button class="btn btn-primary w-100 py-2 mt-3"
+                            style="background-color: var(--primary); border: none;">
+
+                            PROCEED TO CHECKOUT
+
+                        </button>
 
                         <a href="?supplier_id=<?= $supplier_id ?>&page=products"
                             class="btn btn-link w-100 text-center mt-2">
@@ -221,3 +224,5 @@ $total_price = 0;
     <?php endif; ?>
 
 </div>
+
+
