@@ -75,8 +75,8 @@ function refreshCartDrawer(supplierId) {
         <span class="fs-5">Total:</span>
         <span class="fs-5 fw-bold">$${data.total}</span>
     </div>
-    <button class="addtobag_btn w-100" onclick="window.location.href='?supplier_id=${supplierId}&page=checkout'">
-        Checkout
+    <button class="addtobag_btn w-100" onclick="window.location.href='../utils/accessCheckout.php?supplier_id=${supplierId}'">
+    Checkout
     </button>`;
 
                 if (badge) badge.innerText = data.itemCount;
