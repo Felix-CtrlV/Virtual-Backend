@@ -54,4 +54,6 @@ function placeOrder($conn, $customer_id, $supplier_id) {
     }
     return false;
 }
+
 ?>
+

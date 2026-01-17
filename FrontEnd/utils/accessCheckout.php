@@ -45,4 +45,5 @@ if ($supplier_id > 0) {
     
     die("Error: Invalid Supplier ID.");
 }
+
 ?>
