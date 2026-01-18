@@ -14,6 +14,7 @@ if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
     }
 }
 
+
 $query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p.product_id, v.size, v.color 
           FROM cart c 
           JOIN product_variant v ON c.variant_id = v.variant_id 
@@ -1111,6 +1112,11 @@ async function handleRemove(cartId) {
         }
     }).then(async (result) => {
         if (result.isConfirmed) {
+            // Store item data before removal for calculations
+            const itemPrice = parseFloat(itemElement.querySelector('.price-amount').textContent.replace('$', ''));
+            const itemQuantity = parseInt(itemElement.querySelector('.qty-display').textContent);
+            const itemSubtotal = itemPrice;
+            
             // Animate removal
             itemElement.style.opacity = '0';
             itemElement.style.transform = 'translateX(-50px)';
@@ -1148,13 +1154,18 @@ async function handleRemove(cartId) {
                             setTimeout(() => {
                                 cartCount.style.transform = 'scale(1)';
                             }, 300);
+                            
+                            // Update order summary
+                            updateOrderSummary(-itemSubtotal);
                         } else {
+                            // Last item removed - hide cart and show empty state
                             cartCount.remove();
+                            showEmptyCartState();
                         }
                     }
                     
                     // Success message
-                    Swal.fire({
+                   /* Swal.fire({
                         icon: 'success',
                         title: 'Removed',
                         text: 'Item removed from cart',
@@ -1162,7 +1173,7 @@ async function handleRemove(cartId) {
                         timer: 1500,
                         background: 'var(--glass-bg)',
                         color: 'var(--text-primary)'
-                    });
+                    });*/
                 }
             } catch (error) {
                 hideLoading();
@@ -1186,51 +1197,126 @@ async function handleRemove(cartId) {
     });
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Create particles
-    createParticles();
+// Update order summary dynamically
+function updateOrderSummary(subtotalChange) {
+    // Get current values
+    const subtotalElement = document.querySelector('.summary-row:nth-child(1) .summary-value');
+    const taxElement = document.querySelector('.summary-row:nth-child(3) .summary-value');
+    const totalElement = document.querySelector('.total-amount');
     
-    // Add scroll animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
+    if (!subtotalElement || !taxElement || !totalElement) return;
+    
+    // Parse current values
+    const currentSubtotal = parseFloat(subtotalElement.textContent.replace('$', ''));
+    const currentTax = parseFloat(taxElement.textContent.replace('$', ''));
+    const currentTotal = parseFloat(totalElement.textContent.replace('$', ''));
+    
+    // Calculate new values
+    const newSubtotal = currentSubtotal + subtotalChange;
+    const newTax = newSubtotal * 0.08;
+    const newTotal = newSubtotal + newTax;
+    
+    // Animate the value changes
+    animateValueChange(subtotalElement, currentSubtotal, newSubtotal, '$');
+    animateValueChange(taxElement, currentTax, newTax, '$');
+    animateValueChange(totalElement, currentTotal, newTotal, '$');
+    
+    // Also update the item count in section header
+    const itemsCountElement = document.querySelector('.items-count');
+    if (itemsCountElement) {
+        const currentCountMatch = itemsCountElement.textContent.match(/\((\d+)\)/);
+        if (currentCountMatch) {
+            const currentCount = parseInt(currentCountMatch[1]);
+            const newCount = currentCount - 1;
+            if (newCount > 0) {
+                itemsCountElement.textContent = `(${newCount})`;
+                
+                // Add animation effect
+                itemsCountElement.style.transform = 'scale(1.3)';
+                itemsCountElement.style.color = 'var(--primary)';
+                setTimeout(() => {
+                    itemsCountElement.style.transform = 'scale(1)';
+                    itemsCountElement.style.color = '';
+                }, 300);
             }
-        });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    });
-    
-    // Observe elements
-    document.querySelectorAll('.slide-in, .stagger-item').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-    
-    // Add hover effects
-    const glassCards = document.querySelectorAll('.glass-card');
-    glassCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transition = 'all 0.3s ease';
-        });
-    });
-    
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            window.location.href = '?supplier_id=<?= $supplier_id ?>&page=products';
         }
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            e.preventDefault();
-            // Scroll functionality could be added here
+    }
+}
+
+// Animate value changes with counting effect
+function animateValueChange(element, oldValue, newValue, prefix = '') {
+    const duration = 500; // ms
+    const steps = 20;
+    const stepValue = (newValue - oldValue) / steps;
+    let currentStep = 0;
+    
+    element.style.color = newValue > oldValue ? 'var(--success)' : 'var(--danger)';
+    element.style.fontWeight = '700';
+    
+    const timer = setInterval(() => {
+        currentStep++;
+        const currentValue = oldValue + (stepValue * currentStep);
+        
+        if (currentStep >= steps) {
+            clearInterval(timer);
+            element.textContent = `${prefix}${newValue.toFixed(2)}`;
+            
+            // Return to normal style
+            setTimeout(() => {
+                element.style.color = '';
+                element.style.fontWeight = '';
+            }, 300);
+        } else {
+            element.textContent = `${prefix}${currentValue.toFixed(2)}`;
         }
-    });
-});
+    }, duration / steps);
+}
+
+// Show empty cart state when last item is removed
+function showEmptyCartState() {
+    // Hide the cart grid
+    const cartGrid = document.querySelector('.cart-grid');
+    if (cartGrid) {
+        cartGrid.style.opacity = '0';
+        cartGrid.style.transform = 'translateY(20px)';
+        cartGrid.style.transition = 'all 0.5s ease';
+        
+        setTimeout(() => {
+            cartGrid.style.display = 'none';
+            
+            // Show empty state
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state slide-in';
+            emptyState.innerHTML = `
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h2 class="empty-title">Your Cart is Empty</h2>
+                <p class="empty-description">
+                    Looks like you haven't added any items to your cart yet. 
+                    Start shopping to fill it with amazing products!
+                </p>
+                <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="explore-btn">
+                    <i class="fas fa-store"></i>
+                    Explore Products
+                </a>
+            `;
+            
+            emptyState.style.opacity = '0';
+            emptyState.style.transform = 'translateY(20px)';
+            
+            cartGrid.parentNode.insertBefore(emptyState, cartGrid.nextSibling);
+            
+            // Animate in the empty state
+            setTimeout(() => {
+                emptyState.style.opacity = '1';
+                emptyState.style.transform = 'translateY(0)';
+                emptyState.style.transition = 'all 0.6s ease';
+            }, 100);
+        }, 300);
+    }
+}
 </script>
+
 </body>
 </html>
