@@ -56,11 +56,15 @@ while ($row = $result->fetch_assoc()) {
             <li class="nav-item">
                 <a class="navlink <?= $page === 'review' ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">Review</a>
             </li>
+            
+            <li class="nav-item">
+                <a class="navlink exit-btn" href="/malltiverse/frontend/customer">Exit</a>
+            </li>
 
             <li class="nav-item ms-lg-3">
                 <div class="nav-icons">
                     <a href="?supplier_id=<?= $supplier_id ?>&page=cart" class="cart-link nav-link">
-                        <i class="fa-solid fa-bag-shopping fs-4"></i>
+                        <i class="fa-solid fa-lock fs-4"></i>
                         <?php if ($cart_count > 0): ?>
                             <span id="cart-count-badge" class="badge rounded-pill bg-danger cart-badge">
                                 <?= $cart_count ?>
@@ -72,22 +76,28 @@ while ($row = $result->fetch_assoc()) {
         </ul>
     </div>
 </nav>
+
 <style>
     .cart-link {
-    color: #2A0001;
-    position: relative;
-    display: inline-block;
-    padding: 0.5rem;
-    transform: scale(1.2);
-    margin-right: 10px;
+        color: #0b0101;
+        position: relative;
+        display: inline-block;
+        padding: 0.5rem;
+        transform: scale(1.1); 
+        margin-right: 10px;
+        transition: color 0.3s ease;
+    }
+
+    .cart-link:hover {
+        color: #3e3c3c;
     }
 
     .cart-badge {
         position: absolute;
-        top: 0;
-        right: 0;
-        font-size: 0.65rem;
-        padding: 0.35em 0.65em;
-        transform: translate(25%, -25%);
+        top: 2px;
+        right: -2px;
+        font-size: 0.6rem;
+        padding: 0.3em 0.5em;
+        transform: translate(20%, -20%);
     }
 </style>

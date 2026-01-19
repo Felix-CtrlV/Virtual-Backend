@@ -1,13 +1,13 @@
 <main class="about-page">
     <div class="about-product">
         <div class="product-item">
-            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner2?>" alt="Luxury Watch">
+            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner2?>" alt="Fashion Piece">
         </div>
         <div class="product-item">
-            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner3?>" alt="Luxury Watch">
+            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner3?>" alt="Floral Decor">
         </div>
         <div class="product-item">
-            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner4?>" alt="Luxury Watch">
+            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner4?>" alt="Furniture Decor">
         </div>
     </div>
 

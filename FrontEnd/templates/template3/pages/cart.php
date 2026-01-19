@@ -112,12 +112,12 @@ $total_price = 0;
 
                         <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" 
                            class="btn btn-primary w-100 py-2 mt-3"
-                           style="background-color: var(--primary); border: none; text-decoration: none; display: block; text-align: center; color: white;">
+                           style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none; text-decoration: none; display: block; text-align: center; color: white;">
                             PROCEED TO CHECKOUT 
                         </a>
 
                         <a href="?supplier_id=<?= $supplier_id ?>&page=collection"
-                            class="btn btn-link w-100 text-center mt-2">
+                            class="btn btn-link w-100 text-center mt-2" style="color: rgba(71, 78, 111, 0.6));">
                             Continue Shopping
                         </a>
                     </div>
@@ -129,7 +129,7 @@ $total_price = 0;
             <i class="bi bi-cart-x fs-1 text-muted"></i>
             <p class="mt-3">Your cart is empty.</p>
             <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="btn btn-primary"
-                style="background-color: var(--primary); border: none;">
+                style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none;">
                 Shop Now
             </a>
         </div>

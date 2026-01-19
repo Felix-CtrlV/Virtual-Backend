@@ -52,7 +52,7 @@ if ($products_result && mysqli_num_rows($products_result) > 0) {
         $img_src = !empty($row['image']) ? "../uploads/products/{$row['product_id']}_{$row['image']}" : "";
         
         $html .= '
-        <div class="col-md-4 col-sm-6 col-12"> <div class="card-product image h-100">
+        <div class="col-md-4 col-sm-6 col-12"> <div class="card-product image">
                 <img src="'.$img_src.'" class="card-img-top" alt="'.htmlspecialchars($row['product_name']).'">
                 <div class="card-body">
                     <h4 class="card_title">'.htmlspecialchars($row['product_name']).'</h4>
