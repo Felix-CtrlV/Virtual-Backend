@@ -759,10 +759,6 @@ while ($item = mysqli_fetch_assoc($result)) {
             text-decoration: none;
         }
         
-        .fab:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 12px 35px rgba(242, 5, 133, 0.4);
-        }
     </style>
 </head>
 <body>
@@ -921,7 +917,7 @@ while ($item = mysqli_fetch_assoc($result)) {
                         <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" style="text-decoration: none;">
                             <button class="checkout-btn">
                                 <i class="fas fa-lock"></i>
-                                Secure Checkout
+                               Secure Checkout
                             </button>
                         </a>
                         
@@ -934,6 +930,7 @@ while ($item = mysqli_fetch_assoc($result)) {
             </div>
         </div>
     </div>
+    
     <?php else: ?>
     <div class="empty-state slide-in">
         <div class="empty-icon">

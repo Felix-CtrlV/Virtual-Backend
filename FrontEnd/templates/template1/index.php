@@ -1,9 +1,5 @@
 <?php
-
-// Start the session at the very top to access login data
-
 if (session_status() === PHP_SESSION_NONE) {
-
     session_start();
 
 }
@@ -14,7 +10,24 @@ if (!isset($conn)) {
     include '../../../BackEnd/config/dbconfig.php';
 
 }
+require_once __DIR__ . '/../../utils/Ordered.php'; 
 
+// 3. ORDER PROCESSING LOGIC
+// Now $conn is guaranteed to exist
+$customer_id = 1; // Testing 
+$supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {    
+    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+    
+    if ($is_ordered) {
+        // This captures the page you were on before the redirect
+        
+        echo "<script>
+            alert('Order Placed Successfully!'); 
+        </script>";
+    }
+}
 
 
 $supplier_id = (int)$supplier['supplier_id'];
