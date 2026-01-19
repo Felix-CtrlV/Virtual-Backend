@@ -29,7 +29,6 @@
     </ul>
 
     <div class="auth-buttons">
-        <!-- Cart Icon -->
         <button class="cart-icon-btn" id="cart-icon-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="21" r="1"></circle>
@@ -38,10 +37,8 @@
             </svg>
             <span class="cart-badge" id="cart-badge">0</span>
         </button>
-        <!-- <button class="login-link">Log In</button> -->
-    </div>
+        </div>
 
-    <!-- Cart Popup -->
     <div class="cart-popup" id="cart-popup">
         <div class="cart-popup-content">
             <div class="cart-popup-header">
@@ -56,12 +53,11 @@
                     <span>Total:</span>
                     <span id="cart-total-amount">$0.00</span>
                 </div>
-                <button class="cart-checkout-btn">Checkout</button>
+                <button class="cart-checkout-btn" onclick="window.location.href='?supplier_id=<?= $supplier_id ?>&page=cart'">Checkout</button>
             </div>
         </div>
     </div>
-    
-    <!-- Minimalist Alert Box -->
+
     <div class="minimal-alert" id="minimal-alert"></div>
 
 </header>
