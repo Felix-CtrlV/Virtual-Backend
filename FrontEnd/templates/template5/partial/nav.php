@@ -20,6 +20,10 @@
                 <?php endif; ?>
             </div>
         </a>
+        
+       <a href="../customer/index.html" class="shopping">
+       <i class="fas fa-arrow-left"></i> Back to Shopping Mall
+       </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
