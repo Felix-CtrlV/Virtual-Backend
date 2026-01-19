@@ -73,8 +73,8 @@ html{
     align-items: center;
     gap: 10px;
     padding: 8px 20px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
+    background: var(--primary), var(--secondary);
+    color:var(--primary-color);
     border-radius: 50px;
     font-weight: 700;
     text-transform: uppercase;
@@ -884,11 +884,6 @@ h1 {
     color: #ffffff;
 }
 
-
-.footer-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin: 40px 0 20px;
-}
 
 .footer-bottom {
     text-align: center;
@@ -2195,8 +2190,6 @@ footer css
 .footer-bottom {
     max-width: 1400px;
     margin: 0 auto;
-    padding-top: 3rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
     text-align: center;
     position: relative;
     z-index: 1;
@@ -3528,4 +3521,36 @@ input[name="qty"] {
         transform: scale(1.1); 
         box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
-    
+
+
+    /* Continue Shopping CSS*/
+.shopping {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #f8f9fa;
+  color: #2d3748;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  font-size: 16px;
+}
+
+.shopping:hover {
+  background-color: #edf2f7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e0;
+}
+
+.shopping i {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.shopping:hover i {
+  transform: translateX(-4px);
+}

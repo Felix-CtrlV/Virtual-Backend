@@ -1,5 +1,3 @@
-
-
 <section class="hero-container <?= htmlspecialchars($supplier['description']) ?>">
     <div class="hero-content">
         <span class="category-title">

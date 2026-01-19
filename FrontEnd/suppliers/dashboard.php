@@ -6,7 +6,7 @@ include("partials/nav.php");
     <h1>Welcome back, <b><?= $supplierName; ?></b></h1>
     <div class="stats-row">
         <div class="stat-item">
-            <span class="stat-val">$<?= $totalRevenue ?></span>
+            <span class="stat-val">$<?= number_format($totalRevenue, 2) ?></span>
             <span class="stat-label">Revenue</span>
         </div>
         <div class="stat-item">
@@ -27,17 +27,43 @@ include("partials/nav.php");
             </div>
         </div>
 
-        <div class="glass-panel" style="height: 310px;">
-            <div style="display: flex; justify-content: space-between;">
-                <h4 style="margin-bottom:15px">Best Sellers</h4>
-                <div class="card-chip">Top-5</div>
-            </div>
-            <ul class="menu-list">
-                <?php foreach ($bestsellers as $item) { ?>
-                    <li> <?= htmlspecialchars($item['product_name']) ?> <span>&rsaquo;</span></li>
-                <?php } ?>
-            </ul>
+        <div class="glass-panel" style="height: auto; max-height: 250px; overflow: auto;">
+            <div style="padding: 15px; display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+                <h4 style="margin-bottom: 10px; font-size: 1rem;">Recent Reviews <small>(7 Days)</small></h4>
 
+                <div class="reviews-scroll" style="overflow-y: auto; flex-grow: 1; padding-right: 5px;">
+                    <?php if (empty($recentReviews)): ?>
+                        <p style="color: #999; font-size: 0.9rem; text-align: center;">No reviews this week.</p>
+                    <?php else: ?>
+                        <?php foreach ($recentReviews as $review): ?>
+                            <div class="review-item"
+                                onclick='openReviewModal(event, <?php echo htmlspecialchars(json_encode($review), ENT_QUOTES, 'UTF-8'); ?>)'
+                                style="display: flex; gap: 10px; margin-bottom: 15px; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s;">
+
+                                <img src="../assets/customer_profiles/<?= htmlspecialchars($review['image'] ?? 'default.png') ?>"
+                                    onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($review['customer_name']) ?>&background=random'"
+                                    style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+
+                                <div style="width: 100%;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <h5 style="margin: 0; font-size: 0.9rem;">
+                                            <?= htmlspecialchars($review['customer_name']) ?></h5>
+                                        <div class="stars" style="font-size: 0.8rem;">
+                                            <?php for ($i = 1; $i <= 5; $i++)
+                                                echo ($i <= $review['rating']) ? '<span class="star-gold">★</span>' : '<span style="color:#ddd">★</span>'; ?>
+                                        </div>
+                                    </div>
+                                    <p
+                                        style="margin: 4px 0 0 0; font-size: 0.8rem; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        <?= htmlspecialchars($review['review']) ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -45,7 +71,7 @@ include("partials/nav.php");
 
         <?php
         if ($diff >= 0) {
-            $difftext = $diff . 'Days';
+            $difftext = $diff . ' Days';
         } else {
             $difftext = 'Overdue';
         }
@@ -56,17 +82,9 @@ include("partials/nav.php");
                 <div style="display:flex; justify-content:space-between;">
                     <h4>Inventory Control</h4>
                 </div>
-                <h2 style="margin-top:5px; font-weight:300;">4.2k <small
-                        style="font-size:0.8rem; color:#888;">units</small></h2>
-
-                <div class="chart-container">
-                    <?php foreach ($inventory as $item): ?>
-                        <div class="bar-group">
-                            <div class="bar <?php echo ($item['level'] < 35) ? 'low' : ''; ?>"
-                                style="height: <?php echo $item['level']; ?>%;"></div>
-                            <span class="bar-label"><?php echo $item['day']; ?></span>
-                        </div>
-                    <?php endforeach; ?>
+                <div class="chart-container"
+                    style="position: relative; height: 160px; width: 100%; display:flex; justify-content:center;">
+                    <canvas id="categoryChart"></canvas>
                 </div>
             </div>
 
@@ -87,12 +105,21 @@ include("partials/nav.php");
         </div>
 
         <div class="glass-panel timeline">
-            <div class="timeline-header">
-                <h4>2024</h4>
-                <span>...</span>
+            <div class="timeline-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h4>Revenue Analytics</h4>
+
+                <form method="GET" action="dashboard.php" style="margin:0;">
+                    <select name="year" onchange="this.form.submit()"
+                        style="padding: 5px 10px; border-radius: 6px; border: 1px solid #ccc; background: #fff; font-size: 0.9rem; cursor: pointer;">
+                        <?php foreach ($availableYears as $yr): ?>
+                            <option value="<?= $yr ?>" <?= ($selectedYear == $yr) ? 'selected' : '' ?>>
+                                <?= $yr ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </form>
             </div>
             <canvas id="performanceChart" style="width:100%; max-height:250px;"></canvas>
-
         </div>
 
     </div>
@@ -114,53 +141,60 @@ include("partials/nav.php");
             </div>
         </div>
 
-        <div class="glass-panel" style="margin-bottom: 20px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <h4>Performance</h4>
-                <h4>18%</h4>
-            </div>
-            <div style="background:#ddd; height:8px; border-radius:4px; overflow:hidden;">
-                <div style="width:18%; background:var(--primary); height:100%;"></div>
-            </div>
-        </div>
-
         <div class="dark-card">
+
             <div class="dark-header">
                 <div>
-                    <h4>Approve Orders</h4>
-                    <small>2/8 Pending</small>
+                    <h4 style="color: white; margin:0;">Best Sellers</h4>
+                    <small style="color: rgba(255,255,255,0.8);">Top Performing Items</small>
                 </div>
-                <small>See All</small>
+                <div class="card-chip" style="background: rgba(255,255,255,0.2); color: white;">Top 5</div>
             </div>
 
-            <ul class="task-list">
-                <?php foreach ($orders as $order): ?>
-                    <li class="task-item">
-                        <div class="task-icon">#</div>
-                        <div class="task-info">
-                            <h4><?php echo $order['item']; ?></h4>
-                            <p><?php echo $order['time']; ?> • <?php echo $order['status']; ?></p>
-                        </div>
-                        <div class="approve-btn <?php echo ($order['status'] == 'Approved') ? 'checked' : ''; ?>"></div>
+            <ul class="menu-list">
+                <?php $rank = 1;
+                foreach ($bestsellers as $item) { ?>
+                    <li style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;">
+                        <span
+                            style="background: var(--primary); color: white; width: 20px; height: 20px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 0.7rem; margin-right: 8px;">#<?= $rank ?></span>
+                        <b><?= htmlspecialchars($item['product_name']) ?></b>
+                        <small
+                            style="margin-left: auto; color: #666; font-weight: 600;">(<?= (int) $item['best_variant_sold'] ?>
+                            sold)</small>
                     </li>
-                <?php endforeach; ?>
+                    <?php $rank++;
+                } ?>
             </ul>
         </div>
 
     </div>
 </div>
+
+<div id="reviewModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeReviewModal()">&times;</span>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img id="modalImg" src=""
+                style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #eee;">
+            <h3 id="modalName" style="margin: 0; color: #333;"></h3>
+            <div id="modalStars" style="font-size: 1.2rem; margin-top: 5px;"></div>
+        </div>
+        <h5 id="modalProduct" style="color: var(--primary); text-align: center; margin-bottom: 15px;"></h5>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+            <p id="modalComment" style="color: #444; line-height: 1.6; margin: 0;"></p>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <small id="modalDate" style="color: #999;"></small>
+        </div>
+    </div>
 </div>
-</body>
 
 <script>
+    // 1. PERFORMANCE CHART (Line Chart)
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const performanceData = [1200, 1500, 1300, 1600, 1800, 1700, 1900, 2000, 2100, 2200, 2400, 2500];
-
+    const performanceData = <?= json_encode(array_values($monthlyRevenue ?? [])) ?>;
     const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-    const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim();
-
     const ctx = document.getElementById('performanceChart').getContext('2d');
-
     const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
     gradient.addColorStop(0, primaryColor + '88');
     gradient.addColorStop(1, primaryColor + '00');
@@ -170,62 +204,106 @@ include("partials/nav.php");
         data: {
             labels: months,
             datasets: [{
-                label: 'Revenue ($)',
                 data: performanceData,
                 borderColor: primaryColor,
                 backgroundColor: gradient,
                 borderWidth: 3,
                 tension: 0.3,
                 fill: true,
-                pointRadius: 2,
-                pointBackgroundColor: primaryColor,
-                pointHoverRadius: 4,
-                pointHoverBackgroundColor: secondaryColor
+                pointRadius: 3,
+                pointBackgroundColor: primaryColor
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#000' }, title: { display: true, text: 'Month' } },
+                y: { beginAtZero: true, ticks: { color: '#000' }, title: { display: true, text: 'Revenue ($)' } }
+            }
+        }
+    });
+
+    // 2. INVENTORY CHART (Pie Chart)
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryLabels = <?= json_encode($categoryLabels) ?>;
+    const categoryData = <?= json_encode($categoryData) ?>;
+
+    // Generate colors dynamically based on primary color or preset palette
+    const bgColors = [primaryColor, '#ea982a', '#cb4444', '#4caf50', '#673ab7', '#3f51b5'];
+
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryData,
+                backgroundColor: bgColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false,
-                    position: 'top',
-                    labels: { color: primaryColor, font: { size: 14 } }
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white'
-                }
-            },
-            scales: {
-                x: {
-                    display: true,
-                    ticks: {
-                        display: true,
-                        color: '#000000',
-                        font: { size: 12 }
-                    },
-                    grid: { color: 'rgba(255,255,255,0.1)' },
-                    title: { display: true, text: 'Month', color: '#000000', font: { size: 14 } }
-                },
-                y: {
-                    display: true,
-                    ticks: {
-                        display: true,
-                        color: '#000000',
-                        font: { size: 12 }
-                    },
-                    grid: { color: 'rgba(255,255,255,0.1)' },
-                    title: { display: true, text: 'Revenue ($)', color: '#000000', font: { size: 14 } },
-                    beginAtZero: true
-                }
+                legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } }
             }
         }
     });
+
+    // 3. REVIEW MODAL LOGIC (FIXED)
+    // 3. REVIEW MODAL LOGIC
+const modal = document.getElementById('reviewModal');
+
+// Note: Added 'event' as the first parameter
+function openReviewModal(event, review) {
+    // PREVENT IMMEDIATE CLOSING:
+    event.stopPropagation(); // Stops the click from reaching window.onclick
+    event.preventDefault();  // Prevents page reload if inside a link/form
+
+    // Data Mapping
+    document.getElementById('modalName').textContent = review.customer_name;
+    document.getElementById('modalProduct').textContent = review.product_name ? 'Purchased: ' + review.product_name : 'Verified Purchase';
+    document.getElementById('modalComment').textContent = review.review; 
+    document.getElementById('modalDate').textContent = review.created_at;
+    
+    // Image handling
+    const img = document.getElementById('modalImg');
+    const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(review.customer_name) + '&background=random';
+    
+    if (review.customer_image) {
+        img.src = '../uploads/users/' + review.customer_image;
+    } else {
+        img.src = defaultImg;
+    }
+    
+    img.onerror = function() { this.src = defaultImg; };
+
+    // Star generation
+    let starsHtml = '';
+    for(let i=1; i<=5; i++) {
+        starsHtml += (i <= review.rating) ? '<span class="star-gold">★</span>' : '<span style="color:#ddd">★</span>';
+    }
+    document.getElementById('modalStars').innerHTML = starsHtml;
+
+    // Show Modal
+    modal.style.display = 'flex';
+}
+
+function closeReviewModal() {
+    modal.style.display = 'none';
+}
+
+// Close on outside click
+window.onclick = function(event) {
+    if (event.target == modal) {
+        closeReviewModal();
+    }
+}
 </script>
 
+</body>
 
 </html>

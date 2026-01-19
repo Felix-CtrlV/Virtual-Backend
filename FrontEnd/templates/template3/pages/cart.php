@@ -1,8 +1,19 @@
 <?php
-// 1. Redirect if not logged in
-$customer_id = 1; //testing 
 
-// 2. Fetch cart items with product details
+require_once __DIR__ . '/../../../utils/Ordered.php'; 
+
+$customer_id = 1; // Testing 
+$supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {    
+    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+    
+    if ($is_ordered) {
+        echo "<script>alert('Order Placed Successfully!'); window.location.href='?supplier_id=$supplier_id&page=cart';</script>";
+        exit();
+    }
+}
+
 $cart_query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p.product_id, v.color, v.size 
                FROM cart c 
                JOIN product_variant v ON c.variant_id = v.variant_id 
@@ -22,7 +33,7 @@ $total_price = 0;
 <div class="container mt-5 mb-5">
     <h2 class="mb-4">Your Shopping Cart</h2>
 
-    <?php if (mysqli_num_rows($result) > 0): ?>
+    <?php if ($cart_count > 0): ?>
         <div class="row">
             <div class="col-md-8">
                 <div class="card shadow-sm">
@@ -98,12 +109,15 @@ $total_price = 0;
                             <span>Grand Total:</span>
                             <strong class="text-primary fs-4">$<?= number_format($total_price, 2) ?></strong>
                         </div>
-                        <button class="btn btn-primary w-100 py-2 mt-3"
-                            style="background-color: var(--primary); border: none;">
-                            PROCEED TO CHECKOUT
-                        </button>
+
+                        <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" 
+                           class="btn btn-primary w-100 py-2 mt-3"
+                           style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none; text-decoration: none; display: block; text-align: center; color: white;">
+                            PROCEED TO CHECKOUT 
+                        </a>
+
                         <a href="?supplier_id=<?= $supplier_id ?>&page=collection"
-                            class="btn btn-link w-100 text-center mt-2">
+                            class="btn btn-link w-100 text-center mt-2" style="color: rgba(71, 78, 111, 0.6));">
                             Continue Shopping
                         </a>
                     </div>
@@ -114,8 +128,8 @@ $total_price = 0;
         <div class="text-center py-5">
             <i class="bi bi-cart-x fs-1 text-muted"></i>
             <p class="mt-3">Your cart is empty.</p>
-            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="btn btn-primary"
-                style="background-color: var(--primary); border: none;">
+            <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="btn btn-primary"
+                style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none;">
                 Shop Now
             </a>
         </div>

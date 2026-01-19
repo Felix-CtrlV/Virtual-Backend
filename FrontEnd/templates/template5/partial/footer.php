@@ -39,7 +39,7 @@
             </div>
             <hr class="footer-divider">
             <div class="footer-bottom">
-                <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($supplier['company_name']) ?>. All rights reserved.</p>
+                <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($supplier['tags']) ?>. All rights reserved.</p>
             </div>
         </div>
     </div>
