@@ -1,25 +1,46 @@
-
-<footer class="footer">
-    <div class="footer-inner">
-        <h5><?= htmlspecialchars($supplier['company_name']) ?></h5>
-        <?php if (!empty($supplier['description'])): ?>
-            <p><?= htmlspecialchars(substr($supplier['description'], 0, 150)) ?>...</p>
-        <?php endif; ?>
-
-        <div class="footer-links">
-            <?php
-            $base_url = "?supplier_id=" . $supplier_id;
-            ?>
-            <li><a href="<?= $base_url ?>&page=home">Home</a></li>
-            <li><a href="<?= $base_url ?>&page=products">Products</a></li>
-            <li><a href="<?= $base_url ?>&page=about">About</a></li>
-            <li><a href="<?= $base_url ?>&page=contact">Contact</a></li>
-        </div>
+<footer class="main-footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <div class="logo-box">MALL<span>TIVERSE</span></div>
+      <p>Making the world’s data accessible and useful for teams everywhere.</p>
+      <div class="social-icons">
+        <a href="#">𝕏</a>
+        <a href="#">in</a>
+        <a href="#">ig</a>
+      </div>
     </div>
 
-    <div class="footer-bar"></div>
-
-    <div class="footer-bottom">
-        <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($supplier['company_name']) ?>. All rights reserved.</p>
+    <div class="footer-links">
+      <div class="link-column">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Integrations</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="link-column">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="link-column">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+        </ul>
+      </div>
     </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; 2025 MALLTIVERSE Inc. All rights reserved.</p>
+  </div>
 </footer>

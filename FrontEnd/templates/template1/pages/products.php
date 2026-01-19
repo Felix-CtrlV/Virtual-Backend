@@ -8,11 +8,12 @@ if ($current_page < 1) $current_page = 1;
 $offset = ($current_page - 1) * $limit;
 
 // --- 2. GET TOTAL COUNT (To know how many pages exist) ---
+// Change the first condition
 if (!isset($_GET['category_id'])) {
-    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE supplier_id = ?");
+    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE supplier_id = ? AND status != 'unavailable'");
     mysqli_stmt_bind_param($count_stmt, "i", $supplier_id);
 } else {
-    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE supplier_id = ? AND category_id = ?");
+    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE supplier_id = ? AND category_id = ? AND status != 'unavailable'");
     mysqli_stmt_bind_param($count_stmt, "ii", $supplier_id, $_GET['category_id']);
 }
 mysqli_stmt_execute($count_stmt);
@@ -30,13 +31,13 @@ mysqli_stmt_close($count_stmt);
       <?php
       // --- 3. FETCH PRODUCTS WITH LIMIT & OFFSET ---
       if (!isset($_GET['category_id'])) {
-        $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
-        mysqli_stmt_bind_param($products_stmt, "iii", $supplier_id, $limit, $offset);
-      } else {
-        $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
-        mysqli_stmt_bind_param($products_stmt, "iiii", $supplier_id, $_GET['category_id'], $limit, $offset);
-      }
-
+    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    mysqli_stmt_bind_param($products_stmt, "iii", $supplier_id, $limit, $offset);
+} else {
+    // ADD THE STATUS CHECK HERE TOO:
+    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    mysqli_stmt_bind_param($products_stmt, "iiii", $supplier_id, $_GET['category_id'], $limit, $offset);
+}
       if ($products_stmt) {
         mysqli_stmt_execute($products_stmt);
         $products_result = mysqli_stmt_get_result($products_stmt);

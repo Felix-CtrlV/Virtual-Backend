@@ -11,15 +11,15 @@ $offset = ($page - 1) * $limit;
 $like = "%$search%";
 
 if ($category_id) {
-    $count_sql = "SELECT COUNT(*) as total FROM products WHERE supplier_id = ? AND category_id = ?";
+    $count_sql = "SELECT COUNT(*) as total FROM products WHERE supplier_id = ? AND category_id = ? AND status = 'available'";
     $c_stmt = mysqli_prepare($conn, $count_sql);
     mysqli_stmt_bind_param($c_stmt, "ii", $supplierid, $category_id);
 } elseif ($search !== "") {
-    $count_sql = "SELECT COUNT(*) as total FROM products p INNER JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND c.category_name LIKE ?";
+    $count_sql = "SELECT COUNT(*) as total FROM products p INNER JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND c.category_name LIKE ? AND p.status = 'available'";
     $c_stmt = mysqli_prepare($conn, $count_sql);
     mysqli_stmt_bind_param($c_stmt, "is", $supplierid, $like);
 } else {
-    $count_sql = "SELECT COUNT(*) as total FROM products WHERE supplier_id = ?";
+    $count_sql = "SELECT COUNT(*) as total FROM products WHERE supplier_id = ? AND status = 'available'";
     $c_stmt = mysqli_prepare($conn, $count_sql);
     mysqli_stmt_bind_param($c_stmt, "i", $supplierid);
 }
@@ -30,15 +30,15 @@ $total_items = mysqli_fetch_assoc($total_result)['total'];
 $total_pages = ceil($total_items / $limit);
 
 if ($category_id) {
-    $sql = "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $sql = "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? AND status = 'available' ORDER BY created_at DESC LIMIT ? OFFSET ?";
     $stmt = mysqli_prepare($conn, $sql);
     mysqli_stmt_bind_param($stmt, "iiii", $supplierid, $category_id, $limit, $offset);
 } elseif ($search !== "") {
-    $sql = "SELECT p.* FROM products p INNER JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND c.category_name LIKE ? ORDER BY p.created_at DESC LIMIT ? OFFSET ?";
+    $sql = "SELECT p.* FROM products p INNER JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND c.category_name LIKE ? AND p.status = 'available' ORDER BY p.created_at DESC LIMIT ? OFFSET ?";
     $stmt = mysqli_prepare($conn, $sql);
     mysqli_stmt_bind_param($stmt, "isii", $supplierid, $like, $limit, $offset);
 } else {
-    $sql = "SELECT * FROM products WHERE supplier_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $sql = "SELECT * FROM products WHERE supplier_id = ? AND status = 'available' ORDER BY created_at DESC LIMIT ? OFFSET ?";
     $stmt = mysqli_prepare($conn, $sql);
     mysqli_stmt_bind_param($stmt, "iii", $supplierid, $limit, $offset);
 }
@@ -52,7 +52,8 @@ if ($products_result && mysqli_num_rows($products_result) > 0) {
         $img_src = !empty($row['image']) ? "../uploads/products/{$row['product_id']}_{$row['image']}" : "";
         
         $html .= '
-        <div class="col-md-4 col-sm-6 col-12"> <div class="card-product image">
+        <div class="col-md-4 col-sm-6 col-12"> 
+            <div class="card-product image">
                 <img src="'.$img_src.'" class="card-img-top" alt="'.htmlspecialchars($row['product_name']).'">
                 <div class="card-body">
                     <h4 class="card_title">'.htmlspecialchars($row['product_name']).'</h4>
@@ -71,3 +72,4 @@ echo json_encode([
     'html' => $html,
     'total_pages' => $total_pages
 ]);
+?>
