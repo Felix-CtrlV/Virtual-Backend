@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <nav class="main-nav navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top">
-    <div class="container">
+    <div class="container-fluid px-4">
         <a href="<?= $base_url ?>&page=home" class="brand-link navbar-brand py-0 d-flex align-items-center">
             
             <?php if (!empty($shop_assets['logo'])): ?>

@@ -3521,8 +3521,10 @@ input[name="qty"] {
         transform: scale(1.1); 
         box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
+
+
     /* Continue Shopping CSS*/
-    .shopping {
+.shopping {
   display: inline-flex;
   align-items: center;
   gap: 8px;
