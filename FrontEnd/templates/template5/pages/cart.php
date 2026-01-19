@@ -921,7 +921,7 @@ while ($item = mysqli_fetch_assoc($result)) {
                         <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" style="text-decoration: none;">
                             <button class="checkout-btn">
                                 <i class="fas fa-lock"></i>
-                                Secure Checkout
+                               Secure Checkout
                             </button>
                         </a>
                         
