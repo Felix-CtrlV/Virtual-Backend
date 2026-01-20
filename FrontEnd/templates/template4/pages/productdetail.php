@@ -97,6 +97,7 @@ $main_image = "../uploads/products/" . $product['product_id'] . "_" . htmlspecia
         max-height: 800px;
         object-fit: contain;
         display: block;
+        background-color: #111111;  
         transition: transform 0.3s ease;
     }
 

@@ -116,32 +116,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $new_price = (float) $_POST['product_price'];
         $new_status = $_POST['product_status']; // 'available' or 'unavailable'
 
-        // 1. Update Base Product (Price & Status)
+        // 1. Update Base Product
         $stmt = $conn->prepare("UPDATE products SET price = ?, status = ? WHERE product_id = ? AND supplier_id = ?");
         $stmt->bind_param("dsii", $new_price, $new_status, $pid, $supplier_id);
         $stmt->execute();
         $stmt->close();
 
-        // 2. Delete Marked Variants (FIXED: Handles Cart Dependency)
+        // 2. Delete Marked Variants
         if (!empty($_POST['deleted_variants_ids'])) {
             $ids_to_delete = explode(',', $_POST['deleted_variants_ids']);
-            // Filter to ensure only integers
             $ids_to_delete = array_map('intval', $ids_to_delete);
 
             if (!empty($ids_to_delete)) {
-                // Prepare a string for IN clause (e.g., "1,2,5")
                 $in_clause = implode(',', $ids_to_delete);
-
-                // --- FIX STARTS HERE ---
-                // First: Remove these variants from the CART table to satisfy Foreign Key Constraint
                 $conn->query("DELETE FROM cart WHERE variant_id IN ($in_clause)");
-
-                // (Optional: If you have a wishlist table, delete from there too, e.g.)
-                // $conn->query("DELETE FROM wishlist WHERE variant_id IN ($in_clause)");
-
-                // Second: Now it is safe to delete the variants
                 $conn->query("DELETE FROM product_variant WHERE variant_id IN ($in_clause) AND product_id = $pid");
-                // --- FIX ENDS HERE ---
             }
         }
 
@@ -157,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $updateStmt->close();
         }
 
-        // 4. Insert NEW Variants (from the Staging Queue)
+        // 4. Insert NEW Variants
         if (!empty($_POST['new_variants_json'])) {
             $new_vars = json_decode($_POST['new_variants_json'], true);
             if (json_last_error() === JSON_ERROR_NONE && !empty($new_vars)) {
@@ -253,6 +242,8 @@ ob_end_flush();
         /* --- CORE STYLES & OVERRIDES --- */
         :root {
             --primary: #2563eb;
+            /* Standard Dashboard Blue */
+            --primary-grad: linear-gradient(135deg, #2563eb, #1d4ed8);
             --bg: #f8f9fa;
             --surface: #ffffff;
             --border: #e2e8f0;
@@ -260,26 +251,7 @@ ob_end_flush();
             --text-light: #64748b;
             --danger: #ef4444;
             --success: #22c55e;
-            --modal-radius: 16px;
-        }
-
-        /* Modern Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            --modal-radius: 12px;
         }
 
         body {
@@ -306,7 +278,7 @@ ob_end_flush();
             background: var(--surface);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
             border: 1px solid var(--border);
         }
 
@@ -333,7 +305,7 @@ ob_end_flush();
         }
 
         .btn-main {
-            background: #111;
+            background: var(--primary);
             color: white;
             border: none;
             padding: 10px 24px;
@@ -344,12 +316,11 @@ ob_end_flush();
             align-items: center;
             gap: 8px;
             transition: 0.2s;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
         }
 
         .btn-main:hover {
-            background: #333;
-            color: white;
+            background: #1d4ed8;
             transform: translateY(-1px);
         }
 
@@ -383,10 +354,6 @@ ob_end_flush();
             color: #334155;
         }
 
-        .custom-table tr:last-child td {
-            border-bottom: none;
-        }
-
         .custom-table tr:hover {
             background: #f8fafc;
             cursor: pointer;
@@ -412,7 +379,6 @@ ob_end_flush();
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
-            letter-spacing: 0.02em;
         }
 
         .badge.ok {
@@ -430,7 +396,7 @@ ob_end_flush();
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -462,48 +428,73 @@ ob_end_flush();
         }
 
         .modal-sidebar {
-            /* width: 35%; */
+            width: 300px;
             background: #f8fafc;
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 20px;
+            flex-shrink: 0;
         }
 
         .modal-content-area {
-            width: 65%;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
-        .modal-header {
+        /* -- HEADER STYLES (NEW VS OLD) -- */
+        /* New Product Header (Gradient) */
+        .modal-header-new {
             padding: 24px 32px;
+            background: var(--primary-grad);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-header-new .modal-title {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-header-new .modal-close {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .modal-header-new .modal-close:hover {
+            color: white;
+        }
+
+        /* Old Edit Header (Standard) */
+        .modal-header-edit {
+            padding: 24px 32px;
+            background: #fff;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #fff;
             flex-shrink: 0;
         }
 
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
+        .modal-header-edit .modal-title {
             color: #0f172a;
             margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
         }
 
         .modal-close {
             cursor: pointer;
-            color: #94a3b8;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            line-height: 1;
             transition: 0.2s;
-        }
-
-        .modal-close:hover {
-            color: #0f172a;
         }
 
         .modal-body-scroll {
@@ -547,7 +538,7 @@ ob_end_flush();
 
         .input-std {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 0.95rem;
@@ -563,13 +554,12 @@ ob_end_flush();
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        textarea.input-std {
-            min-height: 100px;
-            resize: vertical;
-        }
-
+        /* IMAGE FIX */
         .image-drop-zone {
             width: 100%;
+            height: auto;
+            min-height: 250px;
+            /* Fixed min height for consistency */
             aspect-ratio: 1;
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
@@ -580,12 +570,27 @@ ob_end_flush();
             position: relative;
             cursor: pointer;
             transition: 0.2s;
-            background: #fff;
+            background: white;
         }
 
         .image-drop-zone:hover {
             border-color: var(--primary);
-            background: #eff6ff;
+            background: #f8fafc;
+        }
+
+        .preview-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Ensures image fits nicely */
+            border-radius: 12px;
+            display: none;
+            padding: 10px;
+            /* Padding so image doesn't touch dashed border */
+            box-sizing: border-box;
+            background: white;
         }
 
         .file-input {
@@ -596,113 +601,165 @@ ob_end_flush();
             z-index: 5;
         }
 
-        .preview-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 12px;
-            display: none;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-
-        .pill-container {
+        /* --- NEW: SIZE CHIPS & STEPPER --- */
+        .size-chips {
             display: flex;
+            gap: 8px;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 20px;
         }
 
-        .pill-radio {
-            display: none;
-        }
-
-        .pill-label {
-            padding: 8px 16px;
-            background: #f1f5f9;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-            color: #475569;
-            font-weight: 500;
-        }
-
-        .pill-radio:checked+.pill-label {
-            background: #0f172a;
-            color: white;
-            border-color: #0f172a;
-        }
-
-        .pill-add-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 1px dashed #94a3b8;
+        .size-chip {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            color: #64748b;
-            font-size: 1.2rem;
-            transition: 0.2s;
-        }
-
-        .new-cat-box {
-            display: none;
-            gap: 8px;
-            margin-top: 12px;
-            align-items: center;
-        }
-
-        .variant-input-group {
-            display: grid;
-            grid-template-columns: auto 1fr 100px auto;
-            gap: 12px;
-            align-items: center;
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary {
-            background: #fff;
             border: 1px solid #cbd5e1;
-            color: #475569;
-            padding: 10px 20px;
             border-radius: 8px;
+            background: white;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            color: #475569;
             transition: 0.2s;
+            font-size: 0.85rem;
         }
 
-        .btn-secondary:hover {
+        .size-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .qty-stepper {
+            display: flex;
+            align-items: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            overflow: hidden;
+            width: 120px;
+        }
+
+        .qty-btn {
+            width: 36px;
+            height: 38px;
+            border: none;
             background: #f1f5f9;
-            color: #0f172a;
+            color: #475569;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .btn-create {
-            background: #0f172a;
+        .qty-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .qty-input-real {
+            flex: 1;
+            border: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #0f172a;
+            height: 38px;
+            width: 40px;
+            outline: none;
+        }
+
+        /* Color Picker Styling */
+        .color-wrapper {
+            position: relative;
+            width: 100%;
+            height: 40px;
+        }
+
+        .color-display {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            box-sizing: border-box;
+            gap: 10px;
+        }
+
+        .color-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .color-input-hidden {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Variant Grid for Add Modal */
+        .variant-creator-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .added-variants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .variant-card-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .variant-card-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--card-color, #000);
+        }
+
+        .btn-add-var {
+            background: #1e293b;
             color: white;
             border: none;
-            padding: 10px 32px;
             border-radius: 8px;
+            padding: 0 20px;
+            height: 40px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.95rem;
-            transition: 0.2s;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .btn-create:hover {
-            background: #333;
-            transform: translateY(-1px);
-        }
-
+        /* --- ORIGINAL EDIT MODAL STYLES --- */
         .var-table {
             width: 100%;
             font-size: 0.9rem;
@@ -732,16 +789,51 @@ ob_end_flush();
             text-align: center;
         }
 
-        .modal-big-img {
-            /* max-width: 100%; */
-            width: 100%;
-            height: 100%;
-            /* max-height: 400px; */
-            object-fit: cover;
-            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+        .variant-input-group {
+            display: grid;
+            grid-template-columns: auto 1fr 100px auto;
+            gap: 12px;
+            align-items: center;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
-        /* --- TOGGLE SWITCH --- */
+        /* Standard Buttons */
+        .btn-secondary {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .btn-create {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .btn-create:hover {
+            background: #1d4ed8;
+        }
+
+        /* Toggle */
         .switch {
             position: relative;
             display: inline-block;
@@ -788,14 +880,6 @@ ob_end_flush();
             transform: translateX(20px);
         }
 
-        .status-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-right: 10px;
-            color: #475569;
-        }
-
-        /* --- DELETE BUTTON --- */
         .btn-icon-danger {
             background: #fef2f2;
             color: #ef4444;
@@ -810,10 +894,51 @@ ob_end_flush();
             transition: 0.2s;
         }
 
-        .btn-icon-danger:hover {
-            background: #ef4444;
+        /* Category Pills */
+        .pill-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .pill-radio {
+            display: none;
+        }
+
+        .pill-label {
+            padding: 8px 16px;
+            background: white;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .pill-radio:checked+.pill-label {
+            background: var(--primary);
             color: white;
-            border-color: #ef4444;
+            border-color: var(--primary);
+        }
+
+        .pill-add-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px dashed #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .new-cat-box {
+            display: none;
+            gap: 8px;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -889,7 +1014,7 @@ ob_end_flush();
 
             <div style="margin-top:20px; text-align:center;">
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?= $i ?>" style="padding:8px 14px; margin:0 3px; background:<?= $i == $page ? '#0f172a' : 'white' ?>; color:<?= $i == $page ? 'white' : '#0f172a' ?>; text-decoration:none; border-radius:6px; border: 1px solid #e2e8f0; font-size:0.9rem; font-weight:500;"><?= $i ?></a>
+                    <a href="?page=<?= $i ?>" style="padding:8px 14px; margin:0 3px; background:<?= $i == $page ? 'var(--primary)' : 'white' ?>; color:<?= $i == $page ? 'white' : 'var(--primary)' ?>; text-decoration:none; border-radius:6px; border: 1px solid #e2e8f0; font-size:0.9rem; font-weight:500;"><?= $i ?></a>
                 <?php endfor; ?>
             </div>
         </div>
@@ -904,7 +1029,7 @@ ob_end_flush();
                     <div class="image-drop-zone">
                         <input type="file" name="image" form="createProductForm" class="file-input" accept="image/*" required onchange="previewFile(this)">
                         <div class="upload-msg" id="uploadPlaceholder" style="text-align:center; pointer-events:none;">
-                            <div class="upload-icon">📷</div>
+                            <div style="font-size:2rem; margin-bottom:10px;">📷</div>
                             <span style="font-weight:600; color:#64748b; font-size:0.9rem;">Upload Photo</span>
                         </div>
                         <img id="imagePreview" class="preview-img">
@@ -917,13 +1042,13 @@ ob_end_flush();
                         <input type="hidden" name="variants_data" id="hiddenVariantsJson">
                         <input type="hidden" name="new_category_name" id="hiddenNewCatName">
 
-                        <div class="modal-header">
+                        <div class="modal-header-new">
                             <h2 class="modal-title">Add New Product</h2>
                             <span class="modal-close" onclick="closeModal('addModal')">&times;</span>
                         </div>
 
                         <div class="modal-body-scroll">
-                            <div class="form-section-title">Basic Information</div>
+                            <div class="form-section-title">General Info</div>
                             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
                                 <div class="form-group">
                                     <label class="form-label">Product Name</label>
@@ -932,7 +1057,7 @@ ob_end_flush();
                                 <div class="form-group">
                                     <label class="form-label">Price</label>
                                     <div style="position:relative;">
-                                        <span style="position:absolute; left:12px; top:12px; color:#64748b;">$</span>
+                                        <span style="position:absolute; left:12px; top:10px; color:#64748b;">$</span>
                                         <input type="number" step="0.01" name="price" class="input-std" style="padding-left:25px;" placeholder="0.00" required>
                                     </div>
                                 </div>
@@ -941,10 +1066,9 @@ ob_end_flush();
                                 <label class="form-label">Description</label>
                                 <textarea name="description" class="input-std" placeholder="Describe the product details, material, and fit..."></textarea>
                             </div>
-                            <div style="border-top:1px solid #f1f5f9; margin: 25px 0;"></div>
-                            <div class="form-section-title">Organization</div>
+
+                            <div class="form-section-title">Category</div>
                             <div class="form-group">
-                                <label class="form-label">Category</label>
                                 <div class="pill-container">
                                     <?php foreach ($categories as $cat): ?>
                                         <label>
@@ -966,35 +1090,52 @@ ob_end_flush();
                                     <button type="button" class="btn-secondary" style="padding:10px 15px;" onclick="stageNewCategory()">Add</button>
                                 </div>
                             </div>
-                            <div style="border-top:1px solid #f1f5f9; margin: 25px 0;"></div>
-                            <div class="form-section-title">Variants & Inventory</div>
-                            <div class="form-group">
-                                <div class="variant-input-group">
-                                    <input type="color" id="stageColor" value="#000000" style="height:40px; width:40px; border:none; cursor:pointer; background:none; padding:0;">
-                                    <input type="text" id="stageSize" placeholder="Size (e.g. Medium)" class="input-std">
-                                    <input type="number" id="stageQty" placeholder="Qty" class="input-std">
-                                    <button type="button" class="btn-secondary" onclick="addVariantToQueue()">Add Variant</button>
+
+                            <div class="form-section-title">Variants & Stock</div>
+                            <div class="variant-creator-card">
+                                <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+                                    <div style="flex:2; min-width:200px;">
+                                        <label class="form-label">Size</label>
+                                        <div class="size-chips">
+                                            <div class="size-chip" onclick="selectSize(this, 'S')">S</div>
+                                            <div class="size-chip" onclick="selectSize(this, 'M')">M</div>
+                                            <div class="size-chip" onclick="selectSize(this, 'L')">L</div>
+                                            <div class="size-chip" onclick="selectSize(this, 'XL')">XL</div>
+                                            <input type="text" id="stageSize" class="input-std" style="width:80px; padding:0 10px; height:40px;" placeholder="Custom">
+                                        </div>
+                                    </div>
+                                    <div style="flex:1; min-width:120px;">
+                                        <label class="form-label">Color</label>
+                                        <div class="color-wrapper">
+                                            <input type="color" id="stageColor" value="#000000" class="color-input-hidden" onchange="updateColorDisplay(this)">
+                                            <div class="color-display">
+                                                <div id="colorCircle" class="color-circle" style="background:#000;"></div>
+                                                <span id="colorHexText" style="font-size:0.85rem; color:#64748b;">#000000</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="flex:0 0 auto;">
+                                        <label class="form-label">Quantity</label>
+                                        <div class="qty-stepper">
+                                            <button type="button" class="qty-btn" onclick="adjustQty(-1)">-</button>
+                                            <input type="number" id="stageQty" class="qty-input-real" value="1" min="1">
+                                            <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-add-var" onclick="addVariantToQueue()">+ Add</button>
                                 </div>
-                                <table class="var-table">
-                                    <thead>
-                                        <tr>
-                                            <th width="10%">Color</th>
-                                            <th width="60%">Size</th>
-                                            <th width="20%">Qty</th>
-                                            <th width="10%"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="variantPreviewBody">
-                                        <tr>
-                                            <td colspan="4" style="text-align:center; padding:20px; color:#94a3b8; font-style:italic;">No variants added yet.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+
+                                <div id="variantPreviewBody" class="added-variants-grid">
+                                </div>
+                                <div id="noVariantsMsg" style="text-align:center; color:#94a3b8; font-size:0.9rem; margin-top:10px;">
+                                    No variants added. Default "One Size" will be created.
+                                </div>
                             </div>
                         </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn-secondary" onclick="closeModal('addModal')">Cancel</button>
-                            <button type="submit" class="btn-create">Create Product</button>
+                            <button type="submit" class="btn-create">Publish Product</button>
                         </div>
                     </form>
                 </div>
@@ -1003,8 +1144,8 @@ ob_end_flush();
 
         <div id="variantModal" class="modal-overlay">
             <div class="modal-box">
-                <div class="modal-sidebar"  >
-                    <img id="varModalImg" class="modal-big-img" src="">
+                <div class="modal-sidebar">
+                    <img id="varModalImg" style="width:100%; height:auto; object-fit:contain; max-height:400px;" src="">
                 </div>
 
                 <div class="modal-content-area">
@@ -1015,11 +1156,11 @@ ob_end_flush();
                         <input type="hidden" name="deleted_variants_ids" id="editDeletedVariantsIds">
                         <input type="hidden" name="product_status" id="editProductStatus">
 
-                        <div class="modal-header">
+                        <div class="modal-header-edit">
                             <div>
                                 <h2 id="varModalTitle" class="modal-title">Product Name</h2>
                                 <div style="display:flex; align-items:center; margin-top:5px;">
-                                    <span class="status-label" id="statusLabelText">Available</span>
+                                    <span class="status-label" id="statusLabelText" style="margin-right:10px; font-weight:600; color:#22c55e;">Available</span>
                                     <label class="switch">
                                         <input type="checkbox" id="statusToggle" onchange="toggleStatus(this)">
                                         <span class="slider round"></span>
@@ -1142,6 +1283,26 @@ ob_end_flush();
             isNewCategoryMode = false;
         }
 
+        // --- NEW VARIANT UI HELPERS ---
+        function selectSize(el, size) {
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('stageSize').value = size;
+        }
+
+        function adjustQty(amount) {
+            const input = document.getElementById('stageQty');
+            let current = parseInt(input.value) || 0;
+            let newVal = current + amount;
+            if (newVal < 1) newVal = 1;
+            input.value = newVal;
+        }
+
+        function updateColorDisplay(input) {
+            document.getElementById('colorCircle').style.background = input.value;
+            document.getElementById('colorHexText').innerText = input.value;
+        }
+
         // --- ADD PRODUCT: VARIANT QUEUE ---
         function addVariantToQueue() {
             const color = document.getElementById('stageColor').value;
@@ -1157,33 +1318,41 @@ ob_end_flush();
                 size: size,
                 qty: parseInt(qty)
             });
-            renderVariantTable();
+            renderVariantGrid();
+            // Reset
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
             document.getElementById('stageSize').value = '';
-            document.getElementById('stageQty').value = '';
-            document.getElementById('stageSize').focus();
+            document.getElementById('stageQty').value = '1';
         }
 
         function removeVariantFromQueue(id) {
             variantQueue = variantQueue.filter(v => v.id !== id);
-            renderVariantTable();
+            renderVariantGrid();
         }
 
-        function renderVariantTable() {
-            const tbody = document.getElementById('variantPreviewBody');
-            tbody.innerHTML = '';
+        function renderVariantGrid() {
+            const container = document.getElementById('variantPreviewBody');
+            const msg = document.getElementById('noVariantsMsg');
+            container.innerHTML = '';
             if (variantQueue.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8; font-style:italic;">No variants added yet.</td></tr>';
+                msg.style.display = 'block';
                 return;
             }
+            msg.style.display = 'none';
+
             variantQueue.forEach(v => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><span style="display:inline-block;width:20px;height:20px;background:${v.color};border-radius:50%;border:1px solid #e2e8f0; vertical-align:middle;"></span></td>
-                    <td style="color:#334155; font-weight:500;">${v.size}</td>
-                    <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:4px; font-weight:600; font-size:0.85rem;">${v.qty}</span></td>
-                    <td style="text-align:right;"><span onclick="removeVariantFromQueue(${v.id})" style="color:#ef4444; cursor:pointer; font-size:1.2rem;">&times;</span></td>
+                const div = document.createElement('div');
+                div.className = 'variant-card-item';
+                div.style.setProperty('--card-color', v.color);
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:700; font-size:1rem; color:#1e293b;">${v.size}</div>
+                        <div style="font-size:0.8rem; color:#64748b;">${v.qty} units</div>
+                    </div>
+                    <div style="width:20px; height:20px; border-radius:50%; background:${v.color}; border:1px solid #ddd; margin:0 10px;"></div>
+                    <span onclick="removeVariantFromQueue(${v.id})" style="color:#ef4444; cursor:pointer; font-weight:bold; padding:5px;">&times;</span>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(div);
             });
         }
 
@@ -1198,7 +1367,7 @@ ob_end_flush();
             return true;
         }
 
-        // --- EDIT MODAL LOGIC (UPDATED) ---
+        // --- EDIT MODAL LOGIC (ORIGINAL) ---
         function openVariantModal(p) {
             editVariantQueue = [];
             deletedVariantsIds = []; // Reset delete queue

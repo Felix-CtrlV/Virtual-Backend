@@ -1,6 +1,29 @@
 <link rel="stylesheet" href="../templates/template4/style.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.lordicon.com/lordicon.js"></script>
+<style>
+    /* Added styles for Exit Button */
+    .exit-btn {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.3s;
+        text-decoration: none;
+        /* margin-left: 50px; */
+        position: absolute;
+        right: 20px;
+        /* Space between exit and cart */
+    }
+
+    .exit-btn:hover {
+        opacity: 0.7;
+    }
+</style>
 <header class="smart-header">
     <div class="logo-container">
         <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
@@ -28,7 +51,8 @@
         </li>
     </ul>
 
-    <div class="auth-buttons">
+    <div class="auth-buttons" style="display: flex; align-items: center;">
+
         <button class="cart-icon-btn" id="cart-icon-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="21" r="1"></circle>
@@ -37,7 +61,16 @@
             </svg>
             <span class="cart-badge" id="cart-badge">0</span>
         </button>
-        </div>
+        <a href="../index.php" class="exit-btn" title="Exit Shop">
+            <lord-icon
+                src="https://cdn.lordicon.com/vfiwitrm.json"
+                trigger="hover"
+                stroke="bold"
+                colors="primary:#121331,secondary:#000000"
+                style="width:35px;height:35px">
+            </lord-icon>
+        </a>
+    </div>
 
     <div class="cart-popup" id="cart-popup">
         <div class="cart-popup-content">
