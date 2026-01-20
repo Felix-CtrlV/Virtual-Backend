@@ -147,8 +147,8 @@ if ($categoryStmt) {
 }
 // Fallback if empty (for demo)
 if (empty($categoryData)) {
-    $categoryLabels = ['Electronics', 'Accessories', 'Furniture', 'Clothing'];
-    $categoryData = [40, 25, 20, 15];
+    $categoryLabels = ['NoData'];
+    $categoryData = [0];
 }
 
 

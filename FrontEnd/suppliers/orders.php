@@ -1,5 +1,4 @@
 <?php
-// orders.php
 session_start();
 
 // --- 1. AJAX HANDLER (API LOGIC) ---
@@ -7,16 +6,15 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
     include("../../BackEnd/config/dbconfig.php");
     $supplier_id = $_SESSION['supplierid'];
 
-    // A. FETCH ORDERS LIST
+    // A. FETCH ORDERS LIST (Populates the Table)
     if (isset($_GET['ajax_action']) && $_GET['ajax_action'] === 'fetch_orders') {
-        $month = (int)$_GET['month'];
-        $year = (int)$_GET['year'];
+        $month = (int) $_GET['month'];
+        $year = (int) $_GET['year'];
         $search = trim($_GET['search']);
 
-        $sql = "SELECT o.order_id, o.order_code, o.order_date, o.order_status, o.payment_method, o.price AS total_amount, c.name AS customer_name 
-                FROM orders o 
-                LEFT JOIN customers c ON o.customer_id = c.customer_id 
-                WHERE o.supplier_id = ? AND MONTH(o.order_date) = ? AND YEAR(o.order_date) = ?";
+        $sql = "SELECT DISTINCT o.order_id, o.order_code, o.order_date, o.order_status, o.payment_method, o.price AS total_amount, c.name AS customer_name, p.product_id FROM orders o
+LEFT JOIN customers c ON o.customer_id = c.customer_id JOIN order_detail od ON o.order_id = od.order_id JOIN product_variant pv ON od.variant_id = pv.variant_id JOIN products p ON pv.product_id = p.product_id
+WHERE o.supplier_id = ? AND MONTH(o.order_date) = ? AND YEAR(o.order_date) = ?";
 
         $params = [$supplier_id, $month, $year];
         $types = "iii";
@@ -32,6 +30,10 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
         $sql .= " ORDER BY o.order_date DESC";
 
         $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            echo "<tr><td colspan='6' style='text-align:center; padding:20px; color:red;'>Database Error: " . $conn->error . "</td></tr>";
+            exit;
+        }
         $stmt->bind_param($types, ...$params);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -39,12 +41,15 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
 
         if (count($orders) > 0) {
             foreach ($orders as $o) {
-                // Status Class Logic
+                // Status Class Logic for the Table Badge
                 $statusClass = 'badge';
                 $s = strtolower($o['order_status']);
-                if ($s == 'confirm' || $s == 'shipped') $statusClass .= ' ok';
-                elseif ($s == 'cancelled') $statusClass .= ' low';
-                else $statusClass .= ' pending';
+                if ($s == 'confirm' || $s == 'shipped')
+                    $statusClass .= ' ok';
+                elseif ($s == 'cancelled')
+                    $statusClass .= ' low';
+                else
+                    $statusClass .= ' pending';
 
                 echo '<tr class="product-row">';
                 echo '<td>
@@ -55,8 +60,12 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
                 echo '<td style="font-weight:700;">$' . number_format($o['total_amount'], 2) . '</td>';
                 echo '<td style="color:#666;">' . ucfirst($o['payment_method']) . '</td>';
                 echo '<td><span class="' . $statusClass . '">' . ucfirst($o['order_status']) . '</span></td>';
+
+                // --- THE VIEW BUTTON ---
                 echo '<td>
-                        <button class="btn-sm" style="background:white; border:1px solid #ddd; color:#333;" onclick="openManageModal(' . $o['order_id'] . ')">Manage</button>
+                        <button class="btn-sm" style="background:#fff; border:1px solid #ddd; color:#333; font-weight:600;" onclick="openViewModal(' . $o['order_id'] . ')">
+                            View Details
+                        </button>
                       </td>';
                 echo '</tr>';
             }
@@ -66,16 +75,50 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
         exit;
     }
 
-    // B. FETCH SINGLE ORDER DETAILS
+    // B. FETCH SINGLE ORDER DETAILS (The Backend Logic for the Modal)
+    // --- THIS SECTION IS FIXED ---
     if (isset($_GET['ajax_action']) && $_GET['ajax_action'] === 'get_details') {
-        $order_id = (int)$_GET['order_id'];
+        // Ensure we output JSON even if errors occur
+        header('Content-Type: application/json');
 
-        $stmt = $conn->prepare("SELECT o.*, c.name, c.email, c.address, c.phone FROM orders o LEFT JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_id = ? AND o.supplier_id = ?");
+        $order_id = (int) $_GET['order_id'];
+
+        // 1. Fetch Order + Customer Info
+        $stmt = $conn->prepare("
+                SELECT o.*, c.name, c.email, c.address, c.phone 
+                FROM orders o 
+                LEFT JOIN customers c ON o.customer_id = c.customer_id 
+                WHERE o.order_id = ? AND o.supplier_id = ?");
+
+        if (!$stmt) {
+            echo json_encode(['error' => 'Order Query SQL Error: ' . $conn->error]);
+            exit;
+        }
+
         $stmt->bind_param("ii", $order_id, $supplier_id);
         $stmt->execute();
-        $order = $stmt->get_result()->fetch_assoc();
+        $orderResult = $stmt->get_result();
 
-        $pStmt = $conn->prepare("SELECT od.quantity, od.price, p.product_name, p.image FROM order_detail od JOIN products p ON od.product_id = p.product_id WHERE od.order_id = ?");
+        if ($orderResult->num_rows === 0) {
+            echo json_encode(['error' => 'Order not found or access denied']);
+            exit;
+        }
+
+        $order = $orderResult->fetch_assoc();
+
+        // 2. Fetch Items for that Order
+        // Note: If you still get an error, check if your table is named 'order_details' (plural) instead of 'order_detail'
+        $pStmt = $conn->prepare("SELECT  od.quantity, p.price, p.product_name, p.product_id, p.image 
+                                        FROM order_detail od
+                                        JOIN product_variant pv ON od.variant_id = pv.variant_id 
+                                        JOIN products p ON pv.product_id = p.product_id 
+                                        WHERE od.order_id = ?");
+
+        if (!$pStmt) {
+            echo json_encode(['error' => 'Product Query SQL Error: ' . $conn->error]);
+            exit;
+        }
+
         $pStmt->bind_param("i", $order_id);
         $pStmt->execute();
         $products = $pStmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -83,21 +126,11 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
         echo json_encode(['order' => $order, 'products' => $products]);
         exit;
     }
-
-    // C. UPDATE STATUS
-    if (isset($_POST['ajax_action']) && $_POST['ajax_action'] === 'update_status') {
-        $order_id = (int)$_POST['order_id'];
-        $status = $_POST['status'];
-
-        $stmt = $conn->prepare("UPDATE orders SET order_status = ? WHERE order_id = ? AND supplier_id = ?");
-        $stmt->bind_param("sii", $status, $order_id, $supplier_id);
-        echo $stmt->execute() ? 'success' : 'error';
-        exit;
-    }
 }
 
 // --- NORMAL PAGE LOAD ---
 include("partials/nav.php");
+include("../../BackEnd/config/dbconfig.php"); // Ensure DB is connected for stats
 
 // Stats Calculation
 $supplier_id = $_SESSION['supplierid'];
@@ -106,9 +139,14 @@ $statsStmt = $conn->prepare("SELECT
     SUM(CASE WHEN order_status = 'pending' THEN 1 ELSE 0 END) as pending,
     SUM(CASE WHEN order_status = 'confirm' THEN price ELSE 0 END) as revenue
     FROM orders WHERE supplier_id = ? AND MONTH(order_date) = MONTH(CURRENT_DATE())");
-$statsStmt->bind_param("i", $supplier_id);
-$statsStmt->execute();
-$stats = $statsStmt->get_result()->fetch_assoc();
+
+if ($statsStmt) {
+    $statsStmt->bind_param("i", $supplier_id);
+    $statsStmt->execute();
+    $stats = $statsStmt->get_result()->fetch_assoc();
+} else {
+    $stats = ['total' => 0, 'pending' => 0, 'revenue' => 0];
+}
 ?>
 
 <!DOCTYPE html>
@@ -157,7 +195,6 @@ $stats = $statsStmt->get_result()->fetch_assoc();
             margin-bottom: 25px;
             gap: 20px;
             padding: 15px 25px;
-            /* Bigger padding for glass effect */
         }
 
         .search-wrapper {
@@ -285,7 +322,7 @@ $stats = $statsStmt->get_result()->fetch_assoc();
             border: 1px solid #fef3c7;
         }
 
-        /* --- MODAL --- */
+        /* --- VIEW MODAL STYLES (NEW) --- */
         .split-modal {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
@@ -316,6 +353,66 @@ $stats = $statsStmt->get_result()->fetch_assoc();
             border: 1px solid #f0f0f0;
         }
 
+        .info-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #999;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Transaction Details Grid */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .detail-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        /* Large Status Pill */
+        .status-pill-lg {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: capitalize;
+            margin-top: 5px;
+        }
+
+        .status-pill-lg.ok {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pill-lg.pending {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .status-pill-lg.low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Products List */
         .modal-prod-item {
             display: flex;
             align-items: center;
@@ -332,31 +429,10 @@ $stats = $statsStmt->get_result()->fetch_assoc();
             object-fit: cover;
         }
 
-        /* Radio Status */
-        .status-opt {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            border: 1px solid #e5e5e5;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            background: #fff;
-        }
-
-        .status-opt:hover {
-            border-color: #ccc;
-        }
-
-        input[type="radio"]:checked+span {
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        input[type="radio"] {
-            accent-color: var(--primary);
-            transform: scale(1.1);
+        .modal-prod-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
         }
     </style>
 </head>
@@ -364,18 +440,19 @@ $stats = $statsStmt->get_result()->fetch_assoc();
 <body>
     <div class="rent-header">
         <div>
-            <h1>Manage Orders</h1>
-            <p style="color:#666; margin-top:5px;">Track sales and update status</p>
+            <h1>Orders</h1>
+            <p style="color:#666; margin-top:5px;">Track sales and view receipts</p>
         </div>
         <div class="glass-panel" style="padding: 10px 20px; display:flex; align-items:center; gap:10px;">
             <div style="text-align:right;">
                 <small style="display:block; color:#666; font-size:0.75rem;">REVENUE (THIS MONTH)</small>
                 <div style="font-weight:800; color: var(--primary); font-size:1.1rem;">
-                    $<?= number_format($stats['revenue'] ?? 0, 2) ?>
+                    $<?= number_format($stats['revenue'], 2) ?>
                 </div>
             </div>
             <svg class="icon-svg" style="color:var(--primary);" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
     </div>
@@ -384,7 +461,8 @@ $stats = $statsStmt->get_result()->fetch_assoc();
         <div class="rent-card">
             <div class="icon-box">
                 <svg class="icon-svg" style="color:white;" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             </div>
             <div class="rent-details">
@@ -396,7 +474,8 @@ $stats = $statsStmt->get_result()->fetch_assoc();
         <div class="rent-card">
             <div class="icon-box" style="background:#ea982a;">
                 <svg class="icon-svg" style="color:white;" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
             <div class="rent-details">
@@ -408,7 +487,8 @@ $stats = $statsStmt->get_result()->fetch_assoc();
         <div class="rent-card">
             <div class="icon-box" style="background:#333;">
                 <svg class="icon-svg" style="color:white;" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                 </svg>
             </div>
             <div class="rent-details">
@@ -425,7 +505,8 @@ $stats = $statsStmt->get_result()->fetch_assoc();
             <div class="search-wrapper">
                 <div class="search-icon-pos">
                     <svg class="icon-sm" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
                 <input type="text" id="searchInput" class="search-input" placeholder="Search customer or code...">
@@ -468,112 +549,117 @@ $stats = $statsStmt->get_result()->fetch_assoc();
         </div>
     </div>
 
-    <div id="manageModal" class="modal-overlay">
-        <div class="modal-box" style="width: 900px; height: 650px;">
-            <form id="updateOrderForm" class="split-modal" onsubmit="return saveStatus(event)">
-                <input type="hidden" id="modalOrderId" name="order_id">
+    <div id="viewModal" class="modal-overlay">
+        <div class="modal-box" style="width: 850px; height: 600px;">
+            <div class="split-modal">
 
                 <div class="modal-info-side">
-                    <h2 style="margin-bottom:20px; font-weight:800; font-size:1.4rem;">
-                        Order <span id="displayOrderCode" style="color:var(--primary);">#...</span>
-                    </h2>
-
-                    <div class="info-group">
-                        <div class="info-label">Customer Details</div>
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-                            <div style="background:#eee; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;">👤</div>
-                            <div class="info-val" id="displayCustomer">...</div>
-                        </div>
-                        <div style="font-size:0.85rem; color:#666; margin-left:40px;" id="displayEmail">...</div>
-                        <div style="font-size:0.85rem; color:#666; margin-left:40px; margin-top:2px;" id="displayAddress">...</div>
+                    <div style="margin-bottom:25px;">
+                        <small style="color:#888;">ORDER ID</small>
+                        <h2 style="font-weight:800; font-size:1.8rem; margin:0; line-height:1;">
+                            <span id="displayOrderCode" style="color:var(--primary);">#...</span>
+                        </h2>
                     </div>
 
                     <div class="info-group">
-                        <div class="info-label">Update Order Status</div>
-                        <div class="status-options">
-                            <label class="status-opt">
-                                <input type="radio" name="status" value="pending">
-                                <span>Pending</span>
-                            </label>
-                            <label class="status-opt">
-                                <input type="radio" name="status" value="confirm">
-                                <span>Confirmed</span>
-                            </label>
-                            <label class="status-opt">
-                                <input type="radio" name="status" value="shipped">
-                                <span>Shipped</span>
-                            </label>
-                            <label class="status-opt">
-                                <input type="radio" name="status" value="cancelled">
-                                <span>Cancelled</span>
-                            </label>
+                        <div class="info-label">Customer Information</div>
+                        <div style="display:flex; align-items:flex-start; gap:12px; margin-top:10px;">
+                            <div
+                                style="background:#eee; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                                👤</div>
+                            <div>
+                                <div class="info-val" id="displayCustomer" style="font-size:1rem; font-weight:600;">...
+                                </div>
+                                <div style="font-size:0.85rem; color:#666; margin-top:2px;" id="displayEmail">...</div>
+                                <div style="font-size:0.85rem; color:#666; margin-top:2px;" id="displayPhone">...</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:15px; padding-top:10px; border-top:1px dashed #eee;">
+                            <small style="color:#999; display:block; margin-bottom:4px;">Shipping Address</small>
+                            <div id="displayAddress" style="font-size:0.9rem; line-height:1.4; color:#333;">...</div>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="info-label">Transaction Details</div>
+
+                        <div class="detail-grid">
+                            <div class="detail-box">
+                                <small class="info-label" style="display:block; margin-bottom:0;">Payment</small>
+                                <div class="detail-value" id="displayPayment">...</div>
+                            </div>
+                            <div class="detail-box">
+                                <small class="info-label" style="display:block; margin-bottom:0;">Date</small>
+                                <div class="detail-value" id="displayDate">...</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:20px;">
+                            <small class="info-label">Order Status</small>
+                            <div>
+                                <span id="displayStatusPill" class="status-pill-lg pending">...</span>
+                            </div>
                         </div>
                     </div>
 
                     <div style="margin-top:auto;">
-                        <button type="submit" class="btn-main" style="width:100%; justify-content:center;">Save Changes</button>
-                        <button type="button" class="btn-sm" style="width:100%; margin-top:10px; background:transparent; color:#888; border:none;" onclick="closeModal()">Dismiss</button>
+                        <button type="button" class="btn-main"
+                            style="width:100%; background:#333; border:none; justify-content:center;"
+                            onclick="closeModal()">Close Details</button>
                     </div>
                 </div>
 
                 <div class="modal-product-side">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:20px;">
-                        <h3 style="margin:0;">Items</h3>
-                        <div style="font-weight:800; font-size:1.3rem; color:var(--primary);" id="displayTotal">$0.00</div>
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:20px;">
+                        <h3 style="margin:0;">Purchased Items</h3>
+                        <div style="font-weight:800; font-size:1.4rem; color:var(--primary);" id="displayTotal">$0.00
+                        </div>
                     </div>
 
                     <div class="modal-prod-list" id="modalProductList">
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
     <script>
         // --- STATE MANAGEMENT ---
-        let viewDate = new Date(); // Tracks the currently viewed month
-        const today = new Date(); // Fixed reference for capping
+        let viewDate = new Date();
+        const today = new Date();
 
         document.addEventListener('DOMContentLoaded', () => {
             updateDateUI();
             fetchOrders();
         });
 
-        // --- LIVE SEARCH (Debounce) ---
+        // --- LIVE SEARCH ---
         let debounceTimer;
         document.getElementById('searchInput').addEventListener('input', () => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(fetchOrders, 300);
         });
 
-        // --- DATE NAVIGATION LOGIC ---
+        // --- DATE NAVIGATION ---
         function changeDate(direction) {
-            // Update viewDate
             viewDate.setMonth(viewDate.getMonth() + direction);
             updateDateUI();
             fetchOrders();
         }
 
         function updateDateUI() {
-            // Format: "January 2026"
-            const options = {
-                year: 'numeric',
-                month: 'long'
-            };
+            const options = { year: 'numeric', month: 'long' };
             document.getElementById('dateDisplay').innerText = viewDate.toLocaleDateString('en-US', options);
 
-            // Cap Logic: Disable "Next" if viewDate >= current real month/year
             const nextBtn = document.getElementById('nextBtn');
-            // Compare year and month
             const isCurrentOrFuture = (viewDate.getFullYear() > today.getFullYear()) ||
                 (viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() >= today.getMonth());
-
             nextBtn.disabled = isCurrentOrFuture;
         }
 
-        // --- FETCH ORDERS ---
+        // --- FETCH ORDERS LIST ---
         function fetchOrders() {
-            // Send 1-based month to PHP (JS is 0-based)
             const month = viewDate.getMonth() + 1;
             const year = viewDate.getFullYear();
             const search = document.getElementById('searchInput').value;
@@ -593,40 +679,92 @@ $stats = $statsStmt->get_result()->fetch_assoc();
                 });
         }
 
-        // --- MODAL LOGIC ---
-        function openManageModal(orderId) {
-            const modal = document.getElementById('manageModal');
+        // --- VIEW MODAL LOGIC (READ ONLY) ---
+        function openViewModal(orderId) {
+            const modal = document.getElementById('viewModal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('open'), 10);
 
-            fetch(`orders.php?ajax_action=get_details&order_id=${orderId}`)
-                .then(res => res.json())
-                .then(data => {
-                    // Populate
-                    document.getElementById('modalOrderId').value = data.order.order_id;
-                    document.getElementById('displayOrderCode').innerText = '#' + data.order.order_code;
-                    document.getElementById('displayCustomer').innerText = data.order.customer_name || 'Guest';
-                    document.getElementById('displayEmail').innerText = data.order.email;
-                    document.getElementById('displayAddress').innerText = data.order.address;
-                    document.getElementById('displayTotal').innerText = '$' + parseFloat(data.order.price).toFixed(2);
+            // Clear previous data
+            document.getElementById('modalProductList').innerHTML = '<div style="padding:20px; text-align:center;">Loading details...</div>';
 
-                    // Status
-                    const radios = document.getElementsByName('status');
-                    for (let r of radios) {
-                        r.checked = (r.value == data.order.order_status);
+            fetch(`orders.php?ajax_action=get_details&order_id=${orderId}`)
+                .then(res => res.text())
+                .then(text => {
+                    let data;
+
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Invalid JSON returned:", text);
+                        alert("Server error. Check console.");
+                        closeModal();
+                        return;
                     }
 
-                    // Products
+                    if (data.error) {
+                        alert("Error: " + data.error);
+                        closeModal();
+                        return;
+                    }
+
+                    if (!data.order) {
+                        console.error("Missing order object:", data);
+                        alert("Order data missing.");
+                        closeModal();
+                        return;
+                    }
+
+                    const o = data.order;
+
+
+                    // 1. Header & Total
+                    document.getElementById('displayOrderCode').innerText = '#' + o.order_code;
+                    document.getElementById('displayTotal').innerText = '$' + parseFloat(o.price).toFixed(2);
+
+                    // 2. Customer Info
+                    document.getElementById('displayCustomer').innerText = o.name || 'Guest Customer';
+                    document.getElementById('displayEmail').innerText = o.email || 'No email provided';
+                    document.getElementById('displayPhone').innerText = o.phone || 'No phone provided';
+                    document.getElementById('displayAddress').innerText = o.address || 'No shipping address';
+
+                    // 3. Transaction Details
+                    // Payment
+                    document.getElementById('displayPayment').innerHTML = `
+                        <svg class="icon-sm" viewBox="0 0 24 24" style="color:#666;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg> 
+                        ${o.payment_method ? o.payment_method.toUpperCase() : 'N/A'}
+                    `;
+
+                    // Date & Time
+                    const dateObj = new Date(o.order_date);
+                    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    document.getElementById('displayDate').innerHTML = `
+                        <svg class="icon-sm" viewBox="0 0 24 24" style="color:#666;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 
+                        ${dateStr} <span style="font-weight:400; color:#888; font-size:0.8em; margin-left:4px;">${timeStr}</span>
+                    `;
+
+                    // Status Pill
+                    const pill = document.getElementById('displayStatusPill');
+                    const s = o.order_status.toLowerCase();
+                    pill.className = 'status-pill-lg'; // reset
+                    pill.innerText = o.order_status;
+
+                    if (s === 'confirm' || s === 'shipped') pill.classList.add('ok');
+                    else if (s === 'cancelled') pill.classList.add('low');
+                    else pill.classList.add('pending');
+
+                    // 4. Products List
                     const list = document.getElementById('modalProductList');
                     list.innerHTML = '';
 
                     if (data.products.length > 0) {
                         data.products.forEach(p => {
-                            const imgPath = p.image ? '../uploads/products/' + data.order.supplier_id + '_' + p.image : '../assets/placeholder.png';
+                            const imgPath = p.image ? '../uploads/products/' + p.product_id + '_' + p.image : '../assets/placeholder.png';
 
                             const html = `
                                 <div class="modal-prod-item">
-                                    <img src="${imgPath}" class="modal-prod-img" onerror="this.src='../assets/placeholder.png'">
+                                    <img src="${imgPath}" class="modal-prod-img">
                                     <div style="flex-grow:1;">
                                         <div style="font-weight:600; color:#333; margin-bottom:4px;">${p.product_name}</div>
                                         <div style="font-size:0.85rem; color:#888;">
@@ -639,49 +777,22 @@ $stats = $statsStmt->get_result()->fetch_assoc();
                             list.insertAdjacentHTML('beforeend', html);
                         });
                     } else {
-                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#999;">No items found in this order.</div>';
+                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#999;">No items found.</div>';
                     }
+                })
+                .catch(err => {
+                    console.error("Fetch Error:", err);
+                    document.getElementById('modalProductList').innerText = "Error loading details.";
                 });
         }
 
         function closeModal() {
-            const modal = document.getElementById('manageModal');
+            const modal = document.getElementById('viewModal');
             modal.classList.remove('open');
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
-        function saveStatus(e) {
-            e.preventDefault();
-            const form = document.getElementById('updateOrderForm');
-            const formData = new FormData(form);
-            formData.append('ajax_action', 'update_status');
-
-            const btn = form.querySelector('.btn-main');
-            const originalText = btn.innerText;
-            btn.innerText = 'Saving...';
-
-            fetch('orders.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.text())
-                .then(res => {
-                    if (res.trim() === 'success') {
-                        // Slight delay for better UX feeling
-                        setTimeout(() => {
-                            closeModal();
-                            fetchOrders();
-                            btn.innerText = originalText;
-                        }, 300);
-                    } else {
-                        alert("Error updating order.");
-                        btn.innerText = originalText;
-                    }
-                });
-            return false;
-        }
-
-        window.onclick = function(e) {
+        window.onclick = function (e) {
             if (e.target.classList.contains('modal-overlay')) closeModal();
         }
     </script>

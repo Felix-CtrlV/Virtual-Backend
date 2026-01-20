@@ -273,8 +273,8 @@ function openReviewModal(event, review) {
     const img = document.getElementById('modalImg');
     const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(review.customer_name) + '&background=random';
     
-    if (review.customer_image) {
-        img.src = '../uploads/users/' + review.customer_image;
+    if (review.image) {
+        img.src = '../assets/customer_profiles/' + review.image;
     } else {
         img.src = defaultImg;
     }
