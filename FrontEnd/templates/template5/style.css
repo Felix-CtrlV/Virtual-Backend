@@ -3523,7 +3523,7 @@ input[name="qty"] {
     }
 
 
-    /* Continue Shopping CSS*/
+/* Continue Shopping CSS*/
 .shopping {
   display: inline-flex;
   align-items: center;
@@ -3553,4 +3553,35 @@ input[name="qty"] {
 
 .shopping:hover i {
   transform: translateX(-4px);
+}
+
+
+.qty-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.btn-qty {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+#qtyInput {
+    width: 60px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+}
+/* Hide arrows in input number */
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }

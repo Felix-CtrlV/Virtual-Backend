@@ -59,7 +59,7 @@ for ($i = 0; $i < $banner_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'products', 'contact', 'review', 'productdetail'];
+$allowed_pages = ['home', 'about', 'products', 'contact', 'review', 'productdetail', 'cart'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }

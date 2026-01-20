@@ -10,19 +10,19 @@ if (!isset($conn)) {
     include '../../../BackEnd/config/dbconfig.php';
 
 }
-require_once __DIR__ . '/../../utils/Ordered.php'; 
+require_once __DIR__ . '/../../utils/Ordered.php';
 
 // 3. ORDER PROCESSING LOGIC
 // Now $conn is guaranteed to exist
 $customer_id = 1; // Testing 
-$supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+$supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
-if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {    
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
     $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
-    
+
     if ($is_ordered) {
         // This captures the page you were on before the redirect
-        
+
         echo "<script>
             alert('Order Placed Successfully!'); 
         </script>";
@@ -30,7 +30,7 @@ if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
 }
 
 
-$supplier_id = (int)$supplier['supplier_id'];
+$supplier_id = (int) $supplier['supplier_id'];
 
 
 
@@ -54,7 +54,7 @@ if ($assets_stmt) {
 
 
 
-if($assets_result && mysqli_num_rows($assets_result) > 0){
+if ($assets_result && mysqli_num_rows($assets_result) > 0) {
 
     $shop_assets = mysqli_fetch_assoc($assets_result);
 
@@ -84,9 +84,9 @@ if($assets_result && mysqli_num_rows($assets_result) > 0){
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
-$allowed_pages = ['home', 'about', 'products','productDetail','review', 'contact','cart'];
+$allowed_pages = ['home', 'about', 'products', 'productDetail', 'review', 'contact', 'cart'];
 
-if(!in_array($page, $allowed_pages)){
+if (!in_array($page, $allowed_pages)) {
 
     $page = 'home';
 
@@ -100,7 +100,8 @@ if(!in_array($page, $allowed_pages)){
 
 // ==========================================
 
-function getCartCount($conn, $customer_id) {
+function getCartCount($conn, $customer_id)
+{
 
     $count = 0;
 
@@ -162,6 +163,8 @@ $page_path = __DIR__ . "/pages/$page.php";
 
     <title><?= htmlspecialchars($supplier['company_name']) ?></title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <link rel="stylesheet" href="../templates/<?= basename(__DIR__) ?>/style.css">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -169,15 +172,17 @@ $page_path = __DIR__ . "/pages/$page.php";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-
         :root {
 
-            --primary: <?= htmlspecialchars($shop_assets['primary_color']) ?>;
+            --primary:
+                <?= htmlspecialchars($shop_assets['primary_color']) ?>
+            ;
 
-            --secondary: <?= htmlspecialchars($shop_assets['secondary_color']) ?>;
+            --secondary:
+                <?= htmlspecialchars($shop_assets['secondary_color']) ?>
+            ;
 
         }
-
     </style>
 
 </head>
@@ -192,7 +197,7 @@ $page_path = __DIR__ . "/pages/$page.php";
 
         <?php
 
-        if(file_exists($page_path)){
+        if (file_exists($page_path)) {
 
             include($page_path);
 
@@ -219,22 +224,22 @@ $page_path = __DIR__ . "/pages/$page.php";
 
 
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold">Confirm Deletion</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-muted">
-        Are you sure you want to remove this product from your bag?
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-primary px-4" id="confirmDeleteBtn">Yes, Remove</button>
-        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
-      </div>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-muted">
+                    Are you sure you want to remove this product from your bag?
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary px-4" id="confirmDeleteBtn">Yes, Remove</button>
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 </body>
 

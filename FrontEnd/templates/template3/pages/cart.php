@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../../../utils/Ordered.php'; 
 
-$customer_id = 1; // Testing 
+$customer_id = 1;
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
 
 if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {    
@@ -272,8 +272,13 @@ $total_price = 0;
                             PROCEED TO CHECKOUT 
                         </a>
 
+<<<<<<< HEAD
                         <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="continue-shopping-btn">
                             <i class="fas fa-arrow-left"></i> Continue Shopping
+=======
+                        <a href="?supplier_id=<?= $supplier_id ?>&page=collection"class="btn btn-link w-100 text-center mt-2" style="color: rgba(71, 78, 111, 0.6));">
+                            Continue Shopping
+>>>>>>> 946ef65240ffa982dcf1036421d5d857df06643d
                         </a>
                     </div>
                 </div>

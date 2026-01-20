@@ -1,29 +1,47 @@
-<div class="about-content">
-    <div class="about_image">
-        <img src="../uploads/supplier_shop_id/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
-            alt="Company Logo" class="about-logo">
-    </div>
-    <div class="about-text-container">
-        <h2>About Us</h2>
-        <?php if (!empty($supplier['description'])): ?>
-            <p><?= nl2br(htmlspecialchars($shop_assets['about'])) ?></p>
-        <?php else: ?>
-            <p>No description available for this supplier.</p>
-        <?php endif; ?>
-        
-        
-        <div class="extras">
-            <button class="product-page-btn"
-        onclick="window.location.href='<?= $base_url ?>&page=products'">
-    Shop With Us
-</button>
+<?php
 
-<button class="contact-page-btn"
-        onclick="window.location.href='<?= $base_url ?>&page=contact'">
-    Get In Touch With Us
-</button>
+ // later make dynamic if needed
+
+$sql = "SELECT about, banner FROM shop_assets WHERE supplier_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $supplier_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$shop_assets = $result->fetch_assoc();
+
+$about_text = $shop_assets['about'] ?? '';
+$banner = $shop_assets['banner'] ?? '';
+?>
+<section class="about-hero"
+    style="background-image: url('../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($banner) ?>');">
+
+    <div class="about-overlay">
+
+        <div class="about-center-box">
+
+            <h2 class="about-title">WHO ARE WE?</h2>
+
+            <?php if (!empty($about_text)): ?>
+                <p class="about-description">
+                    <?= nl2br(htmlspecialchars($about_text)) ?>
+                </p>
+            <?php else: ?>
+                <p class="about-description">
+                    No description available.
+                </p>
+            <?php endif; ?>
+
+            <div class="about-buttons">
+                <a href="?page=products&supplier_id=<?= $supplier_id ?>" class="product-page-btn">
+                    Shop With Us
+                </a>
+
+                <a href="?page=contact&supplier_id=<?= $supplier_id ?>" class="contact-page-btn">
+                    Get In Touch
+                </a>
+            </div>
 
         </div>
 
     </div>
-</div>
+</section>

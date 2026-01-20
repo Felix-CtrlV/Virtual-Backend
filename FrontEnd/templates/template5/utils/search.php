@@ -15,6 +15,7 @@ if ($category_id) {
     mysqli_stmt_bind_param($stmt, "is", $supplierid, $like);
 }
 
+
 mysqli_stmt_execute($stmt);
 $products_result = mysqli_stmt_get_result($stmt);
 

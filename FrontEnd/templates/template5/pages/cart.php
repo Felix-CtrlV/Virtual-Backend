@@ -33,6 +33,7 @@ $cart_items = [];
 while ($item = mysqli_fetch_assoc($result)) {
     $cart_items[] = $item;
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -759,10 +760,6 @@ while ($item = mysqli_fetch_assoc($result)) {
             text-decoration: none;
         }
         
-        .fab:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 12px 35px rgba(242, 5, 133, 0.4);
-        }
     </style>
 </head>
 <body>
@@ -917,13 +914,12 @@ while ($item = mysqli_fetch_assoc($result)) {
                         <span class="total-amount">$<?= number_format($grand_total * 1.08, 2) ?></span>
                     </div>
                     
+                    <!--Account number url -->
                     <div class="checkout-action">
-                        <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" style="text-decoration: none;">
-                            <button class="checkout-btn">
-                                <i class="fas fa-lock"></i>
-                               Secure Checkout
-                            </button>
-                        </a>
+                <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>&account_number=VB403687042537" style="text-decoration: none;">
+                <button type="button" class="checkout-btn"> <i class="fas fa-lock"></i> Secure Checkout
+                </button>
+                </a>
                         
                         <div class="security-badge">
                             <i class="fas fa-shield-alt"></i>
