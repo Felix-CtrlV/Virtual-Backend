@@ -58,10 +58,81 @@ while ($row = mysqli_fetch_assoc($result2)) {
         .qty-error { color: #ff4d4d; font-size: 0.9rem; margin-top: 8px; display: none; font-weight: 600; }
         .add-cart:disabled { background-color: #d1d1d1 !important; cursor: not-allowed; opacity: 0.7; }
         .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }
+
+        .cart-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .cart-modal {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }        
+        .success-icon::after {
+            content: '';
+            width: 60px;
+            height: 60px;
+            background-color: #2196f3;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .success-icon i {
+            color: white;
+            font-size: 30px;
+            z-index: 1;
+        }
+        .cart-modal h2 {
+            font-family: 'Inter', sans-serif;
+            color: #000;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: 0.1px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .cart-modal p {
+            color: #333;
+            font-size: 1.1rem;
+        }
+        @keyframes fadeIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 
 <body>
+    <div class="cart-modal-overlay" id="cartModal">
+        <div class="cart-modal">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2>Added to Cart</h2>
+            <p>The item has been added.</p>
+        </div>
+    </div>
+
     <div class="product-wrapper">
         <div class="product-left">
             <img src="../uploads/products/<?= $product['product_id'] ?>_<?= htmlspecialchars($product['image']) ?>"
@@ -121,14 +192,14 @@ while ($row = mysqli_fetch_assoc($result2)) {
 
     <script>
         const allVariants = <?= json_encode($variants) ?>;
-        const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>;
-        
+        const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>;        
         const colorInputs = document.querySelectorAll('input[name="color"]');
         const sizeSelect = document.getElementById('sizeSelect');
         const qtyInput = document.getElementById('qtyInput');
         const addToCartBtn = document.getElementById('addToCartBtn');
         const qtyErrorMessage = document.getElementById('qtyErrorMessage');
         const stockDisplay = document.getElementById('stockDisplay');
+        const cartModal = document.getElementById('cartModal');
 
         let currentVariant = null;
 
@@ -196,6 +267,15 @@ while ($row = mysqli_fetch_assoc($result2)) {
                 validateStock();
             }
         }
+        function showSuccessModal() {
+            cartModal.style.display = 'flex';
+            setTimeout(() => {
+                cartModal.style.display = 'none';
+            }, 2500);
+        }
+        cartModal.addEventListener('click', (e) => {
+            if(e.target === cartModal) cartModal.style.display = 'none';
+        });
 
         document.getElementById('addToCartForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -217,7 +297,7 @@ while ($row = mysqli_fetch_assoc($result2)) {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert(data.message || "Added to cart successfully!");
+                    showSuccessModal();
                 } else {
                     alert("Error: " + (data.message || "Something went wrong"));
                 }
