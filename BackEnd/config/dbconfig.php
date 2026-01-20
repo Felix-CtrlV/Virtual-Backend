@@ -5,6 +5,12 @@ $password = "AVNS_kEHRdCr_cgK14vicoWI";
 $port = 12525;
 $database = "Malltiverse";
 
+// $host = "localhost";
+// $username = "root";
+// $password = "kaung273";
+// $database = "malltiverse";
+// $port = 3306;
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

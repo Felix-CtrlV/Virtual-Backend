@@ -330,6 +330,7 @@ if ($statsStmt) {
         }
 
         .modal-info-side {
+            width: 440px;
             background: #fafafa;
             padding: 35px;
             border-right: 1px solid #eee;
@@ -600,12 +601,6 @@ if ($statsStmt) {
                                 <span id="displayStatusPill" class="status-pill-lg pending">...</span>
                             </div>
                         </div>
-                    </div>
-
-                    <div style="margin-top:auto;">
-                        <button type="button" class="btn-main"
-                            style="width:100%; background:#333; border:none; justify-content:center;"
-                            onclick="closeModal()">Close Details</button>
                     </div>
                 </div>
 
