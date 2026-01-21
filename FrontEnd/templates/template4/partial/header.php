@@ -61,7 +61,7 @@
             </svg>
             <span class="cart-badge" id="cart-badge">0</span>
         </button>
-        <a href="../index.php" class="exit-btn" title="Exit Shop">
+        <a href="../customer/index.html" class="exit-btn" title="Exit Shop">
             <lord-icon
                 src="https://cdn.lordicon.com/vfiwitrm.json"
                 trigger="hover"
