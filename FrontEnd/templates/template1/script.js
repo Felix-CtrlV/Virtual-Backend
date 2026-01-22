@@ -1,6 +1,5 @@
 // Global Toast Notification Helper
 window.showNotification = function (message, type = 'success') {
-    // Check if a container already exists, if not create one
     let container = document.getElementById('notification-container');
     if (!container) {
         container = document.createElement('div');
@@ -21,7 +20,6 @@ window.showNotification = function (message, type = 'success') {
 
     container.appendChild(toast);
 
-    // Auto-remove after 3 seconds
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transition = '0.5s';
@@ -29,8 +27,44 @@ window.showNotification = function (message, type = 'success') {
     }, 3000);
 };
 
-// Add this CSS animation to your style.css
-// @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+window.changeQty = function (cartId, currentQty, delta, supplierId, availableStock) {
+    const newQty = parseInt(currentQty) + delta;
+    if (newQty < 1) return;
+
+    // Use the stock passed from the button, or try to find it on the page
+    let maxStock = availableStock;
+    if (!maxStock || maxStock === 999) {
+        const stockDisplay = document.getElementById('stock-display');
+        if (stockDisplay && stockDisplay.textContent.includes('In Stock:')) {
+            maxStock = parseInt(stockDisplay.textContent.replace('In Stock: ', ''));
+        }
+    }
+
+    // VALIDATION CHECK: Only block if increasing
+    if (delta > 0 && newQty > maxStock) {
+        window.showNotification("Quantity exceeds available stock!", "danger");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('cart_id', cartId);
+    formData.append('quantity', newQty);
+
+    fetch('../utils/update_cart_qty.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                refreshCartDrawer(supplierId);
+            } else {
+                window.showNotification(data.message, "danger");
+            }
+        })
+        .catch(err => console.error('Error updating quantity:', err));
+};
+
 function refreshCartDrawer(supplierId) {
     const container = document.getElementById('cartItemsContainer');
     const footer = document.getElementById('cartFooter');
@@ -38,24 +72,31 @@ function refreshCartDrawer(supplierId) {
 
     if (!container || !supplierId) return;
 
-    // We use get_cart_data.php because it returns the data we need to build the UI
     fetch(`../utils/get_cart_data.php?supplier_id=${supplierId}`)
         .then(res => res.json())
         .then(data => {
             let html = '';
-
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
+                    // Check if stock exists in the item object, otherwise default to a high number or ignore
+                    const availableStock = item.stock !== undefined ? item.stock : 999;
+
                     html += `
                     <div class="cart-item-block mb-4">
                         <div class="d-flex gap-3">
                             <img src="${item.image}" alt="${item.name}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
                             <div class="flex-grow-1">
                                 <h6 class="mb-1 fw-bold">${item.name}</h6>
-                                <div class="text-muted small">Qty: ${item.qty} ${item.size ? '| Size: ' + item.size : ''}</div>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="small text-muted">Color:</span>
+                                <div class="text-muted small d-flex align-items-center gap-2">
+                                    <span>Color:</span>
                                     <span class="color-preview" style="background-color: ${item.color_code || '#ccc'}; border: 1px solid #ddd; width: 12px; height: 12px; border-radius: 50%; display: inline-block;"></span>
+                                    <span>${item.size ? ' | Size: ' + item.size : ''}</span>
+                                    <span> | Qty: ${item.qty}</span>
+                                </div>
+                                <div class="qty-selector-container d-flex align-items-center gap-3 mt-2">
+                                    <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, -1, ${supplierId}, ${availableStock})">−</button>
+                                    <span class="qty-display">${item.qty}</span>
+                                    <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, 1, ${supplierId}, ${availableStock})">+</button>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="fw-bold">$${parseFloat(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
@@ -67,9 +108,7 @@ function refreshCartDrawer(supplierId) {
                         </div>
                     </div>`;
                 });
-
                 container.innerHTML = html;
-                // Inside refreshCartDrawer function, find where footer.innerHTML is set:
                 footer.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
         <span class="fs-5">Total:</span>
@@ -169,4 +208,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (supplierId) refreshCartDrawer(supplierId);
+    const errorMsg = urlParams.get('error');
+    if (errorMsg) {
+        window.showNotification(errorMsg, "danger");
+
+        // URL ထဲက error parameter ကို ဖျောက်ချင်ရင်
+        const currentSupplierId = urlParams.get('supplier_id');
+        const newUrl = window.location.pathname + (currentSupplierId ? '?supplier_id=' + currentSupplierId : '');
+        window.history.replaceState({}, document.title, newUrl);
+    }
+
 });

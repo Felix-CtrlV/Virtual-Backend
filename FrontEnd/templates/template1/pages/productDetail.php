@@ -128,7 +128,6 @@ mysqli_stmt_close($variant_stmt);
 </div>
 
 <script>
-    // 1. DATA AND ELEMENTS
     const variants = <?= json_encode($variants) ?>;
     const colorEls = document.querySelectorAll('.color');
     const sizeButtons = document.getElementById('size-buttons');
@@ -141,43 +140,34 @@ mysqli_stmt_close($variant_stmt);
     let selectedColor = null;
     let currentVariant = null;
 
-    // 2. COLOR SELECTION LOGIC
     colorEls.forEach(colorEl => {
         colorEl.addEventListener('click', () => {
             colorEls.forEach(c => c.classList.remove('active'));
             colorEl.classList.add('active');
             selectedColor = colorEl.dataset.color;
-
             const filteredVariants = variants.filter(v => v.color === selectedColor);
 
-            // Reset Size Selection
             sizeButtons.innerHTML = '';
             stockDisplay.textContent = '';
             qtyErrorMessage.style.display = 'none';
             selectedSize = null;
             currentVariant = null;
-            qtySpan.textContent = "1"; // Reset quantity to 1 on selection change
+            qtySpan.textContent = "1";
 
             filteredVariants.forEach(v => {
                 const btn = document.createElement('button');
                 btn.className = 'size-btn';
                 btn.textContent = v.size;
-
-                // If Out of Stock in DB
                 if (v.quantity <= 0) {
                     btn.style.opacity = '0.4';
                     btn.style.cursor = 'not-allowed';
-                    btn.title = "Out of Stock";
                 }
-
                 btn.addEventListener('click', () => {
                     if (v.quantity <= 0) return;
-
                     document.querySelectorAll('.sizes button').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     selectedSize = v.size;
                     currentVariant = v;
-
                     stockDisplay.textContent = `In Stock: ${v.quantity}`;
                     validateStock();
                 });
@@ -186,28 +176,17 @@ mysqli_stmt_close($variant_stmt);
         });
     });
 
-    // 3. QUANTITY VALIDATION LOGIC
     function validateStock() {
         if (!currentVariant) return;
-
         const requestedQty = parseInt(qtySpan.textContent);
         const availableQty = parseInt(currentVariant.quantity);
-
-        if (requestedQty > availableQty) {
-            qtyErrorMessage.style.display = 'block';
-            addToCartBtn.disabled = true;
-            addToCartBtn.style.opacity = '0.5';
-            addToCartBtn.style.cursor = 'not-allowed';
-        } else {
-            qtyErrorMessage.style.display = 'none';
-            addToCartBtn.disabled = false;
-            addToCartBtn.style.opacity = '1';
-            addToCartBtn.style.cursor = 'pointer';
-        }
+        qtyErrorMessage.style.display = requestedQty > availableQty ? 'block' : 'none';
+        addToCartBtn.disabled = requestedQty > availableQty;
+        addToCartBtn.style.opacity = requestedQty > availableQty ? '0.5' : '1';
     }
 
     document.getElementById('increase').addEventListener('click', () => {
-        if (!currentVariant) return; // Don't increase if no variant selected
+        if (!currentVariant) return;
         qtySpan.textContent = parseInt(qtySpan.textContent) + 1;
         validateStock();
     });
@@ -220,41 +199,55 @@ mysqli_stmt_close($variant_stmt);
         }
     });
 
-    // 4. ADD TO BAG HANDLER
-    document.getElementById('addToCartBtn').addEventListener('click', function () {
+    // FIXED ADD TO BAG HANDLER
+    addToCartBtn.addEventListener('click', function () {
         if (!currentVariant) {
             alert("Please select a color and size first.");
             return;
         }
 
-        const formData = new FormData();
-        formData.append('variant_id', currentVariant.variant_id);
-        formData.append('supplier_id', <?= $supplier_id ?>);
-        formData.append('quantity', qtySpan.textContent);
+        const requestedQty = parseInt(qtySpan.textContent);
+        const availableStock = parseInt(currentVariant.quantity);
 
-        fetch('../utils/add_to_cart.php', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
+        // Check current bag total before allowing addition
+        fetch(`../utils/get_cart_data.php?supplier_id=<?= $supplier_id ?>`)
+            .then(res => res.json())
             .then(data => {
-                if (data.status === 'success') {
-                    if (typeof showNotification === "function") {
-                        showNotification(data.message, "success");
-                    } else {
-                        alert(data.message);
-                    }
-                    if (typeof refreshCartDrawer === "function") {
-                        refreshCartDrawer(<?= $supplier_id ?>);
-                    }
-                } else {
+                // Find if THIS specific variant is already in the bag
+                // We match by name and size since we don't have variant_id in the cart JSON
+                const existingItem = data.items.find(item => 
+                    item.name === <?= json_encode($product['product_name']) ?> && 
+                    item.size === selectedSize
+                );
+
+                const currentInBag = existingItem ? parseInt(existingItem.qty) : 0;
+
+                if (currentInBag + requestedQty > availableStock) {
+                    showNotification(`Limit reached! You have ${currentInBag} in bag. Only ${availableStock} available in total.`, "danger");
+                    return; 
+                }
+
+                // If check passes, proceed to add
+                const formData = new FormData();
+                formData.append('variant_id', currentVariant.variant_id);
+                formData.append('supplier_id', <?= $supplier_id ?>);
+                formData.append('quantity', requestedQty);
+
+                return fetch('../utils/add_to_cart.php', {
+                    method: 'POST',
+                    body: formData
+                });
+            })
+            .then(response => response ? response.json() : null)
+            .then(data => {
+                if (data && data.status === 'success') {
+                    showNotification(data.message, "success");
+                    refreshCartDrawer(<?= $supplier_id ?>);
+                } else if (data) {
                     alert("Error: " + data.message);
                 }
             })
-            .catch(err => {
-                console.error('Error:', err);
-                alert("Something went wrong. Please try again.");
-            });
+            .catch(err => console.error('Error:', err));
     });
 
     window.onload = function () {

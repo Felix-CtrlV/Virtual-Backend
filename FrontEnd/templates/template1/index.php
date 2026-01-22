@@ -13,21 +13,22 @@ if (!isset($conn)) {
 require_once __DIR__ . '/../../utils/Ordered.php';
 
 // 3. ORDER PROCESSING LOGIC
-// Now $conn is guaranteed to exist
-$customer_id = 1; // Testing 
+$customer_id = $_SESSION['customer_id'] ?? 1; // Use session if available, else 1
 $supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
 if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
     $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
 
-    if ($is_ordered) {
-        // This captures the page you were on before the redirect
-
-        echo "<script>
-            alert('Order Placed Successfully!'); 
-        </script>";
+    if (!$is_ordered) {
+        echo "<script>alert('Order failed: Stock may have changed or cart is empty.');</script>";
     }
 }
+
+// Check for the clean redirect parameter to show the success message
+if (isset($_GET['payment_success']) && $_GET['payment_success'] === 'true') {
+    echo "<script>alert('Order Placed Successfully!');</script>";
+}
+
 
 
 $supplier_id = (int) $supplier['supplier_id'];
