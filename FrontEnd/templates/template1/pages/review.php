@@ -72,12 +72,12 @@ if (isset($_POST['submit_review'])) {
                 <?= $label ?>
             </div>
             
-            <div class="single-star me-3" style="color: #ffc107;">★</div>
+            <div class="single-star me-3" style="color: #60708d;">★</div>
             
             <div class="flex-grow-1 mx-2">
-                <div class="progress custom-progress" style="height: 8px; background-color: #fff9e6; border-radius: 10px;">
+                <div class="progress custom-progress" style="height: 8px; background-color: #7f8a9f44; border-radius: 10px;">
                     <div class="progress-bar" role="progressbar" 
-                         style="width: <?= $percentage ?>%; background-color: #ffc107; border-radius: 10px;">
+                         style="width: <?= $percentage ?>%; background-color: #60708d; border-radius: 10px;">
                     </div>
                 </div>
             </div>
