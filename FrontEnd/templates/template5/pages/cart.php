@@ -812,10 +812,10 @@ $total_price = 0;
             $items[] = $item;
         endwhile;
         
-        $tax = $total_price * 0.08;
+       
         $shipping = $total_price > 100 ? 0 : 9.99;
         $discount = min(20, $total_price * 0.1); // 10% discount, max $20
-        $grand_total = $total_price + $tax + $shipping - $discount;
+        $grand_total = $total_price + $shipping - $discount;
     ?>
         
         <div class="modern-header">
@@ -929,10 +929,7 @@ $total_price = 0;
                     </span>
                 </div>
                 
-                <div class="summary-item">
-                    <span class="summary-label">Estimated Tax</span>
-                    <span class="summary-value">$<?= number_format($tax, 2) ?></span>
-                </div>
+               
                 
                 <div class="summary-item">
                     <span class="summary-label" style="color: var(--color-accent);">
@@ -958,7 +955,7 @@ $total_price = 0;
         </div>
         
         <div class="continue-shopping">
-            <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="continue-link">
+            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="continue-link">
                 <i class="fas fa-arrow-left"></i>
                 Continue Shopping
             </a>
