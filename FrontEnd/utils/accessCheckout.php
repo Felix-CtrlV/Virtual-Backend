@@ -29,11 +29,11 @@ if ($supplier_id > 0) {
     }
 
     // If stock is insufficient, block checkout and redirect to cart with error
+    $callback_url = $_SERVER['HTTP_REFERER'] ?? "http://localhost/malltiverse/FrontEnd/shop/?supplier_id=$supplier_id";
     if (!empty($out_of_stock_items)) {
         $error_msg = "Stock is no longer sufficient for: " . implode(', ', $out_of_stock_items);
         
         // Redirect back to cart page with the error parameter
-        $callback_url = "../../FrontEnd/shop/?supplier_id=$supplier_id&page=cart";
         header("Location: " . $callback_url . "&error=" . urlencode($error_msg));
         exit();
     }
@@ -66,7 +66,7 @@ if ($supplier_id > 0) {
     $bank_url = "https://crediverse.base44.app/payment?" . http_build_query([
         'amount'         => $total_price,
         'merchant'       => $my_store_name,
-        'return_url'     => "http://localhost/malltiverse/FrontEnd/shop/?supplier_id=$supplier_id&page=cart&payment_status=success",
+        'return_url'     => $callback_url,
         'account_number' => $account_number
     ]);
 
