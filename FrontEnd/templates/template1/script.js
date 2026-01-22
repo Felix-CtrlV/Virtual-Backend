@@ -26,13 +26,17 @@ window.showNotification = function (message, type = 'success') {
         setTimeout(() => toast.remove(), 500);
     }, 3000);
 };
+// Add this at the top of your script to manage the timer
+let debounceTimer;
 
 window.changeQty = function (cartId, currentQty, delta, supplierId, availableStock) {
-    const newQty = parseInt(currentQty) + delta;
+    let newQty = parseInt(currentQty) + delta;
     if (newQty < 1) return;
 
-    // Use the stock passed from the button, or try to find it on the page
+    // 1. STOCK VALIDATION & AUTO-ADJUSTMENT
     let maxStock = availableStock;
+
+    // Fallback if maxStock isn't provided correctly
     if (!maxStock || maxStock === 999) {
         const stockDisplay = document.getElementById('stock-display');
         if (stockDisplay && stockDisplay.textContent.includes('In Stock:')) {
@@ -40,29 +44,57 @@ window.changeQty = function (cartId, currentQty, delta, supplierId, availableSto
         }
     }
 
-    // VALIDATION CHECK: Only block if increasing
+    // CHECK IF EXCEEDED
     if (delta > 0 && newQty > maxStock) {
-        window.showNotification("Quantity exceeds available stock!", "danger");
-        return;
+        // Show notification
+        window.showNotification(`Only ${maxStock} items available in stock. Quantity adjusted.`, "danger");
+
+        // SET TO MAX STOCK instead of returning
+        newQty = maxStock;
+
+        // If the user was already at max stock and tries to add more, just stop here
+        if (parseInt(currentQty) === maxStock) return
     }
 
-    const formData = new FormData();
-    formData.append('cart_id', cartId);
-    formData.append('quantity', newQty);
+    // 2. OPTIMISTIC UI UPDATE
+    const btn = event.currentTarget;
+    const container = btn.closest('.qty-selector-container');
+    const display = container.querySelector('.qty-display');
 
-    fetch('../utils/update_cart_qty.php', {
-        method: 'POST',
-        body: formData
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                refreshCartDrawer(supplierId);
-            } else {
-                window.showNotification(data.message, "danger");
-            }
+    if (display) {
+        display.innerText = newQty;
+        const buttons = container.querySelectorAll('.qty-button');
+        // Update both buttons to use the adjusted newQty
+        buttons[0].setAttribute('onclick', `changeQty(${cartId}, ${newQty}, -1, ${supplierId}, ${availableStock})`);
+        buttons[1].setAttribute('onclick', `changeQty(${cartId}, ${newQty}, 1, ${supplierId}, ${availableStock})`);
+    }
+
+    // 3. DEBOUNCED FETCH
+    clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(() => {
+        const formData = new FormData();
+        formData.append('cart_id', cartId);
+        formData.append('quantity', newQty);
+
+        fetch('../utils/update_cart_qty.php', {
+            method: 'POST',
+            body: formData
         })
-        .catch(err => console.error('Error updating quantity:', err));
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    refreshCartDrawer(supplierId);
+                } else {
+                    window.showNotification(data.message, "danger");
+                    refreshCartDrawer(supplierId);
+                }
+            })
+            .catch(err => {
+                console.error('Error updating quantity:', err);
+                refreshCartDrawer(supplierId);
+            });
+    }, 300);
 };
 
 function refreshCartDrawer(supplierId) {
