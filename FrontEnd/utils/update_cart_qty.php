@@ -2,6 +2,7 @@
 session_start();
 include '../../BackEnd/config/dbconfig.php';
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cart_id = (int)$_POST['cart_id'];
     $quantity = (int)$_POST['quantity'];

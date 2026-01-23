@@ -4,15 +4,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include '../../BackEnd/config/dbconfig.php';
-require_once __DIR__ . '/../../../utils/Ordered.php'; 
+require_once __DIR__ . '/../../../utils/Ordered.php';
 
 $customer_id = $_SESSION['customer_id'] ?? 1;
-$supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+$supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
 // 1. LOGIC: Handle Successful Payment Return
-if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {    
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
     $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
-    
+
     if ($is_ordered) {
         echo "
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
@@ -42,7 +42,7 @@ $cart_query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p
                FROM cart c 
                JOIN product_variant v ON c.variant_id = v.variant_id 
                JOIN products p ON v.product_id = p.product_id 
-               WHERE c.customer_id = ? AND c.supplier_id = ?"; 
+               WHERE c.customer_id = ? AND c.supplier_id = ?";
 
 $stmt = mysqli_prepare($conn, $cart_query);
 mysqli_stmt_bind_param($stmt, "ii", $customer_id, $supplier_id);
@@ -55,7 +55,7 @@ $total_price = 0;
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* YOUR ORIGINAL CSS - UNTOUCHED */
+    /* CSS maintained as per original */
     .qty-control-btn {
         background: transparent;
         border: 1px solid #ddd;
@@ -70,36 +70,43 @@ $total_price = 0;
         cursor: pointer;
         font-size: 9px;
     }
+
     .qty-control-btn:hover:not(:disabled) {
         background-color: #f8f9fa;
         border-color: #bbb;
         color: #000;
     }
+
     .qty-number {
         font-weight: 600;
         font-size: 15px;
         min-width: 25px;
         text-align: center;
     }
+
     .custom-modal-overlay {
         position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: rgba(0, 0, 0, 0.4);
-        display: none; 
+        display: none;
         align-items: center;
         justify-content: center;
         z-index: 9999;
     }
+
     .custom-modal-content {
-        background: #f0f2f5; 
+        background: #f0f2f5;
         padding: 40px;
         border-radius: 30px;
         text-align: center;
         width: 90%;
         max-width: 450px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
+
     .custom-modal-content h2 {
         color: #1a2a47;
         font-weight: 800;
@@ -107,25 +114,29 @@ $total_price = 0;
         margin-bottom: 20px;
         margin-top: 0;
     }
+
     .custom-modal-content p {
         color: #444;
         font-size: 16px;
         margin-bottom: 30px;
     }
+
     .modal-btn-group {
         display: flex;
-        gap: 15px;
         justify-content: center;
     }
+
     .btn-cancel {
         background-color: #7d8590;
         color: white;
         border: none;
+        margin-right: 20px;
         padding: 12px 30px;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
     }
+
     .btn-remove {
         background-color: #98B9D5;
         color: white;
@@ -135,11 +146,13 @@ $total_price = 0;
         font-weight: 600;
         cursor: pointer;
     }
+
     .order-summary-card {
         border: 1px solid #dee2e6;
         border-radius: 0.25rem;
-        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
     }
+
     .continue-shopping-btn {
         display: inline-flex;
         align-items: center;
@@ -154,57 +167,14 @@ $total_price = 0;
         font-weight: 500;
         transition: background-color 0.2s;
     }
+
     .continue-shopping-btn:hover {
         background-color: #f8f9fa;
         color: #000;
     }
+
     .continue-shopping-btn i {
         margin-right: 8px;
-    }
-    .update-notification-overlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 10001;
-    }
-    .update-notification-content {
-        background: #f0f2f5;
-        padding: 40px;
-        border-radius: 30px;
-        text-align: center;
-        width: 320px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-    }
-    .success-icon-circle {
-        width: 80px;
-        height: 80px;
-        background-color: #98B9D5;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        border: 8px solid #d9e6f0;
-    }
-    .success-icon-circle i {
-        color: white;
-        font-size: 35px;
-    }
-    .update-notification-content h3 {
-        color: #000;
-        font-weight: 800;
-        font-size: 26px;
-        margin-top: 0;
-        margin-bottom: 15px;
-    }
-    .update-notification-content p {
-        color: #444;
-        font-size: 15px;
-        margin: 0;
     }
 </style>
 
@@ -213,7 +183,7 @@ $total_price = 0;
 
     <?php if (isset($_GET['error'])): ?>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'error',
                     title: 'Stock Out',
@@ -243,19 +213,20 @@ $total_price = 0;
                                 <?php while ($item = mysqli_fetch_assoc($result)):
                                     $subtotal = $item['price'] * $item['quantity'];
                                     $total_price += $subtotal;
-                                ?>
+                                    ?>
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <img src="../uploads/products/<?= $item['product_id'] ?>_<?= $item['image'] ?>"
-                                                     alt="<?= $item['product_name'] ?>"
-                                                     style="width: 100px; height: 100px; object-fit: contain; margin-right: 15px;">
+                                                    alt="<?= $item['product_name'] ?>"
+                                                    style="width: 100px; height: 100px; object-fit: contain; margin-right: 15px;">
                                                 <span style="text-align: left;">
                                                     <strong><?= htmlspecialchars($item['product_name']) ?></strong>
                                                     <br>
                                                     <small class="text-muted d-flex align-items-center">
-                                                        Color: 
-                                                        <span style="display: inline-block; width: 20px; height: 20px; background-color: <?= $item['color'] ?>; border-radius: 50%; border: 1px solid #ddd; margin: 0 5px;"></span>
+                                                        Color:
+                                                        <span
+                                                            style="display: inline-block; width: 20px; height: 20px; background-color: <?= $item['color'] ?>; border-radius: 50%; border: 1px solid #ddd; margin: 0 5px;"></span>
                                                         (Size: <?= htmlspecialchars($item['size']) ?>)
                                                     </small>
                                                 </span>
@@ -263,19 +234,23 @@ $total_price = 0;
                                         </td>
                                         <td>$<?= number_format($item['price'], 2) ?></td>
                                         <td class="text-center">
-                                            <div class="d-flex align-items-center justify-content-center bg-transparent" style="gap: 5px;">
-                                                <button type="button" class="qty-control-btn" 
-                                                        onclick="updateQuantity(<?= $item['cart_id'] ?>, <?= $item['quantity'] - 1 ?>, <?= $item['available_stock'] ?>)">
+                                            <div class="d-flex align-items-center justify-content-center bg-transparent"
+                                                style="gap: 5px;">
+                                                <button type="button" class="qty-control-btn"
+                                                    onclick="updateQuantity(<?= $item['cart_id'] ?>, parseInt(document.getElementById('qty-<?= $item['cart_id'] ?>').innerText) - 1, <?= $item['available_stock'] ?>)">
                                                     <i class="fas fa-minus"></i>
                                                 </button>
-                                                <span class="qty-number"><?= $item['quantity'] ?></span>
-                                                <button type="button" class="qty-control-btn" 
-                                                        onclick="updateQuantity(<?= $item['cart_id'] ?>, <?= $item['quantity'] + 1 ?>, <?= $item['available_stock'] ?>)">
+
+                                                <span id="qty-<?= $item['cart_id'] ?>"
+                                                    class="qty-number"><?= $item['quantity'] ?></span>
+
+                                                <button type="button" class="qty-control-btn"
+                                                    onclick="updateQuantity(<?= $item['cart_id'] ?>, parseInt(document.getElementById('qty-<?= $item['cart_id'] ?>').innerText) + 1, <?= $item['available_stock'] ?>)">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
                                             </div>
                                         </td>
-                                        <td>$<?= number_format($subtotal, 2) ?></td>
+                                        <td id="subtotal-<?= $item['cart_id'] ?>">$<?= number_format($subtotal, 2) ?></td>
                                         <td>
                                             <button class="btn btn-sm btn-outline-danger border-0"
                                                 onclick="openRemoveModal(<?= $item['cart_id'] ?>)">
@@ -301,13 +276,14 @@ $total_price = 0;
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Grand Total:</span>
-                            <strong class="text-primary fs-4">$<?= number_format($total_price, 2) ?></strong>
+                            <strong id="grand-total"
+                                class="text-primary fs-4">$<?= number_format($total_price, 2) ?></strong>
                         </div>
 
-                        <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" 
-                           class="btn btn-primary w-100 py-3 mt-3 fw-bold"
-                           style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none; border-radius: 10px; color: white; text-decoration: none; display: block; text-align: center;">
-                            PROCEED TO CHECKOUT 
+                        <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>"
+                            class="btn btn-primary w-100 py-3 mt-3 fw-bold"
+                            style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none; border-radius: 10px; color: white; text-decoration: none; display: block; text-align: center;">
+                            PROCEED TO CHECKOUT
                         </a>
 
                         <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="continue-shopping-btn">
@@ -340,81 +316,131 @@ $total_price = 0;
     </div>
 </div>
 
-<div id="updateSuccessModal" class="update-notification-overlay">
-    <div class="update-notification-content">
-        <div class="success-icon-circle">
-            <i class="fas fa-check"></i>
-        </div>
-        <h3>Updated</h3>
-        <p>Quantity updated successfully</p>
-    </div>
-</div>
-
 <script>
-let pendingCartId = null;
+    let pendingCartId = null;
+    let updateTimer = null; // Timer to wait before showing the alert
 
-function closeModal() {
-    document.getElementById('customDeleteModal').style.display = 'none';
-    pendingCartId = null;
-}
-
-function openRemoveModal(cartId) {
-    pendingCartId = cartId;
-    document.getElementById('customDeleteModal').style.display = 'flex';
-}
-
-document.getElementById('confirmBtn').onclick = function() {
-    if (pendingCartId) {
-        removeFromCart(pendingCartId);
-    }
-};
-
-function updateQuantity(cartId, newQty, availableStock) {
-    if (newQty < 1) {
-        openRemoveModal(cartId);
-        return;
-    }
-    
-    if (newQty > availableStock) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Out of Stock',
-            text: 'Only ' + availableStock + ' items available in stock.',
-            confirmButtonColor: '#98B9D5'
-        });
-        return;
+    function closeModal() {
+        document.getElementById('customDeleteModal').style.display = 'none';
+        pendingCartId = null;
     }
 
-    const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
-    fetch(rootPath, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ 'cart_id': cartId, 'quantity': newQty })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            document.getElementById('updateSuccessModal').style.display = 'flex';
-            setTimeout(() => { location.reload(); }, 1000);
-        } else {
-            alert('Error: ' + data.message);
+    function openRemoveModal(cartId) {
+        pendingCartId = cartId;
+        document.getElementById('customDeleteModal').style.display = 'flex';
+    }
+
+    document.getElementById('confirmBtn').onclick = function () {
+        if (pendingCartId) {
+            removeFromCart(pendingCartId);
         }
-    })
-    .catch(error => console.error('Error:', error));
-}
+    };
+    function updateQuantity(cartId, newQty, availableStock) {
+        if (newQty < 1) {
+            openRemoveModal(cartId);
+            return;
+        }
 
-function removeFromCart(cartId) {
-    const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
-    fetch(rootPath, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ 'cart_id': cartId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') location.reload();
-        else { alert('Error: ' + data.message); closeModal(); }
-    })
-    .catch(error => console.error('Error Details:', error));
-}
+        if (newQty > availableStock) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Out of Stock',
+                text: 'Only ' + availableStock + ' items available in stock.',
+                confirmButtonColor: '#98B9D5'
+            });
+            return;
+        }
+
+        // 1. Update UI Immediately
+        document.getElementById('qty-' + cartId).innerText = newQty;
+        recalculateCart();
+
+        // 2. Clear existing timer
+        clearTimeout(updateTimer);
+
+        // 3. Set a timer to update Database and show the Large Alert
+        updateTimer = setTimeout(() => {
+            const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
+            fetch(rootPath, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ 'cart_id': cartId, 'quantity': newQty })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Reverted design to match First Image (Large centered modal)
+                        Swal.fire({
+                            title: 'Updated',
+                            text: 'Quantity updated successfully',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500, // Closes automatically after 1.5s
+                            borderRadius: '30px',
+                            customClass: {
+                                popup: 'custom-swal-popup'
+                            }
+                        });
+                    } else {
+                        alert('Error: ' + data.message);
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }, 500);
+    }
+    function removeFromCart(cartId) {
+        const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
+
+        fetch(rootPath, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ 'cart_id': cartId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 1. Close the modal
+                    closeModal();
+
+                    // 2. Show a success alert (matching your large centered design)
+                    Swal.fire({
+                        title: 'Removed',
+                        text: 'Item has been removed from your cart.',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        borderRadius: '30px'
+                    }).then(() => {
+                        // 3. Reload the page to refresh the cart list and totals
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while removing the item.');
+            });
+    }
+    function recalculateCart() {
+        let grandTotal = 0;
+        document.querySelectorAll('table tbody tr').forEach(row => {
+            const priceText = row.cells[1].innerText.replace('$', '').replace(',', '');
+            const price = parseFloat(priceText);
+            const qtyElement = row.querySelector('.qty-number');
+            if (qtyElement) {
+                const qty = parseInt(qtyElement.innerText);
+                const subtotal = price * qty;
+                row.cells[3].innerText = '$' + subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                grandTotal += subtotal;
+            }
+        });
+        document.getElementById('grand-total').innerText = '$' + grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    }
 </script>

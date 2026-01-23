@@ -155,7 +155,7 @@ if (isset($_POST['submit_review'])) {
             <label class="form-label">Write Your Review</label>
             <textarea name="review" class="form-control" rows="4" required></textarea>
           </div>
-          <button type="submit" name="submit_review" class="btn btn-warning">Submit</button>
+          <button type="submit" name="submit_review" class="btn btn-warnin">Submit</button>
         </form>
       </div>
     </div>
