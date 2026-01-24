@@ -1045,20 +1045,20 @@ document.addEventListener('DOMContentLoaded', function() {
 // --- 4. QUANTITY UPDATE (WITH DIM EFFECT) ---
 function updateModernQuantity(cartId, newQty, maxStock) {
     if (newQty > maxStock) {
-         modernAlert.fire({
-      icon: 'warning',
-    title: 'Stock Alert',
-    text: `Maximum ${maxStock} items only`,
-    confirmButtonColor: '#6366f1',
-    cancelButtonColor: '#d33',
-    showCancelButton: true,
-    cancelButtonText: 'Cancel',
-    confirmButtonText: 'Adjust Quantity',
-    backdrop: 'rgba(0,0,0,0.4)',
-    timer: 5000,
-    timerProgressBar: true
-    });
-    return;
+        modernAlert.fire({
+            icon: 'warning',
+            title: 'Stock Alert',
+            text: `Maximum ${maxStock} items only`,
+            confirmButtonColor: '#6366f1',
+            cancelButtonColor: '#d33',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Adjust Quantity',
+            backdrop: 'rgba(0,0,0,0.4)',
+            timer: 5000,
+            timerProgressBar: true
+        });
+        return;
     }
     if (newQty < 1) {
         confirmModernRemove(cartId);
@@ -1066,8 +1066,9 @@ function updateModernQuantity(cartId, newQty, maxStock) {
     }
 
     const qtyElement = document.getElementById('qty-' + cartId);
+    
+   
     if (qtyElement) {
-        
         qtyElement.style.opacity = '0.3';
         qtyElement.style.transform = 'scale(0.8)';
         qtyElement.innerText = newQty;
@@ -1077,6 +1078,8 @@ function updateModernQuantity(cartId, newQty, maxStock) {
     clearTimeout(updateTimer);
     updateTimer = setTimeout(() => {
         const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
+        
+       
         fetch(rootPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1084,15 +1087,33 @@ function updateModernQuantity(cartId, newQty, maxStock) {
         })
         .then(res => res.json())
         .then(data => {
+           
             if (qtyElement) {
-                
                 qtyElement.style.opacity = '1';
                 qtyElement.style.transform = 'scale(1)';
             }
-            if (data.status !== 'success') location.reload();
+
+            if (data.status === 'success') {
+               
+                modernToast.fire({
+                    icon: 'success',
+                    title: 'Quantity updated'
+                });
+              
+            } else {
+                location.reload(); 
+            }
         })
         .catch(() => {
-            if (qtyElement) { qtyElement.style.opacity = '1'; qtyElement.style.transform = 'scale(1)'; }
+            
+            if (qtyElement) { 
+                qtyElement.style.opacity = '1'; 
+                qtyElement.style.transform = 'scale(1)'; 
+            }
+            modernToast.fire({
+                icon: 'error',
+                title: 'Update failed'
+            });
         });
     }, 500);
 }
