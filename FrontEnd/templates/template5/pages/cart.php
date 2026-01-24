@@ -986,7 +986,7 @@ $total_price = 0;
 </div>
 
 <script>
-// Modern SweetAlert Theme
+// --- 1. MODAL & TOAST CONFIG (SweetAlert2) ---
 const modernAlert = Swal.mixin({
     customClass: {
         popup: 'modern-swal-popup',
@@ -997,70 +997,10 @@ const modernAlert = Swal.mixin({
     },
     buttonsStyling: false,
     background: 'rgba(255, 255, 255, 0.95)',
-    backdrop: 'rgba(0, 0, 0, 0.1)',
-    showClass: {
-        popup: 'animate__animated animate__fadeInUp'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__fadeOutDown'
-    }
+    backdrop: 'rgba(0, 0, 0, 0.2)',
+    showClass: { popup: 'animate__animated animate__fadeInUp' },
+    hideClass: { popup: 'animate__animated animate__fadeOutDown' }
 });
-
-// Add modern styles for SweetAlert
-const modernSwalStyle = document.createElement('style');
-modernSwalStyle.innerHTML = `
-    .modern-swal-popup {
-        border-radius: 24px !important;
-        border: 1px solid rgba(209, 213, 219, 0.3) !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1) !important;
-        font-family: 'Poppins', sans-serif !important;
-        backdrop-filter: blur(20px) !important;
-        overflow: hidden !important;
-    }
-    .modern-swal-title {
-        font-family: 'Space Grotesk', sans-serif !important;
-        color: #1f2937 !important;
-        font-weight: 700 !important;
-        font-size: 1.5rem !important;
-    }
-    .modern-swal-content {
-        color: #6b7280 !important;
-    }
-    .modern-confirm-btn {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-        color: white !important;
-        border: none !important;
-        padding: 12px 32px !important;
-        border-radius: 12px !important;
-        font-family: 'Poppins', sans-serif !important;
-        font-weight: 600 !important;
-        margin: 8px !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
-    }
-    .modern-confirm-btn:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
-    }
-    .modern-cancel-btn {
-        background: white !important;
-        color: #6b7280 !important;
-        border: 1px solid #e5e7eb !important;
-        padding: 12px 32px !important;
-        border-radius: 12px !important;
-        font-family: 'Poppins', sans-serif !important;
-        font-weight: 600 !important;
-        margin: 8px !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-    }
-    .modern-cancel-btn:hover {
-        background: #f9fafb !important;
-        border-color: #d1d5db !important;
-    }
-`;
-document.head.appendChild(modernSwalStyle);
 
 const modernToast = Swal.mixin({
     toast: true,
@@ -1070,57 +1010,42 @@ const modernToast = Swal.mixin({
     timerProgressBar: true,
     background: 'rgba(255, 255, 255, 0.95)',
     color: '#6366f1',
-    backdrop: false,
-    customClass: {
-        popup: 'modern-toast'
-    }
+    customClass: { popup: 'modern-toast' }
 });
 
-// Add toast style
-const toastStyle = document.createElement('style');
-toastStyle.innerHTML = `
-    .modern-toast {
-        border-radius: 12px !important;
-        border: 1px solid rgba(209, 213, 219, 0.3) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
-        backdrop-filter: blur(20px) !important;
-        font-family: 'Poppins', sans-serif !important;
-    }
+// Styles Injection
+const modernStyle = document.createElement('style');
+modernStyle.innerHTML = `
+    .modern-swal-popup { border-radius: 24px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.1) !important; font-family: 'Poppins', sans-serif !important; }
+    .modern-confirm-btn { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: white !important; padding: 12px 32px !important; border-radius: 12px !important; margin: 8px !important; cursor: pointer; border: none; font-weight: 600; }
+    .modern-cancel-btn { background: white !important; color: #6b7280 !important; border: 1px solid #e5e7eb !important; padding: 12px 32px !important; border-radius: 12px !important; margin: 8px !important; cursor: pointer; font-weight: 600; }
+    .qty-display-modern { transition: opacity 0.3s ease, transform 0.2s ease; display: inline-block; }
+    .modern-toast { border-radius: 12px !important; border: 1px solid rgba(209,213,219,0.3) !important; backdrop-filter: blur(20px); }
 `;
-document.head.appendChild(toastStyle);
+document.head.appendChild(modernStyle);
 
-// Confirmation dialog for removing items
-function confirmModernRemove(cartId) {
-    modernAlert.fire({
-        title: 'Remove Item?',
-        html: `
-            <div style="text-align: center; padding: 20px 0;">
-                <div style="font-size: 4rem; color: #ef4444; margin-bottom: 20px;">
-                    <i class="fas fa-trash-alt"></i>
-                </div>
-                <p style="font-size: 1.1rem; color: #4b5563;">
-                    Are you sure you want to remove this item from your cart?
-                </p>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Yes, remove it',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        focusCancel: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            removeModernItem(cartId);
+// --- 2. GLOBAL VARIABLES ---
+let updateTimer; 
+let deleteTimeouts = {}; 
+
+// --- 3. INITIALIZATION ON LOAD ---
+document.addEventListener('DOMContentLoaded', function() {
+   
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('pending_delete_')) {
+            const cartId = key.replace('pending_delete_', '');
+            const item = document.querySelector(`#qty-${cartId}`)?.closest('.modern-item');
+            if (item) item.style.display = 'none';
+            finalizeDelete(cartId);
         }
     });
-}
+    recalculateCart();
+});
 
-let updateTimer; // Global timer for debounce
-
+// --- 4. QUANTITY UPDATE (WITH DIM EFFECT) ---
 function updateModernQuantity(cartId, newQty, maxStock) {
-    // 1. Validation
-     if (newQty > maxStock) {
-    modernAlert.fire({
+    if (newQty > maxStock) {
+         modernAlert.fire({
       icon: 'warning',
     title: 'Stock Alert',
     text: `Maximum ${maxStock} items only`,
@@ -1134,208 +1059,206 @@ function updateModernQuantity(cartId, newQty, maxStock) {
     timerProgressBar: true
     });
     return;
-}
+    }
     if (newQty < 1) {
         confirmModernRemove(cartId);
         return;
     }
 
-    
     const qtyElement = document.getElementById('qty-' + cartId);
     if (qtyElement) {
+        
+        qtyElement.style.opacity = '0.3';
+        qtyElement.style.transform = 'scale(0.8)';
         qtyElement.innerText = newQty;
-        recalculateCart(); 
+        recalculateCart();
     }
 
-   
     clearTimeout(updateTimer);
     updateTimer = setTimeout(() => {
         const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
-        
         fetch(rootPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ 'cart_id': cartId, 'quantity': newQty })
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            if (data.status === 'success') {
-               
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1000
-                });
-                Toast.fire({ icon: 'success', title: 'Cart updated' });
-            } else {
-                location.reload(); 
+            if (qtyElement) {
+                
+                qtyElement.style.opacity = '1';
+                qtyElement.style.transform = 'scale(1)';
             }
+            if (data.status !== 'success') location.reload();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(() => {
+            if (qtyElement) { qtyElement.style.opacity = '1'; qtyElement.style.transform = 'scale(1)'; }
+        });
     }, 500);
 }
 
-function recalculateCart() {
-    let grandTotal = 0;
-    let itemCount = 0;
-
-    document.querySelectorAll('.modern-item').forEach(item => {
-        const price = parseFloat(item.getAttribute('data-price')) || 0;
-        const qtyElement = item.querySelector('.qty-display-modern');
-        const qty = qtyElement ? parseInt(qtyElement.innerText) : 0;
-        
-        const subtotal = price * qty;
-        grandTotal += subtotal;
-        itemCount += qty;
-
-        // Item subtotal update
-        const cartId = qtyElement.id.replace('qty-', '');
-        const subtotalDisplay = document.getElementById('subtotal-' + cartId);
-        if (subtotalDisplay) {
-            subtotalDisplay.innerText = '$' + subtotal.toFixed(2);
-        }
-    });
-
-    // Calculate Summary (Shipping & Discount)
-    const shipping = grandTotal > 100 ? 0 : 9.99;
-    const discount = Math.min(20, grandTotal * 0.1);
-    const finalTotal = grandTotal + shipping - discount;
-
-    // Update Summary UI
-    document.querySelectorAll('.stat-value')[0].innerText = itemCount; // Total Items stat
-    document.querySelectorAll('.stat-value')[1].innerText = '$' + grandTotal.toFixed(2); // Subtotal stat
-    
-    // Summary Panel Update
-    const summaryValues = document.querySelectorAll('.summary-value');
-    if (summaryValues.length >= 4) {
-        summaryValues[0].innerText = '$' + grandTotal.toFixed(2);
-        summaryValues[1].innerText = shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2);
-        summaryValues[2].innerText = '-$' + discount.toFixed(2);
-        summaryValues[3].innerText = '$' + finalTotal.toFixed(2);
-    }
-}
-
-// Confirmation dialog for removing items
+// --- 5. REMOVE ITEM WITH UNDO ---
 function confirmModernRemove(cartId) {
     modernAlert.fire({
         title: 'Remove Item?',
-        text: "Are you sure you want to remove this item from your cart?",
+        text: "This item will be removed from your cart.",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, remove it!',
-        cancelButtonText: 'No, keep it',
-        confirmButtonColor: '#ef4444', 
-        cancelButtonColor: '#6b7280'
+        confirmButtonText: 'Yes, remove',
+        cancelButtonText: 'Keep it'
     }).then((result) => {
+        if (result.isConfirmed) initiateRemove(cartId);
+    });
+}
+
+function initiateRemove(cartId) {
+    const itemElement = document.querySelector(`#qty-${cartId}`)?.closest('.modern-item');
+    if (!itemElement) return;
+
+    // UI Animation
+    itemElement.style.transition = 'all 0.4s ease';
+    itemElement.style.transform = 'translateX(100px)';
+    itemElement.style.opacity = '0';
+
+    setTimeout(() => {
+        if (itemElement.style.opacity === '0') {
+            itemElement.style.display = 'none';
+            recalculateCart();
+        }
+    }, 400);
+
+    localStorage.setItem('pending_delete_' + cartId, 'true');
+
+   
+    deleteTimeouts[cartId] = setTimeout(() => {
+        finalizeDelete(cartId);
+    }, 5000);
+
+   
+    const UndoToast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: true,
+        confirmButtonText: 'UNDO',
+        confirmButtonColor: '#6366f1',
+        timer: 5000,
+        timerProgressBar: true
+    });
+
+    UndoToast.fire({ icon: 'info', title: 'Item removed' }).then((result) => {
         if (result.isConfirmed) {
-           
-            removeModernItem(cartId);
+            
+            clearTimeout(deleteTimeouts[cartId]);
+            delete deleteTimeouts[cartId];
+            localStorage.removeItem('pending_delete_' + cartId);
+
+            itemElement.style.display = 'grid'; 
+            setTimeout(() => {
+                itemElement.style.transform = 'translateX(0)';
+                itemElement.style.opacity = '1';
+                recalculateCart();
+            }, 10);
+            modernToast.fire({ icon: 'success', title: 'Item restored' });
         }
     });
 }
 
-// Remove item with animation and DB update
-function removeModernItem(cartId) {
-   
-    const qtyElement = document.getElementById('qty-' + cartId);
-    const item = qtyElement ? qtyElement.closest('.modern-item') : null;
-    
-   
-    if (item) {
-        item.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-        item.style.transform = 'translateX(100px)';
-        item.style.opacity = '0';
-        
-        
-        setTimeout(() => {
-            item.style.height = '0';
-            item.style.marginBottom = '0';
-            item.style.padding = '0';
-            item.style.border = 'none';
-            item.style.overflow = 'hidden';
-        }, 200);
-    }
-    
- 
+
+function finalizeDelete(cartId) {
     const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
-    
     fetch(rootPath, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ 'cart_id': cartId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            modernToast.fire({
-                icon: 'success',
-                title: 'Item removed successfully'
-            });
-            
-         
-            setTimeout(() => {
-                location.reload(); 
-            }, 600);
-        } else {
-            
-            if (item) {
-                item.style.transform = '';
-                item.style.opacity = '';
-                item.style.height = '';
-                item.style.marginBottom = '';
-                item.style.padding = '';
-            }
-            modernAlert.fire('Error', data.message || 'Failed to remove item', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        modernAlert.fire('Network Error', 'Not Connected Server', 'error');
+        body: new URLSearchParams({ 'cart_id': cartId }),
+        keepalive: true
+    }).then(() => {
+        localStorage.removeItem('pending_delete_' + cartId);
+        delete deleteTimeouts[cartId];
     });
 }
 
-// Add hover effect to save button
-document.addEventListener('DOMContentLoaded', function() {
-    const saveButtons = document.querySelectorAll('.action-btn-modern.save');
-    saveButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            if (icon.classList.contains('far')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                icon.style.color = '#ef4444';
-                
-                modernToast.fire({
-                    icon: 'success',
-                    title: 'Saved for later'
-                });
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                icon.style.color = '';
-                
-                modernToast.fire({
-                    icon: 'info',
-                    title: 'Removed from saved'
-                });
-            }
-        });
-    });
-    
-    // Add parallax effect to floating shapes
-    document.addEventListener('mousemove', function(e) {
-        const shapes = document.querySelectorAll('.floating-shape');
-        const mouseX = e.clientX / window.innerWidth;
-        const mouseY = e.clientY / window.innerHeight;
-        
-        shapes.forEach((shape, index) => {
-            const speed = 0.05 + (index * 0.02);
-            const x = (mouseX - 0.5) * 100 * speed;
-            const y = (mouseY - 0.5) * 100 * speed;
-            
-            shape.style.transform = `translate(${x}px, ${y}px) rotate(${x}deg)`;
-        });
-    });
+
+window.addEventListener('beforeunload', () => {
+    Object.keys(deleteTimeouts).forEach(cartId => finalizeDelete(cartId));
 });
+
+// --- 6. CALCULATION ENGINE ---
+function recalculateCart() {
+    let grandTotal = 0;
+    let totalQty = 0;
+
+    
+    document.querySelectorAll('.modern-item').forEach(item => {
+        
+        if (item.style.display !== 'none' && item.style.opacity !== '0') {
+            const price = parseFloat(item.getAttribute('data-price')) || 0;
+            const qtyElement = item.querySelector('.qty-display-modern');
+            const qty = parseInt(qtyElement.innerText) || 0;
+            
+            const subtotal = price * qty;
+            grandTotal += subtotal;
+            totalQty += qty;
+
+           
+            const cartId = qtyElement.id.replace('qty-', '');
+            const subDisplay = document.getElementById('subtotal-' + cartId);
+            if (subDisplay) {
+                subDisplay.innerText = '$' + subtotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            }
+        }
+    });
+
+   
+    const shipping = (grandTotal > 100 || grandTotal === 0) ? 0 : 9.99;
+    const discount = grandTotal * 0.1; // 10% discount ဥပမာ
+    const finalTotal = (grandTotal + shipping) - discount;
+
+   
+    
+  
+    const bigSubtotalCard = document.querySelectorAll('.stat-value')[1]; 
+    if (bigSubtotalCard) {
+        bigSubtotalCard.innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    }
+
+    // ၂။ Total Item count
+    const itemCountStat = document.querySelectorAll('.stat-value')[0];
+    if (itemCountStat) itemCountStat.innerText = totalQty;
+
+   
+    const summaries = document.querySelectorAll('.summary-value');
+    if (summaries.length >= 4) {
+        summaries[0].innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        summaries[1].innerText = shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2);
+        summaries[2].innerText = '-$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2});
+        summaries[3].innerText = '$' + finalTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    }
+}
+
+function updateUI(tQty, sub, ship, disc, total, types) {
+    // Statistics & Badge
+    const stats = document.querySelectorAll('.stat-value');
+    if (stats.length > 0) stats[0].innerText = tQty;
+
+    document.querySelectorAll('.badge, .cart-count').forEach(b => {
+        b.innerText = tQty;
+        b.style.display = tQty > 0 ? 'flex' : 'none';
+    });
+
+    // Summary Labels
+    const summaries = document.querySelectorAll('.summary-value');
+    if (summaries.length >= 4) {
+        summaries[0].innerText = '$' + sub.toLocaleString(undefined, {minimumFractionDigits: 2});
+        summaries[1].innerText = ship === 0 ? 'FREE' : '$' + ship.toFixed(2);
+        summaries[2].innerText = '-$' + disc.toLocaleString(undefined, {minimumFractionDigits: 2});
+        
+        document.querySelectorAll('.summary-value.total').forEach(el => {
+            el.innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
+        });
+    }
+
+    if (types === 0 && Object.keys(deleteTimeouts).length === 0) {
+        setTimeout(() => location.reload(), 1000);
+    }
+}
 </script>
