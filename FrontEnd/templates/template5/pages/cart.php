@@ -832,140 +832,148 @@ $total_price = 0;
 
 <div class="modern-container">
     <?php if ($cart_count > 0): 
-        // Calculate totals
+        // 1. Logic Section: Variables အားလုံးကို တွက်ချက်ခြင်း
         $items = [];
+        $total_price = 0;
+        $total_quantity = 0; // စုစုပေါင်းအရေအတွက်အတွက်
+
+        // Database ကလာတဲ့ Result ကို Loop ပတ်ပြီး တွက်မယ်
         while ($item = mysqli_fetch_assoc($result)): 
             $subtotal = $item['price'] * $item['quantity'];
             $total_price += $subtotal;
+            $total_quantity += $item['quantity']; // Quantity တွေကို ပေါင်းထည့်ခြင်း
             $items[] = $item;
         endwhile;
         
-       
+        // Shipping, Discount နဲ့ Grand Total တွက်ခြင်း
         $shipping = $total_price > 100 ? 0 : 9.99;
-        $discount = min(20, $total_price * 0.1); // 10% discount, max $20
+        $discount = $total_price * 0.1; // 10% Discount (Limit မရှိ)
         $grand_total = $total_price + $shipping - $discount;
     ?>
         
         <div class="modern-header">
             <h1>Your Shopping Cart</h1>
             <p class="header-subtitle">Review your items and proceed to checkout</p>
-            
-            <div class="cart-stats-modern">
-                <div class="stat-card">
-                    <div class="stat-value"><?= $cart_count ?></div>
-                    <div class="stat-label">Items</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$<?= number_format($total_price, 2) ?></div>
-                    <div class="stat-label">Subtotal</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$<?= number_format($discount, 2) ?></div>
-                    <div class="stat-label">Savings</div>
-                </div>
-            </div>
-        </div>
+
+    <div class="cart-stats-modern">
+   <div class="stat-card">
+    <div class="stat-value" id="total-qty-stat"><?= $total_quantity ?></div>
+    <div class="stat-label">Total Items</div>
+</div>
+<div class="stat-card">
+    <div class="stat-value" id="total-subtotal-stat">$<?= number_format($total_price, 2) ?></div>
+    <div class="stat-label">Subtotal</div>
+</div>
+<div class="stat-card">
+    <div class="stat-value" id="total-savings-stat">$<?= number_format($discount, 2) ?></div>
+    <div class="stat-label">Savings (10%)</div>
+</div>
+</div>
 
     <div class="modern-layout">
-    <div class="products-panel-modern">
-        <div class="panel-header-modern">
-            <h2 class="panel-title-modern">
-                <i class="fas fa-shopping-bag"></i>
-                Cart Items
-            </h2>
-            <span style="color: var(--color-primary); font-weight: 600;">
-                <?= $cart_count ?> item<?= $cart_count > 1 ? 's' : '' ?>
-            </span>
-        </div>
-        
-        <?php foreach ($items as $item): 
-            $subtotal = $item['price'] * $item['quantity']; 
-        ?>
-            <div class="modern-item" data-price="<?= $item['price'] ?>">
-                <div class="item-image-modern">
-                    <img src="../uploads/products/<?= $item['product_id'] ?>_<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['product_name']) ?>">
-                </div>
-                
-                <div class="item-content">
-                    <div class="item-header">
-                        <h3><?= htmlspecialchars($item['product_name']) ?></h3>
-                        <div class="item-meta">
-                            <span class="meta-badge"><i class="fas fa-ruler"></i> <?= htmlspecialchars($item['size']) ?></span>
-                            <span class="meta-badge">
-                                <span class="color-indicator" style="background-color: <?= $item['color'] ?>;"></span>
-                                <?= htmlspecialchars($item['color']) ?>
-                            </span>
+        <div class="products-panel-modern">
+           <div class="panel-header-modern">
+    <h2 class="panel-title-modern">
+        <i class="fas fa-shopping-bag"></i>
+        Cart Items
+    </h2>
+    
+    <span id="total-qty-header" style="color: var(--color-primary); font-weight: 600;">
+        <?= $total_quantity ?> item<?= $total_quantity > 1 ? 's' : '' ?>
+    </span>
+</div>
+
+            
+            <?php foreach ($items as $item): 
+                $item_subtotal = $item['price'] * $item['quantity']; 
+            ?>
+                <div class="modern-item" data-price="<?= $item['price'] ?>">
+                    <div class="item-image-modern">
+                        <img src="../uploads/products/<?= $item['product_id'] ?>_<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['product_name']) ?>">
+                    </div>
+                    
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3><?= htmlspecialchars($item['product_name']) ?></h3>
+                            <div class="item-meta">
+                                <span class="meta-badge"><i class="fas fa-ruler"></i> <?= htmlspecialchars($item['size']) ?></span>
+                                <span class="meta-badge">
+                                    <span class="color-indicator" style="background-color: <?= $item['color'] ?>;"></span>
+                                    <?= htmlspecialchars($item['color']) ?>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="item-actions-modern">
+                            <div class="quantity-controls-modern">
+                                <button class="qty-btn-modern" onclick="updateModernQuantity(<?= $item['cart_id'] ?>, parseInt(document.getElementById('qty-<?= $item['cart_id'] ?>').innerText) - 1, <?= $item['stock_limit'] ?>)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="qty-display-modern" id="qty-<?= $item['cart_id'] ?>"><?= $item['quantity'] ?></div>
+                                <button class="qty-btn-modern" onclick="updateModernQuantity(<?= $item['cart_id'] ?>, parseInt(document.getElementById('qty-<?= $item['cart_id'] ?>').innerText) + 1, <?= $item['stock_limit'] ?>)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="item-actions-modern">
-                        <div class="quantity-controls-modern">
-                            <button class="qty-btn-modern" onclick="updateModernQuantity(<?= $item['cart_id'] ?>, parseInt(document.getElementById('qty-<?= $item['cart_id'] ?>').innerText) - 1, <?= $item['stock_limit'] ?>)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <div class="qty-display-modern" id="qty-<?= $item['cart_id'] ?>"><?= $item['quantity'] ?></div>
-                            <button class="qty-btn-modern" onclick="updateModernQuantity(<?= $item['cart_id'] ?>, parseInt(document.getElementById('qty-<?= $item['cart_id'] ?>').innerText) + 1, <?= $item['stock_limit'] ?>)">
-                                <i class="fas fa-plus"></i>
+                    <div class="price-section-modern">
+                        <div>
+                            <div class="price-total-modern" id="subtotal-<?= $item['cart_id'] ?>">$<?= number_format($item_subtotal, 2) ?></div>
+                            <div class="price-unit-modern">$<?= number_format($item['price'], 2) ?> each</div>
+                        </div>
+                        <div class="item-actions-right">
+                            <button class="action-btn-modern" onclick="confirmModernRemove(<?= $item['cart_id'] ?>)" title="Remove item">
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="price-section-modern">
-                    <div>
-                        <div class="price-total-modern" id="subtotal-<?= $item['cart_id'] ?>">$<?= number_format($subtotal, 2) ?></div>
-                        <div class="price-unit-modern">$<?= number_format($item['price'], 2) ?> each</div>
-                    </div>
-                    <div class="item-actions-right">
-                        <button class="action-btn-modern" onclick="confirmModernRemove(<?= $item['cart_id'] ?>)" title="Remove item">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
+            <?php endforeach; ?>
+        </div> 
+
+        <div class="summary-panel-modern">
+            <div class="summary-header">
+                <h2 class="summary-title">Order Summary</h2>
+                <p class="summary-subtitle">Complete your purchase</p>
             </div>
-        <?php endforeach; ?>
-    </div> <div class="summary-panel-modern">
-        <div class="summary-header">
-            <h2 class="summary-title">Order Summary</h2>
-            <p class="summary-subtitle">Complete your purchase</p>
-        </div>
-        
-        <div class="summary-item">
-            <span class="summary-label">Subtotal</span>
-            <span class="summary-value">$<?= number_format($total_price, 2) ?></span>
-        </div>
-        
-        <div class="summary-item">
-            <span class="summary-label">Shipping</span>
-            <span class="summary-value"><?= $shipping > 0 ? '$' . number_format($shipping, 2) : 'FREE' ?></span>
-        </div>
-        
-        <div class="summary-item">
-            <span class="summary-label" style="color: var(--color-accent);">
-                <i class="fas fa-tag"></i> Discount
-            </span>
-            <span class="summary-value" style="color: var(--color-accent);">
-                -$<?= number_format($discount, 2) ?>
-            </span>
-        </div>
-        
-        <div class="summary-item total">
-            <span class="summary-label">Total</span>
-            <span class="summary-value total">$<?= number_format($grand_total, 2) ?></span>
-        </div>
-        
-        <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" class="checkout-btn-modern">
-            <i class="fas fa-lock"></i> Secure Checkout
-        </a>
-    </div> 
-</div>
-        
-        <div class="continue-shopping">
-            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="continue-link">
-                <i class="fas fa-arrow-left"></i>
-                Continue Shopping
+            
+            <div class="summary-item">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value">$<?= number_format($total_price, 2) ?></span>
+            </div>
+            
+            <div class="summary-item">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value"><?= $shipping > 0 ? '$' . number_format($shipping, 2) : 'FREE' ?></span>
+            </div>
+            
+            <div class="summary-item">
+                <span class="summary-label" style="color: var(--color-accent);">
+                    <i class="fas fa-tag"></i> Discount (10%)
+                </span>
+                <span class="summary-value" style="color: var(--color-accent);">
+                    -$<?= number_format($discount, 2) ?>
+                </span>
+            </div>
+            
+            <div class="summary-item total">
+                <span class="summary-label">Total</span>
+                <span class="summary-value total">$<?= number_format($grand_total, 2) ?></span>
+            </div>
+            
+            <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" class="checkout-btn-modern">
+                <i class="fas fa-lock"></i> Secure Checkout
             </a>
-        </div>
+        </div> 
+    </div> 
+        
+    <div class="continue-shopping">
+        <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="continue-link">
+            <i class="fas fa-arrow-left"></i>
+            Continue Shopping
+        </a>
+    </div>
 
     <?php else: ?>
         <div class="empty-state-modern">
@@ -1208,54 +1216,55 @@ function recalculateCart() {
     let grandTotal = 0;
     let totalQty = 0;
 
-    
+   
     document.querySelectorAll('.modern-item').forEach(item => {
-        
         if (item.style.display !== 'none' && item.style.opacity !== '0') {
             const price = parseFloat(item.getAttribute('data-price')) || 0;
             const qtyElement = item.querySelector('.qty-display-modern');
             const qty = parseInt(qtyElement.innerText) || 0;
             
-            const subtotal = price * qty;
-            grandTotal += subtotal;
+            const itemSubtotal = price * qty;
+            grandTotal += itemSubtotal;
             totalQty += qty;
 
-           
+            // Individual item subtotal text update (e.g., $120.00)
             const cartId = qtyElement.id.replace('qty-', '');
             const subDisplay = document.getElementById('subtotal-' + cartId);
             if (subDisplay) {
-                subDisplay.innerText = '$' + subtotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+                subDisplay.innerText = '$' + itemSubtotal.toLocaleString(undefined, {minimumFractionDigits: 2});
             }
         }
     });
 
    
     const shipping = (grandTotal > 100 || grandTotal === 0) ? 0 : 9.99;
-    const discount = grandTotal * 0.1; // 10% discount ဥပမာ
+    const discount = grandTotal * 0.1; 
     const finalTotal = (grandTotal + shipping) - discount;
 
-   
     
-  
-    const bigSubtotalCard = document.querySelectorAll('.stat-value')[1]; 
-    if (bigSubtotalCard) {
-        bigSubtotalCard.innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
-    }
+    
+    const qtyStat = document.getElementById('total-qty-stat');
+    const subtotalStat = document.getElementById('total-subtotal-stat');
+    const savingsStat = document.getElementById('total-savings-stat');
+    const headerQtyText = document.getElementById('total-qty-header');
 
-    // ၂။ Total Item count
-    const itemCountStat = document.querySelectorAll('.stat-value')[0];
-    if (itemCountStat) itemCountStat.innerText = totalQty;
+    if (qtyStat) qtyStat.innerText = totalQty;
+    if (subtotalStat) subtotalStat.innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    if (savingsStat) savingsStat.innerText = '$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2});
+    if (headerQtyText) headerQtyText.innerText = totalQty + (totalQty > 1 ? ' items' : ' item');
 
    
-    const summaries = document.querySelectorAll('.summary-value');
-    if (summaries.length >= 4) {
-        summaries[0].innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
-        summaries[1].innerText = shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2);
-        summaries[2].innerText = '-$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2});
-        summaries[3].innerText = '$' + finalTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    const summaryValues = document.querySelectorAll('.summary-value');
+    if (summaryValues.length >= 4) {
+        summaryValues[0].innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}); // Subtotal
+        summaryValues[1].innerText = shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2); // Shipping
+        summaryValues[2].innerText = '-$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2}); // Discount
+        
+        document.querySelectorAll('.summary-value.total').forEach(el => {
+            el.innerText = '$' + finalTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        });
     }
 }
-
 function updateUI(tQty, sub, ship, disc, total, types) {
     // Statistics & Badge
     const stats = document.querySelectorAll('.stat-value');
