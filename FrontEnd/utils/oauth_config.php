@@ -19,12 +19,12 @@
  */
 
 // Google OAuth Credentials
-define('GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_CLIENT_ID_HERE');
-define('GOOGLE_CLIENT_SECRET', 'YOUR_GOOGLE_CLIENT_SECRET_HERE');
+define('GOOGLE_CLIENT_ID', '466100344494-kdrg075kh1f8ob3k2bfdchqjegkmek8r.apps.googleusercontent.com');
+define('GOOGLE_CLIENT_SECRET', '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');
 
 // GitHub OAuth Credentials
-define('GITHUB_CLIENT_ID', 'YOUR_GITHUB_CLIENT_ID_HERE');
-define('GITHUB_CLIENT_SECRET', 'YOUR_GITHUB_CLIENT_SECRET_HERE');
+define('GITHUB_CLIENT_ID', 'Ov23livJcudpX9qQPoOi');
+define('GITHUB_CLIENT_SECRET', '64976b12e34a0810bf11f0ba4bd77128a049bc05');
 
 // Base URL (auto-detect or set manually)
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
