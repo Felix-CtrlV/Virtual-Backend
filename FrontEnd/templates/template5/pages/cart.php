@@ -1063,7 +1063,7 @@ function updateModernQuantity(cartId, newQty, maxStock) {
             cancelButtonText: 'Cancel',
             confirmButtonText: 'Adjust Quantity',
             backdrop: 'rgba(0,0,0,0.4)',
-            timer: 5000,
+            timer: 3000,
             timerProgressBar: true
         });
         return;
