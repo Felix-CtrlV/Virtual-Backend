@@ -252,7 +252,7 @@ $colors = array_unique($colors);
     Swal.fire({
         icon: 'error',
         title: 'Limited Availability',
-        text: `We only have ${checkStock} pieces left in stock for this variant.`,
+        text: `We only have ${checkStock} pieces left in stock for this products.`,
         
         customClass: {
             popup: 'swal-frost-popup',

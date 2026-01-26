@@ -1,5 +1,6 @@
 <?php
 include("../../BackEnd/config/dbconfig.php");
+// Start session to handle potential OAuth errors or messages
 ?>
 
 <!DOCTYPE html>
@@ -8,60 +9,82 @@ include("../../BackEnd/config/dbconfig.php");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>Admin Portal | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+
     <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.21/build/spline-viewer.js"></script>
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
 </head>
 
 <body class="adminlogincontainer">
-    <!-- <spline-viewer class="robotmodel" url="https://prod.spline.design/6qRF8rgLp7IgQBCX/scene.splinecode"></spline-viewer>-->
+
     <spline-viewer class="robotmodel"
-        url="https://prod.spline.design/RhUHenI1aUGPujeh/scene.splinecode"></spline-viewer>
+        url="https://prod.spline.design/4BgGmVOudYtxvUyp/scene.splinecode"></spline-viewer>
 
     <div class="adminloginbox">
 
-        <h1>Admin Login</h1>
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Enter your credentials to access the admin panel.</p>
+
+        <span class="showerror">Username or Password is Incorrect</span>
 
         <form class="loginform" action="" method="post">
-            <div class="row">
-                <label for="username">Username :</label>
-                <input autocomplete="off" type="text" id="username" name="username" required><br><br>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input autocomplete="off" type="text" id="username" name="username" placeholder="e.g. admin" required>
             </div>
-            <div class="row">
-                <label for="password">Password :</label>
-                <input autocomplete="off" type="password" id="password" name="password" required><br><br>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input autocomplete="off" type="password" id="password" name="password" placeholder="••••••••" required>
             </div>
-            <span class="showerror">Username or Password is Incorrect</span>
+
             <button type="submit" name="submit" class="login-btn">
-                <span class="btn-text">Login</span>
+                <span class="btn-text">Login to Dashboard</span>
                 <lord-icon id="loadingIcon" src="https://cdn.lordicon.com/izqdfqdl.json" trigger="loop"
-                    state="loop-queue" colors="primary:#000000" style="width:30px;height:30px">
+                    state="loop-queue" colors="primary:#ffffff" style="width:25px;height:25px">
                 </lord-icon>
             </button>
-
         </form>
+
+        <div class="divider">
+            <span>OR CONTINUE WITH</span>
+        </div>
+
+        <div class="social-login">
+            <a href="../utils/google_oauth.php?type=admin" class="social-btn google-btn">
+                <i class="fab fa-google"></i> Google
+            </a>
+            <a href="../utils/github_oauth.php?type=admin" class="social-btn github-btn">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
     </div>
 </body>
 
 <script>
     const form = document.querySelector(".loginform");
+
     form.addEventListener("submit", (e) => {
         e.preventDefault();
 
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
-        document.querySelector(".btn-text").style.display = "none";
-        document.getElementById("loadingIcon").style.display = "block";
+        // UI Loading State
+        const btnText = document.querySelector(".btn-text");
+        const loadingIcon = document.getElementById("loadingIcon");
+        const errorText = document.querySelector('.showerror');
+
+        btnText.style.display = "none";
+        loadingIcon.style.display = "block";
+        errorText.style.display = 'none';
 
         login(username, password);
     });
-</script>
 
-
-
-<script>
     function login(username, password) {
         const errortext = document.querySelector('.showerror');
         const buttontext = document.querySelector('.btn-text');
@@ -74,7 +97,7 @@ include("../../BackEnd/config/dbconfig.php");
         })
             .then(response => response.json())
             .then(data => {
-                 if (data.success) {
+                if (data.success) {
                     window.location.href = 'dashboard.php';
                 } else {
                     errortext.style.display = 'block';
@@ -85,11 +108,11 @@ include("../../BackEnd/config/dbconfig.php");
             .catch(err => {
                 console.error('Login error:', err);
                 errortext.style.display = 'block';
+                errortext.innerText = "Server connection failed.";
                 buttontext.style.display = 'block';
                 loadingicon.style.display = 'none';
             });
     }
-
 </script>
 
 </html>

@@ -89,7 +89,7 @@ if (!isset($pageTitle)) {
                     colors="primary:#ffffff,secondary:#ffffff,tertiary:#000000,quaternary:#ffffff,quinary:#ffffff"
                     style="width:25px;height:25px">
                 </lord-icon>
-                <span class="nav-label-main">View Suppliers</span>
+                <span class="nav-label-main">View Companies</span>
             </a>
             <a class="nav-button <?php echo $active === 'reviews' ? 'active' : ''; ?>"
                 href="reviews.php?adminid=<?php echo urlencode($adminid); ?>">

@@ -749,35 +749,40 @@ h1 {
         filter: blur(0);
     }
 }
+/*View Details CSS */
 .btn-order-now {
-    background: 
-        linear-gradient(45deg, 
-            #1a1a1a 25%, 
-            transparent 25%, 
-            transparent 75%, 
-            #1a1a1a 75%),
-        linear-gradient(45deg, 
-            #1a1a1a 25%, 
-            #0a0a0a 25%, 
-            #0a0a0a 75%, 
-            #1a1a1a 75%);
-    background-size: 10px 10px;
-    background-position: 0 0, 5px 5px;
-    color: #c9a86a;
-    padding: 17px 30px;
-    border: 2px solid #c9a86a;
-    border-radius: 4px;
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    transition: all 0.3s;
+  display: inline-block;
+  padding: 12px 32px;
+  background: transparent;
+  color: #111;
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 1px solid #111;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-order-now::after {
+  content: '→';
+  margin-left: 10px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
 }
 
 .btn-order-now:hover {
-    background-position: 5px 5px, 10px 10px;
-    transform: translateY(-3px);
-    letter-spacing: 3px;
+  padding-right: 45px;
+  background: #111;
+  color: #fff;
+}
+
+.btn-order-now:hover::after {
+  opacity: 1;
+  transform: translateX(0);
 }
 .card-product {
     overflow: hidden; 

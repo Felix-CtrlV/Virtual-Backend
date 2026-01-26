@@ -5,18 +5,35 @@ $adminid = $_SESSION["adminid"] ?? null;
 $search = $_POST['search'] ?? '';
 
 $sql = "
-SELECT s.*, sa.logo, sa.banner,
-    (SELECT ROUND(AVG(rating), 1) FROM reviews WHERE supplier_id = s.supplier_id) AS avg_rating,
-    (SELECT COUNT(*) FROM reviews WHERE supplier_id = s.supplier_id) AS review_count
+SELECT 
+    s.*,
+    c.*,
+    sa.logo,
+    sa.banner,
+
+    (SELECT ROUND(AVG(rating), 1)
+     FROM reviews
+     WHERE supplier_id = s.supplier_id) AS avg_rating,
+
+    (SELECT COUNT(*)
+     FROM reviews
+     WHERE supplier_id = s.supplier_id) AS review_count
+
 FROM suppliers s
-LEFT JOIN shop_assets sa ON sa.supplier_id = s.supplier_id
+LEFT JOIN companies c 
+    ON c.supplier_id = s.supplier_id
+LEFT JOIN shop_assets sa 
+    ON sa.supplier_id = s.supplier_id
+
 WHERE (
-    s.company_name LIKE ?
+    c.company_name LIKE ?
     OR s.name LIKE ?
     OR s.email LIKE ?
     OR s.status LIKE ?
 )
-ORDER BY s.created_at DESC
+
+ORDER BY s.created_at DESC;
+
 ";
 
 $stmt = $conn->prepare($sql);
@@ -92,7 +109,8 @@ if ($supplierresult->num_rows > 0) {
             <td><?= date("M d, Y", strtotime($supplierrow['created_at'])) ?></td>
 
             <td>
-                <a class="button" href="suppliersmanagement.php?adminid=<?= $_SESSION['adminid'] ?>&supplierid=<?= $supplierrow['supplier_id'] ?>"
+                <a class="button"
+                    href="suppliersmanagement.php?adminid=<?= $_SESSION['adminid'] ?>&supplierid=<?= $supplierrow['supplier_id'] ?>"
                     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">
                     <span class="span-mother">
                         <span>V</span>
