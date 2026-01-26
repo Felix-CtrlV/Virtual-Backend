@@ -80,23 +80,23 @@
             <a href="supplierRegister.php?duration=1" class="p-btn">Select Plan</a>
         </div>
 
-        <div class="price-card">
+        <div class="price-card" style="border-color: #7d6de3;">
+            <div class="best-value">BEST VALUE</div>
             <div>
                 <div class="p-duration">6 Months</div>
                 <div class="p-price">$6,000</div>
                 <div class="p-sub">Half-year commitment.</div>
             </div>
-            <a href="supplierRegister.php?duration=6" class="p-btn">Select Plan</a>
+            <a href="supplierRegister.php?duration=6" class="p-btn"  style="background: #7d6de3;">Select Plan</a>
         </div>
 
-        <div class="price-card" style="border-color: #7d6de3;">
-            <div class="best-value">BEST VALUE</div>
+        <div class="price-card">
             <div>
                 <div class="p-duration">12 Months</div>
                 <div class="p-price">$12,000</div>
                 <div class="p-sub">Full year access with priority support.</div>
             </div>
-            <a href="supplierRegister.php?duration=12" class="p-btn" style="background: #7d6de3;">Select Plan</a>
+            <a href="supplierRegister.php?duration=12" class="p-btn">Select Plan</a>
         </div>
 
     </div>

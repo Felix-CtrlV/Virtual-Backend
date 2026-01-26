@@ -1,12 +1,12 @@
 <?php
-// product_details.php - Logic Header
+
 $product_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if ($product_id <= 0) {
     exit("<div class='container mt-5 text-center'><h4>Invalid Product ID.</h4><a href='index.php' class='btn btn-outline-dark'>Back to Shop</a></div>");
 }
 
-// ၁။ Product နှင့် Category အချက်အလက်များ ဆွဲထုတ်ခြင်း
+
 $stmt = mysqli_prepare($conn, "
     SELECT p.*, c.category_name 
     FROM products p 
@@ -21,7 +21,7 @@ if (!$product) {
     exit("<div class='container mt-5 text-center'><h4>Product not found.</h4><a href='index.php' class='btn btn-outline-dark'>Back to Shop</a></div>");
 }
 
-// ၂။ Variant များနှင့် Quantity ကိုပါ ဆွဲထုတ်ခြင်း
+
 $stmt2 = mysqli_prepare($conn, "SELECT variant_id, color, size, quantity FROM product_variant WHERE product_id = ?");
 mysqli_stmt_bind_param($stmt2, "i", $product_id);
 mysqli_stmt_execute($stmt2);
@@ -73,7 +73,7 @@ $colors = array_unique($colors);
             </div>
 
             <div class="mb-4">
-                <label class="fw-bold small text-uppercase text-muted mb-2">Select Color</label>
+                <label class="fw-bold small text-uppercase text-muteadd-to-carAd mb-2">Select Color</label>
                 <div class="d-flex align-items-center">
                     <?php foreach ($colors as $color): ?>
                         <?php $uniqueId = 'color_' . preg_replace('/[^a-zA-Z0-9]/', '', $color); ?>
@@ -108,9 +108,11 @@ $colors = array_unique($colors);
 
             <input type="hidden" id="supplier_id" value="<?= htmlspecialchars($product['supplier_id']) ?>">
             
-            <button id="addToCartBtn" class="btn btn-dark btn-lg w-100 shadow-sm border-0 py-3 mt-2">
-                <i class="fas fa-shopping-bag me-2"></i> ADD TO CART
-            </button>
+       <button id="addToCartBtn" 
+        data-stock="<?= $product['stock_available'] ?? 0 ?>"
+        class="add-to-cart-btn btn btn-dark w-100 py-3">
+    ADD TO CART
+</button>
         </div>
     </div>
 </div>
@@ -121,18 +123,17 @@ $colors = array_unique($colors);
     const colorRadios = document.querySelectorAll('input[name="color_option"]');
     let currentVariant = null;
 
-    // အစပိုင်းမှာ Size Select ကို နှိပ်လို့မရအောင် ပိတ်ထားပါမယ်
     window.addEventListener('DOMContentLoaded', () => {
         sizeSelect.disabled = true;
         refreshBag();
     });
 
-    // Size Select ကို နှိပ်လိုက်တဲ့အခါ Color ရွေးမရွေး စစ်ဆေးခြင်း
+    
     sizeSelect.addEventListener('mousedown', function(e) {
         const colorInput = document.querySelector('input[name="color_option"]:checked');
         if (!colorInput) {
-            e.preventDefault(); // Dropdown ပွင့်မလာအောင် တားဆီးခြင်း
-            this.blur(); // Focus ဖယ်ထုတ်ခြင်း
+            e.preventDefault(); 
+            this.blur(); 
             Swal.fire({
                 icon: 'info',
                 title: 'Note',
@@ -146,7 +147,7 @@ $colors = array_unique($colors);
         const colorInput = document.querySelector('input[name="color_option"]:checked');
         if (!colorInput) return;
 
-        // Color ရွေးပြီးတာနဲ့ Size Box ကို ပြန်ဖွင့်ပေးပါမယ်
+        
         sizeSelect.disabled = false;
 
         const selectedColor = colorInput.value;
@@ -167,25 +168,46 @@ $colors = array_unique($colors);
         currentVariant = null;
     }
 
-    function displayStock() {
-        const selectedSize = sizeSelect.value;
-        const colorInput = document.querySelector('input[name="color_option"]:checked');
-        const stockDisplay = document.getElementById('stockDisplay');
+    /*pyin */
+   function displayStock() {
+    const selectedSize = sizeSelect.value;
+    const colorInput = document.querySelector('input[name="color_option"]:checked');
+    const stockDisplay = document.getElementById('stockDisplay');
+    const addToCartBtn = document.getElementById('addToCartBtn');
 
-        if (colorInput && selectedSize) {
-            currentVariant = allVariants.find(v => 
-                String(v.size).trim() === String(selectedSize).trim() && 
-                String(v.color).trim() === String(colorInput.value).trim()
-            );
+    if (colorInput && selectedSize) {
+        
+        currentVariant = allVariants.find(v => 
+            String(v.size).trim() === String(selectedSize).trim() && 
+            String(v.color).trim() === String(colorInput.value).trim()
+        );
 
-            if (currentVariant) {
-                let displayQty = (parseInt(currentVariant.quantity) > 0) ? currentVariant.quantity : 1;
-                stockDisplay.innerHTML = `<i class="fas fa-box-open me-1"></i> Stock available: ${displayQty}`;
-                stockDisplay.className = "mt-1 small fw-bold text-secondary";
+        if (currentVariant) {
+           
+            fetch(`../utils/get_variant_stock.php?id=${currentVariant.variant_id}`)
+            .then(res => res.json())
+            .then(data => {
+                const realStock = data.stock;
+                
+                currentVariant.quantity = realStock; 
+
+                stockDisplay.innerHTML = `<i class="fas fa-box-open me-1"></i> Stock available: ${realStock}`;
+                
+                if (realStock <= 0) {
+                    stockDisplay.className = "mt-1 small fw-bold text-danger";
+                    stockDisplay.innerText = "Out of Stock";
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.innerText = "OUT OF STOCK";
+                } else {
+                    stockDisplay.className = "mt-1 small fw-bold text-secondary";
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.innerText = "ADD TO CART";
+                }
                 validateQty();
-            }
+            });
         }
     }
+}
 
     function changeQty(amount) {
         const qtyInput = document.getElementById('qtyInput');
@@ -226,15 +248,28 @@ $colors = array_unique($colors);
 
         let checkStock = (parseInt(currentVariant.quantity) > 0) ? parseInt(currentVariant.quantity) : 1;
 
-        if (qty > checkStock) {
-            Swal.fire({ 
-                icon: 'error', 
-                title: 'Not Enough Stock', 
-                text: `Available stock is only ${checkStock} units.` 
-            });
-            return;
+     if (qty > checkStock) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Limited Availability',
+        text: `We only have ${checkStock} pieces left in stock for this products.`,
+        
+        customClass: {
+            popup: 'swal-frost-popup',
+            title: 'swal-frost-title',
+            htmlContainer: 'swal-frost-content',
+            confirmButton: 'swal-frost-btn'
+        },
+        buttonsStyling: false,
+        showClass: {
+            popup: 'animate__animated animate__fadeIn' 
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOut'
         }
-
+    });
+    return;
+}
         const formData = new FormData();
         formData.append('variant_id', currentVariant.variant_id);
         formData.append('supplier_id', supplierId);
@@ -278,3 +313,27 @@ $colors = array_unique($colors);
             });
     }
 </script>
+<script>
+function checkCurrentStock(variantId) {
+    if(!variantId) return;
+
+    
+    fetch(`../../frontend/utils/get_variant_stock.php?id=${variantId}`)
+    .then(res => res.json())
+    .then(data => {
+        const stockDisplay = document.querySelector('.stock-display'); 
+        if (stockDisplay) {
+            stockDisplay.innerText = `Stock available: ${data.stock}`;
+            
+           
+            const addToCartBtn = document.querySelector('.add-to-cart-btn');
+            if (data.stock <= 0) {
+                stockDisplay.style.color = 'red';
+                if(addToCartBtn) addToCartBtn.disabled = true;
+            } else {
+                stockDisplay.style.color = '';
+                if(addToCartBtn) addToCartBtn.disabled = false;
+            }
+        }
+    });
+}</script>

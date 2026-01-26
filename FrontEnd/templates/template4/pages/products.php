@@ -1,16 +1,13 @@
 <?php
-// products.php - Modern "Carved" Dark Aesthetic with Search & Radio-Style Color Variants
+// products.php - Fixed Path & Infinite Scroll
 
-// Ensure access context
 if (!isset($supplier_id)) {
     die("Access Denied");
 }
 
-// Check for category filter and search query
 $category_filter = isset($_GET['category_id']) ? $_GET['category_id'] : 'all';
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// HELPER: Map Color Names to Hex Codes
 function getColorHex($colorName)
 {
     $c = strtolower(trim($colorName));
@@ -35,9 +32,7 @@ function getColorHex($colorName)
 ?>
 
 <style>
-    /* ============================================
-       SHARED VARIABLES & LAYOUT
-       ============================================ */
+    /* VARIABLES & LAYOUT */
     :root {
         --bg-color: #0a0a0a;
         --card-bg: #141414;
@@ -46,7 +41,6 @@ function getColorHex($colorName)
         --border-color: #2a2a2a;
         --font-display: 'Helvetica Neue', 'Arial Black', sans-serif;
         --font-body: 'Helvetica', sans-serif;
-        --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .products-page {
@@ -57,7 +51,7 @@ function getColorHex($colorName)
         overflow-x: hidden;
     }
 
-    /* Hero Section */
+    /* Hero & Search */
     .products-hero {
         padding: 120px 0 60px;
         text-align: center;
@@ -68,32 +62,13 @@ function getColorHex($colorName)
         font-size: clamp(3rem, 10vw, 8rem);
         text-transform: uppercase;
         font-weight: 900;
-        letter-spacing: -0.04em;
-        line-height: 0.9;
         margin-bottom: 40px;
-        opacity: 0;
-        animation: fadeUp 1s var(--transition-smooth) forwards;
     }
 
-    @keyframes fadeUp {
-        from {
-            transform: translateY(50px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    /* Search Bar */
     .search-wrapper {
         margin: 0 auto 30px;
         max-width: 500px;
         position: relative;
-        opacity: 0;
-        animation: fadeUp 1s var(--transition-smooth) 0.1s forwards;
         padding: 0 20px;
     }
 
@@ -104,16 +79,13 @@ function getColorHex($colorName)
         border-radius: 50px;
         padding: 15px 50px 15px 25px;
         color: #fff;
-        font-family: var(--font-body);
-        font-size: 1rem;
         outline: none;
-        transition: all 0.3s ease;
+        transition: 0.3s;
     }
 
     .search-input:focus {
         border-color: var(--accent);
         background: rgba(255, 255, 255, 0.05);
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
     }
 
     .search-btn {
@@ -125,23 +97,15 @@ function getColorHex($colorName)
         border: none;
         color: #666;
         cursor: pointer;
-        font-size: 1.2rem;
-        transition: color 0.3s ease;
     }
 
-    .search-btn:hover {
-        color: var(--accent);
-    }
-
-    /* Filter Pills */
+    /* Filters */
     .filter-container {
         display: flex;
         justify-content: center;
         gap: 15px;
         flex-wrap: wrap;
         margin-bottom: 80px;
-        opacity: 0;
-        animation: fadeUp 1s var(--transition-smooth) 0.2s forwards;
     }
 
     .category-btn {
@@ -153,9 +117,8 @@ function getColorHex($colorName)
         text-transform: uppercase;
         font-weight: 700;
         font-size: 0.85rem;
-        letter-spacing: 1px;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: 0.3s;
     }
 
     .category-btn:hover,
@@ -163,22 +126,15 @@ function getColorHex($colorName)
         background: #fff;
         color: #000;
         border-color: #fff;
-        transform: translateY(-2px);
     }
 
-    /* ============================================
-       PRODUCT CARD STYLE
-       ============================================ */
+    /* Product Grid */
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 40px;
         padding: 0 5%;
-        margin-bottom: 100px;
-    }
-
-    .product-card-wrapper {
-        perspective: 1000px;
+        margin-bottom: 50px;
     }
 
     .product-card {
@@ -187,61 +143,33 @@ function getColorHex($colorName)
         overflow: hidden;
         position: relative;
         transition: transform 0.1s ease-out;
-        transform-style: preserve-3d;
         border: 1px solid var(--border-color);
         height: 100%;
         display: flex;
         flex-direction: column;
     }
 
-    /* Glare Effect */
-    .product-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(125deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
-        opacity: 0;
-        transition: opacity 0.3s;
-        pointer-events: none;
-        z-index: 5;
-    }
-
-    .product-card:hover::after {
-        opacity: 1;
-    }
-
-    .product-card:hover {
-        border-color: #444;
-    }
-
-    /* Image */
     .card-image-box {
         position: relative;
         width: 100%;
         aspect-ratio: 1 / 1;
         background: #1a1a1a;
         overflow: hidden;
-        transform: translateZ(20px);
     }
 
     .product-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.7s var(--transition-smooth);
+        transition: transform 0.7s;
     }
 
     .product-card:hover .product-img {
         transform: scale(1.08);
     }
 
-    /* Info */
     .card-info {
         padding: 25px;
-        transform: translateZ(30px);
         display: flex;
         flex-direction: column;
         flex-grow: 1;
@@ -279,7 +207,6 @@ function getColorHex($colorName)
         color: #fff;
     }
 
-    /* Radio Color Options */
     .color-options {
         display: flex;
         gap: 8px;
@@ -289,18 +216,8 @@ function getColorHex($colorName)
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        cursor: pointer;
-        background-clip: content-box;
         padding: 2px;
         border: 1px solid #444;
-        transition: all 0.2s ease;
-        position: relative;
-    }
-
-    .color-dot-radio:hover {
-        border-color: #fff;
-        transform: scale(1.1);
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
     }
 
     .card-link {
@@ -311,290 +228,180 @@ function getColorHex($colorName)
         height: 100%;
         z-index: 10;
     }
-
-    /* Load More */
-    .load-more-container {
-        text-align: center;
-        margin-top: 60px;
-    }
-
-    .magnet-btn-dark {
-        display: inline-block;
-        padding: 20px 50px;
-        background: #1a1a1a;
-        color: #fff;
-        border: 1px solid #333;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
-
-    .magnet-btn-dark:hover {
-        background: #fff;
-        color: #000;
-        border-color: #fff;
-    }
-
-    .magnet-btn-dark:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        hover: none;
-    }
 </style>
 
 <section class="page-content products-page">
-
     <div class="products-hero">
         <h1 class="products-title">The Collection</h1>
 
         <div class="search-wrapper">
-            <form action="" method="GET" class="search-form">
+            <form action="" method="GET">
                 <input type="hidden" name="supplier_id" value="<?= $supplier_id ?>">
                 <input type="hidden" name="page" value="products">
-                <?php if ($category_filter !== 'all'): ?>
-                    <input type="hidden" name="category_id" value="<?= htmlspecialchars($category_filter) ?>">
-                <?php endif; ?>
-
-                <input type="text" name="search" class="search-input"
-                    placeholder="Search products..."
-                    value="<?= htmlspecialchars($search_query) ?>">
-                <button type="submit" class="search-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <?php if ($category_filter !== 'all'): ?><input type="hidden" name="category_id" value="<?= $category_filter ?>"><?php endif; ?>
+                <input type="text" name="search" class="search-input" placeholder="Search..." value="<?= htmlspecialchars($search_query) ?>">
+                <button type="submit" class="search-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
+                    </svg></button>
             </form>
         </div>
 
         <div class="filter-container">
-            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="category-btn <?= $category_filter == 'all' ? 'active' : '' ?>">All Products</a>
+            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="category-btn <?= $category_filter == 'all' ? 'active' : '' ?>">All</a>
             <?php
             $cat_query = mysqli_query($conn, "SELECT * FROM category WHERE supplier_id = $supplier_id ORDER BY category_name ASC");
             while ($cat = mysqli_fetch_assoc($cat_query)) {
                 $cId = $cat['category_id'];
-                $cName = htmlspecialchars($cat['category_name']);
-                $isActive = ($category_filter == $cId) ? 'active' : '';
-                // Append search query to filters so we don't lose the search term when changing categories
-                $searchPart = $search_query ? "&search=" . urlencode($search_query) : "";
-                echo "<a href='?supplier_id=$supplier_id&page=products&category_id=$cId$searchPart' class='category-btn $isActive'>$cName</a>";
+                $active = ($category_filter == $cId) ? 'active' : '';
+                $searchStr = $search_query ? "&search=" . urlencode($search_query) : "";
+                echo "<a href='?supplier_id=$supplier_id&page=products&category_id=$cId$searchStr' class='category-btn $active'>" . htmlspecialchars($cat['category_name']) . "</a>";
             }
             ?>
         </div>
     </div>
 
-    <div class="row product-grid" id="product-grid">
+    <div class="product-grid" id="product-grid">
         <?php
-        // Prepare SQL with Dynamic Parameters
-        $sql = "SELECT p.*, c.category_name 
-                FROM products p 
-                LEFT JOIN category c ON p.category_id = c.category_id 
-                WHERE p.supplier_id = ? AND status = 'available'";
-
+        $sql = "SELECT p.*, c.category_name FROM products p LEFT JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND status = 'available'";
         $types = "i";
         $params = [$supplier_id];
 
-        // Apply Category Filter
         if ($category_filter !== 'all') {
             $sql .= " AND p.category_id = ?";
             $types .= "i";
             $params[] = $category_filter;
         }
-
-        // Apply Search Filter
         if (!empty($search_query)) {
             $sql .= " AND (p.product_name LIKE ? OR p.description LIKE ?)";
             $types .= "ss";
-            $searchTerm = "%" . $search_query . "%";
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
+            $val = "%$search_query%";
+            $params[] = $val;
+            $params[] = $val;
         }
 
         $sql .= " ORDER BY p.created_at DESC LIMIT 9";
-
         $stmt = mysqli_prepare($conn, $sql);
-
-        // Dynamic binding
         mysqli_stmt_bind_param($stmt, $types, ...$params);
-
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
         if (mysqli_num_rows($result) > 0):
             while ($row = mysqli_fetch_assoc($result)):
                 $imgUrl = "../uploads/products/" . $row['product_id'] . "_" . $row['image'];
-                $price = number_format($row['price'], 2);
-                $name = htmlspecialchars($row['product_name']);
-                $catName = htmlspecialchars($row['category_name'] ?? 'Exclusive');
                 $detailLink = "?supplier_id=$supplier_id&page=productdetail&product_id=" . $row['product_id'];
 
-                // FETCH VARIANTS
-                $pId = $row['product_id'];
                 $vStmt = mysqli_prepare($conn, "SELECT DISTINCT color FROM product_variant WHERE product_id = ? AND quantity > 0");
-                mysqli_stmt_bind_param($vStmt, "i", $pId);
+                mysqli_stmt_bind_param($vStmt, "i", $row['product_id']);
                 mysqli_stmt_execute($vStmt);
-                $vResult = mysqli_stmt_get_result($vStmt);
-                $availableColors = [];
-                while ($vRow = mysqli_fetch_assoc($vResult)) $availableColors[] = $vRow['color'];
+                $vRes = mysqli_stmt_get_result($vStmt);
+                $colors = [];
+                while ($c = mysqli_fetch_assoc($vRes)) $colors[] = $c['color'];
         ?>
                 <div class="product-card-wrapper tilt-wrapper">
                     <div class="product-card tilt-element">
                         <a href="<?= $detailLink ?>" class="card-link"></a>
-                        <div class="card-image-box">
-                            <img src="<?= $imgUrl ?>" alt="<?= $name ?>" class="product-img">
-                        </div>
+                        <div class="card-image-box"><img src="<?= $imgUrl ?>" class="product-img"></div>
                         <div class="card-info">
                             <div>
-                                <div class="p-category"><?= $catName ?></div>
-                                <h3 class="p-title"><?= $name ?></h3>
+                                <div class="p-category"><?= htmlspecialchars($row['category_name'] ?? 'Exclusive') ?></div>
+                                <h3 class="p-title"><?= htmlspecialchars($row['product_name']) ?></h3>
                             </div>
-                            <div class="p-footer">
-                                <span class="p-price">$<?= $price ?></span>
-                                <div class="color-options" style="position: relative; z-index: 20;">
-                                    <?php if (empty($availableColors)): ?>
-                                        <span style="font-size:0.8rem; color:#555;">Sold Out</span>
-                                    <?php else: ?>
-                                        <?php foreach ($availableColors as $col):
-                                            $hex = getColorHex($col); ?>
-                                            <div class="color-dot-radio"
-                                                title="<?= htmlspecialchars($col) ?>"
-                                                style="background-color: <?= $hex ?>;">
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
+                            <div class="p-footer"><span class="p-price">$<?= number_format($row['price'], 2) ?></span>
+                                <div class="color-options">
+                                    <?php foreach ($colors as $col): ?><div class="color-dot-radio" style="background:<?= getColorHex($col) ?>"></div><?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            <?php
-            endwhile;
-        else:
-            ?>
-            <div class="col-12 text-center text-muted" style="width: 100%; padding: 50px;">
-                <p>No products found matching your search.</p>
-                <?php if (!empty($search_query)): ?>
-                    <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="magnet-btn-dark" style="margin-top:20px; font-size:0.8rem; padding:10px 30px;">Clear Search</a>
-                <?php endif; ?>
-            </div>
+            <?php endwhile;
+        else: ?>
+            <p style="grid-column: 1/-1; text-align: center; color: #666;">No products found.</p>
         <?php endif; ?>
     </div>
 
     <?php if (mysqli_num_rows($result) >= 9): ?>
-        <div class="load-more-container">
-            <button id="load-more-btn" class="magnet-btn-dark"
-                data-offset="9"
-                data-supplier="<?= $supplier_id ?>"
-                data-category="<?= $category_filter ?>"
-                data-search="<?= htmlspecialchars($search_query) ?>">
-                View More
-            </button>
-        </div>
+        <div id="infinite-scroll-trigger" style="height: 50px; margin-bottom: 50px;"></div>
+        <div id="loading-state" style="text-align: center; display: none; padding: 20px; color: #888;">Loading more...</div>
     <?php endif; ?>
 </section>
 
 <script>
-    // 3D Tilt Logic
+    // 3D Tilt
     document.addEventListener("DOMContentLoaded", function() {
-        const cards = document.querySelectorAll('.tilt-element');
-        cards.forEach(card => attachTilt(card));
-
-        function attachTilt(card) {
-            card.addEventListener('mousemove', handleHover);
-            card.addEventListener('mouseleave', resetCard);
-        }
-
-        function handleHover(e) {
-            const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -5;
-            const rotateY = ((x - centerX) / centerX) * 5;
-            this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-        }
-
-        function resetCard() {
-            this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-        }
-
-        // Expose function for new elements
+        const attachTilt = (card) => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2) * 5;
+                const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2) * -5;
+                this.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${x}deg) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'perspective(1000px) rotate(0) scale(1)';
+            });
+        };
+        document.querySelectorAll('.tilt-element').forEach(attachTilt);
         window.attachTiltToElement = attachTilt;
     });
 
-    // View More Button Functionality
+    // INFINITE SCROLL WITH FIXED PATH
     document.addEventListener("DOMContentLoaded", function() {
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        const productGrid = document.getElementById('product-grid');
+        const trigger = document.getElementById('infinite-scroll-trigger');
+        const loader = document.getElementById('loading-state');
+        const grid = document.getElementById('product-grid');
 
-        if (loadMoreBtn && productGrid) {
-            loadMoreBtn.addEventListener('click', async function() {
-                const offset = parseInt(loadMoreBtn.dataset.offset || 9);
-                const supplierId = loadMoreBtn.dataset.supplier;
-                const categoryFilter = loadMoreBtn.dataset.category || 'all';
-                const searchQuery = loadMoreBtn.dataset.search || '';
+        let offset = 9;
+        const sId = "<?= $supplier_id ?>";
+        const cId = "<?= $category_filter ?>";
+        const search = "<?= htmlspecialchars($search_query) ?>";
+        let isFetching = false,
+            hasMore = true;
 
-                loadMoreBtn.disabled = true;
-                const originalText = loadMoreBtn.textContent;
-                loadMoreBtn.textContent = 'Loading...';
+        const loadMore = async () => {
+            if (isFetching || !hasMore) return;
+            isFetching = true;
+            loader.style.display = 'block';
 
-                try {
-                    const formData = new FormData();
-                    formData.append('offset', offset);
-                    formData.append('supplier_id', supplierId);
-                    if (categoryFilter !== 'all') formData.append('category_id', categoryFilter);
-                    if (searchQuery !== '') formData.append('search', searchQuery);
+            try {
+                const formData = new FormData();
+                formData.append('offset', offset);
+                formData.append('supplier_id', sId);
+                if (cId !== 'all') formData.append('category_id', cId);
+                if (search) formData.append('search', search);
 
-                    // NOTE: Ensure this path is correct for your server
-                    const response = await fetch('/Malltiverse/FrontEnd/templates/template4/fetch_products.php', {
-                        method: 'POST',
-                        body: formData
-                    });
+                // --- FIX IS HERE: ADDED 'partial/' TO PATH ---
+                const response = await fetch('../templates/template4/fetch_products.php', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    const html = await response.text();
+                if (!response.ok) throw new Error('Path incorrect or server error');
 
-                    if (html.trim() === 'NO_MORE' || html.trim() === '') {
-                        loadMoreBtn.textContent = 'No More Products';
-                        loadMoreBtn.disabled = true;
-                    } else {
-                        // Append new items
-                        const temp = document.createElement('div');
-                        temp.innerHTML = html;
-
-                        const newCards = [];
-                        while (temp.firstChild) {
-                            if (temp.firstChild.nodeType === 1) {
-                                newCards.push(temp.firstChild);
-                                productGrid.appendChild(temp.firstChild);
-                            } else {
-                                productGrid.appendChild(temp.firstChild);
-                            }
-                        }
-
-                        // Update offset
-                        loadMoreBtn.dataset.offset = offset + 9;
-                        loadMoreBtn.disabled = false;
-                        loadMoreBtn.textContent = originalText;
-
-                        // Re-attach JS Tilt
-                        if (typeof window.attachTiltToElement === 'function') {
-                            newCards.forEach(wrapper => {
-                                const card = wrapper.querySelector('.tilt-element');
-                                if (card) window.attachTiltToElement(card);
-                            });
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    loadMoreBtn.disabled = false;
-                    loadMoreBtn.textContent = originalText;
+                const html = await response.text();
+                if (html.trim() === 'NO_MORE' || !html.trim()) {
+                    hasMore = false;
+                    loader.innerText = "End of collection";
+                    observer.unobserve(trigger);
+                } else {
+                    grid.insertAdjacentHTML('beforeend', html);
+                    offset += 9;
+                    grid.querySelectorAll('.tilt-element').forEach(window.attachTiltToElement);
+                    loader.style.display = 'none';
                 }
+            } catch (err) {
+                console.error(err);
+                loader.innerText = "Error loading. Check console.";
+            } finally {
+                isFetching = false;
+            }
+        };
+
+        if (trigger) {
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore) loadMore();
             });
+            observer.observe(trigger);
         }
     });
 </script>

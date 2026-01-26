@@ -9,34 +9,69 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $email = $_POST['email'];
     $address = $_POST['address'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Secure hashing
-    $phone = $_POST['phone'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $phone = $_POST['phone'] ?? '';
+    $company_name = $_POST['shopname'];
+    $tags = $_POST['tags'] ?? '';
+    $description = $_POST['shopdescription'] ?? '';
+    $account_number = $_POST['account_number'] ?? '';
+    $template_id = intval($_POST['selected_template']);
+    $primary_color = $_POST['primary'] ?? '#7d6de3';
+    $secondary_color = $_POST['secondary'] ?? '#ff00e6';
+    $banner_type = $_POST['banner_type'] ?? 'image';
+    $months_to_add = intval($_POST['selected_duration']);
+    $renting_price = 1000 * $months_to_add;
 
-    $shopname = $_POST['shopname'];
-    // ... handle other fields and file uploads as per your logic ...
-
-    // 1. INSERT SUPPLIER (Simplified Query - Adjust columns to your actual table)
-    $sql_supplier = "INSERT INTO suppliers (name, email, password, address, phone, shop_name) VALUES (?, ?, ?, ?, ?, ?)";
+    // 1. INSERT SUPPLIER with all fields
+    $sql_supplier = "INSERT INTO suppliers (name, email, password, company_name, tags, description, address, phone, account_number, template_id, renting_price, status) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
     $stmt = $conn->prepare($sql_supplier);
-    $stmt->bind_param("ssssss", $name, $email, $password, $address, $phone, $shopname);
+    $stmt->bind_param("sssssssssids", $name, $email, $password, $company_name, $tags, $description, $address, $phone, $account_number, $template_id, $renting_price);
 
     if ($stmt->execute()) {
-        $new_supplier_id = $conn->insert_id; // Get the ID of the new supplier
+        $new_supplier_id = $conn->insert_id;
 
-        // 2. INSERT RENT DATA
-        // Logic: Paid = Now, Due = Now + X Months, Amount = 1000 * X
-        $months_to_add = intval($_POST['selected_duration']);
-        $total_amount = 1000 * $months_to_add;
+        // 2. Handle file uploads
+        $upload_dir = "../uploads/shops/$new_supplier_id/";
+        if (!file_exists($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
 
+        $logo_name = '';
+        $banner_name = '';
+
+        // Upload logo
+        if (isset($_FILES['logoimage']) && $_FILES['logoimage']['error'] === UPLOAD_ERR_OK) {
+            $logo_ext = pathinfo($_FILES['logoimage']['name'], PATHINFO_EXTENSION);
+            $logo_name = 'logo.' . $logo_ext;
+            move_uploaded_file($_FILES['logoimage']['tmp_name'], $upload_dir . $logo_name);
+        }
+
+        // Upload banner (image or video)
+        if (isset($_FILES['bannerimage']) && $_FILES['bannerimage']['error'] === UPLOAD_ERR_OK) {
+            $banner_ext = pathinfo($_FILES['bannerimage']['name'], PATHINFO_EXTENSION);
+            $banner_name = 'banner.' . $banner_ext;
+            move_uploaded_file($_FILES['bannerimage']['tmp_name'], $upload_dir . $banner_name);
+        }
+
+        // 3. INSERT RENT PAYMENT
         $paid_date = date('Y-m-d');
         $due_date = date('Y-m-d', strtotime("+$months_to_add month"));
+        $total_amount = $renting_price;
 
-        $sql_rent = "INSERT INTO rent_payment (supplier_id, paid_date, due_date, paid_amount, month) VALUES (?, ?, ?, ?, ?)";
+        $sql_rent = "INSERT INTO rent_payments (supplier_id, paid_date, due_date, paid_amount, month) VALUES (?, ?, ?, ?, ?)";
         $stmt_rent = $conn->prepare($sql_rent);
         $stmt_rent->bind_param("issdi", $new_supplier_id, $paid_date, $due_date, $total_amount, $months_to_add);
         $stmt_rent->execute();
 
-        // Redirect to success or login
+        // 4. INSERT SHOP ASSETS
+        $sql_assets = "INSERT INTO shop_assets (supplier_id, logo, banner, primary_color, secondary_color, about, description, template_type) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $about_text = $description;
+        $stmt_assets = $conn->prepare($sql_assets);
+        $stmt_assets->bind_param("isssssss", $new_supplier_id, $logo_name, $banner_name, $primary_color, $secondary_color, $about_text, $description, $banner_type);
+        $stmt_assets->execute();
+
         header("Location: supplierLogin.php?msg=registered");
         exit();
     } else {
@@ -67,6 +102,27 @@ $templateResult = mysqli_query($conn, $templatequery);
 
         .step-3-content h3 {
             margin-bottom: 10px;
+        }
+        
+        .banner-mode-selector label {
+            transition: all 0.3s ease;
+        }
+        
+        .banner-mode-selector input[type="radio"]:checked + label,
+        .banner-mode-selector label:has(input[type="radio"]:checked) {
+            border-color: #7d6de3 !important;
+            background: #f0f0ff;
+        }
+        
+        .banner-upload-box video {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+        
+        .banner-mode-selector label:hover {
+            border-color: #7d6de3;
+            background: #f9f9ff;
         }
     </style>
 </head>
@@ -110,12 +166,30 @@ $templateResult = mysqli_query($conn, $templatequery);
                 </div>
 
                 <div class="step-group" id="step2">
+                    <h3>Shop Details</h3>
+                    
+                    <div class="banner-mode-selector" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Banner Type:</label>
+                        <div style="display: flex; gap: 15px;">
+                            <label style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s;">
+                                <input type="radio" name="banner_type" value="image" checked onchange="toggleBannerType('image')" style="margin-right: 8px;">
+                                <i class="fas fa-image" style="margin-right: 5px;"></i> Image
+                            </label>
+                            <label style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s;">
+                                <input type="radio" name="banner_type" value="video" onchange="toggleBannerType('video')" style="margin-right: 8px;">
+                                <i class="fas fa-video" style="margin-right: 5px;"></i> Video
+                            </label>
+                        </div>
+                    </div>
+                    
                     <div class="shop-visual-header">
-                        <label class="banner-upload-box" for="u_banner">
-                            <span id="banner-ph">Upload Banner</span>
-                            <img id="prev_banner" src="">
+                        <label class="banner-upload-box" for="u_banner" id="banner-label">
+                            <span id="banner-ph">Upload Banner Image</span>
+                            <img id="prev_banner" src="" style="display: none;">
+                            <video id="prev_banner_video" src="" style="display: none; width: 100%; max-height: 200px;"></video>
                         </label>
-                        <input type="file" name="bannerimage" id="u_banner" accept="image/*" onchange="previewImage(this, 'prev_banner')">
+                        <input type="file" name="bannerimage" id="u_banner" accept="image/*,video/*" onchange="previewBanner(this)">
+                        <input type="hidden" name="template_type" id="template_type" value="image">
 
                         <div class="logo-upload-box">
                             <label class="logo-inner" for="u_logo">
@@ -127,10 +201,16 @@ $templateResult = mysqli_query($conn, $templatequery);
                     </div>
 
                     <div class="input-group" style="margin-top: 10px;">
-                        <input type="text" name="shopname" placeholder="Shop Name" required>
+                        <input type="text" name="shopname" placeholder="Company/Shop Name" required>
                     </div>
                     <div class="input-group">
-                        <textarea rows="3" name="shopdescription" placeholder="Shop Description"></textarea>
+                        <input type="text" name="tags" placeholder="Tags (e.g., Fashion, Electronics)" required>
+                    </div>
+                    <div class="input-group">
+                        <textarea rows="3" name="shopdescription" placeholder="Shop Description" required></textarea>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" name="account_number" placeholder="Account Number">
                     </div>
 
                     <div class="btn-row">
@@ -242,6 +322,52 @@ $templateResult = mysqli_query($conn, $templatequery);
                     document.getElementById(imgId).style.display = 'block';
                 }
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function toggleBannerType(type) {
+            const bannerInput = document.getElementById('u_banner');
+            const bannerLabel = document.getElementById('banner-label');
+            const bannerPh = document.getElementById('banner-ph');
+            const templateType = document.getElementById('template_type');
+            
+            templateType.value = type;
+            
+            if (type === 'video') {
+                bannerInput.accept = 'video/*';
+                bannerPh.textContent = 'Upload Banner Video';
+                document.getElementById('prev_banner').style.display = 'none';
+                document.getElementById('prev_banner_video').style.display = 'none';
+            } else {
+                bannerInput.accept = 'image/*';
+                bannerPh.textContent = 'Upload Banner Image';
+                document.getElementById('prev_banner').style.display = 'none';
+                document.getElementById('prev_banner_video').style.display = 'none';
+            }
+        }
+        
+        function previewBanner(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const bannerType = document.querySelector('input[name="banner_type"]:checked').value;
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    if (bannerType === 'video') {
+                        document.getElementById('prev_banner').style.display = 'none';
+                        const videoEl = document.getElementById('prev_banner_video');
+                        videoEl.src = e.target.result;
+                        videoEl.style.display = 'block';
+                        videoEl.controls = true;
+                    } else {
+                        document.getElementById('prev_banner_video').style.display = 'none';
+                        const imgEl = document.getElementById('prev_banner');
+                        imgEl.src = e.target.result;
+                        imgEl.style.display = 'block';
+                    }
+                    document.getElementById('banner-ph').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
             }
         }
 

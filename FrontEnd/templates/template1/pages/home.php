@@ -6,14 +6,16 @@ $supplier_id = (int) ($_GET['supplier_id'] ?? 1);
 ============================= */
 $sql = "
     SELECT 
-        s.company_name,
-        sa.banner,
-        sa.template_type,
-        sa.description
-    FROM suppliers s
-    JOIN shop_assets sa ON sa.supplier_id = s.supplier_id
-    WHERE s.supplier_id = ?
-    LIMIT 1
+    c.company_name,
+    sa.banner,
+    sa.template_type,
+    c.description
+FROM suppliers s
+JOIN companies c ON s.supplier_id = c.supplier_id
+JOIN shop_assets sa ON sa.supplier_id = s.supplier_id
+WHERE s.supplier_id = ?
+LIMIT 1
+ 
 ";
 
 $stmt = $conn->prepare($sql);

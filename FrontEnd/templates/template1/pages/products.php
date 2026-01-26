@@ -57,8 +57,6 @@ mysqli_stmt_close($count_stmt);
                   <span class="card_title"><?= htmlspecialchars($product['product_name']) ?></span>
                   <span class="price">$<?= number_format($product['price'], 2) ?></span>
                 </div>
-                <button class="add-to-cart" data-product-id="<?= $product['product_id'] ?>"
-                  data-supplier-id="<?= $supplier_id ?>" title="Add to cart">+</button>
               </div>
 
               <a class="detail-link"

@@ -21,10 +21,11 @@ if ($supplier_id <= 0) {
 
 // 3. Get supplier + template
 $stmt = mysqli_prepare($conn, "
-    SELECT s.*, t.template_folder
-    FROM suppliers s
-    JOIN templates t ON s.template_id = t.template_id
-    WHERE s.supplier_id = ?
+   SELECT s.*, c.*, t.template_folder
+FROM suppliers s
+JOIN companies c ON s.supplier_id = c.supplier_id
+JOIN templates t ON c.template_id = t.template_id
+WHERE s.supplier_id = ?
 ");
 
 if (!$stmt) {

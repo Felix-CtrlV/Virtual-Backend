@@ -35,9 +35,15 @@ foreach ($bg_allowed_ext as $ext) {
 
 $supplier_stmt = mysqli_prepare(
     $conn,
-    "SELECT company_name, description, email, phone, address 
-     FROM suppliers 
-     WHERE supplier_id = ?"
+    "SELECT 
+    c.company_name,
+    c.description,
+    s.email,
+    c.phone,
+    c.address
+FROM suppliers s
+JOIN companies c ON s.supplier_id = c.supplier_id
+WHERE s.supplier_id = ?"
 );
 
 mysqli_stmt_bind_param($supplier_stmt, "i", $supplier_id);

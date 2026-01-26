@@ -2,7 +2,7 @@
 // PHP Logic for Banner/Video
 // $has_video = !empty($banner_video_url);
 // Fallback texts if variables aren't set
-$company_name = $supplier['company_name'] ?? 'BRAND';
+$company_name = $supplier['company_name'];
 $tagline = $supplier['tagline'] ?? 'Redefine Your Limits.';
 ?>
 

@@ -32,7 +32,7 @@ $message = "";
 
         <div class="right-panel">
             <h1>Login</h1>
-            <p class="sub-text">Doesn't have an account? <a href="supplierRegister.php">Create Account</a></p>
+            <p class="sub-text">Doesn't have an account? <a href="pricing.php">Create Account</a></p>
 
             <p id="message"> <?= $message; ?> </p>
             <form id="loginform" method="POST">
@@ -51,6 +51,10 @@ $message = "";
                     <i id="togglePassword" class="fa-regular fa-eye eye-icon"></i>
                 </div>
                 
+                <div style="text-align: right; margin-bottom: 15px;">
+                    <a href="#" id="forgot-password-link" style="color: #666; text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+                </div>
+                
                 <button type="submit" name="submit" class="submit-btn">Login</button>
             </form>
 
@@ -59,12 +63,25 @@ $message = "";
             </div>
 
             <div class="social-login">
-                <button class="social-btn">
+                <button type="button" class="social-btn" onclick="window.location.href='utils/google_oauth.php?type=supplier'">
                     <i class="fa-brands fa-google" style="color:#DB4437;"></i> Google
                 </button>
-                <button class="social-btn">
+                <button type="button" class="social-btn" onclick="window.location.href='utils/github_oauth.php?type=supplier'">
                     <i class="fa-brands fa-github" style="color:#fff;"></i> GitHub
                 </button>
+            </div>
+            
+            <!-- Forgot Password Modal -->
+            <div id="forgot-password-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: linear-gradient(rgb(111 22 253 / 60%), rgb(73 73 120 / 90%)); padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
+                    <h3 style="margin-top: 0;">Reset Password</h3>
+                    <p id="forgot-message" style="color: #666; font-size: 0.9rem;"></p>
+                    <input type="email" id="forgot-email" placeholder="Enter your email" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="document.getElementById('forgot-password-modal').style.display='none'" style="flex: 1; padding: 10px; background: #f5f5f5; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                        <button onclick="handleForgotPassword()" style="flex: 1; padding: 10px; background: #000; color: white; border: none; border-radius: 5px; cursor: pointer;">Send Reset Link</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -134,6 +151,47 @@ $message = "";
         toggle.classList.toggle('fa-eye');
         toggle.classList.toggle('fa-eye-slash');
     });
+    
+    // Forgot Password
+    document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('forgot-password-modal').style.display = 'flex';
+    });
+    
+    function handleForgotPassword() {
+        const email = document.getElementById('forgot-email').value.trim();
+        const messageEl = document.getElementById('forgot-message');
+        
+        if (!email) {
+            messageEl.textContent = 'Please enter your email';
+            messageEl.style.color = '#d32f2f';
+            return;
+        }
+        
+        fetch('utils/forgot_password.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, type: 'supplier' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                messageEl.textContent = data.message;
+                messageEl.style.color = '#388e3c';
+                document.getElementById('forgot-email').value = '';
+                setTimeout(() => {
+                    document.getElementById('forgot-password-modal').style.display = 'none';
+                }, 2000);
+            } else {
+                messageEl.textContent = data.message;
+                messageEl.style.color = '#d32f2f';
+            }
+        })
+        .catch(err => {
+            messageEl.textContent = 'Error sending reset link. Please try again.';
+            messageEl.style.color = '#d32f2f';
+        });
+    }
         
 </script>
 

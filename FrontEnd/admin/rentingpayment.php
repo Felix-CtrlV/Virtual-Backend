@@ -5,23 +5,53 @@ include("partials/nav.php");
 ?>
 
 <?php
-$activesuppliersquery = "SELECT COUNT(*) AS total_suppliers FROM suppliers where status = 'active';";
+$activesuppliersquery = "SELECT COUNT(*) AS total_company FROM companies where status = 'active';";
 $suppliersresult = mysqli_query($conn, $activesuppliersquery);
 $suppliersrow = mysqli_fetch_assoc($suppliersresult);
 
-$totalsuppliersquery = "SELECT COUNT(*) AS total_suppliers FROM suppliers;";
+$totalsuppliersquery = "SELECT COUNT(*) AS total_company FROM companies;";
 $totalsuppliersresult = mysqli_query($conn, $totalsuppliersquery);
 $totalsuppliersrow = mysqli_fetch_assoc($totalsuppliersresult);
 
-$activesupplierspercent = $suppliersrow['total_suppliers'] / max($totalsuppliersrow['total_suppliers'], 1) * 100;
-
+$activesupplierspercent = $suppliersrow['total_company'] / max($totalsuppliersrow['total_company'], 1) * 100;
 // ...............................................................................................................................
 
 $rentquery = " SELECT
-COUNT(DISTINCT s.supplier_id) AS total_shops, COUNT(DISTINCT CASE WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) AND rp.due_date  >= CURRENT_DATE THEN s.supplier_id END) AS paid_shops,
-ROUND( COUNT(DISTINCT CASE WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) AND rp.due_date  >= CURRENT_DATE THEN s.supplier_id END) * 100.0 / NULLIF(COUNT(DISTINCT s.supplier_id), 0),2) AS payment_percentage,
-COUNT(DISTINCT CASE WHEN rp.due_date < CURRENT_DATE THEN s.supplier_id END) AS overdue_shops,COALESCE(SUM(CASE WHEN rp.paid_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND rp.paid_date <= CURRENT_DATE
-THEN rp.paid_amount END), 0) AS total_collected_amount FROM suppliers s LEFT JOIN rent_payments rp ON rp.supplier_id = s.supplier_id WHERE s.status = 'active';";
+    COUNT(DISTINCT c.company_id) AS total_shops,
+    
+    COUNT(DISTINCT CASE 
+        WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) 
+             AND rp.due_date >= CURRENT_DATE 
+        THEN c.company_id 
+    END) AS paid_shops,
+    
+    ROUND(
+        COUNT(DISTINCT CASE 
+            WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) 
+                 AND rp.due_date >= CURRENT_DATE 
+            THEN c.company_id 
+        END) * 100.0 / NULLIF(COUNT(DISTINCT c.company_id), 0),
+        2
+    ) AS payment_percentage,
+    
+    COUNT(DISTINCT CASE 
+        WHEN rp.due_date < CURRENT_DATE 
+        THEN c.company_id 
+    END) AS overdue_shops,
+    
+    COALESCE(SUM(CASE 
+        WHEN rp.paid_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') 
+             AND rp.paid_date <= CURRENT_DATE
+        THEN rp.paid_amount 
+    END), 0) AS total_collected_amount
+
+FROM suppliers s
+INNER JOIN companies c 
+    ON c.supplier_id = s.supplier_id AND c.status = 'active'
+LEFT JOIN rent_payments rp 
+    ON rp.supplier_id = s.supplier_id
+WHERE s.status = 'active';
+";
 $rentresult = mysqli_query($conn, $rentquery);
 $rentrow = mysqli_fetch_assoc($rentresult);
 
@@ -30,10 +60,33 @@ $totalShops = (int) ($rentrow['total_shops'] ?? 0);
 $unpaidShops = max($totalShops - $paidShops, 0);
 
 $unpaidsuppliers = [];
-$unpaidsql = "SELECT s.supplier_id, s.company_name, s.name, s.email, s.phone, s.renting_price, rp.paid_date AS last_paid_date, rp.due_date AS due_date FROM suppliers s
-LEFT JOIN ( SELECT rp1.* FROM rent_payments rp1 INNER JOIN ( SELECT supplier_id, MAX(paid_date) AS latest_paid FROM rent_payments GROUP BY supplier_id) rp2
-ON rp1.supplier_id = rp2.supplier_id AND rp1.paid_date = rp2.latest_paid) rp ON rp.supplier_id = s.supplier_id WHERE s.status = 'active' AND (
-rp.paid_date IS NULL OR rp.due_date < CURRENT_DATE ) ORDER BY (rp.due_date IS NULL) ASC, rp.due_date ASC LIMIT 8;";
+$unpaidsql = "SELECT 
+    s.supplier_id,
+    c.*,
+    s.name AS supplier_name,
+    s.email,
+    rp.paid_date AS last_paid_date,
+    rp.due_date AS due_date
+FROM suppliers s
+INNER JOIN companies c
+    ON c.supplier_id = s.supplier_id
+LEFT JOIN (
+    SELECT rp1.*
+    FROM rent_payments rp1
+    INNER JOIN (
+        SELECT supplier_id, MAX(paid_date) AS latest_paid
+        FROM rent_payments
+        GROUP BY supplier_id
+    ) rp2
+    ON rp1.supplier_id = rp2.supplier_id 
+       AND rp1.paid_date = rp2.latest_paid
+) rp
+    ON rp.supplier_id = s.supplier_id
+WHERE s.status = 'active'
+  AND c.status = 'active'
+  AND (rp.paid_date IS NULL OR rp.due_date < CURRENT_DATE)
+ORDER BY (rp.due_date IS NULL) ASC, rp.due_date ASC
+LIMIT 8;";
 $unpaidresult = mysqli_query($conn, $unpaidsql);
 if ($unpaidresult) {
     while ($row = mysqli_fetch_assoc($unpaidresult)) {
@@ -42,12 +95,21 @@ if ($unpaidresult) {
 }
 
 $recentpayments = [];
-$recentpaymentssql = "SELECT rp.supplier_id, s.company_name, rp.paid_amount, rp.paid_date, rp.due_date
-    FROM rent_payments rp
-    INNER JOIN suppliers s ON s.supplier_id = rp.supplier_id
-    WHERE s.status = 'active'
-    ORDER BY rp.paid_date DESC
-    LIMIT 10";
+$recentpaymentssql = "SELECT 
+    rp.supplier_id,
+    c.*,
+    rp.paid_amount,
+    rp.paid_date,
+    rp.due_date
+FROM rent_payments rp
+INNER JOIN suppliers s 
+    ON s.supplier_id = rp.supplier_id
+INNER JOIN companies c
+    ON c.supplier_id = s.supplier_id AND c.status = 'active'
+WHERE s.status = 'active'
+ORDER BY rp.paid_date DESC
+LIMIT 10;
+";
 $recentpaymentsresult = mysqli_query($conn, $recentpaymentssql);
 if ($recentpaymentsresult) {
     while ($row = mysqli_fetch_assoc($recentpaymentsresult)) {
@@ -61,12 +123,12 @@ if ($recentpaymentsresult) {
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">Active Suppliers</div>
-                    <div class="card-value"><?= $suppliersrow['total_suppliers'] ?></div>
+                    <div class="card-title">Active Companies</div>
+                    <div class="card-value"><?= $suppliersrow['total_company'] ?></div>
                 </div>
                 <span class="card-chip status-pill status-active">Active</span>
             </div>
-            <div class="card-trend trend-up"><?= $activesupplierspercent ?>% of all suppliers are Active</div>
+            <div class="card-trend trend-up"><?= $activesupplierspercent ?>% of all companies are Active</div>
         </div>
         <div class="card">
             <div class="card-header">
@@ -76,7 +138,7 @@ if ($recentpaymentsresult) {
                 </div>
                 <span class="card-chip">This Month</span>
             </div>
-            <div class="card-trend trend-down"><?= $rentrow['overdue_shops'] ?> overdue shop(s)</div>
+            <div class="card-trend trend-down"><?= $rentrow['overdue_shops'] ?> overdue company(s)</div>
         </div>
         <div class="card">
             <div class="card-header">
@@ -125,7 +187,7 @@ if ($recentpaymentsresult) {
                     <div class="card-value"><?= $unpaidShops ?></div>
                 </div>
                 <a class="btn btn-ghost" href="viewsuppliers.php?adminid=<?= urlencode($adminid) ?>"
-                    style="padding:5px 12px;font-size:11px;">View Suppliers</a>
+                    style="padding:5px 12px;font-size:11px;">View Companies</a>
             </div>
 
             <div style="overflow:auto; height: 170px;">

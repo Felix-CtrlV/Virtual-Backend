@@ -18,7 +18,7 @@ $rentRow = $totalRentPaidStmt->get_result()->fetch_assoc();
 $totalRentPaid = $rentRow['total_paid'] ?? 0;
 $totalRentPaidStmt->close();
 
-$rentprice = "select renting_price from suppliers where supplier_id = ?";
+$rentprice = "select renting_price from companies where supplier_id = ?";
 $rentpriceStmt = $conn->prepare($rentprice);
 $rentpriceStmt->bind_param("i", $supplierid);
 $rentpriceStmt->execute();
