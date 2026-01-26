@@ -1,3 +1,32 @@
+<?php
+// 1. LOGIC: Handle Successful Payment Return
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
+    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+
+    if ($is_ordered) {
+        echo "
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: 'top-end',
+                  showConfirmButton: false,
+                  timer: 3000,
+                  timerProgressBar: true
+                });
+
+                Toast.fire({
+                  icon: 'success',
+                  title: 'Ordered successfully!'
+                }).then(() => {
+                    window.location.href = '?supplier_id=$supplier_id&page=cart';
+                });
+            });
+        </script>";
+    }
+}
+?>
 <link rel="stylesheet" href="../templates/template4/style.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.lordicon.com/lordicon.js"></script>
