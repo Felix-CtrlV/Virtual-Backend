@@ -25,6 +25,8 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  margin-left: 320px;
+  gap: 35px;
 }
 
 .nav-menu li {
@@ -480,7 +482,9 @@
     transparent 65%
   ); */
   pointer-events: none;
-  transition: opacity 0.6s ease, transform 1s ease;
+  transition:
+    opacity 0.6s ease,
+    transform 1s ease;
 }
 
 /* content layer */
@@ -500,7 +504,9 @@
   margin-bottom: 16px;
   opacity: 0;
   animation: softRise 1s ease forwards;
-  transition: transform 0.4s ease, letter-spacing 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    letter-spacing 0.4s ease;
 }
 
 /* TITLE */
@@ -513,7 +519,9 @@
   opacity: 0;
   animation: softRise 1s ease forwards;
   animation-delay: 0.15s;
-  transition: transform 0.4s ease, text-shadow 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    text-shadow 0.4s ease;
 }
 
 /* underline */
@@ -537,7 +545,9 @@
   opacity: 0;
   animation: softRise 1s ease forwards;
   animation-delay: 0.3s;
-  transition: transform 0.4s ease, color 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    color 0.4s ease;
 }
 
 /* =================
@@ -763,6 +773,7 @@
   justify-content: center;
   color: #333;
   transition: color 0.3s ease;
+  left: 55px;
 }
 
 .cart-icon-btn:hover {
@@ -807,7 +818,7 @@
 }
 
 .cart-popup.active::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
@@ -827,18 +838,30 @@
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slideOut {
-  from { transform: translateX(0); }
-  to { transform: translateX(100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .cart-popup-content {
@@ -856,8 +879,12 @@
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .cart-popup-header {
@@ -1160,16 +1187,16 @@
     left: 16px;
     max-width: none;
   }
-  
+
   .custom-confirm-box {
     padding: 24px;
     max-width: 90%;
   }
-  
+
   .confirm-buttons {
     flex-direction: column-reverse;
   }
-  
+
   .confirm-btn-cancel,
   .confirm-btn-ok {
     width: 100%;
