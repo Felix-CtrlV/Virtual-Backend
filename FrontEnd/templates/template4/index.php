@@ -11,7 +11,14 @@ $supplier_id = (int) $_GET['supplier_id'];
 
 $supplier_stmt = mysqli_prepare(
     $conn,
-    "SELECT * FROM suppliers WHERE supplier_id = ? LIMIT 1"
+    "SELECT 
+    s.*,
+    c.*
+FROM suppliers s
+JOIN companies c ON s.supplier_id = c.supplier_id
+WHERE s.supplier_id = ?
+LIMIT 1
+"
 );
 
 mysqli_stmt_bind_param($supplier_stmt, "i", $supplier_id);

@@ -166,6 +166,7 @@ let supplierToDelete = null;
 window.removeItem = function (cartId, supplierId) {
     itemToDelete = cartId;
     supplierToDelete = supplierId;
+    
 
     const modalBtn = document.getElementById('confirmDeleteBtn');
     if (modalBtn) {
