@@ -1,13 +1,14 @@
 <footer class="site-footer">
-    <div class="container">
-        <div class="footer-content">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5><?= htmlspecialchars($supplier['company_name']) ?></h5>
-                    <?php if (!empty($supplier['description'])): ?>
-                        <p><?= htmlspecialchars(substr($supplier['description'], 0, 150)) ?>...</p>
-                    <?php endif; ?>
-                </div>
+    <div class="footer-container">
+        <div class="footer-brand">
+            <div class="logo-box">MALL<span>TIVERSE</span></div>
+                <p>Making the world’s data accessible and useful for teams everywhere.</p>
+                    <div class="social-icons">
+                        <a href="#">𝕏</a>
+                        <a href="#">in</a>
+                        <a href="#">ig</a>
+                    </div>
+            </div>
                 <div class="col-md-4">
                     <h5>Quick Links</h5>
                     <ul class="footer-links">
