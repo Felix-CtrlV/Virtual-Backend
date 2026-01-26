@@ -18,11 +18,24 @@ function isVideoFile($filename)
 
 // Fetch Supplier & Shop Assets Data
 $stmt = $conn->prepare("
-    SELECT s.*, sa.logo, sa.banner, sa.primary_color, sa.secondary_color, 
-           sa.about AS shop_about, sa.description AS shop_description, sa.template_type
-    FROM suppliers s 
-    LEFT JOIN shop_assets sa ON s.supplier_id = sa.supplier_id 
-    WHERE s.supplier_id = ?
+    SELECT 
+    s.*,
+    c.*,
+    c.description AS company_description,
+    sa.logo,
+    sa.banner,
+    sa.primary_color,
+    sa.secondary_color,
+    sa.about AS shop_about,
+    sa.description AS shop_description,
+    sa.template_type
+FROM suppliers s
+LEFT JOIN companies c 
+    ON c.supplier_id = s.supplier_id AND c.status = 'active'
+LEFT JOIN shop_assets sa 
+    ON s.supplier_id = sa.supplier_id
+WHERE s.supplier_id = ?;
+
 ");
 $stmt->bind_param("i", $supplierid);
 $stmt->execute();
@@ -60,24 +73,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // --- A. UPDATE PROFILE ---
     if (isset($_POST['save_profile'])) {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $phone = $_POST['phone'];
-        $address = $_POST['address'];
-        $upd = $conn->prepare("UPDATE suppliers SET name=?, email=?, phone=?, address=? WHERE supplier_id=?");
-        $upd->bind_param("ssssi", $name, $email, $phone, $address, $supplierid);
-        if ($upd->execute()) {
-            $msg = "Profile updated successfully.";
-            $msg_type = "success";
-            $user['name'] = $name;
-            $user['email'] = $email;
-            $user['phone'] = $phone;
-            $user['address'] = $address;
-        } else {
-            $msg = "Error updating profile.";
-            $msg_type = "error";
-        }
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $address = $_POST['address'];
+
+    // 1️⃣ Update suppliers table (name, email)
+    $upd1 = $conn->prepare("UPDATE suppliers SET name=?, email=? WHERE supplier_id=?");
+    $upd1->bind_param("ssi", $name, $email, $supplierid);
+
+    // 2️⃣ Update companies table (phone, address)
+    $upd2 = $conn->prepare("UPDATE companies SET phone=?, address=? WHERE supplier_id=? AND status='active'");
+    $upd2->bind_param("ssi", $phone, $address, $supplierid);
+
+    if ($upd1->execute() && $upd2->execute()) {
+        $msg = "Profile updated successfully.";
+        $msg_type = "success";
+
+        // Update local user array
+        $user['name'] = $name;
+        $user['email'] = $email;
+        $user['phone'] = $phone;
+        $user['address'] = $address;
+    } else {
+        $msg = "Error updating profile.";
+        $msg_type = "error";
     }
+}
+
 
     // --- B. UPDATE COMPANY ---
     if (isset($_POST['save_company'])) {
@@ -821,11 +844,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="segmented-control">
                             <input type="radio" name="media_mode" value="image" id="mode-image"
                                 <?= ($user['template_type'] ?? 'image') == 'image' ? 'checked' : '' ?>>
-                            <label for="mode-image" class="seg-label">Image Mode</label>
+                            <label for="mode-image" class="seg-label" style="margin-bottom: 0px;">Image Mode</label>
 
                             <input type="radio" name="media_mode" value="video" id="mode-video"
                                 <?= ($user['template_type'] ?? '') == 'video' ? 'checked' : '' ?>>
-                            <label for="mode-video" class="seg-label">Video Mode</label>
+                            <label for="mode-video" class="seg-label" style="margin-bottom: 0px;">Video Mode</label>
 
                             <div class="seg-pill"></div>
                         </div>

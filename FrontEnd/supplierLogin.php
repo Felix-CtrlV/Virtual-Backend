@@ -73,7 +73,7 @@ $message = "";
             
             <!-- Forgot Password Modal -->
             <div id="forgot-password-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-                <div style="background: white; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
+                <div style="background: linear-gradient(rgb(111 22 253 / 60%), rgb(73 73 120 / 90%)); padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
                     <h3 style="margin-top: 0;">Reset Password</h3>
                     <p id="forgot-message" style="color: #666; font-size: 0.9rem;"></p>
                     <input type="email" id="forgot-email" placeholder="Enter your email" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">

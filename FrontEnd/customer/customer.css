@@ -1,8 +1,7 @@
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
   background: #05070c;
   color: #e9eefc;
   overflow: hidden;
@@ -14,261 +13,195 @@ body {
   position: relative;
 }
 
+/* --- HUD (Top Bar) --- */
 #hud {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
+  top: 0; left: 0; right: 0;
+  z-index: 20; /* Higher than overlay so login is clickable */
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 14px 14px;
-  pointer-events: none;
+  align-items: center; /* Better alignment */
+  padding: 20px 30px;
+  pointer-events: none; /* Let clicks pass through empty spaces */
 }
 
-#hudLeft {
-  display: grid;
-  gap: 6px;
+#hudLeft, #hudRight, #hudCenter {
+  pointer-events: auto; /* Enable clicks on buttons/text */
 }
 
-#sceneTitle {
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
+#hudLeft { display: grid; gap: 4px; }
+#sceneTitle { font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.9rem;}
+#sceneHint { font-size: 12px; opacity: 0.7; }
 
-#sceneHint {
-  font-size: 13px;
-  opacity: 0.9;
-}
-
+/* --- Search Bar (Hidden by default) --- */
 #hudCenter {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  pointer-events: none;
+  flex: 1; display: flex; justify-content: center; gap: 10px;
 }
-
 #searchContainer {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  pointer-events: auto;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  display: flex; gap: 10px;
+  background: rgba(0,0,0,0.6);
+  padding: 8px; border-radius: 8px;
+  backdrop-filter: blur(5px);
 }
-
-#searchContainer:not([hidden]) {
-  opacity: 1;
-  visibility: visible;
-}
-
 #searchBar {
-  background: rgba(247, 247, 245, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #0b1020;
-  padding: 10px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  width: 300px;
-  backdrop-filter: blur(8px);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: transparent; border: none; color: white;
+  border-bottom: 1px solid #555; padding: 5px; outline: none;
 }
-
-#searchBar::placeholder {
-  color: rgba(11, 16, 32, 0.5);
-}
-
-#searchBar:focus {
-  outline: none;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
-}
-
 #floorSelector {
-  background: rgba(247, 247, 245, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #0b1020;
-  padding: 10px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #222; color: white; border: none; border-radius: 4px;
 }
 
-#floorSelector:focus {
-  outline: none;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
-}
-
+/* --- Auth / Top Right --- */
 #hudRight {
-  pointer-events: auto;
+  display: flex; align-items: center; gap: 15px;
 }
 
+.auth-container {
+    display: flex;
+    align-items: center;
+}
+
+/* Login Button */
+.btn-login-nav {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.85rem;
+    transition: 0.2s;
+    backdrop-filter: blur(4px);
+}
+.btn-login-nav:hover { background: rgba(255,255,255,0.2); }
+
+/* Profile Pill */
+.profile-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 5px 15px 5px 5px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+}
+
+.nav-profile-img {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.profile-name { font-size: 0.85rem; font-weight: 500; margin-right: 5px; }
+
+.btn-logout {
+    background: none; border: none;
+    color: #f87171; cursor: pointer;
+    font-size: 0.9rem; padding: 5px;
+}
+.btn-logout:hover { color: #ef4444; transform: scale(1.1); }
+
+/* Back Button */
 #btnBack {
-  background: rgba(15, 20, 34, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #e9eefc;
-  padding: 10px 10px;
-  border-radius: 12px;
-  cursor: pointer;
-  margin-left: 15px;
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+  color: white; border: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 16px; border-radius: 6px; cursor: pointer;
 }
 
-#btnBack:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-#canvasWrap {
-  position: absolute;
-  inset: 0;
-}
-
-#threeCanvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.postFx {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 6;
-  background:
-    radial-gradient(1200px 700px at 50% 50%, rgba(255,255,255,0.06), rgba(255,255,255,0.0) 55%),
-    radial-gradient(900px 520px at 50% 55%, rgba(0,0,0,0.22), rgba(0,0,0,0.0) 55%),
-    radial-gradient(1200px 900px at 50% 50%, rgba(0,0,0,0.28), rgba(0,0,0,0.0) 65%);
-  mix-blend-mode: multiply;
-  opacity: 0.7;
-}
-
-.postFx::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, rgba(0,0,0,0.0) 2px, rgba(0,0,0,0.0) 3px);
-  opacity: 0.18;
-  mix-blend-mode: multiply;
-}
-
-.postFx::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(900px 600px at 50% 50%, rgba(255,255,255,0.08), rgba(255,255,255,0.0) 60%),
-    radial-gradient(1200px 900px at 50% 50%, rgba(0,0,0,0.32), rgba(0,0,0,0.0) 70%);
-  opacity: 0.35;
-}
-
-.fade {
-  position: absolute;
-  inset: 0;
-  background: #05070c;
-  opacity: 0;
-  transition: opacity 600ms ease;
-  pointer-events: none;
-}
-
-.fade.on {
-  opacity: 1;
-}
-
+/* --- The Overlay (Relayout) --- */
 .overlay {
   position: absolute;
   inset: 0;
-  z-index: 12;
-  display: grid;
-  place-items: center;
-  padding: 28px 18px;
-  background: radial-gradient(1200px 600px at 30% 40%, rgba(255, 255, 255, 0.10), rgba(5, 7, 12, 0.0) 60%),
-    linear-gradient(180deg, rgba(5, 7, 12, 0.10), rgba(5, 7, 12, 0.45));
-  pointer-events: auto;
+  z-index: 10;
+  /* Removed the centered flexbox to allow custom positioning */
+  display: block; 
+  background: radial-gradient(circle at center, transparent 0%, rgba(5,7,12,0.8) 100%);
+  transition: opacity 0.8s ease;
 }
 
 .overlay[hidden] {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.overlayInner {
-  width: min(820px, 100%);
-  padding: 18px 18px;
+/* New Side Panel Layout */
+.overlaySidePanel {
+  position: absolute;
+  bottom: 80px; /* Positioned at bottom left */
+  left: 60px;
+  width: 450px;
+  max-width: 90%;
+  padding: 40px;
+  
+  /* Glassmorphism */
+  background: rgba(5, 7, 12, 0.4); 
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  
+  animation: slideIn 1s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .overlayKicker {
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  font-size: 11px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  opacity: 0.9;
+  color: #38bdf8;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .overlayTitle {
-  margin-top: 14px;
   font-family: "Playfair Display", serif;
-  font-size: clamp(38px, 6vw, 74px);
-  line-height: 0.95;
+  font-size: 3rem; /* Slightly smaller to fit side */
+  line-height: 1;
   font-weight: 600;
-  color: rgba(233, 238, 252, 0.95);
+  color: #fff;
+  margin-bottom: 20px;
 }
 
 .overlayTitleEm {
-  display: inline-block;
   font-style: italic;
-  font-weight: 500;
-  opacity: 0.95;
+  color: #94a3b8;
 }
 
 .overlayDesc {
-  margin-top: 14px;
-  font-size: 14px;
-  line-height: 1.55;
-  max-width: 520px;
-  opacity: 0.9;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(233, 238, 252, 0.8);
+  margin-bottom: 30px;
 }
 
-.overlayCtas {
-  margin-top: 18px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
+/* Buttons */
 .btnPrimary {
-  appearance: none;
-  border: 0;
-  background: rgba(233, 238, 252, 0.92);
-  color: #0b1020;
-  padding: 10px 14px;
-  border-radius: 999px;
+  background: #e9eefc;
+  color: #05070c;
+  border: none;
+  padding: 14px 28px;
+  font-size: 14px;
   font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 4px;
 }
 
 .btnPrimary:hover {
-  background: rgba(233, 238, 252, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(233, 238, 252, 0.4);
 }
 
-.btnGhost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: rgba(233, 238, 252, 0.95);
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  background: rgba(15, 20, 34, 0.35);
-  backdrop-filter: blur(10px);
+/* --- Canvas Wrap --- */
+#canvasWrap {
+  width: 100%; height: 100%;
 }
-
-.btnGhost:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-}
+#threeCanvas { display: block; width: 100%; height: 100%; outline: none; }

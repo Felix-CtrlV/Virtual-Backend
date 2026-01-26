@@ -9,8 +9,12 @@ if (!isset($conn)) {
 
     include '../../../BackEnd/config/dbconfig.php';
 
+
 }
 require_once __DIR__ . '/../../utils/Ordered.php';
+
+    require_once __DIR__ . '/../../utils/colorSwitch.php';
+
 
 // 3. ORDER PROCESSING LOGIC
 $customer_id = $_SESSION['customer_id'] ?? 1; // Use session if available, else 1
@@ -81,6 +85,12 @@ if ($assets_result && mysqli_num_rows($assets_result) > 0) {
 
 }
 
+$primaryColor = $shop_assets['primary_color'];
+$secondaryColor = resolveSecondaryColor(
+    $primaryColor,
+    $shop_assets['secondary_color']
+);
+
 
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
@@ -148,6 +158,7 @@ if (isset($_SESSION['customer_id'])) {
 
 $page_path = __DIR__ . "/pages/$page.php";
 
+
 ?>
 
 
@@ -175,13 +186,8 @@ $page_path = __DIR__ . "/pages/$page.php";
     <style>
         :root {
 
-            --primary:
-                <?= htmlspecialchars($shop_assets['primary_color']) ?>
-            ;
-
-            --secondary:
-                <?= htmlspecialchars($shop_assets['secondary_color']) ?>
-            ;
+        --primary: <?= htmlspecialchars($primaryColor) ?>;
+        --secondary: <?= htmlspecialchars($secondaryColor) ?>;
 
         }
     </style>

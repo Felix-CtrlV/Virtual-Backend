@@ -35,15 +35,18 @@ include("partials/nav.php");
                 <?php
                 $reviewquery = "SELECT 
     r.review_id,
-    s.company_name AS company_name,
-    c.name AS customer_name,
+    c.company_name AS company_name,
+    cu.name AS customer_name,
     r.review,
     r.rating,
     r.created_at
 FROM reviews r
-LEFT JOIN suppliers s ON r.supplier_id = s.supplier_id
-LEFT JOIN customers c ON r.customer_id = c.customer_id
+LEFT JOIN companies c 
+    ON r.supplier_id = c.supplier_id
+LEFT JOIN customers cu 
+    ON r.customer_id = cu.customer_id
 ORDER BY r.created_at DESC;
+
 ";
                 $result = mysqli_query($conn, $reviewquery);
                 while ($row = mysqli_fetch_assoc($result)) {

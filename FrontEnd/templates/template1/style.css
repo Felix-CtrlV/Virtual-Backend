@@ -1,3 +1,11 @@
+
+    :root {
+    --overlay-color: 0, 0, 0;
+    --overlay-opacity: 0.55;
+    --bg-text: #ffffff;
+}
+
+
 html,
 body,
 body.home,
@@ -6,7 +14,7 @@ body.product,
 body.productDetail,
 body.about {
 
-    background-color: rgb(255, 255, 255) !important;
+    background-color: var(--bg-text) !important;
 }
 
 
@@ -23,10 +31,10 @@ body.about {
 .card {
 
     width: 400px;
-height: 500px;
+    height: 500px;
     margin: 20px;
     border-radius: 15px;
-    background-color: white;
+    background-color: var(--bg-text);
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease-in-out;
@@ -59,6 +67,7 @@ height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1.7px solid var(--bg-text);
 }
 
 
@@ -72,7 +81,7 @@ height: 500px;
 
 .site-title {
 
-    color: white;
+    color: var(--bg-text);
     font-size: 1.2rem;
     line-height: 1.1;
 }
@@ -87,7 +96,7 @@ height: 500px;
 
 .main-nav {
 
-    background-color: rgb(149, 157, 171);
+    background-color: var(--secondary);
     display: flex;
     align-items: center;
     top: 0;
@@ -102,15 +111,15 @@ height: 500px;
 
 .main-nav .navbar-nav .nav-link {
 
-    color: white;
+    color: var(--bg-text);
     padding: 15px 25px;
 }
 
 
-
 *,
 
-*:before, *:after {
+*:before,
+*:after {
 
     padding: 0;
     margin: 0;
@@ -122,26 +131,9 @@ height: 500px;
     position: relative;
     text-decoration: none;
     font-family: "Poppins", sans-serif;
-    color: #d0ceceff;
     letter-spacing: 0.5px;
     padding: 0 15px;
-
-}
-
-
-.nav-item {
-
     list-style: none;
-}
-
-
-.nav-link {
-
-    position: relative;
-    padding: 15px 12px;
-    color: #d0cece;
-    text-decoration: none;
-    display: inline-block;
 }
 
 
@@ -153,7 +145,7 @@ height: 500px;
     bottom: 6px;
     width: 60%;
     height: 2px;
-    background: white;
+    background: var(--bg-text);
     transform: translateX(-50%) scaleX(0);
     transition: transform 0.35s ease;
 }
@@ -166,27 +158,11 @@ height: 500px;
 }
 
 
-
-.nav-link:hover {
-
-    color: white;
-}
-
-
-
-
-
-.navbar-toggler {
-
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-
-
 .navbar-toggler-icon {
 
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 
+    filter: brightness(0) saturate(100%) invert(100%);
 }
 
 /* =============================
@@ -229,7 +205,7 @@ height: 500px;
     font-family: 'Bebas Neue', 'Oswald', sans-serif;
     font-size: clamp(3rem, 8vw, 6rem);
     letter-spacing: 0.15em;
-    color: rgb(169, 182, 197);
+    color: var(--secondary);
     display: flex;
     gap: 1.2rem;
     text-transform: uppercase;
@@ -254,7 +230,7 @@ height: 500px;
     margin-top: 1rem;
     font-size: 0.9rem;
     letter-spacing: 0.3em;
-    color: #b5b5b5;
+    color: var(--secondary);
     text-transform: uppercase;
     opacity: 0;
     animation: fadeIn 1s ease forwards;
@@ -485,8 +461,8 @@ ABOUT PAGE STYLES
 
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.55);
-    display: flex;
+    background: rgba(var(--overlay-color), var(--overlay-opacity));
+ display: flex;
     justify-content: center;
     align-items: center;
     padding: 40px;
@@ -498,7 +474,7 @@ ABOUT PAGE STYLES
 
     max-width: 900px;
     text-align: center;
-    color: #ffffff;
+    color: var(--bg-text);
     position: relative;
     z-index: 2;
 }
@@ -515,7 +491,7 @@ ABOUT PAGE STYLES
     font-size: 1.1rem;
     line-height: 1.9;
     margin-bottom: 40px;
-    color: #eaeaea;
+    color: var(--bg-text);
 }
 
 .about-buttons a {
@@ -533,8 +509,8 @@ ABOUT PAGE STYLES
     width: 280px;
     padding: 14px 20px;
     border-radius: 8px;
-    background: rgb(234, 225, 225);
-    color: #60708D;
+    background: var(--bg-text);
+    color: #333;
     font-weight: 600;
     text-decoration: none;
     margin: 0 10px;
@@ -546,8 +522,8 @@ ABOUT PAGE STYLES
 .product-page-btn:hover,
 .contact-page-btn:hover {
 
-    background: #ffffff;
-    color: #2c3e50;
+    background: var(--bg-text);
+    color: var(--secondary);
     transform: translateY(-3px);
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
 }
@@ -581,8 +557,8 @@ CONTACT PAGE STYLES
 
 .contact-card-container {
 
-    width: 85%; 
-    height: 75vh; 
+    width: 85%;
+    height: 75vh;
     display: flex;
     justify-content: center;
 }
@@ -593,10 +569,10 @@ CONTACT PAGE STYLES
     display: flex;
     width: 100%;
     height: 100%;
-    background-color: #fff;
+    background-color: var(--bg-text);
     border-radius: 20px;
-    overflow: hidden; 
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 
 }
 
@@ -608,8 +584,8 @@ CONTACT PAGE STYLES
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: linear-gradient(135deg, #60708d 0%, rgb(149, 157, 171) 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: var(--bg-text);
 }
 
 .contact-header h2 {
@@ -636,14 +612,19 @@ CONTACT PAGE STYLES
 
 
 .info-column h3 {
-    
-    font-size: 15px; font-weight: bold; margin-bottom: 5px; 
+
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 
-.info-column p, .info-column a {
-    
-    font-size: 13px; color: #fff; text-decoration: none; 
+.info-column p,
+.info-column a {
+
+    font-size: 13px;
+    color: var(--bg-text);
+    text-decoration: none;
 }
 
 
@@ -663,10 +644,22 @@ CONTACT PAGE STYLES
 
 @media (max-width: 992px) {
 
-    .contact-card-container { width: 95%; height: auto; }
-    .contact-page { flex-direction: column; }
-    .contact-info-grid { grid-template-columns: 1fr; }
-    .contact-image-container { height: 300px; }
+    .contact-card-container {
+        width: 95%;
+        height: auto;
+    }
+
+    .contact-page {
+        flex-direction: column;
+    }
+
+    .contact-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-image-container {
+        height: 300px;
+    }
 }
 
 
@@ -674,22 +667,8 @@ CONTACT PAGE STYLES
 
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #ededed;
 }
 
-
-.banner {
-
-    width: 100%;
-    height: 70vh;
-    background: linear-gradient(to right, #111, #333);
-    border-bottom-left-radius: 60px;
-    border-bottom-right-radius: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
 
 
 .banner-content {
@@ -772,7 +751,7 @@ CONTACT PAGE STYLES
 
 .category-overlay h3 {
 
-    color: #fff;
+    color: var(--bg-text);
     font-size: 1.2rem;
     margin-bottom: 12px;
 }
@@ -781,7 +760,7 @@ CONTACT PAGE STYLES
 .shop-btn {
 
     padding: 8px 20px;
-    background: #fff;
+    background: var(--bg-text);
     color: #000;
     text-decoration: none;
     border-radius: 20px;
@@ -863,7 +842,7 @@ CONTACT PAGE STYLES
     width: 100%;
     height: 230px;
     border-radius: 14px;
-    background: #e0e0e0;
+    background: var(--bg-text);
     margin-bottom: 0.75rem;
     box-shadow:
 
@@ -890,7 +869,7 @@ CONTACT PAGE STYLES
     display: flex;
     align-items: center;
     justify-content: space-between;
-  padding: 0.5rem;
+    padding: 0.2rem !important;
     border-radius: 12px;
     background: #e0e0e0;
     box-shadow:
@@ -1017,29 +996,13 @@ CONTACT PAGE STYLES
 .detail-link {
 
     text-decoration: none;
-  display: block;
+    display: block;
 }
-
-
-.product body {
-
-    background-color: #cecdcdff;
-}
-
 
 
 .productDetail * {
 
     box-sizing: border-box;
-}
-
-
-body.productDetail {
-
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    color: #2b2b2b;
-    background: #cecdcdff;
 }
 
 
@@ -1076,7 +1039,7 @@ body.productDetail {
 
     padding: 16px;
     border-radius: 18px;
-    background: #e0e0e0;
+    background: var(--bg-text);
     box-shadow:
 
         inset 4px 4px 8px #bebebe,
@@ -1100,7 +1063,7 @@ body.productDetail {
     height: 431px;
     padding: 20px 30px;
     border-radius: 18px;
-    background: #e0e0e0;
+    background: #e0e0e0; /*do not change this*/
     display: flex;
     flex-direction: column;
     box-shadow:
@@ -1209,7 +1172,7 @@ body.productDetail {
 
     display: flex;
     gap: 10px;
- align-items: center;
+    align-items: center;
     margin-top: 6px;
 }
 
@@ -1240,7 +1203,7 @@ body.productDetail {
         -4px -4px 8px #f8f8f8;
 
     transition: all 0.2s ease;
-cursor: pointer;
+    cursor: pointer;
 }
 
 
@@ -1407,7 +1370,7 @@ cursor: pointer;
     width: 100%;
     height: 230px;
     border-radius: 14px;
-    background: #e0e0e0;
+    background: #fffdfd;
     margin-bottom: 0.75rem;
     box-shadow:
 
@@ -1433,7 +1396,7 @@ cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem;
+    padding: 0.2rem;
     border-radius: 12px;
     background: #e0e0e0;
     box-shadow:
@@ -1608,7 +1571,7 @@ REVIEW SECTION======= */
 .single-star {
 
     font-size: 1.2rem;
-    color: #60708d;
+    color: var(--primary);
 }
 
 
@@ -1622,7 +1585,7 @@ REVIEW SECTION======= */
 
 .custom-progress .progress-bar {
 
-    background-color: #60708d;
+    background-color: var(--primary);
     border-radius: 10px;
 }
 
@@ -1637,7 +1600,7 @@ REVIEW SECTION======= */
 
 .average-rating {
 
-    background-color: #fff;
+    background-color: var(--bg-text);
     border: 1px solid #eee;
     border-radius: 12px;
     padding: 30px;
@@ -1648,7 +1611,7 @@ REVIEW SECTION======= */
 .average-rating .stars {
 
     font-size: 2.2rem;
-    color: #60708d;
+    color: var(--primary);
     margin-bottom: 10px;
 }
 
@@ -1680,7 +1643,7 @@ REVIEW SECTION======= */
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 15px;
-    background-color: #fff;
+    background-color: var(--bg-text);
 }
 
 
@@ -1729,9 +1692,10 @@ REVIEW SECTION======= */
 }
 
 
-.svg-star.active .star-fill, .svg-star.selected .star-fill {
+.svg-star.active .star-fill,
+.svg-star.selected .star-fill {
 
-    fill: #60708d;
+    fill: var(--primary);
 }
 
 
@@ -1759,7 +1723,7 @@ REVIEW SECTION======= */
 .review-form .btn-warnin {
 
     color: #eff0f0;
-    background-color: #60708d;
+    background-color: var(--primary);
     border: none;
     font-weight: 600;
     padding: 10px 25px;
@@ -1769,7 +1733,7 @@ REVIEW SECTION======= */
 
 .review-form .btn-warnin:hover {
 
-    background-color: #60708d;
+    background-color: var(--primary);
     color: #eff0f0;
 }
 
@@ -1896,7 +1860,8 @@ REVIEW SECTION======= */
     transform: translateY(-1px);
 }
 
-/*Your Bag container*/
+/*====
+  Bag container ====*/
 
 .cart-sidebar-header {
 
@@ -1969,7 +1934,7 @@ REVIEW SECTION======= */
     right: -450px;
     width: 400px;
     height: 100vh;
-    background: #fff;
+    background: var(--bg-text);
     z-index: 2050;
     transition: all 0.4s ease;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
@@ -2025,7 +1990,7 @@ REVIEW SECTION======= */
     width: 100%;
     padding: 14px;
     background: #000;
-    color: #fff;
+    color: var(--bg-text);
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -2079,7 +2044,7 @@ REVIEW SECTION======= */
 
 #deleteConfirmModal .btn-primary {
 
-    background-color: #2196F3;
+    background-color: var(--primary);
     border: none;
     font-weight: 500;
     padding: 8px 24px;
@@ -2090,7 +2055,7 @@ REVIEW SECTION======= */
 
 #deleteConfirmModal .btn-primary:hover {
 
-    background-color: #1976D2;
+    background-color: #var(--secondary);
 }
 
 
@@ -2185,7 +2150,7 @@ REVIEW SECTION======= */
 .pag-btn.active {
 
     background-color: #333;
-    color: #fff;
+    color: var(--bg-text);
     border-color: #333;
 }
 
@@ -2229,7 +2194,7 @@ REVIEW SECTION======= */
 
 
 .qty-display {
-    
+
     font-size: 16px;
     font-weight: 600;
     min-width: 20px;

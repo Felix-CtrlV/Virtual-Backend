@@ -296,7 +296,6 @@ mysqli_stmt_close($variant_stmt);
                                     class="related_product_card_title"><?= htmlspecialchars($rel_product['product_name']) ?></span>
                                 <span class="related_product_price">$<?= number_format($rel_product['price'], 2) ?></span>
                             </div>
-                            <button class="related_product_add-to-cart" title="Add to cart">+</button>
                         </div>
                         <a class="detail-link"
                             href="?supplier_id=<?= $supplier_id ?>&page=productDetail&product_id=<?= $rel_product['product_id'] ?>">

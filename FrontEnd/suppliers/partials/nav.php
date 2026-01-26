@@ -9,12 +9,9 @@ if (!isset($_SESSION["supplier_logged_in"])) {
 $supplierid = $_SESSION["supplierid"];
 
 // 1. Fetch Supplier & Shop Details
-$stmt = $conn->prepare("SELECT suppliers.*,
-shop_assets.*, products.product_id, products.product_name, products.price,
-product_variant.variant_id, product_variant.size, product_variant.color, product_variant.quantity
-FROM suppliers LEFT JOIN shop_assets ON suppliers.supplier_id = shop_assets.supplier_id
-LEFT JOIN products ON suppliers.supplier_id = products.supplier_id
-LEFT JOIN product_variant ON products.product_id = product_variant.product_id WHERE suppliers.supplier_id = ?");
+$stmt = $conn->prepare("SELECT  s.*, c.company_name, c.description AS company_description, sa.*, p.product_id, p.product_name, p.price, pv.variant_id, pv.size, pv.color, pv.quantity
+FROM suppliers s LEFT JOIN companies c ON c.supplier_id = s.supplier_id LEFT JOIN shop_assets sa ON sa.supplier_id = s.supplier_id LEFT JOIN products p 
+ON p.supplier_id = s.supplier_id LEFT JOIN product_variant pv ON pv.product_id = p.product_id WHERE s.supplier_id = ? AND c.status = 'active';");
 $stmt->bind_param("i", $supplierid);
 $stmt->execute();
 $result = $stmt->get_result();

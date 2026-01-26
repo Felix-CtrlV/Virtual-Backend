@@ -136,7 +136,7 @@ $rentrow = mysqli_fetch_assoc($rentresult);
                 </div>
                 <span class="card-chip"><?= $rentrow['payment_percentage'] ?>% collected</span>
             </div>
-            <div class="card-trend trend-down"><?= $rentrow['overdue_shops'] ?> overdue shop(s)</div>
+            <div class="card-trend trend-down"><?= $rentrow['overdue_shops'] ?> overdue company(s)</div>
         </div>
     </div>
 </section>
