@@ -193,7 +193,7 @@ $total_price = 0;
         gap: 30px;
         margin-top: 40px;
         flex-wrap: wrap;
-        margin-bottom:50px;
+        margin-bottom:80px;
     }
 
     .stat-card {
@@ -1171,7 +1171,7 @@ function initiateRemove(cartId) {
         showConfirmButton: true,
         confirmButtonText: 'UNDO',
         confirmButtonColor: '#6366f1',
-        timer: 5000,
+        timer: 3000,
         timerProgressBar: true
     });
 
