@@ -1,4 +1,6 @@
 <?php
+session_start();
+$isLoggedIn = isset($_SESSION['customer_logged_in']) && $_SESSION['customer_logged_in'] === true;
 // ======================================================
 // SHOP ENTRY POINT WITH GLOBAL LOADING SCREEN (FIXED)
 // ======================================================
@@ -286,11 +288,13 @@ $final_content = preg_replace(
     $final_content,
     1
 );
+$final_js = $loader_js . '<script>const USER_LOGGED_IN = ' . ($isLoggedIn ? 'true' : 'false') . ';</script>';
 
 $final_content = preg_replace(
     '/<\/body>/i',
-    $loader_js . '</body>',
+    $final_js . '</body>',
     $final_content,
     1
 );
+
 echo $final_content;

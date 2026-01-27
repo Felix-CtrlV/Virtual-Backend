@@ -21,16 +21,22 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=home">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=products">Products</a></li>
-                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=review">Review</a></li>
-                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=contact">Contact</a></li>
-                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=about">About</a></li>
+                <li class="nav-item"><a class="nav-link"
+                        href="?supplier_id=<?= $supplier_id ?>&page=products">Products</a></li>
+                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=review">Review</a>
+                </li>
+                <li class="nav-item"><a class="nav-link"
+                        href="?supplier_id=<?= $supplier_id ?>&page=contact">Contact</a></li>
+                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=about">About</a>
+                </li>
                 <li class="nav-item"><a class="nav-link" href="/malltiverse/frontend/customer">Exit</a></li>
-                
+
                 <li class="nav-item ms-lg-3">
-                    <a href="javascript:void(0)" id="cartIconTrigger" class="nav-link position-relative cart-link">
+                    <a href="javascript:void(0)" id="cartIconTrigger" class="nav-link position-relative cart-link"
+                        onclick="<?= $isLoggedIn ? '' : 'showLoginPopup(); event.stopPropagation();' ?>">
                         <i class="bi bi-cart fs-4"></i>
-                        <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count" style="font-size: 0.7rem;"></span>
+                        <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count"
+                            style="font-size: 0.7rem;"></span>
                     </a>
                 </li>
             </ul>

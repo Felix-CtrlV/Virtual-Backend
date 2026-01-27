@@ -1,10 +1,18 @@
 <?php
-if (!isset($conn)) {
-  include '../../../BackEnd/config/dbconfig.php';
+// Ensure session is started (usually done in index.php, but check if needed)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$supplier_id = (int) $supplier['supplier_id'];
+if (!isset($conn)) {
+    include '../../../BackEnd/config/dbconfig.php';
+}
 
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['customer_id']);
+$current_customer_id = $isLoggedIn ? $_SESSION['customer_id'] : null;
+
+$supplier_id = (int) $supplier['supplier_id'];
 // Fetch reviews with customer profile images
 $review_stmt = mysqli_prepare($conn, "
     SELECT r.rating, r.review, r.created_at, c.image 
@@ -36,43 +44,47 @@ mysqli_stmt_close($review_stmt);
 <?php
 // Handle form submission
 if (isset($_POST['submit_review'])) {
+    // SECURITY: Prevent guests from submitting via POST even if they bypass JS
+    if (!$isLoggedIn) {
+        header("Location: customerLogin.php");
+        exit();
+    }
+
     $rating = (int) $_POST['rating'];
     $review_text = trim($_POST['review']);
-    $customer_id = 1; // Replace with actual logged-in user ID if available
+    $customer_id = $current_customer_id; // Use the actual logged-in ID
 
-    // Only proceed if rating is greater than 0 to prevent empty star submissions
     if ($rating > 0 && !empty($review_text)) {
         $insert_stmt = mysqli_prepare($conn, "INSERT INTO reviews (supplier_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
         mysqli_stmt_bind_param($insert_stmt, "iisi", $supplier_id, $customer_id, $review_text, $rating);
         mysqli_stmt_execute($insert_stmt);
         mysqli_stmt_close($insert_stmt);
 
-        // Correct way to refresh: Redirect to the same page to clear POST data
-        header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id);
-        exit(); 
+        header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id . "&page=review");
+        exit();
     }
 }
 ?>
 
 <div class="review-wrapper">
 
-<div class="review-header">
-  <h2 class="company-name">
-    <?= htmlspecialchars($supplier['company_name']) ?>
-  </h2>
+  <div class="review-header">
+    <h2 class="company-name">
+      <?= htmlspecialchars($supplier['company_name']) ?>
+    </h2>
 
-  <?php if (!empty($supplier['description'])): ?>
-    <p class="company-description">
-      <?= htmlspecialchars($supplier['description']) ?>
+    <?php if (!empty($supplier['description'])): ?>
+      <p class="company-description">
+        <?= htmlspecialchars($supplier['description']) ?>
+      </p>
+    <?php endif; ?>
+
+    <div class="review-divider"></div>
+
+    <p class="review-encouragement">
+      Your voice is code. Every review helps us optimize, innovate, and evolve.
     </p>
-  <?php endif; ?>
-
-  <div class="review-divider"></div>
-
-  <p class="review-encouragement">
-    Your voice is code. Every review helps us optimize, innovate, and evolve.
-  </p>
-</div>
+  </div>
 
 
   <!-- REVIEW CONTENT -->
@@ -81,36 +93,37 @@ if (isset($_POST['submit_review'])) {
 
       <!-- Rating Breakdown -->
       <div class="col-md-6 rating-breakdown">
-    <h4>Rating Breakdown</h4>
-    <?php
-    $max_count = max($ratings);
-    $star_names = [5 => 'FIVE', 4 => 'FOUR', 3 => 'THREE', 2 => 'TWO', 1 => 'ONE'];
-    
-    foreach ($star_names as $star => $label):
-        $count = $ratings[$star];
-        $percentage = $total_count > 0 ? ($count / $total_count) * 100 : 0;
-        ?>
-        <div class="rating-row d-flex align-items-center mb-3">
+        <h4>Rating Breakdown</h4>
+        <?php
+        $max_count = max($ratings);
+        $star_names = [5 => 'FIVE', 4 => 'FOUR', 3 => 'THREE', 2 => 'TWO', 1 => 'ONE'];
+
+        foreach ($star_names as $star => $label):
+          $count = $ratings[$star];
+          $percentage = $total_count > 0 ? ($count / $total_count) * 100 : 0;
+          ?>
+          <div class="rating-row d-flex align-items-center mb-3">
             <div class="star-text text-uppercase me-2" style="width: 60px; font-weight: 500;">
-                <?= $label ?>
+              <?= $label ?>
             </div>
-            
+
             <div class="single-star me-3" style="color: var(--primary);">★</div>
-            
+
             <div class="flex-grow-1 mx-2">
-                <div class="progress custom-progress" style="height: 8px; background-color: #7f8a9f44; border-radius: 10px;">
-                    <div class="progress-bar" role="progressbar" 
-                         style="width: <?= $percentage ?>%; background-color: var(--primary); border-radius: 10px;">
-                    </div>
+              <div class="progress custom-progress"
+                style="height: 8px; background-color: #7f8a9f44; border-radius: 10px;">
+                <div class="progress-bar" role="progressbar"
+                  style="width: <?= $percentage ?>%; background-color: var(--primary); border-radius: 10px;">
                 </div>
+              </div>
             </div>
-            
+
             <div class="rating-count ms-3 text-end" style="width: 45px; font-weight: 500;">
-                <?= $count > 1000 ? round($count / 1000, 1) . 'K' : $count ?>
+              <?= $count > 1000 ? round($count / 1000, 1) . 'K' : $count ?>
             </div>
-        </div>
-    <?php endforeach; ?>
-</div>
+          </div>
+        <?php endforeach; ?>
+      </div>
 
       <!-- Average Rating -->
       <div class="col-md-6 text-center average-rating">
@@ -125,36 +138,34 @@ if (isset($_POST['submit_review'])) {
 
     <div class="row mt-5">
       <!-- Recent Feedbacks -->
-       <h4>Recent Feedbacks</h4>
+      <h4>Recent Feedbacks</h4>
       <div class="col-md-6 recent-feedback">
-  
-  <?php foreach ($reviews as $feedback): ?>
-    <div class="feedback-card d-flex align-items-start">
-      
-      <?php 
-        // 1. Get the filename from the 'image' column
-        $user_img = $feedback['image']; 
-        
-        // 2. Define the path to your uploads folder (adjust this path to your actual folder)
-        $upload_path = "../assets/customer_profiles/";
-        
-        // 3. Set the final source: use default if database entry is empty
-        $img_src = (!empty($user_img)) ? $upload_path . $user_img : $upload_path . "user_1_admin.jpg";
-      ?>
 
-      <img src="<?= $img_src ?>" 
-           class="rounded-circle me-3" 
-           alt="User" 
-           style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee;">
-      
-      <div>
-        <strong>Customer</strong><br>
-        <?= str_repeat('★', $feedback['rating']) . str_repeat('☆', 5 - $feedback['rating']) ?><br>
-        <p><?= htmlspecialchars($feedback['review']) ?></p>
+        <?php foreach ($reviews as $feedback): ?>
+          <div class="feedback-card d-flex align-items-start">
+
+            <?php
+            // 1. Get the filename from the 'image' column
+            $user_img = $feedback['image'];
+
+            // 2. Define the path to your uploads folder (adjust this path to your actual folder)
+            $upload_path = "../assets/customer_profiles/";
+
+            // 3. Set the final source: use default if database entry is empty
+            $img_src = (!empty($user_img)) ? $upload_path . $user_img : $upload_path . "user_1_admin.jpg";
+            ?>
+
+            <img src="<?= $img_src ?>" class="rounded-circle me-3" alt="User"
+              style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #eee;">
+
+            <div>
+              <strong>Customer</strong><br>
+              <?= str_repeat('★', $feedback['rating']) . str_repeat('☆', 5 - $feedback['rating']) ?><br>
+              <p><?= htmlspecialchars($feedback['review']) ?></p>
+            </div>
+          </div>
+        <?php endforeach; ?>
       </div>
-    </div>
-  <?php endforeach; ?>
-</div>
       <!-- Add Review Form -->
       <div class="col-md-6 review-form">
         <h4>Add a Review</h4>
@@ -178,7 +189,11 @@ if (isset($_POST['submit_review'])) {
             <label class="form-label">Write Your Review</label>
             <textarea name="review" class="form-control" rows="4" required></textarea>
           </div>
-          <button type="submit" name="submit_review" class="btn btn-warnin">Submit</button>
+          <?php if ($isLoggedIn): ?>
+            <button type="submit" name="submit_review">Submit Review</button>
+          <?php else: ?>
+            <button type="button" onclick="showLoginPopup()">Submit Review</button>
+          <?php endif; ?>
         </form>
       </div>
     </div>
