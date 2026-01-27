@@ -396,7 +396,7 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
     <div class="row reveal-on-scroll">
         <div class="col-12 text-center mb-4">
             <h2 class="text-uppercase fw-bold text-white">Why Choose Us?</h2>
-            <p class="text-muted">The core principles that define our legacy.</p>
+            <p style="color: gray;">The core principles that define our legacy.</p>
         </div>
     </div>
 
