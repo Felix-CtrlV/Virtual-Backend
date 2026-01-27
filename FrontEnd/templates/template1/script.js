@@ -111,7 +111,7 @@ function refreshCartDrawer(supplierId) {
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
                     // Check if stock exists in the item object, otherwise default to a high number or ignore
-                    const availableStock = item.stock !== undefined ? item.stock : 999;
+                    const availableStock = item.availableStock !== undefined ? item.availableStock : 999;
 
                     html += `
                     <div class="cart-item-block mb-4">
@@ -129,6 +129,7 @@ function refreshCartDrawer(supplierId) {
                                     <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, -1, ${supplierId}, ${availableStock})">−</button>
                                     <span class="qty-display">${item.qty}</span>
                                     <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, 1, ${supplierId}, ${availableStock})">+</button>
+                                    console.log("Available Stock:", ${availableStock});
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="fw-bold">$${parseFloat(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>

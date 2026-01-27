@@ -14,7 +14,7 @@ $total = 0;
 
 if ($customer_id > 0 && $supplier_id > 0) {
     // Query using c.supplier_id to match the cart table schema
-    $query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p.product_id, v.color, v.size
+    $query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p.product_id, v.color, v.size, v.quantity as available_stock
               FROM cart c 
               JOIN product_variant v ON c.variant_id = v.variant_id 
               JOIN products p ON v.product_id = p.product_id 
@@ -37,9 +37,10 @@ if ($customer_id > 0 && $supplier_id > 0) {
                 'name'       => $row['product_name'],
                 'price'      => (float) $row['price'],
                 'qty'        => (int) $row['quantity'],
+                'availableStock' => (int) $row['available_stock'],
                 'image'      => $image_url,
                 'color_code' => $row['color'] ?? '',
-                'size'       => $row['size'] ?? ''
+                'size'       => $row['size'] ?? '',
             ];
             $total += ($row['price'] * $row['quantity']);
         }
