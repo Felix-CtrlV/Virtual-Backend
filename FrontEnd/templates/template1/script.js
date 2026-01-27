@@ -129,7 +129,7 @@ function refreshCartDrawer(supplierId) {
                                     <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, -1, ${supplierId}, ${availableStock})">−</button>
                                     <span class="qty-display">${item.qty}</span>
                                     <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, 1, ${supplierId}, ${availableStock})">+</button>
-                                    console.log("Available Stock:", ${availableStock});
+                                   
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="fw-bold">$${parseFloat(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
@@ -245,8 +245,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const errorMsg = urlParams.get('error');
     if (errorMsg) {
         window.showNotification(errorMsg, "danger");
-
-        // URL ထဲက error parameter ကို ဖျောက်ချင်ရင်
         const currentSupplierId = urlParams.get('supplier_id');
         const newUrl = window.location.pathname + (currentSupplierId ? '?supplier_id=' + currentSupplierId : '');
         window.history.replaceState({}, document.title, newUrl);
