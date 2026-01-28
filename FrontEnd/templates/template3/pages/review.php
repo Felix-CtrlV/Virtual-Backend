@@ -1,10 +1,27 @@
 <?php
 include("../../BackEnd/config/dbconfig.php");
 
+// --- 1. START SESSION & CHECK LOGIN ---
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$is_logged_in = isset($_SESSION['customer_id']);
+$current_url = urlencode($_SERVER['REQUEST_URI']);
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
+    // --- 2. BACKEND LOGIN PROTECTION ---
+    // Even if JS is bypassed, prevent Guest from submitting via PHP
+    if (!$is_logged_in) {
+        echo "<script>
+                alert('Please login to submit your review.');
+                window.location.href = '../customerLogin.php?return_url=$current_url';
+              </script>";
+        exit();
+    }
+
     $supplier_id = 1;
-    $customer_id = 1;
+    $customer_id = $_SESSION['customer_id']; // Use actual ID from Session
     $rating = (int) $_POST['rating'];
     $review = trim($_POST['review']);
 
@@ -45,7 +62,6 @@ while ($row = mysqli_fetch_assoc($result)) {
     $rating_counts[$row['rating']]++;
     $total_ratings++;
     $sum_ratings += $row['rating'];
-    $images[] = $row['image'];
 }
 
 $average_rating = $total_ratings > 0
@@ -119,10 +135,8 @@ $average_rating = $total_ratings > 0
                     <div class="comments-list">
                         <?php foreach ($reviews as $r): ?>
                             <div class="comment-item">
-
                                 <div class="user-avatar-circle"
                                     style="background-image: url(../assets/customer_profiles/<?= $r['image'] ?>);">
-                                    <!-- <?= strtoupper(substr($r['name'], 0, 1)) ?> -->
                                 </div>
                                 <div class="comment-content">
                                     <div class="comment-bubble">
@@ -156,7 +170,7 @@ $average_rating = $total_ratings > 0
                             <h3>Add a Review</h3>
                         </header>
 
-                        <form id="reviewForm" method="POST" action="../utils/review.php?supplier_id=<?= $supplier_id ?>">
+                        <form id="reviewForm" method="POST">
                             <div class="textarea-group">
                                 <label>Your Feedback</label>
                                 <textarea name="review" placeholder="Within 400 Characters" maxlength="400" required></textarea>
@@ -169,17 +183,30 @@ $average_rating = $total_ratings > 0
                                 <div class="star-box gray" data-rating="4"><i class="fa-solid fa-star"></i></div>
                                 <div class="star-box gray" data-rating="5"><i class="fa-solid fa-star"></i></div>
                             </div>
-                                <input type="hidden" name="rating" id="selected-rating" value="5">
-                            </div>
-                                <button type="submit" name="submit" class="submit-btn-gradient">SUBMIT</button>
+                            <input type="hidden" name="rating" id="selected-rating" value="5">
+                            <button type="submit" name="submit" class="submit-btn-gradient">SUBMIT</button>
                         </form>
+                    </div>
                 </div>
             </div>
         </div>
 
         <script>
+            // --- 3. FRONTEND LOGIN PROTECTION (JS) ---
+            const isLoggedIn = <?= json_encode($is_logged_in) ?>;
+            const reviewForm = document.getElementById('reviewForm');
             const starBoxes = document.querySelectorAll('.star-box');
             const ratingInput = document.getElementById('selected-rating');
+
+            reviewForm.addEventListener('submit', function(e) {
+                if (!isLoggedIn) {
+                    // Stop the form from submitting
+                    e.preventDefault(); 
+                    alert("Please login to submit your review.");
+                    // Redirect to login page with return URL
+                    window.location.href = `../customerLogin.php?return_url=${encodeURIComponent(window.location.href)}`;
+                }
+            });
 
             starBoxes.forEach(box => {
                 box.addEventListener('click', () => {

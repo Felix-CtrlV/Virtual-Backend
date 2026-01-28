@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include("../../BackEnd/config/dbconfig.php");
 
 $product_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -44,90 +48,178 @@ while ($row = mysqli_fetch_assoc($result2)) {
         $sizes[] = $row['size'];
     }
 }
+
+// Login Status
+$isLoggedIn = isset($_SESSION['customer_id']) ? 'true' : 'false';
+$currentUrl = urlencode($_SERVER['REQUEST_URI']);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <title><?= htmlspecialchars($product['product_name']) ?></title>
     <link rel="stylesheet" href="../css/product_detail.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* Existing Styles */
         .qty-error { color: #ff4d4d; font-size: 0.9rem; margin-top: 8px; display: none; font-weight: 600; }
         .add-cart:disabled { background-color: #d1d1d1 !important; cursor: not-allowed; opacity: 0.7; }
         .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }
-
-        .cart-modal-overlay {
+        
+        /* Success Modal */
+        .cart-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .cart-modal { background: white; padding: 40px; border-radius: 10px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease; }
+        .success-icon { width: 80px; height: 80px; background-color: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }         
+        .success-icon::after { content: ''; width: 60px; height: 60px; background-color: #2196f3; border-radius: 50%; position: absolute; }
+        .success-icon i { color: white; font-size: 30px; z-index: 1; }
+        .login-prompt-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none; /* Hidden by default */
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); 
+            display: none;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 10001;
+            backdrop-filter: blur(8px);
         }
-        .cart-modal {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            text-align: center;
+
+        .login-prompt-card {
+            background: rgba(255, 255, 255, 0.1);
+            width: 100%;
             max-width: 400px;
-            width: 90%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            animation: fadeIn 0.3s ease;
+            padding: 45px 35px;
+            border-radius: 24px;
+            text-align: center;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.2);
         }
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #e3f2fd;
-            border-radius: 50%;
+
+        .login-prompt-card h2 { 
+            color: #ffffff;
+            font-size: 30px; 
+            margin-bottom: 12px; 
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-prompt-card p { 
+            color: #ffffff;
+            opacity: 0.9;
+            margin-bottom: 35px; 
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .divider-container {
+            color: #ffffff;
+            font-weight: 500;
+            opacity: 0.7;
+        }
+        .divider-container::before, .divider-container::after {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .close-login {
+            color: #ffffff;
+            opacity: 0.8;
+            font-size: 28px;
+        }
+        .close-login:hover {
+            opacity: 1;
+        }
+
+        .btn-login-alt { 
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-login-alt:hover { 
+            background: #ffffff;
+            color: #000000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-create-alt { 
+            background: transparent; 
+            color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+        }
+
+        .btn-create-alt:hover { 
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .close-login {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .divider-container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            position: relative;
-        }        
-        .success-icon::after {
-            content: '';
-            width: 60px;
-            height: 60px;
-            background-color: #2196f3;
-            border-radius: 50%;
-            position: absolute;
-        }
-        .success-icon i {
-            color: white;
-            font-size: 30px;
-            z-index: 1;
-        }
-        .cart-modal h2 {
-            font-family: 'Inter', sans-serif;
-            color: #000;
+            text-align: center;
+            margin: 25px 0;
+            color: #555;
+            font-size: 13px;
             font-weight: 600;
-            font-size: 1.5rem;
-            letter-spacing: 0.1px;
-            margin-top: 0;
-            margin-bottom: 15px;
         }
-        .cart-modal p {
-            color: #333;
-            font-size: 1.1rem;
+        .divider-container::before, .divider-container::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #333;
         }
-        @keyframes fadeIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .divider-container:not(:empty)::before { margin-right: 15px; }
+        .divider-container:not(:empty)::after { margin-left: 15px; }
+
+        .modal-action-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
         }
+        .btn-login-alt { background-color: #333; color: white; }
+        .btn-login-alt:hover { background-color: #444; }
+        .btn-create-alt { background-color: transparent; color: white; border: 1px solid #444; }
+        .btn-create-alt:hover { background-color: #222; }
+
+        @keyframes fadeIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 
 <body>
+    <div class="login-prompt-overlay" id="loginPromptModal">
+        <div class="login-prompt-card">
+            <span class="close-login" onclick="toggleLoginModal(false)">&times;</span>
+            <h2>Log back in</h2>
+            <p>Choose an account to continue.</p>
+            
+            <div class="divider-container">OR</div>
+
+            <div class="modal-buttons">
+                <a href="../customerLogin.php?return_url=<?= $currentUrl ?>" class="modal-action-btn btn-login-alt">Log in to another account</a>
+                <a href="../customerRegister.php" class="modal-action-btn btn-create-alt">Create account</a>
+            </div>
+        </div>
+    </div>
+
     <div class="cart-modal-overlay" id="cartModal">
         <div class="cart-modal">
-            <div class="success-icon">
-                <i class="fas fa-check"></i>
-            </div>
+            <div class="success-icon"><i class="fas fa-check"></i></div>
             <h2>Added to Cart</h2>
             <p>The item has been added.</p>
         </div>
@@ -175,7 +267,7 @@ while ($row = mysqli_fetch_assoc($result2)) {
                             <input type="number" name="qty" id="qtyInput" value="1" min="1">
                             <button type="button" onclick="adjustQty(1)">+</button>
                         </div>
-                        <span id="qtyErrorMessage" class="qty-error">Quantity is out of our stock!</span>
+                        <span id="qtyErrorMessage" class="qty-error">Quantity is out of stock!</span>
                     </div>
                 </div>
 
@@ -186,128 +278,143 @@ while ($row = mysqli_fetch_assoc($result2)) {
                 </div>
             </form>
 
-            <p class="shipping">Standard delivery in 2–4 days or Premium delivery in 2–4 hours</p>
         </div>
     </div>
 
     <script>
-        const allVariants = <?= json_encode($variants) ?>;
-        const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>;        
-        const colorInputs = document.querySelectorAll('input[name="color"]');
-        const sizeSelect = document.getElementById('sizeSelect');
-        const qtyInput = document.getElementById('qtyInput');
-        const addToCartBtn = document.getElementById('addToCartBtn');
-        const qtyErrorMessage = document.getElementById('qtyErrorMessage');
-        const stockDisplay = document.getElementById('stockDisplay');
-        const cartModal = document.getElementById('cartModal');
+    const customerId = <?= isset($_SESSION['customer_id']) ? $_SESSION['customer_id'] : 0 ?>;
+    const ADD_TO_CART_API = "../utils/add_to_cart.php";
+    const allVariants = <?= json_encode($variants) ?>;
+    const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>; 
+    
+    const colorInputs = document.querySelectorAll('input[name="color"]');
+    const sizeSelect = document.getElementById('sizeSelect');
+    const qtyInput = document.getElementById('qtyInput');
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const qtyErrorMessage = document.getElementById('qtyErrorMessage');
+    const stockDisplay = document.getElementById('stockDisplay');
+    const cartModal = document.getElementById('cartModal');
+    const loginPromptModal = document.getElementById('loginPromptModal');
 
-        let currentVariant = null;
+    let currentVariant = null;
 
-        colorInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                const selectedColor = e.target.value;
-                const filtered = allVariants.filter(v => v.color === selectedColor);
+    function toggleLoginModal(show) {
+        loginPromptModal.style.display = show ? 'flex' : 'none';
+    }
 
-                sizeSelect.innerHTML = '<option value="">Select Size</option>';
-                sizeSelect.disabled = false;
-                stockDisplay.textContent = '';
-                resetFormState();
+    colorInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+            const selectedColor = e.target.value.toString().trim().toLowerCase();
+            const filtered = allVariants.filter(v => v.color.toString().trim().toLowerCase() === selectedColor);
 
+            sizeSelect.innerHTML = '<option value="">Select Size</option>';
+            sizeSelect.disabled = false;
+            stockDisplay.textContent = '';
+            qtyInput.value = 1;
+            qtyErrorMessage.style.display = 'none';
+            currentVariant = null;
+            addToCartBtn.disabled = true;
+
+            if (filtered.length === 0) {
+                sizeSelect.innerHTML = '<option value="">No sizes available</option>';
+                sizeSelect.disabled = true;
+            } else {
                 filtered.forEach(v => {
                     const option = document.createElement('option');
                     option.value = v.size;
-                    option.textContent = `${v.size} ${v.quantity <= 0 ? '(Out of Stock)' : ''}`;
-                    if(v.quantity <= 0) option.disabled = true;
+                    const stockQty = parseInt(v.quantity) || 0;
+                    const isOutOfStock = stockQty <= 0;
+                    option.textContent = `${v.size} ${isOutOfStock ? '(Out of Stock)' : ''}`;
+                    if (isOutOfStock) option.disabled = true;
                     sizeSelect.appendChild(option);
                 });
-            });
-        });
-
-        sizeSelect.addEventListener('change', (e) => {
-            const selectedColor = document.querySelector('input[name="color"]:checked').value;
-            const selectedSize = e.target.value;
-
-            currentVariant = allVariants.find(v => v.color === selectedColor && v.size === selectedSize);
-
-            if (currentVariant) {
-                stockDisplay.textContent = `Stock available: ${currentVariant.quantity}`;
-                validateStock(); 
             }
         });
+    });
 
-        qtyInput.addEventListener('input', validateStock);
+    sizeSelect.addEventListener('change', (e) => {
+        const checkedColorInput = document.querySelector('input[name="color"]:checked');
+        if (!checkedColorInput) return;
 
-        function validateStock() {
-            if (!currentVariant) return;
+        const selectedColor = checkedColorInput.value.toString().trim().toLowerCase();
+        const selectedSize = e.target.value;
 
-            const requestedQty = parseInt(qtyInput.value) || 0;
-            const maxStock = parseInt(currentVariant.quantity);
+        currentVariant = allVariants.find(v => 
+            v.color.toString().trim().toLowerCase() === selectedColor && 
+            v.size.toString() === selectedSize.toString()
+        );
 
-            if (requestedQty > maxStock) {
-                qtyErrorMessage.style.display = 'block';
-                addToCartBtn.disabled = true;
-            } else {
-                qtyErrorMessage.style.display = 'none';
-                addToCartBtn.disabled = false;
-            }
+        if (currentVariant) {
+            stockDisplay.textContent = `Stock available: ${currentVariant.quantity}`;
+            validateStock(); 
+        } else {
+            stockDisplay.textContent = '';
+            addToCartBtn.disabled = true;
         }
+    });
 
-        function resetFormState() {
-            qtyInput.value = 1;
+    function validateStock() {
+        if (!currentVariant) return;
+        const requestedQty = parseInt(qtyInput.value) || 0;
+        const availableQty = parseInt(currentVariant.quantity) || 0;
+
+        if (requestedQty > availableQty) {
+            qtyErrorMessage.textContent = `Only ${availableQty} items available.`;
+            qtyErrorMessage.style.display = 'block';
+            addToCartBtn.disabled = true;
+        } else if (requestedQty < 1) {
+            addToCartBtn.disabled = true;
+        } else {
             qtyErrorMessage.style.display = 'none';
             addToCartBtn.disabled = false;
-            currentVariant = null;
+        }
+    }
+
+    function adjustQty(amount) {
+        let val = parseInt(qtyInput.value) || 1;
+        let newVal = val + amount;
+        if (newVal >= 1) {
+            qtyInput.value = newVal;
+            validateStock();
+        }
+    }
+
+    document.getElementById('addToCartForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Check Login Status - Trigger Modal instead of Alert
+        if (!customerId || customerId === 0) {
+            toggleLoginModal(true);
+            return;
         }
 
-        function adjustQty(amount) {
-            let val = parseInt(qtyInput.value) || 1;
-            let newVal = val + amount;
-            if (newVal >= 1) {
-                qtyInput.value = newVal;
-                validateStock();
+        if (!currentVariant) {
+            alert("Please select both color and size.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('variant_id', currentVariant.variant_id);
+        formData.append('supplier_id', supplierId);
+        formData.append('quantity', qtyInput.value);
+
+        fetch(ADD_TO_CART_API, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                cartModal.style.display = 'flex';
+                setTimeout(() => { cartModal.style.display = 'none'; }, 2000);
+            } else {
+                alert(data.message || "Error adding to cart");
             }
-        }
-        function showSuccessModal() {
-            cartModal.style.display = 'flex';
-            setTimeout(() => {
-                cartModal.style.display = 'none';
-            }, 2500);
-        }
-        cartModal.addEventListener('click', (e) => {
-            if(e.target === cartModal) cartModal.style.display = 'none';
+        })
+        .catch(err => {
+            console.error('Error:', err);
         });
-
-        document.getElementById('addToCartForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!currentVariant) {
-                alert("Please select color and size.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('variant_id', currentVariant.variant_id);
-            formData.append('supplier_id', supplierId);
-            formData.append('quantity', qtyInput.value);
-
-            fetch('../utils/add_to_cart.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    showSuccessModal();
-                } else {
-                    alert("Error: " + (data.message || "Something went wrong"));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("System error. Check console.");
-            });
-        });
-    </script>
+    });
+</script>
 </body>
-
 </html>
