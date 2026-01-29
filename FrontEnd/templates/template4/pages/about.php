@@ -27,11 +27,20 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    body {
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    /* --- GLOBAL FIXES FOR GAP/OVERFLOW --- */
+    html, body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden; /* Critical: Hides the horizontal scrollbar */
         background-color: var(--bg-color);
         color: var(--text-main);
         font-family: var(--font-body);
-        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
     }
 
     /* --- ANIMATIONS --- */
@@ -49,12 +58,13 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
     /* --- TYPOGRAPHY --- */
     .display-header {
         font-family: var(--font-display);
-        font-size: clamp(3rem, 6vw, 5rem);
+        font-size: clamp(2.5rem, 6vw, 5rem);
         font-weight: 900;
         text-transform: uppercase;
-        line-height: 0.9;
+        line-height: 1.1;
         margin-bottom: 30px;
         color: #fff;
+        word-wrap: break-word; /* Prevents long words from breaking layout */
     }
 
     .section-label {
@@ -71,11 +81,13 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
     .about-header-section {
         padding: 120px 0 80px;
         position: relative;
+        width: 100%; /* Ensure it fits container */
+        overflow: hidden; /* Double safety to clip any rogue elements */
     }
 
     /* --- SPLIT CONTENT --- */
     .story-text {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         line-height: 1.7;
         color: var(--text-muted);
         font-weight: 300;
@@ -86,29 +98,10 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         font-weight: 600;
     }
 
-    .about-image-wrapper {
-        position: relative;
-        border-radius: 20px;
-        overflow: hidden;
-        border: 1px solid #333;
-    }
-
-    .about-image-wrapper img {
-        width: 100%;
-        height: auto;
-        display: block;
-        filter: grayscale(100%) contrast(1.1);
-        transition: filter 0.5s ease;
-    }
-
-    .about-image-wrapper:hover img {
-        filter: grayscale(0%) contrast(1);
-    }
-
     /* --- BENTO GRID (Values) --- */
     .values-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 20px;
         margin-top: 50px;
     }
@@ -120,6 +113,7 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         border: 1px solid #222;
         transition: transform 0.3s ease, border-color 0.3s ease;
         text-align: left;
+        height: 100%; 
     }
 
     .value-card:hover {
@@ -149,6 +143,10 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         border-bottom: 1px solid #222;
         padding: 60px 0;
         margin: 80px 0;
+        width: 100vw; /* Stretch full width */
+        margin-left: calc(-50vw + 50%); /* Center strictly */
+        margin-right: calc(-50vw + 50%);
+        background: var(--bg-color); /* Ensure background covers the gap */
     }
 
     .stat-item {
@@ -158,7 +156,7 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
     .stat-number {
         display: block;
         font-family: var(--font-display);
-        font-size: 3.5rem;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
         color: #fff;
         line-height: 1;
     }
@@ -184,6 +182,7 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         text-decoration: none;
         transition: all 0.3s ease;
         border: 1px solid #fff;
+        white-space: nowrap;
     }
 
     .magnet-btn:hover {
@@ -192,44 +191,45 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         transform: translateY(-3px);
     }
 
+    /* --- REACTOR 3D CONTAINER (FIXED CLIPPING) --- */
     .reactor-container {
         position: relative;
         width: 100%;
-        height: 100%;
         min-height: 500px;
-        /* Tall canvas for 3D effect */
         background: #050505;
         border-radius: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
+        
+        /* STRICT CLIPPING FIXES */
+        overflow: hidden; 
+        transform: translate3d(0,0,0); /* Force hardware accel to respect overflow */
+        -webkit-mask-image: -webkit-radial-gradient(white, black); /* Webkit fix for radius clipping */
+        
         border: 1px solid #222;
         box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
         perspective: 1000px;
-        /* Essential for 3D depth */
     }
 
     /* Moving Cyber Grid Floor */
     .cyber-grid {
         position: absolute;
-        width: 300%;
-        height: 300%;
+        width: 200%; /* Reduced from 300% to help performance */
+        height: 200%;
         top: -50%;
-        left: -100%;
+        left: -50%;
         background-image:
             linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
         background-size: 50px 50px;
         transform: rotateX(70deg);
-        /* Flattens it into a floor */
         animation: grid-scroll 10s linear infinite;
         z-index: 1;
         mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 70%);
-        /* Fade edges */
+        pointer-events: none; /* Prevent interference */
     }
 
-    /* Glowing Orb Background */
     .glow-core {
         position: absolute;
         width: 300px;
@@ -240,13 +240,15 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         animation: pulse-glow 4s ease-in-out infinite;
     }
 
-    /* Rotating Rings */
     .orbit-ring {
         position: absolute;
         border-radius: 50%;
         border: 1px solid rgba(255, 255, 255, 0.08);
         z-index: 3;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.02);
+        max-width: 85%; /* Tighter constraint for mobile */
+        max-height: 85%;
+        pointer-events: none;
     }
 
     .orbit-ring img {
@@ -257,7 +259,6 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         width: 380px;
         height: 380px;
         border-left: 2px solid var(--accent);
-        /* Uses your PHP accent color */
         animation: spin-3d 12s linear infinite;
     }
 
@@ -275,7 +276,6 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         animation: spin-3d 6s linear infinite;
     }
 
-    /* Floating Logo */
     .levitating-logo {
         position: relative;
         z-index: 10;
@@ -285,65 +285,125 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
         animation: levitate 5s ease-in-out infinite;
     }
 
-
-
     /* Animation Keyframes */
     @keyframes grid-scroll {
-        0% {
-            transform: rotateX(70deg) translateY(0);
-        }
-
-        100% {
-            transform: rotateX(70deg) translateY(50px);
-        }
+        0% { transform: rotateX(70deg) translateY(0); }
+        100% { transform: rotateX(70deg) translateY(50px); }
     }
 
     @keyframes spin-3d {
-        0% {
-            transform: rotate(0deg) rotateX(10deg);
-        }
-
-        100% {
-            transform: rotate(360deg) rotateX(10deg);
-        }
+        0% { transform: rotate(0deg) rotateX(10deg); }
+        100% { transform: rotate(360deg) rotateX(10deg); }
     }
 
     @keyframes spin-reverse {
-        0% {
-            transform: rotate(360deg);
-        }
-
-        100% {
-            transform: rotate(0deg);
-        }
+        0% { transform: rotate(360deg); }
+        100% { transform: rotate(0deg); }
     }
 
     @keyframes levitate {
-
-        0%,
-        100% {
-            transform: translateY(0) scale(1);
-        }
-
-        50% {
-            transform: translateY(-20px) scale(1.05);
-        }
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-20px) scale(1.05); }
     }
 
     @keyframes pulse-glow {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
 
-        0%,
-        100% {
-            opacity: 0.5;
-            transform: scale(1);
+    /* ============================
+       RESPONSIVE MEDIA QUERIES
+       ============================ */
+
+    @media (max-width: 991px) {
+        .about-header-section {
+            padding: 90px 0 60px;
         }
-
-        50% {
-            opacity: 1;
-            transform: scale(1.2);
+        .story-text {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        .reactor-container {
+            min-height: 450px;
+            margin-top: 30px; 
         }
     }
-</style>
+
+    @media (max-width: 768px) {
+        .display-header {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 20px;
+        }
+        .reactor-container {
+            min-height: 400px;
+            margin-bottom: 30px;
+        }
+        .glow-core { width: 220px; height: 220px; }
+        .ring-outer { width: 320px; height: 320px; }
+        .ring-middle { width: 240px; height: 240px; }
+        .ring-inner { width: 160px; height: 160px; }
+        .levitating-logo { max-width: 130px; }
+        .values-grid {
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .value-card { padding: 30px; }
+        .stats-strip {
+            padding: 40px 0;
+            margin: 50px 0;
+        }
+        .magnet-btn {
+            width: 100%;
+            text-align: center;
+            padding: 15px 20px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .about-header-section {
+            padding: 60px 0 40px;
+            /* Ensure section handles overflow internally */
+            overflow: hidden; 
+        }
+        .story-text {
+            font-size: 1rem;
+            text-align: left; 
+        }
+        .reactor-container {
+            min-height: 350px;
+            /* Ensure container doesn't exceed view width minus padding */
+            width: 100%;
+        }
+        .glow-core { width: 180px; height: 180px; }
+        /* Tighter constraints for rings on small phones */
+        .ring-outer { width: 260px; height: 260px; }
+        .ring-middle { width: 190px; height: 190px; }
+        .ring-inner { width: 120px; height: 120px; }
+        .levitating-logo { max-width: 100px; }
+        
+        .stats-strip .stat-item {
+            width: 100%;
+            margin-bottom: 30px;
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        .stats-strip .stat-item:last-child {
+            margin-bottom: 0;
+        }
+        .stats-strip .row {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .display-header { font-size: 2rem; }
+        .reactor-container { min-height: 280px; }
+        .ring-outer { width: 230px; height: 230px; }
+        .ring-middle { width: 160px; height: 160px; }
+        .ring-inner { width: 100px; height: 100px; }
+        .levitating-logo { max-width: 80px; }
+        .value-card { padding: 20px; }
+    }
 </style>
 
 <div class="container about-header-section">
@@ -389,7 +449,6 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <div class="container py-5">
@@ -465,7 +524,6 @@ $accent_color = $shop_assets['primary_color'] ?? '#D4AF37'; // Use DB color or G
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Shared Intersection Observer for Scroll Animations
         const observerOptions = {
             threshold: 0.1
         };
