@@ -20,6 +20,19 @@ require_once __DIR__ . '/../../utils/Ordered.php';
 $customer_id = $_SESSION['customer_id'] ?? 1; // Use session if available, else 1
 $supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
+$company_query = mysqli_prepare($conn, "select * from companies where supplier_id = ?");
+if($company_query){
+    mysqli_stmt_bind_param($company_query, "i", $supplier_id);
+    mysqli_stmt_execute($company_query);
+    $company_result = mysqli_stmt_get_result($company_query);
+}else{
+    $company_result = false;
+}
+
+$company_row = mysqli_fetch_assoc($company_result);
+$company_id = $company_row['company_id'];
+
+
 if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
     $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
 
@@ -41,11 +54,11 @@ $supplier_id = (int) $supplier['supplier_id'];
 
 // --- (Your existing shop_assets logic) ---
 
-$assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE supplier_id = ?");
+$assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE company_id = ?");
 
 if ($assets_stmt) {
 
-    mysqli_stmt_bind_param($assets_stmt, "i", $supplier_id);
+    mysqli_stmt_bind_param($assets_stmt, "i", $company_id);
 
     mysqli_stmt_execute($assets_stmt);
 
