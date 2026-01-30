@@ -2,6 +2,15 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+if (!isset($_SESSION['customer_id']) || $_SESSION['customer_id'] <= 0) {
+    echo json_encode([
+        'status' => 'guest',
+        'items' => []
+    ]);
+    exit;
+}
+
 include __DIR__ . '/../../BackEnd/config/dbconfig.php';
 
 header('Content-Type: application/json');

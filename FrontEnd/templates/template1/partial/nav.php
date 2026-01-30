@@ -21,28 +21,60 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=home">Home</a></li>
-                <li class="nav-item"><a class="nav-link"
-                        href="?supplier_id=<?= $supplier_id ?>&page=products">Products</a></li>
-                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=review">Review</a>
-                </li>
-                <li class="nav-item"><a class="nav-link"
-                        href="?supplier_id=<?= $supplier_id ?>&page=contact">Contact</a></li>
-                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=about">About</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=products">Products</a></li>
+                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=review">Review</a></li>
+                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=contact">Contact</a></li>
+                <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=about">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="/malltiverse/frontend/customer">Exit</a></li>
-
+                
                 <li class="nav-item ms-lg-3">
-                    <a href="javascript:void(0)" id="cartIconTrigger" class="nav-link position-relative cart-link"
-                        onclick="<?= $isLoggedIn ? '' : 'showLoginPopup(); event.stopPropagation();' ?>">
+                    <a href="javascript:void(0)" id="cartIconTrigger" class="nav-link position-relative cart-link">
                         <i class="bi bi-cart fs-4"></i>
-                        <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count"
-                            style="font-size: 0.7rem;"></span>
+                        <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count" style="font-size: 0.7rem;"></span>
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+<style>
+    .cart-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px; /* hidden off-screen */
+    width: 350px;
+    height: 100%;
+    background: white;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+    display: flex;
+    z-index: 9999;
+    flex-direction: column;
+    visibility: hidden;
+    transition: right 0.3s ease, visibility 0.3s;
+}
+
+.cart-sidebar.open {
+   right: 0 !important;
+    visibility: visible !important;
+}
+
+.cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 9998;
+}
+
+.cart-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+ 
+</style>
 
 <div id="cartDrawer" class="cart-sidebar">
     <div class="cart-sidebar-header d-flex justify-content-between align-items-center">

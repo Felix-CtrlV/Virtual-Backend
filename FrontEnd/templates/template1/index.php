@@ -247,6 +247,146 @@ $page_path = __DIR__ . "/pages/$page.php";
             </div>
         </div>
     </div>
+\
+<!-- Auth popup -->
+<div id="authModal" class="auth-modal">
+  <div class="auth-box">
+    <h3>Login Required</h3>
+    <p>Please login or create an account to continue.</p>
+    <div class="auth-actions">
+      <button id="authLoginBtn">Login</button>
+      <button id="authRegisterBtn">Create Account</button>
+    </div>
+    <button class="auth-close">&times;</button>
+  </div>
+</div>
+
+<style>
+.auth-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 99999999; }
+.auth-modal.show { display: flex; }
+.auth-box {
+    position: relative; /* make positioning for child absolute elements work */
+    background: #fff;
+    padding: 24px;
+    border-radius: 14px;
+    width: 320px;
+    text-align: center;
+}
+
+/* Style the close button */
+.auth-close {
+    position: absolute;
+    top: 2px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+}
+
+.auth-actions button { margin: 10px; padding: 10px 16px; cursor: pointer; }
+</style>
+
+<script>
+function openAuthModal() {
+    document.getElementById("authModal")?.classList.add("show");
+}
+document.querySelector(".auth-close")?.addEventListener("click", () => {
+    document.getElementById("authModal").classList.remove("show");
+});
+document.getElementById("authLoginBtn")?.addEventListener("click", () => {
+    window.location.href = "/Malltiverse/FrontEnd/customerLogin.php";
+});
+document.getElementById("authRegisterBtn")?.addEventListener("click", () => {
+    window.location.href = "/Malltiverse/FrontEnd/customerRegister.php";
+});
+</script>
+
+<script>
+/* ================================
+   CART DRAWER CORE LOGIC
+================================ */
+
+const cartDrawer = document.getElementById("cartDrawer");
+const cartOverlay = document.getElementById("cartOverlay");
+const cartItemsContainer = document.getElementById("cartItemsContainer");
+const closeCartBtn = document.getElementById("closeCart");
+const cartTrigger = document.getElementById("cartIconTrigger");
+
+/* ---------- OPEN / CLOSE ---------- */
+function openCart() {
+    cartDrawer.classList.add("open");
+    cartOverlay.classList.add("active");
+}
+
+function closeCart() {
+    cartDrawer.classList.remove("open");
+    cartOverlay.classList.remove("active");
+}
+
+closeCartBtn?.addEventListener("click", closeCart);
+cartOverlay?.addEventListener("click", closeCart);
+
+/* ---------- GUEST VIEW ---------- */
+function renderGuestCart() {
+    cartItemsContainer.innerHTML = `
+        <div style="padding:24px; text-align:center">
+            <p>Please login or create an account to view your cart.</p>
+            <button onclick="location.href='/Malltiverse/FrontEnd/customerLogin.php'" class="btn btn-dark me-2">Login</button>
+            <button onclick="location.href='/Malltiverse/FrontEnd/customerRegister.php'" class="btn btn-outline-dark">Register</button>
+        </div>
+    `;
+}
+
+/* ---------- EMPTY CART ---------- */
+function renderEmptyCart() {
+    cartItemsContainer.innerHTML = `
+        <p class="text-center text-muted mt-4">Your bag is empty.</p>
+    `;
+}
+
+/* ---------- LOAD CART ---------- */
+function refreshCartDrawer(supplierId) {
+    openCart();
+
+    if (!window.IS_LOGGED_IN) {
+        renderGuestCart();
+        return;
+    }
+
+    fetch(`../utils/get_cart_data.php?supplier_id=${supplierId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.items || data.items.length === 0) {
+                renderEmptyCart();
+                return;
+            }
+
+            cartItemsContainer.innerHTML = "";
+
+            data.items.forEach(item => {
+                cartItemsContainer.innerHTML += `
+                    <div class="cart-item mb-3">
+                        <strong>${item.name}</strong><br>
+                        Qty: ${item.qty}<br>
+                        $${parseFloat(item.price).toFixed(2)}
+                    </div>
+                `;
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            renderEmptyCart();
+        });
+}
+
+/* ---------- CLICK BIND ---------- */
+cartTrigger?.addEventListener("click", () => {
+    refreshCartDrawer(<?= (int)$supplier_id ?>);
+});
+</script>
+
 
 </body>
 

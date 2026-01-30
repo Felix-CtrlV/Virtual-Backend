@@ -62,19 +62,18 @@ mysqli_stmt_close($variant_stmt);
             </div>
 
             <div class="detail_product" style="position: relative; padding-top: 20px;">
-                <a href="?supplier_id=<?= $supplier_id ?>&page=products"
-                    style="position: absolute; top: 15px; right: 15px; text-decoration: none; z-index: 10; display: flex; align-items: center; justify-content: center;"
-                    title="Back to Shop">
-                    <svg width="40" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="50" y1="16" x2="13" y2="16" stroke="black" stroke-width="1" stroke-linecap="round" />
-                        <path d="M19 10L13 16L19 22" stroke="black" stroke-width="1" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                </a>
+    <a href="?supplier_id=<?= $supplier_id ?>&page=products" 
+       style="position: absolute; top: 15px; right: 15px; text-decoration: none; z-index: 10; display: flex; align-items: center; justify-content: center;" 
+       title="Back to Shop">
+        <svg width="40" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="50" y1="16" x2="13" y2="16" stroke="black" stroke-width="1" stroke-linecap="round"/>
+            <path d="M19 10L13 16L19 22" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </a>
 
-                <div class="detail_product_category"><?= htmlspecialchars($product['category_name'] ?? ' ') ?></div>
-                <h1 class="p-title"><?= htmlspecialchars($product['product_name']) ?></h1>
-                <div class="p-price">$<?= number_format($product['price'], 2) ?></div>
+    <div class="detail_product_category"><?= htmlspecialchars($product['category_name'] ?? ' ') ?></div>
+    <h1 class="p-title"><?= htmlspecialchars($product['product_name']) ?></h1>
+    <div class="p-price">$<?= number_format($product['price'], 2) ?></div>
 
                 <?php if (empty($colors)): ?>
                     <p style="color: #ff4444; font-weight: bold; margin-top: 10px;">Currently Unavailable</p>
@@ -103,7 +102,7 @@ mysqli_stmt_close($variant_stmt);
 
                     <div id="qtyErrorMessage"
                         style="display:none; color: #c62828; font-size: 0.8rem; margin-top: 8px; font-weight: bold;">
-                        Quantity exceeds available stock!
+                   Quantity exceeds available stock!
                     </div>
 
                     <?php if (($product['status'] ?? 'available') !== 'unavailable'): ?>
@@ -113,11 +112,7 @@ mysqli_stmt_close($variant_stmt);
                                 <span id="qty">1</span>
                                 <button class="qty-btn" id="increase">+</button>
                             </div>
-                            <?php if ($isLoggedIn): ?>
-                                <button class="addtobag_btn" id="addToCartBtn">ADD TO BAG</button>
-                            <?php else: ?>
-                                <button class="addtobag_btn" onclick="showLoginPopup()">ADD TO BAG</button>
-                            <?php endif; ?>
+                            <button class="addtobag_btn" id="addToCartBtn">ADD TO BAG</button>
                         </div>
                     <?php else: ?>
                         <div class="unavailable-message"
@@ -204,59 +199,61 @@ mysqli_stmt_close($variant_stmt);
         }
     });
 
-    if (addToCartBtn) {
-        addToCartBtn.addEventListener('click', function () {
-            if (!currentVariant) {
-                alert("Please select a color and size first.");
+    // FIXED ADD TO BAG HANDLER
+  addToCartBtn.addEventListener('click', function () {
+
+    // 🔐 GUEST CHECK — reuse review popup
+    if (!window.IS_LOGGED_IN) {
+        openAuthModal();   // SAME popup as review page
+        return;
+    }
+
+    if (!currentVariant) {
+        showNotification("Please select a color and size first.", "danger");
+        return;
+    }
+
+    const requestedQty = parseInt(qtySpan.textContent);
+    const availableStock = parseInt(currentVariant.quantity);
+
+    fetch(`../utils/get_cart_data.php?supplier_id=<?= $supplier_id ?>`)
+        .then(res => res.json())
+        .then(data => {
+            const existingItem = data.items.find(item =>
+                item.name === <?= json_encode($product['product_name']) ?> &&
+                item.size === selectedSize
+            );
+
+            const currentInBag = existingItem ? parseInt(existingItem.qty) : 0;
+
+            if (currentInBag + requestedQty > availableStock) {
+                showNotification(
+                    `Limit reached! You have ${currentInBag} in bag. Only ${availableStock} available.`,
+                    "danger"
+                );
                 return;
             }
 
-            const requestedQty = parseInt(qtySpan.textContent);
-            const availableStock = parseInt(currentVariant.quantity);
+            const formData = new FormData();
+            formData.append('variant_id', currentVariant.variant_id);
+            formData.append('supplier_id', <?= $supplier_id ?>);
+            formData.append('quantity', requestedQty);
 
-            fetch(`../utils/get_cart_data.php?supplier_id=<?= $supplier_id ?>`)
-                .then(res => res.json())
-                .then(data => {
-                    const existingItem = data.items ? data.items.find(item =>
-                        item.name === <?= json_encode($product['product_name']) ?> &&
-                        item.size === selectedSize
-                    ) : null;
+            return fetch('../utils/add_to_cart.php', {
+                method: 'POST',
+                body: formData
+            });
+        })
+        .then(response => response ? response.json() : null)
+        .then(data => {
+            if (data && data.status === 'success') {
+                showNotification(data.message, "success");
+                refreshCartDrawer(<?= $supplier_id ?>);
+            }
+        })
+        .catch(err => console.error(err));
+});
 
-                    const currentInBag = existingItem ? parseInt(existingItem.qty) : 0;
-                    const totalRequested = currentInBag + requestedQty;
-
-                    if (totalRequested > availableStock) {
-                        window.showNotification(`Limit reached! You have ${currentInBag} in bag. Max available: ${availableStock}.`, "danger");
-                        throw new Error('Stock limit reached');
-                    }
-
-                    const formData = new FormData();
-                    formData.append('variant_id', currentVariant.variant_id);
-                    formData.append('supplier_id', <?= (int)$supplier_id ?>);
-                    formData.append('quantity', requestedQty);
-
-                    return fetch('../utils/add_to_cart.php', { method: 'POST', body: formData });
-                })
-                .then(res => res ? res.json() : null)
-                .then(data => {
-                    if (data && data.status === 'success') {
-                        window.showNotification(data.message, "success");
-                        if (typeof refreshCartDrawer === "function") {
-                            refreshCartDrawer(<?= (int)$supplier_id ?>);
-                        }
-                    }
-                })
-                .catch(err => {
-                    if (err.message !== 'Stock limit reached') console.error('Error:', err);
-                });
-        });
-    }
-
-    window.onload = function () {
-        if (typeof refreshCartDrawer === "function") {
-            refreshCartDrawer(<?= (int)$supplier_id ?>);
-        }
-    };
 </script>
 <section class="related-section">
     <div class="related-section-header">

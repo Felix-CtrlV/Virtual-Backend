@@ -68,15 +68,13 @@ if ($customer_id > 0) {
     <style>
         .qty-control-btn { background: transparent; border: 1px solid #ddd; color: #555; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s; cursor: pointer; font-size: 9px; }
         .qty-control-btn:hover:not(:disabled) { background-color: #f8f9fa; border-color: #bbb; color: #000; }
-        .qty-number { font-weight: 600; font-size: 15px; min-width: 25px; text-align: center; }
-        
+        .qty-number { font-weight: 600; font-size: 15px; min-width: 25px; text-align: center; }        
         /* Original Delete Modal */
         .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: none; align-items: center; justify-content: center; z-index: 9999; }
         .custom-modal-content { background: #f0f2f5; padding: 40px; border-radius: 30px; text-align: center; width: 90%; max-width: 450px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
         .custom-modal-content h2 { color: #1a2a47; font-weight: 800; font-size: 28px; margin-bottom: 20px; margin-top: 0; }
         .btn-cancel { background-color: #7d8590; color: white; border: none; margin-right: 20px; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-remove { background-color: #98B9D5; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        
+        .btn-remove { background-color: #98B9D5; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; }        
         .order-summary-card { border: 1px solid #dee2e6; border-radius: 0.25rem; box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075); }
         .continue-shopping-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; transition: background-color 0.2s; }
         .continue-shopping-btn i { margin-right: 8px; }
@@ -151,6 +149,10 @@ if ($customer_id > 0) {
         <div class="modal-buttons">
             <a href="../customerLogin.php?return_url=<?= $current_url ?>" class="modal-action-btn btn-login-alt">Log in to another account</a>
             <a href="../customerRegister.php" class="modal-action-btn btn-create-alt">Create account</a>
+            <p onclick="window.location.href='../shop/?supplier_id=<?= $supplier_id ?>&page=home'"
+               style="cursor:pointer; margin-top:20px; font-size: 0.9rem; opacity: 0.5; text-decoration: none;">
+               Cancel
+            </p>
         </div>
     </div>
 </div>
@@ -176,7 +178,7 @@ if ($customer_id > 0) {
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <table class="table table-hover align-middle" style="text-align: center;">
+                        <table class="table table-hover align-middle" style="text-align: center; font-size: 18px;">
                             <thead>
                                 <tr>
                                     <th>Product</th>
@@ -288,113 +290,125 @@ if ($customer_id > 0) {
     const customerId = <?= $customer_id ?>;
     const loginPromptModal = document.getElementById('loginPromptModal');
 
-    // Show Custom Login Modal if Guest
     if (customerId === 0) {
-        loginPromptModal.style.display = 'flex';
-    }
-
-    let pendingCartId = null;
-    let updateTimer = null;
-
-    function closeModal() {
-        document.getElementById('customDeleteModal').style.display = 'none';
-        pendingCartId = null;
-    }
-
-    function openRemoveModal(cartId) {
-        pendingCartId = cartId;
-        document.getElementById('customDeleteModal').style.display = 'flex';
-    }
-
-    document.getElementById('confirmBtn').onclick = function () {
-        if (pendingCartId) {
-            removeFromCart(pendingCartId);
+            if (loginPromptModal) {
+                loginPromptModal.style.display = 'flex';
+            }
         }
-    };
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === loginPromptModal) {
+                window.location.href = 'shop/?supplier_id=<?= $supplier_id ?>&page=home';
+        }
+    });  
 
-    function updateQuantity(cartId, newQty, availableStock) {
-        if (newQty < 1) {
-            openRemoveModal(cartId);
-            return;
+        // Show Custom Login Modal if Guest
+        if (customerId === 0) {
+            loginPromptModal.style.display = 'flex';
         }
 
-        if (newQty > availableStock) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Out of Stock',
-                text: 'Only ' + availableStock + ' items available in stock.',
-                confirmButtonColor: '#98B9D5'
-            });
-            return;
+        let pendingCartId = null;
+        let updateTimer = null;
+
+        function closeModal() {
+            document.getElementById('customDeleteModal').style.display = 'none';
+            pendingCartId = null;
         }
 
-        document.getElementById('qty-' + cartId).innerText = newQty;
-        recalculateCart();
+        function openRemoveModal(cartId) {
+            pendingCartId = cartId;
+            document.getElementById('customDeleteModal').style.display = 'flex';
+        }
 
-        clearTimeout(updateTimer);
-        updateTimer = setTimeout(() => {
-            const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
+        document.getElementById('confirmBtn').onclick = function () {
+            if (pendingCartId) {
+                removeFromCart(pendingCartId);
+            }
+        };
+
+        function updateQuantity(cartId, newQty, availableStock) {
+            if (newQty < 1) {
+                openRemoveModal(cartId);
+                return;
+            }
+
+            if (newQty > availableStock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Out of Stock',
+                    text: 'Only ' + availableStock + ' items available in stock.',
+                    confirmButtonColor: '#98B9D5'
+                });
+                return;
+            }
+
+            document.getElementById('qty-' + cartId).innerText = newQty;
+            recalculateCart();
+
+            clearTimeout(updateTimer);
+            updateTimer = setTimeout(() => {
+                const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
+                fetch(rootPath, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ 'cart_id': cartId, 'quantity': newQty })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Updated',
+                            text: 'Quantity updated successfully',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                    } else {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }, 500);
+        }
+
+        function removeFromCart(cartId) {
+            const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
             fetch(rootPath, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ 'cart_id': cartId, 'quantity': newQty })
+                body: new URLSearchParams({ 'cart_id': cartId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    closeModal();
                     Swal.fire({
-                        title: 'Updated',
-                        text: 'Quantity updated successfully',
+                        title: 'Removed',
+                        text: 'Item has been removed.',
                         icon: 'success',
                         showConfirmButton: false,
-                        timer: 1000
-                    });
-                } else {
-                    location.reload();
+                        timer: 1500
+                    }).then(() => location.reload());
                 }
-            })
-            .catch(error => console.error('Error:', error));
-        }, 500);
-    }
+            });
+        }
 
-    function removeFromCart(cartId) {
-        const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
-        fetch(rootPath, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ 'cart_id': cartId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                closeModal();
-                Swal.fire({
-                    title: 'Removed',
-                    text: 'Item has been removed.',
-                    icon: 'success',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => location.reload());
-            }
-        });
-    }
-
-    function recalculateCart() {
-        let grandTotal = 0;
-        document.querySelectorAll('table tbody tr').forEach(row => {
-            const priceCell = row.cells[1];
-            if(!priceCell) return;
-            const price = parseFloat(priceCell.innerText.replace('$', '').replace(',', ''));
-            const qtyElement = row.querySelector('.qty-number');
-            if (qtyElement) {
-                const qty = parseInt(qtyElement.innerText);
-                const subtotal = price * qty;
-                row.cells[3].innerText = '$' + subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
-                grandTotal += subtotal;
-            }
-        });
-        document.getElementById('grand-total').innerText = '$' + grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
-    }
-</script>
+        function recalculateCart() {
+            let grandTotal = 0;
+            document.querySelectorAll('table tbody tr').forEach(row => {
+                const priceCell = row.cells[1];
+                if(!priceCell) return;
+                const price = parseFloat(priceCell.innerText.replace('$', '').replace(',', ''));
+                const qtyElement = row.querySelector('.qty-number');
+                if (qtyElement) {
+                    const qty = parseInt(qtyElement.innerText);
+                    const subtotal = price * qty;
+                    row.cells[3].innerText = '$' + subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                    grandTotal += subtotal;
+                }
+            });
+            document.getElementById('grand-total').innerText = '$' + grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        }
+    </script>
 </body>
 </html>
