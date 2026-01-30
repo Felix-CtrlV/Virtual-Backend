@@ -200,55 +200,59 @@ mysqli_stmt_close($variant_stmt);
     });
 
     // FIXED ADD TO BAG HANDLER
-    addToCartBtn.addEventListener('click', function () {
-        if (!currentVariant) {
-            alert("Please select a color and size first.");
-            return;
-        }
+  addToCartBtn.addEventListener('click', function () {
 
-        const requestedQty = parseInt(qtySpan.textContent);
-        const availableStock = parseInt(currentVariant.quantity);
+    // 🔐 GUEST CHECK — reuse review popup
+    if (!window.IS_LOGGED_IN) {
+        openAuthModal();   // SAME popup as review page
+        return;
+    }
 
-        // Check current bag total before allowing addition
-        fetch(`../utils/get_cart_data.php?supplier_id=<?= $supplier_id ?>`)
-            .then(res => res.json())
-            .then(data => {
-                // Find if THIS specific variant is already in the bag
-                // We match by name and size since we don't have variant_id in the cart JSON
-                const existingItem = data.items.find(item => 
-                    item.name === <?= json_encode($product['product_name']) ?> && 
-                    item.size === selectedSize
+    if (!currentVariant) {
+        showNotification("Please select a color and size first.", "danger");
+        return;
+    }
+
+    const requestedQty = parseInt(qtySpan.textContent);
+    const availableStock = parseInt(currentVariant.quantity);
+
+    fetch(`../utils/get_cart_data.php?supplier_id=<?= $supplier_id ?>`)
+        .then(res => res.json())
+        .then(data => {
+            const existingItem = data.items.find(item =>
+                item.name === <?= json_encode($product['product_name']) ?> &&
+                item.size === selectedSize
+            );
+
+            const currentInBag = existingItem ? parseInt(existingItem.qty) : 0;
+
+            if (currentInBag + requestedQty > availableStock) {
+                showNotification(
+                    `Limit reached! You have ${currentInBag} in bag. Only ${availableStock} available.`,
+                    "danger"
                 );
+                return;
+            }
 
-                const currentInBag = existingItem ? parseInt(existingItem.qty) : 0;
+            const formData = new FormData();
+            formData.append('variant_id', currentVariant.variant_id);
+            formData.append('supplier_id', <?= $supplier_id ?>);
+            formData.append('quantity', requestedQty);
 
-                if (currentInBag + requestedQty > availableStock) {
-                    showNotification(`Limit reached! You have ${currentInBag} in bag. Only ${availableStock} available in total.`, "danger");
-                    return; 
-                }
-
-                // If check passes, proceed to add
-                const formData = new FormData();
-                formData.append('variant_id', currentVariant.variant_id);
-                formData.append('supplier_id', <?= $supplier_id ?>);
-                formData.append('quantity', requestedQty);
-
-                return fetch('../utils/add_to_cart.php', {
-                    method: 'POST',
-                    body: formData
-                });
-            })
-            .then(response => response ? response.json() : null)
-            .then(data => {
-                if (data && data.status === 'success') {
-                    showNotification(data.message, "success");
-                    refreshCartDrawer(<?= $supplier_id ?>);
-                } else if (data) {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(err => console.error('Error:', err));
-    });
+            return fetch('../utils/add_to_cart.php', {
+                method: 'POST',
+                body: formData
+            });
+        })
+        .then(response => response ? response.json() : null)
+        .then(data => {
+            if (data && data.status === 'success') {
+                showNotification(data.message, "success");
+                refreshCartDrawer(<?= $supplier_id ?>);
+            }
+        })
+        .catch(err => console.error(err));
+});
 
 </script>
 <section class="related-section">
