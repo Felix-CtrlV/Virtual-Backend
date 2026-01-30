@@ -42,6 +42,8 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+$company_id = $user['company_id']; // Needed for fetching messages
+
 $banner_string = $user["banner"];
 $banners = explode(",", $banner_string);
 $banner_count = count($banners);
@@ -73,33 +75,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // --- A. UPDATE PROFILE ---
     if (isset($_POST['save_profile'])) {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $address = $_POST['address'];
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $phone = $_POST['phone'];
+        $address = $_POST['address'];
 
-    // 1️⃣ Update suppliers table (name, email)
-    $upd1 = $conn->prepare("UPDATE suppliers SET name=?, email=? WHERE supplier_id=?");
-    $upd1->bind_param("ssi", $name, $email, $supplierid);
+        // 1️⃣ Update suppliers table (name, email)
+        $upd1 = $conn->prepare("UPDATE suppliers SET name=?, email=? WHERE supplier_id=?");
+        $upd1->bind_param("ssi", $name, $email, $supplierid);
 
-    // 2️⃣ Update companies table (phone, address)
-    $upd2 = $conn->prepare("UPDATE companies SET phone=?, address=? WHERE supplier_id=? AND status='active'");
-    $upd2->bind_param("ssi", $phone, $address, $supplierid);
+        // 2️⃣ Update companies table (phone, address)
+        $upd2 = $conn->prepare("UPDATE companies SET phone=?, address=? WHERE supplier_id=? AND status='active'");
+        $upd2->bind_param("ssi", $phone, $address, $supplierid);
 
-    if ($upd1->execute() && $upd2->execute()) {
-        $msg = "Profile updated successfully.";
-        $msg_type = "success";
+        if ($upd1->execute() && $upd2->execute()) {
+            $msg = "Profile updated successfully.";
+            $msg_type = "success";
 
-        // Update local user array
-        $user['name'] = $name;
-        $user['email'] = $email;
-        $user['phone'] = $phone;
-        $user['address'] = $address;
-    } else {
-        $msg = "Error updating profile.";
-        $msg_type = "error";
+            // Update local user array
+            $user['name'] = $name;
+            $user['email'] = $email;
+            $user['phone'] = $phone;
+            $user['address'] = $address;
+        } else {
+            $msg = "Error updating profile.";
+            $msg_type = "error";
+        }
     }
-}
 
 
     // --- B. UPDATE COMPANY ---
@@ -201,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Only update SQL if file move SUCCEEDS
                 if (move_uploaded_file($_FILES['banner']['tmp_name'], $target_dir . $banner_name)) {
                     $banner_sql = ", banner = '$banner_name'";
-                    $user['banner'] = $banner_name; 
+                    $user['banner'] = $banner_name;
                     // Update display logic for this request
                     $bannerPathRel = '../uploads/shops/' . $supplierid . '/' . $banner_name;
                     $bannerExists = true;
@@ -217,18 +219,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 3. Update Database (Only if no critical upload error occurred)
         if ($msg_type !== "error") {
-            // Safe update using Prepared Statement
-            // Note: We inject the file names ($logo_sql, $banner_sql) directly into query structure 
-            // because they are built internally with time() and are safe, 
-            // but for max security, you could bind them too.
             $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_type=? $logo_sql $banner_sql WHERE supplier_id=?";
             $stmt2 = $conn->prepare($sql_final);
             $stmt2->bind_param("sssssi", $p_color, $s_color, $shop_about, $shop_desc, $media_mode, $supplierid);
-            
+
             if ($stmt2->execute()) {
                 $msg = "Shop customization saved!";
                 $msg_type = "success";
-                
+
                 // Refresh local variables for immediate UI update
                 $user['primary_color'] = $p_color;
                 $user['secondary_color'] = $s_color;
@@ -249,6 +247,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt3->close();
         }
     }
+
+    // --- E. HANDLE MESSAGE REPLY ---
+    if (isset($_POST['send_reply'])) {
+        $msg_id = $_POST['reply_message_id'];
+        $reply_text = trim($_POST['reply_text']);
+        
+        if (!empty($reply_text)) {
+            // 1. Insert into contact_replies
+            $stmt_reply = $conn->prepare("INSERT INTO contact_replies (message_id, supplier_id, reply_text, created_at) VALUES (?, ?, ?, NOW())");
+            $stmt_reply->bind_param("iis", $msg_id, $supplierid, $reply_text);
+            
+            if ($stmt_reply->execute()) {
+                // 2. Update status in contact_messages
+                $stmt_status = $conn->prepare("UPDATE contact_messages SET status='replied' WHERE message_id=?");
+                $stmt_status->bind_param("i", $msg_id);
+                $stmt_status->execute();
+                
+                $msg = "Reply sent successfully.";
+                $msg_type = "success";
+            } else {
+                $msg = "Error sending reply.";
+                $msg_type = "error";
+            }
+        } else {
+            $msg = "Reply text cannot be empty.";
+            $msg_type = "error";
+        }
+    }
+}
+
+// =========================================
+// 3. FETCH NOTIFICATIONS (MESSAGES)
+// =========================================
+$notifications = [];
+if (!empty($company_id)) {
+    // Assuming you have a 'customers' table. Adjust column names (c.name, c.email) as per your DB
+    $sql_msgs = "
+        SELECT 
+            cm.message_id, 
+            cm.customer_id, 
+            cm.message, 
+            cm.status, 
+            cm.created_at,
+            c.name AS customer_name,
+            c.email AS customer_email
+        FROM contact_messages cm
+        LEFT JOIN customers c ON cm.customer_id = c.customer_id
+        WHERE cm.company_id = ?
+        ORDER BY cm.created_at DESC
+    ";
+    $stmt_msgs = $conn->prepare($sql_msgs);
+    $stmt_msgs->bind_param("i", $company_id);
+    $stmt_msgs->execute();
+    $res_msgs = $stmt_msgs->get_result();
+    while ($row = $res_msgs->fetch_assoc()) {
+        $notifications[] = $row;
+    }
+    $stmt_msgs->close();
 }
 ?>
 
@@ -647,6 +703,118 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .success { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
         .error { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+        /* --- NOTIFICATION TABLE STYLES --- */
+        .msg-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .msg-item {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: box-shadow 0.2s;
+        }
+        .msg-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .msg-content h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .msg-meta {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .msg-body {
+            color: #555;
+            line-height: 1.5;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+        .status-pending { background: #ffeeba; color: #856404; }
+        .status-replied { background: #d1e7dd; color: #0f5132; }
+
+        .btn-reply {
+            background: #fff;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            flex-shrink: 0;
+            margin-left: 20px;
+        }
+        .btn-reply:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* --- MODAL STYLES --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-box {
+            background: #fff;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header h3 { margin: 0; }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .msg-preview {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ddd;
+            font-size: 0.95rem;
+            color: #666;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
     </style>
     
     <div class="settings-wrapper">
@@ -688,6 +856,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="tabs-nav">
             <button class="tab-btn active" onclick="openTab(event, 'profile')">Profile</button>
             <button class="tab-btn" onclick="openTab(event, 'company')">Company</button>
+            <button class="tab-btn" onclick="openTab(event, 'notifications')">Notifications</button>
             <button class="tab-btn" onclick="openTab(event, 'security')">Security</button>
             <button class="tab-btn" onclick="openTab(event, 'customize')">Customize</button>
         </div>
@@ -754,6 +923,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <button type="submit" name="save_company" class="btn-save">Save Company Info</button>
                 </div>
             </form>
+        </div>
+
+        <div id="notifications" class="tab-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <div>
+                    <h3>Customer Messages</h3>
+                    <p style="color:#777; margin:0;">View and reply to inquiries from your shop page.</p>
+                </div>
+            </div>
+
+            <?php if (empty($notifications)): ?>
+                <div style="text-align:center; padding:50px; color:#999; border:2px dashed #eee; border-radius:12px;">
+                    <span style="font-size:2rem;">📭</span>
+                    <p>No messages found.</p>
+                </div>
+            <?php else: ?>
+                <ul class="msg-list">
+                    <?php foreach ($notifications as $note): ?>
+                        <li class="msg-item">
+                            <div class="msg-content">
+                                <h4>
+                                    <?= htmlspecialchars($note['customer_name'] ?? 'Guest') ?>
+                                    <span class="status-badge status-<?= $note['status'] ?>"><?= $note['status'] ?></span>
+                                </h4>
+                                <span class="msg-meta">
+                                    <?= date('M d, Y h:i A', strtotime($note['created_at'])) ?> • 
+                                    <?= htmlspecialchars($note['customer_email']) ?>
+                                </span>
+                                <div class="msg-body">
+                                    <?= nl2br(htmlspecialchars($note['message'])) ?>
+                                </div>
+                            </div>
+                            <?php if ($note['status'] !== 'replied'): ?>
+                                <button class="btn-reply" 
+                                    onclick="openReplyModal(
+                                        '<?= $note['message_id'] ?>', 
+                                        '<?= htmlspecialchars($note['customer_name'] ?? 'Customer', ENT_QUOTES) ?>', 
+                                        '<?= htmlspecialchars(substr($note['message'], 0, 150) . '...', ENT_QUOTES) ?>'
+                                    )">
+                                    Reply ↩
+                                </button>
+                            <?php else: ?>
+                                <button class="btn-reply" disabled style="opacity:0.5; cursor:default; border-color:#ccc; color:#999;">Replied</button>
+                            <?php endif; ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
         </div>
 
         <div id="security" class="tab-content">
@@ -897,6 +1114,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     </div>
 
+    <div id="replyModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeReplyModal()">&times;</button>
+            <div class="modal-header">
+                <h3>Reply to <span id="modal_customer_name" style="color:var(--accent)">Customer</span></h3>
+            </div>
+            
+            <form method="POST">
+                <input type="hidden" name="reply_message_id" id="modal_message_id">
+                
+                <div class="msg-preview">
+                    <strong>Message:</strong><br>
+                    <span id="modal_message_text">...</span>
+                </div>
+
+                <div class="input-group">
+                    <label>Your Reply</label>
+                    <textarea name="reply_text" class="input-field" style="height:120px;" required placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div style="text-align:right; margin-top:20px;">
+                    <button type="button" onclick="closeReplyModal()" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Cancel</button>
+                    <button type="submit" name="send_reply" class="btn-save" style="padding:10px 30px; font-size:1rem;">Send Reply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function openTab(evt, tabName) {
             // Hide all tabs
@@ -973,7 +1218,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             container.appendChild(mediaElem);
             container.appendChild(nameInfo);
         }
+
+        // --- NEW: Modal Logic ---
+        function openReplyModal(id, name, message) {
+            document.getElementById('modal_message_id').value = id;
+            document.getElementById('modal_customer_name').textContent = name;
+            document.getElementById('modal_message_text').textContent = message;
+            
+            const modal = document.getElementById('replyModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeReplyModal() {
+            document.getElementById('replyModal').style.display = 'none';
+        }
+
+        // Close modal if clicking outside box
+        window.onclick = function(event) {
+            const modal = document.getElementById('replyModal');
+            if (event.target == modal) {
+                closeReplyModal();
+            }
+        }
     </script>
 </body>
-
 </html>

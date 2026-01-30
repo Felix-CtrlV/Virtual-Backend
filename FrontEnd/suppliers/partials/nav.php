@@ -90,10 +90,7 @@ if ($bestsellerstmt) {
 }
 
 // 7. Monthly Revenue Chart with YEAR FILTER
-// Check for Year in GET, default to current year
 $selectedYear = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-
-// Fetch available years for the dropdown
 $yearStmt = $conn->prepare("SELECT DISTINCT YEAR(order_date) as yr FROM orders WHERE supplier_id = ? ORDER BY yr DESC");
 $yearStmt->bind_param("i", $supplierid);
 $yearStmt->execute();
@@ -102,10 +99,9 @@ $availableYears = [];
 while ($y = $availableYearsResult->fetch_assoc()) {
     $availableYears[] = $y['yr'];
 }
-if(empty($availableYears)) $availableYears[] = date('Y'); // Fallback
+if(empty($availableYears)) $availableYears[] = date('Y');
 $yearStmt->close();
 
-// Fetch Revenue for Selected Year
 $revenue = $conn->prepare("SELECT MONTH(order_date) AS month, SUM(price) AS total_revenue FROM orders
 WHERE supplier_id = ? AND YEAR(order_date) = ? AND order_status = 'confirm' GROUP BY MONTH(order_date) ORDER BY month;");
 $revenue->bind_param("ii", $supplierid, $selectedYear);
@@ -117,8 +113,7 @@ while ($revenuerow = $revenue_result->fetch_assoc()) {
 }
 $revenue->close();
 
-// 8. Inventory / Best Selling Categories (Pie Chart)
-// Assuming products table has a 'category' column. If not, adapt query.
+// 8. Inventory / Best Selling Categories
 $categoryStmt = $conn->prepare("SELECT 
     c.category_name, 
     SUM(od.quantity) AS total_sold
@@ -142,17 +137,12 @@ if ($categoryStmt) {
     }
     $categoryStmt->close();
 }
-// Fallback if empty (for demo)
 if (empty($categoryData)) {
     $categoryLabels = ['NoData'];
     $categoryData = [0];
 }
 
-
-// 9. Recent Reviews (Last 7 Days)
-// Assuming a 'reviews' table exists. If not, I am mocking the structure for the "Full Code" requirement.
-// Schema assumption: reviews(id, product_id, customer_name, rating, comment, created_at, customer_image)
-// Note: Adapting to join with products to filter by supplier.
+// 9. Recent Reviews
 $reviewStmt = $conn->prepare("SELECT 
     r.review_id,
     r.rating,
@@ -168,8 +158,6 @@ ORDER BY r.created_at DESC;
 ");
 
 $recentReviews = [];
-// NOTE: Since I cannot verify if you have a reviews table, I will use a dummy array if the query fails or returns empty, 
-// so the UI still works for you.
 if ($reviewStmt) {
     $reviewStmt->bind_param("i", $supplierid);
     $reviewStmt->execute();
@@ -177,6 +165,33 @@ if ($reviewStmt) {
     $reviewStmt->close();
 }
 
+// --- FETCH CHAT CONVERSATIONS (SUPPLIER SIDE) ---
+// We fetch conversations where the current user is a 'supplier'
+// and we want to see the 'admin' or other participants.
+$chat_sql = "
+    SELECT 
+        c.conversation_id,
+        a.adminid as other_user_id,
+        a.name,
+        a.image, 
+        (SELECT message_text FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) as last_msg,
+        (SELECT created_at FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) as last_time
+    FROM conversations c
+    JOIN conversation_participants cp_me ON c.conversation_id = cp_me.conversation_id
+    JOIN conversation_participants cp_other ON c.conversation_id = cp_other.conversation_id
+    JOIN admins a ON cp_other.user_id = a.adminid
+    WHERE cp_me.user_id = '$supplierid' 
+      AND cp_me.user_type = 'supplier'
+      AND cp_other.user_type = 'admin'
+    ORDER BY last_time DESC
+";
+$chat_query = mysqli_query($conn, $chat_sql);
+$conversations = [];
+if ($chat_query) {
+    while ($row_chat = mysqli_fetch_assoc($chat_query)) {
+        $conversations[] = $row_chat;
+    }
+}
 
 // Active Page Logic
 $current_page = basename($_SERVER["PHP_SELF"]);
@@ -189,7 +204,6 @@ if (!isset($active)) {
     elseif ($current_page === "orders.php") $active = "orders";
 }
 
-// Dummy Pending Orders for the Left Column (since we moved Bestsellers to Right)
 $pendingOrderList = [
     ['id' => '#ORD-991', 'item' => 'Wireless Headset', 'time' => '10 min ago'],
     ['id' => '#ORD-992', 'item' => 'HDMI Cable 2m', 'time' => '1 hour ago'],
@@ -203,8 +217,11 @@ $pendingOrderList = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supplier Dashboard - <?= $row['company_name'] ?> Style</title>
+    <title>Supplier Dashboard - <?= htmlspecialchars($row['company_name']) ?> Style</title>
     <link rel="stylesheet" href="css/supplierCss.css">
+    
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <script src="https://kit.fontawesome.com/7867607d9e.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -212,6 +229,7 @@ $pendingOrderList = [
             --primary: <?= htmlspecialchars($row['primary_color']) ?>;
             --secondary: <?= htmlspecialchars($row['secondary_color']) ?>;
         }
+        
         /* Modal Styles */
         .modal-overlay {
             display: none; position: fixed; top:0; left:0; width:100%; height:100%;
@@ -224,6 +242,293 @@ $pendingOrderList = [
         @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #888; }
         .star-gold { color: #f5c518; }
+
+        /* ============================
+           FLOATING EXPANDABLE CHAT (Telegram Style)
+           ============================ */
+
+        /* 1. The Floating Button (FAB) */
+        .chat-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 9000;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: white;
+        }
+
+        .chat-fab:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* 2. The Fullscreen Overlay Container */
+        .chat-overlay-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #ffffff; /* Supplier theme usually light */
+            border-radius: 50%;
+            z-index: 9001;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+            box-shadow: 0 0 0 0 rgba(0,0,0,0);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Active State: Full Screen */
+        .chat-overlay-container.active {
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100vh;
+            border-radius: 0;
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* 3. The Inner Layout */
+        .chat-interface-inner {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.3s ease 0.2s; /* Delay fade-in until expanded */
+            background: #f1f5f9;
+        }
+
+        .chat-overlay-container.active .chat-interface-inner {
+            opacity: 1;
+        }
+
+        /* --- SIDEBAR (Contact List) --- */
+        .chat-sidebar-panel {
+            width: 350px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-close-chat {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .btn-close-chat:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .chat-search-box {
+            padding: 15px;
+            background: #f8fafc;
+        }
+
+        .chat-search-input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            color: #334155;
+            outline: none;
+        }
+
+        .chat-contacts-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            display: flex;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        .contact-item:hover, .contact-item.active {
+            background: #f1f5f9;
+        }
+
+        .contact-item.active {
+            border-left: 3px solid var(--primary);
+            background: #eef2ff;
+        }
+
+        .contact-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            margin-right: 15px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .contact-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .contact-info { flex: 1; overflow: hidden; }
+        .contact-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .contact-name { font-weight: 600; color: #334155; font-size: 0.95rem; }
+        .contact-time { font-size: 0.75rem; color: #94a3b8; }
+        .contact-msg { font-size: 0.85rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* --- MAIN CHAT AREA --- */
+        .chat-main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f1f5f9;
+            /* Simple pattern for chat background */
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .chat-header {
+            height: 70px;
+            padding: 0 30px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .header-user { display: flex; align-items: center; gap: 15px; color: #334155; }
+        .header-user img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .header-info h4 { margin: 0; font-size: 1rem; }
+        .header-info span { font-size: 0.8rem; color: var(--primary); font-weight: bold; }
+
+        .chat-messages-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* Custom Scrollbar */
+        .chat-messages-area::-webkit-scrollbar, .chat-contacts-list::-webkit-scrollbar { width: 6px; }
+        .chat-messages-area::-webkit-scrollbar-thumb, .chat-contacts-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .message-bubble {
+            max-width: 65%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .msg-incoming {
+            align-self: flex-start;
+            background: white;
+            color: #334155;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-outgoing {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white; /* Assuming primary is dark enough, else need logic */
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-time {
+            display: block;
+            text-align: right;
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .chat-input-area {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input-box {
+            flex: 1;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 12px 20px;
+            border-radius: 30px;
+            color: #334155;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .chat-input-box:focus { border-color: var(--primary); }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover { transform: scale(1.1); }
+
+        /* Mobile Logic */
+        @media (max-width: 768px) {
+            .chat-sidebar-panel { width: 80px; }
+            .contact-info, .chat-search-box { display: none; }
+            .chat-sidebar-header { justify-content: center; }
+            .contact-avatar { margin-right: 0; }
+        }
     </style>
 </head>
 
@@ -233,7 +538,7 @@ $pendingOrderList = [
 ">
 
     <header>
-        <div class="logo"><?= $row['company_name'] ?></div>
+        <div class="logo"><?= htmlspecialchars($row['company_name']) ?></div>
         <div class="navline">
             <nav class="nav-links">
                 <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>>Dashboard</a>
@@ -242,7 +547,234 @@ $pendingOrderList = [
                 <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?>>Rent Payment</a>
                 <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?>>Settings</a>
             </nav>
-            <button class="btn-logout" onclick="window.location.href='../index.html'">Logout</button>
+            <button class="btn-logout" onclick="window.location.href='../utils/signout.php'">Logout</button>
         </div>
     </header>
+    
     <div class="container">
+
+        <div class="chat-fab" onclick="toggleChatInterface()">
+            <lord-icon src="https://cdn.lordicon.com/fdxqrdfe.json" trigger="loop" delay="2000" colors="primary:#ffffff" style="width:30px;height:30px"></lord-icon>
+        </div>
+
+        <div class="chat-overlay-container" id="chatOverlay">
+            <div class="chat-interface-inner">
+                
+                <div class="chat-sidebar-panel">
+                    <div class="chat-sidebar-header">
+                        <h3 style="margin:0; color:white;">Messages</h3>
+                        <button class="btn-close-chat" onclick="toggleChatInterface()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="chat-search-box">
+                        <input type="text" class="chat-search-input" placeholder="Search...">
+                    </div>
+
+                    <div class="chat-contacts-list">
+                        <?php if (!empty($conversations)): ?>
+                            <?php foreach ($conversations as $conv): ?>
+                                <div class="contact-item" onclick="loadChat(<?php echo $conv['conversation_id']; ?>, '<?php echo htmlspecialchars($conv['name']); ?>', '<?php echo $conv['image']; ?>', this)">
+                                    <div class="contact-avatar">
+                                        <?php if($conv['image'] && $conv['image'] !== 'default_admin.png'): ?>
+                                            <img src="../assets/customer_profiles/<?php echo $conv['image']; ?>" alt="Adm">
+                                        <?php else: ?>
+                                            <span><?php echo strtoupper(substr($conv['name'], 0, 1)); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="contact-info">
+                                        <div class="contact-top">
+                                            <span class="contact-name"><?php echo htmlspecialchars($conv['name']); ?> (Admin)</span>
+                                            <span class="contact-time"><?php echo date('H:i', strtotime($conv['last_time'])); ?></span>
+                                        </div>
+                                        <div class="contact-msg"><?php echo htmlspecialchars($conv['last_msg']); ?></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div style="padding:20px; text-align:center; color:#64748b;">
+                                <p>No active conversations.</p>
+                                <small>Contact support if you need help.</small>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="chat-main-view">
+                    <div id="chat-empty-view" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#64748b;">
+                        <lord-icon src="https://cdn.lordicon.com/zpxybbhl.json" trigger="hover" colors="primary:#64748b,secondary:<?= htmlspecialchars($row['primary_color']) ?>" style="width:100px;height:100px"></lord-icon>
+                        <h3>Select a conversation</h3>
+                        <p>Choose the Admin from the list to start messaging.</p>
+                    </div>
+
+                    <div id="chat-active-view" style="display:none; height:100%; flex-direction:column;">
+                        <div class="chat-header">
+                            <div class="header-user">
+                                <img id="active-chat-img" src="" alt="">
+                                <div class="header-info">
+                                    <h4 id="active-chat-name">Admin Name</h4>
+                                    <span>Mall Administrator</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages-area" id="messages-container">
+                            </div>
+
+                        <div class="chat-input-area">
+                            <input type="hidden" id="current-conv-id">
+                            <input type="text" class="chat-input-box" id="message-input" placeholder="Write a message...">
+                            <button class="send-btn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <script>
+            // --- CHAT LOGIC ---
+            const overlay = document.getElementById('chatOverlay');
+            const msgContainer = document.getElementById('messages-container');
+            const chatInput = document.getElementById('message-input');
+            const currentConvIdInput = document.getElementById('current-conv-id');
+            let chatInterval = null;
+
+            // 1. Toggle Chat (Open/Close)
+            function toggleChatInterface() {
+                overlay.classList.toggle('active');
+                
+                // Stop polling if closed
+                if (!overlay.classList.contains('active')) {
+                    if (chatInterval) clearInterval(chatInterval);
+                } else {
+                    // Resume polling if a chat was previously open
+                    const activeId = currentConvIdInput.value;
+                    if(activeId) {
+                         fetchMessages(activeId, true);
+                         chatInterval = setInterval(() => fetchMessages(activeId, true), 3000);
+                    }
+                }
+            }
+
+            // 2. Load Specific Chat
+            function loadChat(conversationId, name, image, element) {
+                // Highlight sidebar item
+                document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
+                if(element) element.classList.add('active');
+
+                // UI Updates
+                document.getElementById('chat-empty-view').style.display = 'none';
+                document.getElementById('chat-active-view').style.display = 'flex';
+                document.getElementById('active-chat-name').innerText = name;
+                currentConvIdInput.value = conversationId;
+                
+                // Determine image source
+                let imgPath = '';
+                // if(image && image !== 'default_admin.png') {
+                console.log(image);
+                    imgPath = `../assets/customer_profiles/${image}`;
+                // } else {
+                    // imgPath = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+                // }
+                
+                // Error handling for image loading
+                const imgEl = document.getElementById('active-chat-img');
+                imgEl.src = imgPath;
+                // imgEl.onerror = function() {
+                //      this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
+                // };
+
+                // Load Messages
+                msgContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Loading...</div>';
+                fetchMessages(conversationId);
+
+                // Start Polling
+                if (chatInterval) clearInterval(chatInterval);
+                chatInterval = setInterval(() => fetchMessages(conversationId, true), 3000);
+            }
+
+            // 3. Fetch Messages from DB
+            function fetchMessages(conversationId, silent = false) {
+                // Adjust path based on file structure. Assuming nav.php is in 'supplier/inc/' and utils in 'supplier/utils/'
+                // 'adminnav.php' used 'utils/get_messages.php'. 
+                // Since this file is likely included in pages like 'supplier/dashboard.php', the path relative to the RUNNING script is 'utils/...'.
+                // If this doesn't work, try '../utils/' depending on where dashboard.php is located vs utils folder.
+                
+                fetch(`../admin/utils/get_messages.php?conversation_id=${conversationId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            renderMessages(data.messages, silent);
+                        }
+                    })
+                    .catch(err => console.error("Error fetching messages:", err));
+            }
+
+            // 4. Render Messages to DOM
+            function renderMessages(messages, silent) {
+                if (!silent) msgContainer.innerHTML = '';
+
+                let html = '';
+                if (messages.length === 0) {
+                    html = '<div style="text-align:center; margin-top:50px; color:#64748b; font-size:0.9rem;">No messages yet.<br>Start the conversation!</div>';
+                } else {
+                    messages.forEach(msg => {
+                        // 'supplier' matches sender_type in your message table for THIS user
+                        const isMe = (msg.sender_type === 'supplier');
+                        const bubbleClass = isMe ? 'msg-outgoing' : 'msg-incoming';
+                        
+                        const dateObj = new Date(msg.created_at);
+                        const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                        html += `
+                            <div class="message-bubble ${bubbleClass}">
+                                ${msg.message_text}
+                                <span class="msg-time">${timeStr}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Update only if content differs to prevent flicker
+                if (msgContainer.innerHTML !== html) {
+                    msgContainer.innerHTML = html;
+                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                }
+            }
+
+            // 5. Send Message
+            function sendMessage() {
+                const text = chatInput.value.trim();
+                const convId = currentConvIdInput.value;
+                if (!text || !convId) return;
+
+                // Optimistic UI Append
+                const tempMsg = `
+                    <div class="message-bubble msg-outgoing" style="opacity:0.7">
+                        ${text}
+                        <span class="msg-time">Sending...</span>
+                    </div>`;
+                msgContainer.insertAdjacentHTML('beforeend', tempMsg);
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+                chatInput.value = '';
+
+                const formData = new FormData();
+                formData.append('conversation_id', convId);
+                formData.append('message', text);
+
+                fetch('utils/send_message.php', { method: 'POST', body: formData })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) fetchMessages(convId, true);
+                    });
+            }
+
+            // Enter key to send
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+        </script>

@@ -2017,6 +2017,36 @@ CONTACT PAGE STYLES
     display: block;
 }
 
+/*====
+cart login====*/
+.cart-sidebar {
+    position: fixed;
+    top: 0;
+    right: -360px;
+    width: 360px;
+    height: 100%;
+    background: #fff;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: right .3s ease;
+}
+.cart-sidebar.open {
+    right: 0;
+}
+.cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: .3s;
+}
+.cart-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 
 .color-preview {
 
@@ -2101,7 +2131,7 @@ CONTACT PAGE STYLES
 
 #deleteConfirmModal .btn-primary:hover {
 
-    background-color: #var(--secondary);
+    background-color: var(--secondary);
 }
 
 

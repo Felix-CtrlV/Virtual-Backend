@@ -1,3 +1,4 @@
+
 <?php
 // PHP Logic for Banner/Video
 // $has_video = !empty($banner_video_url);
@@ -255,17 +256,266 @@ $tagline = $supplier['tagline'] ?? 'Redefine Your Limits.';
         color: #fff;
     }
 
-    @media(max-width: 768px) {
-        .marquee-item {
-            font-size: 2rem;
-        }
-    }
-
     .p1 {
         font-size: 1.1rem;
         margin-bottom: 20px;
         color: var(--text-muted);
         font-weight: bold;
+    }
+
+    /* ============================
+       RESPONSIVE MEDIA QUERIES
+       ============================ */
+    
+    /* Tablet Devices (768px and below) */
+    @media (max-width: 768px) {
+        .hero-section {
+            top: -60px;
+            height: 90vh;
+        }
+        
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+        }
+        
+        .hero-sub {
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+            margin-top: 15px;
+        }
+        
+        /* Center the button on mobile */
+        .hero-content > div {
+            margin-right: 0 !important;
+            display: flex;
+            justify-content: center;
+            margin-top: 30px !important;
+        }
+        
+        .magnet-btn {
+            padding: 15px 40px;
+            font-size: 1rem;
+        }
+        
+        .marquee-container {
+            top: -60px;
+            padding: 1rem 0;
+        }
+        
+        .marquee-item {
+            font-size: 1.8rem;
+            margin-right: 2rem;
+        }
+        
+        /* Philosophy section */
+        .container-fluid.py-5 .row {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+        
+        .display-3 {
+            font-size: 2.5rem !important;
+        }
+        
+        .lead {
+            font-size: 1rem !important;
+        }
+        
+        /* Bento grid */
+        .bento-grid {
+            grid-template-columns: 1fr;
+            padding: 5% 15px;
+            gap: 15px;
+        }
+        
+        .bento-card {
+            padding: 30px;
+            min-height: 300px;
+        }
+        
+        .bento-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .bento-card h3 {
+            font-size: 1.5rem;
+        }
+        
+        .bento-card p {
+            font-size: 1rem;
+        }
+        
+        /* Big CTA */
+        .big-cta {
+            padding: 60px 20px;
+        }
+        
+        .big-cta h2 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            margin-bottom: 30px;
+        }
+        
+        .scroll-down {
+            bottom: 20px;
+        }
+        
+        .scroll-down small {
+            font-size: 0.8rem;
+        }
+        
+        /* Adjust container padding */
+        .container-fluid {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+    }
+    
+    /* Mobile Devices (576px and below) */
+    @media (max-width: 576px) {
+        .hero-section {
+            top: -55px;
+            height: 85vh;
+        }
+        
+        .hero-title {
+            font-size: clamp(2rem, 7vw, 4rem);
+            line-height: 1;
+        }
+        
+        .hero-sub {
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            margin-top: 10px;
+        }
+        
+        .marquee-item {
+            font-size: 1.5rem;
+            margin-right: 1.5rem;
+        }
+        
+        .display-3 {
+            font-size: 2rem !important;
+        }
+        
+        .text-uppercase {
+            font-size: 0.8rem !important;
+        }
+        
+        .bento-card {
+            padding: 25px;
+            min-height: 280px;
+        }
+        
+        .bento-card i {
+            font-size: 2rem;
+        }
+        
+        .bento-card h3 {
+            font-size: 1.3rem;
+        }
+        
+        .bento-card p {
+            font-size: 0.95rem;
+        }
+        
+        .big-cta h2 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+        }
+        
+        .magnet-btn {
+            padding: 12px 30px;
+            font-size: 0.9rem;
+        }
+        
+        /* Adjust spacing */
+        .py-5 {
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .mt-3 {
+            margin-top: 1rem !important;
+        }
+        
+        /* Philosophy section columns stack */
+        .col-lg-6, .col-lg-5 {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .col-lg-5:last-child {
+            margin-bottom: 0;
+        }
+    }
+    
+    /* Small Mobile Devices (400px and below) */
+    @media (max-width: 400px) {
+        .hero-section {
+            height: 80vh;
+        }
+        
+        .hero-title {
+            font-size: clamp(1.8rem, 6vw, 3rem);
+        }
+        
+        .hero-sub {
+            font-size: 0.8rem;
+        }
+        
+        .marquee-item {
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+        
+        .bento-card {
+            padding: 20px;
+            min-height: 250px;
+        }
+        
+        .bento-card i {
+            font-size: 1.8rem;
+        }
+        
+        .bento-card h3 {
+            font-size: 1.2rem;
+        }
+        
+        .bento-card p {
+            font-size: 0.9rem;
+        }
+        
+        .big-cta {
+            padding: 50px 15px;
+        }
+        
+        .big-cta h2 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+        }
+        
+        .magnet-btn {
+            padding: 10px 25px;
+            font-size: 0.85rem;
+            width: 100%;
+            text-align: center;
+        }
+        
+        /* Make the hero button full width on very small screens */
+        .hero-content .magnet-btn {
+            width: 100%;
+            max-width: 250px;
+        }
+        
+        .scroll-down {
+            bottom: 15px;
+        }
+        
+        .scroll-down small {
+            font-size: 0.7rem;
+        }
     }
 </style>
 

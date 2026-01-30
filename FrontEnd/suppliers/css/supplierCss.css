@@ -966,3 +966,246 @@
         background: #fee2e2;
         color: #991b1b;
     }
+
+    /* --- FLOATING CHAT BUTTON --- */
+.chat-fab-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary); /* Uses your PHP dynamic color */
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 9998;
+    transition: transform 0.2s;
+}
+
+.chat-fab-container:hover {
+    transform: scale(1.1);
+}
+
+/* --- FULLSCREEN OVERLAY (The Animation Magic) --- */
+.chat-overlay {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;      /* Starts same size as button */
+    height: 60px;     /* Starts same size as button */
+    border-radius: 50%;
+    background: white;
+    z-index: 9999;
+    overflow: hidden;
+    /* This creates the expansion effect from the corner */
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
+    box-shadow: 0 0 0 0 rgba(0,0,0,0);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chat-overlay.active {
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* --- TELEGRAM UI LAYOUT --- */
+.chat-interface {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease 0.2s; /* Delay showing content until expanded */
+}
+
+.chat-overlay.active .chat-interface {
+    opacity: 1;
+}
+
+.chat-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10001;
+    background: none;
+    border: none;
+    cursor: pointer;
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+}
+
+/* Sidebar */
+.chat-sidebar {
+    width: 320px;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.sidebar-header {
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-input {
+    background: #f1f1f1;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    width: 100%;
+    outline: none;
+}
+
+.chat-list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.chat-contact {
+    display: flex;
+    padding: 10px 15px;
+    cursor: pointer;
+    gap: 10px;
+}
+
+.chat-contact:hover, .chat-contact.active {
+    background-color: #f4f4f5;
+}
+
+.chat-contact.active {
+    background-color: #3390ec; /* Telegram Blue style highlight */
+    color: white;
+}
+.chat-contact.active .time, .chat-contact.active .last-msg { color: rgba(255,255,255,0.8); }
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.contact-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.name { font-weight: 600; font-size: 0.95rem; }
+.time { font-size: 0.75rem; color: #888; }
+.last-msg { font-size: 0.85rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Main Chat Area */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f5; /* Chat background */
+    background-image: url('https://web.telegram.org/img/bg_0.png'); /* Optional Pattern */
+    background-size: cover;
+}
+
+.chat-header {
+    background: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.avatar-small { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+.header-info { display: flex; flex-direction: column; }
+.header-name { font-weight: 600; }
+.status { font-size: 0.8rem; color: #3390ec; }
+
+.messages-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.msg-bubble {
+    max-width: 60%;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    position: relative;
+    line-height: 1.4;
+}
+
+.msg-bubble.received {
+    background: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+.msg-bubble.sent {
+    background: #e3f2fd; /* Light Blue */
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.msg-time {
+    display: block;
+    text-align: right;
+    font-size: 0.65rem;
+    color: #999;
+    margin-top: 4px;
+}
+
+.chat-input-area {
+    background: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+}
+
+.attach-btn, .send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #888;
+}
+
+/* Mobile Responsiveness for Chat */
+@media (max-width: 768px) {
+    .chat-sidebar { display: none; } /* Hide list on mobile for this demo */
+    .chat-interface { flex-direction: column; }
+    .chat-main { width: 100%; }
+}

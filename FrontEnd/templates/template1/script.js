@@ -1,7 +1,3 @@
-// ==========================================
-// 1. GLOBAL HELPERS & AUTH FUNCTIONS
-// ==========================================
-
 // Global Toast Notification Helper
 window.showNotification = function (message, type = 'success') {
     let container = document.getElementById('notification-container');
@@ -30,34 +26,17 @@ window.showNotification = function (message, type = 'success') {
         setTimeout(() => toast.remove(), 500);
     }, 3000);
 };
-// Global Login Popup Trigger
-window.showLoginPopup = function () {
-    const modal = document.getElementById('auth-modal-overlay');
-    if (modal) {
-        modal.style.display = 'flex';
-    } else {
-        // This fixes the 404 error by navigating to the parent directory
-        alert("Please login to proceed.");
-        window.location.href = "../customerLogin.php";
-    }
-};
-
-// Global Auth Check
-window.checkLoginStatus = function () {
-    return typeof USER_LOGGED_IN !== 'undefined' && USER_LOGGED_IN === true;
-};
-
-// ==========================================
-// 2. CART LOGIC
-// ==========================================
-
+// Add this at the top of your script to manage the timer
 let debounceTimer;
 
 window.changeQty = function (cartId, currentQty, delta, supplierId, availableStock) {
     let newQty = parseInt(currentQty) + delta;
     if (newQty < 1) return;
 
+    // 1. STOCK VALIDATION & AUTO-ADJUSTMENT
     let maxStock = availableStock;
+
+    // Fallback if maxStock isn't provided correctly
     if (!maxStock || maxStock === 999) {
         const stockDisplay = document.getElementById('stock-display');
         if (stockDisplay && stockDisplay.textContent.includes('In Stock:')) {
@@ -65,12 +44,19 @@ window.changeQty = function (cartId, currentQty, delta, supplierId, availableSto
         }
     }
 
+    // CHECK IF EXCEEDED
     if (delta > 0 && newQty > maxStock) {
-        window.showNotification(`Only ${maxStock} items available in stock.`, "danger");
+        // Show notification
+        window.showNotification(`Only ${maxStock} items available in stock. Quantity adjusted.`, "danger");
+
+        // SET TO MAX STOCK instead of returning
         newQty = maxStock;
-        if (parseInt(currentQty) === maxStock) return;
+
+        // If the user was already at max stock and tries to add more, just stop here
+        if (parseInt(currentQty) === maxStock) return
     }
 
+    // 2. OPTIMISTIC UI UPDATE
     const btn = event.currentTarget;
     const container = btn.closest('.qty-selector-container');
     const display = container.querySelector('.qty-display');
@@ -78,11 +64,14 @@ window.changeQty = function (cartId, currentQty, delta, supplierId, availableSto
     if (display) {
         display.innerText = newQty;
         const buttons = container.querySelectorAll('.qty-button');
+        // Update both buttons to use the adjusted newQty
         buttons[0].setAttribute('onclick', `changeQty(${cartId}, ${newQty}, -1, ${supplierId}, ${availableStock})`);
         buttons[1].setAttribute('onclick', `changeQty(${cartId}, ${newQty}, 1, ${supplierId}, ${availableStock})`);
     }
 
+    // 3. DEBOUNCED FETCH
     clearTimeout(debounceTimer);
+
     debounceTimer = setTimeout(() => {
         const formData = new FormData();
         formData.append('cart_id', cartId);
@@ -101,9 +90,14 @@ window.changeQty = function (cartId, currentQty, delta, supplierId, availableSto
                     refreshCartDrawer(supplierId);
                 }
             })
-            .catch(err => console.error('Error updating quantity:', err));
+            .catch(err => {
+                console.error('Error updating quantity:', err);
+                refreshCartDrawer(supplierId);
+            });
     }, 300);
 };
+
+console.log("IS_LOGGED_IN:", window.IS_LOGGED_IN);
 
 function refreshCartDrawer(supplierId) {
     const container = document.getElementById('cartItemsContainer');
@@ -116,9 +110,13 @@ function refreshCartDrawer(supplierId) {
         .then(res => res.json())
         .then(data => {
             let html = '';
+            console.log("IS_LOGGED_IN:", window.IS_LOGGED_IN);
+
             if (data.items && data.items.length > 0) {
                 data.items.forEach(item => {
+                    // Check if stock exists in the item object, otherwise default to a high number or ignore
                     const availableStock = item.availableStock !== undefined ? item.availableStock : 999;
+
                     html += `
                     <div class="cart-item-block mb-4">
                         <div class="d-flex gap-3">
@@ -135,6 +133,7 @@ function refreshCartDrawer(supplierId) {
                                     <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, -1, ${supplierId}, ${availableStock})">−</button>
                                     <span class="qty-display">${item.qty}</span>
                                     <button class="qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, 1, ${supplierId}, ${availableStock})">+</button>
+                                   
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="fw-bold">$${parseFloat(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
@@ -148,13 +147,13 @@ function refreshCartDrawer(supplierId) {
                 });
                 container.innerHTML = html;
                 footer.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="fs-5">Total:</span>
-                        <span class="fs-5 fw-bold">$${data.total}</span>
-                    </div>
-                    <button class="addtobag_btn w-100" onclick="window.checkLoginStatus() ? window.location.href='../utils/accessCheckout.php?supplier_id=${supplierId}' : window.showLoginPopup()">
-                        Checkout
-                    </button>`;
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="fs-5">Total:</span>
+        <span class="fs-5 fw-bold">$${data.total}</span>
+    </div>
+    <button class="addtobag_btn w-100" onclick="window.location.href='../utils/accessCheckout.php?supplier_id=${supplierId}'">
+    Checkout
+    </button>`;
 
                 if (badge) badge.innerText = data.itemCount;
             } else {
@@ -165,32 +164,33 @@ function refreshCartDrawer(supplierId) {
         })
         .catch(err => console.error('Error fetching cart:', err));
 }
-
-// ==========================================
-// 3. EVENT LISTENERS
-// ==========================================
-
+// Variable to store the IDs temporarily while the modal is open
 let itemToDelete = null;
 let supplierToDelete = null;
 
 window.removeItem = function (cartId, supplierId) {
     itemToDelete = cartId;
     supplierToDelete = supplierId;
-    const modalElement = document.getElementById('deleteConfirmModal');
-    if (modalElement) {
-        const deleteModal = new bootstrap.Modal(modalElement);
+
+
+    const modalBtn = document.getElementById('confirmDeleteBtn');
+    if (modalBtn) {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
         deleteModal.show();
     }
 };
-
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const supplierId = urlParams.get('supplier_id');
 
+    // --------------------
+    // Delete item modal
+    // --------------------
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     if (confirmBtn) {
         confirmBtn.addEventListener('click', function () {
             if (!itemToDelete) return;
+
             const formData = new FormData();
             formData.append('cart_id', itemToDelete);
 
@@ -218,43 +218,49 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // --------------------
+    // Cart drawer
+    // --------------------
     const trigger = document.getElementById('cartIconTrigger');
     const closeBtn = document.getElementById('closeCart');
     const drawer = document.getElementById('cartDrawer');
     const overlay = document.getElementById('cartOverlay');
 
-    if (trigger) {
-        trigger.addEventListener('click', () => {
-            // Only open drawer if logged in (The nav.php onclick handles the guest side)
-            if (window.checkLoginStatus()) {
-                drawer.classList.add('open');
-                overlay.classList.add('active');
-                refreshCartDrawer(supplierId);
-            }
-        });
-    }
+    // Ensure drawer starts closed// START CLOSED: remove any "open" class from HTML
+    drawer?.classList.remove('open');
+    overlay?.classList.remove('active');
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            drawer.classList.remove('open');
-            overlay.classList.remove('active');
-        });
-    }
 
-    if (overlay) {
-        overlay.addEventListener('click', function () {
-            drawer.classList.remove('open');
-            overlay.classList.remove('active');
-        });
-    }
+    // Only open on click
+    trigger?.addEventListener('click', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const supplierId = urlParams.get('supplier_id');
+        if (!supplierId) return;
 
-    if (supplierId && window.checkLoginStatus()) refreshCartDrawer(supplierId);
+        drawer.classList.add('open');
+        overlay.classList.add('active');
+        refreshCartDrawer(supplierId); // Only call here
+    });
 
+    closeBtn?.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+
+    overlay?.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+
+
+
+    // --------------------
+    // Show error notification if any
+    // --------------------
     const errorMsg = urlParams.get('error');
     if (errorMsg) {
         window.showNotification(errorMsg, "danger");
-        const currentSupplierId = urlParams.get('supplier_id');
-        const newUrl = window.location.pathname + (currentSupplierId ? '?supplier_id=' + currentSupplierId : '');
+        const newUrl = window.location.pathname + (supplierId ? '?supplier_id=' + supplierId : '');
         window.history.replaceState({}, document.title, newUrl);
     }
 });

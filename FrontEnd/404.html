@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --gray: #222222;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--black);
+            color: var(--white);
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Intro Animation */
+        .intro-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeOut 1.5s ease-in-out 2s forwards;
+        }
+
+        .intro-text {
+            font-size: 4rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-text::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--white), transparent);
+            transform: translateX(-100%);
+            animation: introShine 2s ease-in-out;
+        }
+
+        /* 3D Container for 404 */
+        .container-3d {
+            perspective: 1000px;
+            margin-bottom: 40px;
+            transform-style: preserve-3d;
+        }
+
+        .error-number {
+            font-size: 12rem;
+            font-weight: bold;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float3d 6s ease-in-out infinite;
+        }
+
+        .digit {
+            display: inline-block;
+            position: relative;
+            text-shadow: 
+                5px 5px 0 var(--gray),
+                10px 10px 10px rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+        }
+
+        .digit:nth-child(1) { animation: digitGlitch1 8s infinite; }
+        .digit:nth-child(2) { animation: digitGlitch2 10s infinite; }
+        .digit:nth-child(3) { animation: digitGlitch3 7s infinite; }
+
+        /* Glitch Effect */
+        .glitch-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .glitch {
+            font-size: 3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            letter-spacing: 0.1em;
+            animation: glitch-effect 5s infinite;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--white);
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim-1 5s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 var(--white);
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim-2 5s infinite linear alternate-reverse;
+        }
+
+        /* Message */
+        .message {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-size: 1.2rem;
+            padding: 0 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out 3s forwards;
+        }
+
+        /* 3D Button */
+        .btn-3d {
+            background-color: var(--white);
+            color: var(--black);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out 3.5s forwards;
+        }
+
+        .btn-3d::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            /* background-color: var(--gray); */
+            top: 10px;
+            left: -10px;
+            transform: translateZ(-1px);
+            transition: all 0.3s;
+        }
+
+        .btn-3d:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-3d:hover::before {
+            top: 15px;
+            left: -15px;
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out 4s forwards;
+        }
+
+        /* Background Grid */
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            transform: perspective(500px) rotateX(60deg) translateZ(-100px);
+            opacity: 0.3;
+        }
+
+        /* Animations */
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        @keyframes introShine {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes float3d {
+            0%, 100% { transform: rotateY(0deg) translateY(0); }
+            50% { transform: rotateY(10deg) translateY(-20px); }
+        }
+
+        @keyframes digitGlitch1 {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            96% { transform: translate3d(2px, 0, 0); }
+            97% { transform: translate3d(-2px, 0, 0); }
+            98% { transform: translate3d(0, 2px, 0); }
+            99% { transform: translate3d(0, -2px, 0); }
+        }
+
+        @keyframes digitGlitch2 {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            94% { transform: translate3d(0, 0, 5px); }
+            95% { transform: translate3d(-2px, 0, 0); }
+            96% { transform: translate3d(2px, 0, 0); }
+            97% { transform: translate3d(0, 2px, 0); }
+        }
+
+        @keyframes digitGlitch3 {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            93% { transform: translate3d(0, 0, -5px); }
+            94% { transform: translate3d(2px, 0, 0); }
+            95% { transform: translate3d(-2px, 0, 0); }
+            96% { transform: translate3d(0, -2px, 0); }
+        }
+
+        @keyframes glitch-effect {
+            0%, 12%, 15%, 50%, 55%, 82%, 85%, 100% { transform: skew(0deg); }
+            13% { transform: skew(5deg); }
+            14% { transform: skew(-5deg); }
+            83% { transform: skew(3deg); }
+            84% { transform: skew(-3deg); }
+        }
+
+        @keyframes glitch-anim-1 {
+            0%, 5% { clip: rect(20px, 9999px, 85px, 0); }
+            10% { clip: rect(30px, 9999px, 90px, 0); }
+            15% { clip: rect(50px, 9999px, 100px, 0); }
+            20% { clip: rect(65px, 9999px, 80px, 0); }
+            25% { clip: rect(40px, 9999px, 75px, 0); }
+            30% { clip: rect(70px, 9999px, 95px, 0); }
+            35% { clip: rect(10px, 9999px, 55px, 0); }
+            40%, 100% { clip: rect(80px, 9999px, 100px, 0); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0%, 5% { clip: rect(85px, 9999px, 140px, 0); }
+            10% { clip: rect(65px, 9999px, 120px, 0); }
+            15% { clip: rect(95px, 9999px, 150px, 0); }
+            20% { clip: rect(105px, 9999px, 130px, 0); }
+            25% { clip: rect(65px, 9999px, 110px, 0); }
+            30% { clip: rect(100px, 9999px, 120px, 0); }
+            35% { clip: rect(75px, 9999px, 150px, 0); }
+            40%, 100% { clip: rect(88px, 9999px, 140px, 0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .error-number { font-size: 8rem; }
+            .glitch { font-size: 2rem; }
+            .message { font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .error-number { font-size: 6rem; }
+            .glitch { font-size: 1.5rem; }
+            .btn-3d { padding: 12px 30px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Animation -->
+    <div class="intro-animation">
+        <div class="intro-text">404</div>
+    </div>
+
+    <!-- 3D Background Grid -->
+    <div class="grid-bg"></div>
+
+    <!-- Main Content -->
+    <div class="container-3d">
+        <div class="error-number">
+            <span class="digit">4</span>
+            <span class="digit">0</span>
+            <span class="digit">4</span>
+        </div>
+    </div>
+
+    <div class="glitch-container">
+        <h1 class="glitch" data-text="Page Not Found">Page Not Found</h1>
+    </div>
+
+    <div class="message">
+        <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+        <p>The digital realm is full of mysteries, and sometimes pages get lost in the void.</p>
+    </div>
+
+    <button class="btn-3d" onclick="goHome()">
+        <i class="fas fa-home"></i> Back to Home
+    </button>
+
+    <div class="footer">
+        <p>© 2026 Digital Void. All rights reserved. | Error Code: 404-0001</p>
+    </div>
+
+    <script>
+        // Function to redirect to home
+        function goHome() {
+            // Add button click effect
+            const btn = document.querySelector('.btn-3d');
+            btn.style.transform = 'scale(0.95)';
+            
+            // Simulate navigation after a short delay
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 300);
+        }
+
+        // Add random glitch effects to digits
+        function randomGlitch() {
+            const digits = document.querySelectorAll('.digit');
+            digits.forEach(digit => {
+                if (Math.random() > 0.7) {
+                    digit.style.opacity = Math.random() > 0.5 ? 0.8 : 1;
+                    digit.style.transform = `translate3d(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px, ${Math.random() * 10 - 5}px)`;
+                }
+            });
+            
+            // Random glitch on the main text
+            if (Math.random() > 0.8) {
+                const glitch = document.querySelector('.glitch');
+                glitch.style.textShadow = `${Math.random() * 5 - 2.5}px ${Math.random() * 5 - 2.5}px 0 var(--white)`;
+                setTimeout(() => {
+                    glitch.style.textShadow = 'none';
+                }, 50);
+            }
+            
+            requestAnimationFrame(randomGlitch);
+        }
+
+        // Start random glitch effect after intro animation
+        setTimeout(() => {
+            randomGlitch();
+        }, 2500);
+
+        // Add keyboard interaction
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                goHome();
+            }
+        });
+    </script>
+</body>
+</html>

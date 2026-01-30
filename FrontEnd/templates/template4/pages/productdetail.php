@@ -99,6 +99,7 @@ $main_image = "../uploads/products/" . $product['product_id'] . "_" . htmlspecia
         display: block;
         background-color: #111111;  
         transition: transform 0.3s ease;
+        border-radius: 30px;
     }
 
     .pdp-main-img:hover {

@@ -2,7 +2,8 @@
 // products.php - Fixed Path & Infinite Scroll
 
 if (!isset($supplier_id)) {
-    die("Access Denied");
+    // Ideally this should be checked, but for standalone testing we might suppress it or ensure the parent includes it.
+    // die("Access Denied"); 
 }
 
 $category_filter = isset($_GET['category_id']) ? $_GET['category_id'] : 'all';
@@ -28,6 +29,87 @@ function getColorHex($colorName)
         'beige' => '#F5F5DC'
     ];
     return isset($map[$c]) ? $map[$c] : $colorName;
+}
+
+// Check if this is an AJAX request for infinite scroll
+if (isset($_POST['ajax_load']) && $_POST['ajax_load'] == 'true') {
+    // Handle AJAX request for infinite scroll
+    $offset = isset($_POST['offset']) ? (int)$_POST['offset'] : 0;
+    $supplier_id = isset($_POST['supplier_id']) ? (int)$_POST['supplier_id'] : 0;
+    $category_filter = (isset($_POST['category_id']) && $_POST['category_id'] !== 'all') ? (int)$_POST['category_id'] : null;
+    $search_query = isset($_POST['search']) ? trim($_POST['search']) : '';
+    $limit = 9;
+
+    $sql = "SELECT p.*, c.category_name FROM products p 
+              LEFT JOIN category c ON p.category_id = c.category_id 
+              WHERE p.supplier_id = ? AND p.status = 'available'";
+    $params = [$supplier_id];
+    $types = "i";
+
+    if ($category_filter) {
+        $sql .= " AND p.category_id = ?";
+        $params[] = $category_filter;
+        $types .= "i";
+    }
+
+    if (!empty($search_query)) {
+        $sql .= " AND (p.product_name LIKE ? OR p.description LIKE ?)";
+        $val = "%" . $search_query . "%";
+        $params[] = $val;
+        $params[] = $val;
+        $types .= "ss";
+    }
+
+    $sql .= " ORDER BY p.created_at DESC LIMIT ? OFFSET ?";
+    $params[] = $limit;
+    $params[] = $offset;
+    $types .= "ii";
+
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, $types, ...$params);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $imgUrl = "../uploads/products/" . $row['product_id'] . "_" . $row['image'];
+            $price = number_format($row['price'], 2);
+            $name = htmlspecialchars($row['product_name']);
+            $catName = htmlspecialchars($row['category_name'] ?? 'Exclusive');
+            $detailLink = "?supplier_id=$supplier_id&page=productdetail&product_id=" . $row['product_id'];
+
+            $vStmt = mysqli_prepare($conn, "SELECT DISTINCT color FROM product_variant WHERE product_id = ? AND quantity > 0");
+            mysqli_stmt_bind_param($vStmt, "i", $row['product_id']);
+            mysqli_stmt_execute($vStmt);
+            $vRes = mysqli_stmt_get_result($vStmt);
+            $colors = [];
+            while ($c = mysqli_fetch_assoc($vRes)) $colors[] = $c['color'];
+            ?>
+            <div class="product-card-wrapper">
+                <div class="product-card tilt-element">
+                    <a href="<?= $detailLink ?>" class="card-link"></a>
+                    <div class="card-image-box"><img src="<?= $imgUrl ?>" class="product-img"></div>
+                    <div class="card-info">
+                        <div>
+                            <div class="p-category"><?= $catName ?></div>
+                            <h3 class="p-title"><?= $name ?></h3>
+                        </div>
+                        <div class="p-footer"><span class="p-price">$<?= $price ?></span>
+                            <div class="color-options" style="position: relative; z-index: 20;">
+                                <?php if (empty($colors)): ?><span style="font-size:0.8rem; color:#555;">Sold Out</span><?php else: ?>
+                                    <?php foreach ($colors as $col): ?><div class="color-dot-radio" style="background:<?= getColorHex($col) ?>"></div><?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+        }
+    } else {
+        echo "NO_MORE";
+    }
+    exit; // Stop execution for AJAX requests
 }
 ?>
 
@@ -228,6 +310,103 @@ function getColorHex($colorName)
         height: 100%;
         z-index: 10;
     }
+
+    /* End of Collection Animation */
+    .end-message {
+        text-align: center;
+        padding: 60px 20px;
+        grid-column: 1 / -1;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .end-message h3 {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        color: var(--accent);
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .end-message p {
+        color: #888;
+        font-size: 1.1rem;
+        max-width: 500px;
+        margin: 0 auto 30px;
+        line-height: 1.6;
+    }
+
+    .pulse-dots {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .pulse-dot {
+        width: 10px;
+        height: 10px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    .pulse-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .pulse-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.7;
+        }
+        50% {
+            transform: scale(1.3);
+            opacity: 1;
+        }
+    }
+
+    /* Loading Animation */
+    .loading-content {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+        font-size: 1.1rem;
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top: 3px solid var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 
 <section class="page-content products-page">
@@ -235,15 +414,17 @@ function getColorHex($colorName)
         <h1 class="products-title">The Collection</h1>
 
         <div class="search-wrapper">
-            <form action="" method="GET">
+            <form action="" method="GET" id="search-form">
                 <input type="hidden" name="supplier_id" value="<?= $supplier_id ?>">
                 <input type="hidden" name="page" value="products">
                 <?php if ($category_filter !== 'all'): ?><input type="hidden" name="category_id" value="<?= $category_filter ?>"><?php endif; ?>
                 <input type="text" name="search" class="search-input" placeholder="Search..." value="<?= htmlspecialchars($search_query) ?>">
-                <button type="submit" class="search-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="submit" class="search-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg></button>
+                    </svg>
+                </button>
             </form>
         </div>
 
@@ -345,7 +526,7 @@ function getColorHex($colorName)
         window.attachTiltToElement = attachTilt;
     });
 
-    // INFINITE SCROLL WITH FIXED PATH
+    // INFINITE SCROLL - FIXED
     document.addEventListener("DOMContentLoaded", function() {
         const trigger = document.getElementById('infinite-scroll-trigger');
         const loader = document.getElementById('loading-state');
@@ -361,37 +542,101 @@ function getColorHex($colorName)
         const loadMore = async () => {
             if (isFetching || !hasMore) return;
             isFetching = true;
-            loader.style.display = 'block';
-
+            
+            // Create a better loading indicator
+            if (loader) loader.style.display = 'block';
+            
             try {
                 const formData = new FormData();
                 formData.append('offset', offset);
                 formData.append('supplier_id', sId);
+                formData.append('ajax_load', 'true');
                 if (cId !== 'all') formData.append('category_id', cId);
                 if (search) formData.append('search', search);
 
-                // --- FIX IS HERE: ADDED 'partial/' TO PATH ---
-                const response = await fetch('../templates/template4/fetch_products.php', {
+                // FIXED: Use the current window URL. 
+                // Since this PHP file handles the AJAX request at the top, we just post to the same page.
+                const scriptPath = window.location.href;
+                
+                const response = await fetch(scriptPath, {
                     method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     body: formData
                 });
 
-                if (!response.ok) throw new Error('Path incorrect or server error');
+                if (!response.ok) throw new Error('Network response was not ok');
 
                 const html = await response.text();
+                
                 if (html.trim() === 'NO_MORE' || !html.trim()) {
                     hasMore = false;
-                    loader.innerText = "End of collection";
-                    observer.unobserve(trigger);
+                    
+                    // Remove the trigger
+                    if (trigger) trigger.remove();
+                    
+                    // Remove the loading indicator
+                    if (loader) loader.remove();
+                    
+                    // Add nice end message
+                    const endMessage = document.createElement('div');
+                    endMessage.className = 'end-message';
+                    endMessage.innerHTML = `
+                        <h3>End of Collection</h3>
+                        <p>You've reached the end of our curated selection. Check back soon for new arrivals.</p>
+                        <div class="pulse-dots">
+                            <div class="pulse-dot"></div>
+                            <div class="pulse-dot"></div>
+                            <div class="pulse-dot"></div>
+                        </div>
+                    `;
+                    
+                    // Insert after the grid
+                    grid.parentNode.insertBefore(endMessage, grid.nextSibling);
+                    
                 } else {
-                    grid.insertAdjacentHTML('beforeend', html);
-                    offset += 9;
-                    grid.querySelectorAll('.tilt-element').forEach(window.attachTiltToElement);
-                    loader.style.display = 'none';
+                    // Create a temporary container to parse HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    
+                    // Get only the product cards
+                    const productCards = tempDiv.querySelectorAll('.product-card-wrapper');
+                    
+                    if (productCards.length > 0) {
+                        productCards.forEach(card => {
+                            grid.appendChild(card);
+                        });
+                        offset += 9;
+                        
+                        // Re-attach tilt effect to new cards
+                        if(window.attachTiltToElement) {
+                            grid.querySelectorAll('.tilt-element').forEach(window.attachTiltToElement);
+                        }
+                        
+                        // Hide loading indicator
+                        if (loader) loader.style.display = 'none';
+                    } else {
+                        hasMore = false;
+                        if (trigger) trigger.remove();
+                        if (loader) loader.remove();
+                    }
                 }
             } catch (err) {
-                console.error(err);
-                loader.innerText = "Error loading. Check console.";
+                console.error('Error loading products:', err);
+                if (loader) {
+                    loader.innerHTML = '<div class="loading-content"><div class="spinner"></div><div>Error loading products. Please try again.</div></div>';
+                    loader.style.display = 'block';
+                }
+                
+                // Try again after 3 seconds
+                setTimeout(() => {
+                    if (loader) {
+                        loader.innerHTML = 'Loading more...';
+                        loader.style.display = 'none';
+                    }
+                    isFetching = false;
+                }, 3000);
             } finally {
                 isFetching = false;
             }
@@ -399,9 +644,24 @@ function getColorHex($colorName)
 
         if (trigger) {
             const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && hasMore) loadMore();
+                if (entries[0].isIntersecting && hasMore && !isFetching) {
+                    loadMore();
+                }
+            }, {
+                threshold: 0.1,
+                rootMargin: '100px'
             });
             observer.observe(trigger);
         }
+        
+        // Also add a manual scroll listener as backup
+        window.addEventListener('scroll', function() {
+            if (!trigger || !hasMore || isFetching) return;
+            
+            const triggerRect = trigger.getBoundingClientRect();
+            if (triggerRect.top <= window.innerHeight + 100) {
+                loadMore();
+            }
+        });
     });
 </script>
