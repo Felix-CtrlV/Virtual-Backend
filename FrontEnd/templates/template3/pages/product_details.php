@@ -67,8 +67,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
         /* Existing Styles */
         .qty-error { color: #ff4d4d; font-size: 0.9rem; margin-top: 8px; display: none; font-weight: 600; }
         .add-cart:disabled { background-color: #d1d1d1 !important; cursor: not-allowed; opacity: 0.7; }
-        .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }
-        
+        .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }        
         /* Success Modal */
         .cart-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .cart-modal { background: white; padding: 40px; border-radius: 10px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease; }
@@ -84,127 +83,69 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
             justify-content: center;
             align-items: center;
             z-index: 10001;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(15px);
         }
 
         .login-prompt-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1); 
             width: 100%;
             max-width: 400px;
             padding: 45px 35px;
-            border-radius: 24px;
+            border-radius: 28px;
             text-align: center;
-            color: white;
-            font-family: 'Inter', sans-serif;
+            
             position: relative;
             border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
 
         .login-prompt-card h2 { 
-            color: #ffffff;
-            font-size: 30px; 
-            margin-bottom: 12px; 
-            font-weight: 700;
+            color: #ffffff; font-size: 30px; margin-bottom: 12px; font-weight: 700;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
-
+        
         .login-prompt-card p { 
-            color: #ffffff;
-            opacity: 0.9;
-            margin-bottom: 35px; 
-            font-size: 16px;
-            font-weight: 400;
+            color: #ffffff; opacity: 0.9; margin-bottom: 35px; font-size: 16px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
         }
-
-        .divider-container {
-            color: #ffffff;
-            font-weight: 500;
-            opacity: 0.7;
-        }
-        .divider-container::before, .divider-container::after {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-        }
-
-        .close-login {
-            color: #ffffff;
-            opacity: 0.8;
-            font-size: 28px;
-        }
-        .close-login:hover {
-            opacity: 1;
+        
+        .modal-action-btn {
+            display: block; width: 100%; padding: 14px; margin-bottom: 15px;
+            border-radius: 50px; font-size: 15px; font-weight: 600;
+            text-decoration: none; transition: all 0.3s ease; border: none; cursor: pointer;
+            text-align: center;
         }
 
         .btn-login-alt { 
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff; 
+            background: rgba(255, 255, 255, 0.15); color: #ffffff; 
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
         .btn-login-alt:hover { 
-            background: #ffffff;
-            color: #000000;
+            background: #ffffff; color: #000000;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
         }
 
         .btn-create-alt { 
-            background: transparent; 
-            color: #ffffff; 
+            background: transparent; color: #ffffff; 
             border: 1px solid rgba(255, 255, 255, 0.3); 
         }
 
-        .btn-create-alt:hover { 
-            border-color: #ffffff;
-            background: rgba(255, 255, 255, 0.1);
+        .btn-create-alt:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+        .divider-container { 
+            color: #ffffff; font-weight: 500; opacity: 0.7; display: flex; align-items: center; margin: 25px 0; 
         }
 
-        .close-login {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .divider-container {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 25px 0;
-            color: #555;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .divider-container::before, .divider-container::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #333;
-        }
+        .divider-container::before, .divider-container::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.4); }
         .divider-container:not(:empty)::before { margin-right: 15px; }
-        .divider-container:not(:empty)::after { margin-left: 15px; }
-
-        .modal-action-btn {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-login-alt { background-color: #333; color: white; }
-        .btn-login-alt:hover { background-color: #444; }
-        .btn-create-alt { background-color: transparent; color: white; border: 1px solid #444; }
-        .btn-create-alt:hover { background-color: #222; }
-
-        @keyframes fadeIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .divider-container:not(:empty)::after { margin-left: 15px; }      
     </style>
 </head>
 
 <body>
     <div class="login-prompt-overlay" id="loginPromptModal">
         <div class="login-prompt-card">
-            <span class="close-login" onclick="toggleLoginModal(false)">&times;</span>
+            <!-- <span class="close-login" onclick="toggleLoginModal(false)">&times;</span> -->
             <h2>Log back in</h2>
             <p>Choose an account to continue.</p>
             
@@ -213,6 +154,9 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
             <div class="modal-buttons">
                 <a href="../customerLogin.php?return_url=<?= $currentUrl ?>" class="modal-action-btn btn-login-alt">Log in to another account</a>
                 <a href="../customerRegister.php" class="modal-action-btn btn-create-alt">Create account</a>
+                <p onclick="toggleLoginModal(false)" style="cursor:pointer; margin-top:20px; font-size: 0.9rem; opacity: 0.5; transition: 0.3s;"
+                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">Cancel
+                </p>
             </div>
         </div>
     </div>
@@ -282,139 +226,151 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
     </div>
 
     <script>
-    const customerId = <?= isset($_SESSION['customer_id']) ? $_SESSION['customer_id'] : 0 ?>;
-    const ADD_TO_CART_API = "../utils/add_to_cart.php";
-    const allVariants = <?= json_encode($variants) ?>;
-    const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>; 
-    
-    const colorInputs = document.querySelectorAll('input[name="color"]');
-    const sizeSelect = document.getElementById('sizeSelect');
-    const qtyInput = document.getElementById('qtyInput');
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    const qtyErrorMessage = document.getElementById('qtyErrorMessage');
-    const stockDisplay = document.getElementById('stockDisplay');
-    const cartModal = document.getElementById('cartModal');
-    const loginPromptModal = document.getElementById('loginPromptModal');
+        const customerId = <?= isset($_SESSION['customer_id']) ? $_SESSION['customer_id'] : 0 ?>;
+        const ADD_TO_CART_API = "../utils/add_to_cart.php";
+        const allVariants = <?= json_encode($variants) ?>;
+        const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>; 
+                                
+        const colorInputs = document.querySelectorAll('input[name="color"]');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const qtyInput = document.getElementById('qtyInput');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const qtyErrorMessage = document.getElementById('qtyErrorMessage');
+        const stockDisplay = document.getElementById('stockDisplay');
+        const cartModal = document.getElementById('cartModal');
+        const loginPromptModal = document.getElementById('loginPromptModal');
 
-    let currentVariant = null;
+        let currentVariant = null;
 
-    function toggleLoginModal(show) {
-        loginPromptModal.style.display = show ? 'flex' : 'none';
-    }
+        function toggleLoginModal(show) {
+            loginPromptModal.style.display = show ? 'flex' : 'none';
+        }
 
-    colorInputs.forEach(input => {
-        input.addEventListener('change', (e) => {
-            const selectedColor = e.target.value.toString().trim().toLowerCase();
-            const filtered = allVariants.filter(v => v.color.toString().trim().toLowerCase() === selectedColor);
+        colorInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                const selectedColor = e.target.value.toString().trim().toLowerCase();
+                const filtered = allVariants.filter(v => v.color.toString().trim().toLowerCase() === selectedColor);
 
-            sizeSelect.innerHTML = '<option value="">Select Size</option>';
-            sizeSelect.disabled = false;
-            stockDisplay.textContent = '';
-            qtyInput.value = 1;
-            qtyErrorMessage.style.display = 'none';
-            currentVariant = null;
-            addToCartBtn.disabled = true;
+                sizeSelect.innerHTML = '<option value="">Select Size</option>';
+                sizeSelect.disabled = false;
+                stockDisplay.textContent = '';
+                qtyInput.value = 1;
+                qtyErrorMessage.style.display = 'none';
+                currentVariant = null;
+                addToCartBtn.disabled = true;
 
-            if (filtered.length === 0) {
-                sizeSelect.innerHTML = '<option value="">No sizes available</option>';
-                sizeSelect.disabled = true;
+                if (filtered.length === 0) {
+                    sizeSelect.innerHTML = '<option value="">No sizes available</option>';
+                    sizeSelect.disabled = true;
+                } else {
+                    filtered.forEach(v => {
+                        const option = document.createElement('option');
+                        option.value = v.size;
+                        const stockQty = parseInt(v.quantity) || 0;
+                        const isOutOfStock = stockQty <= 0;
+                        option.textContent = `${v.size} ${isOutOfStock ? '(Out of Stock)' : ''}`;
+                        if (isOutOfStock) option.disabled = true;
+                        sizeSelect.appendChild(option);
+                    });
+                }
+            });
+        });
+
+        sizeSelect.addEventListener('change', (e) => {
+            const checkedColorInput = document.querySelector('input[name="color"]:checked');
+            if (!checkedColorInput) return;
+
+            const selectedColor = checkedColorInput.value.toString().trim().toLowerCase();
+            const selectedSize = e.target.value;
+
+            currentVariant = allVariants.find(v => 
+                v.color.toString().trim().toLowerCase() === selectedColor && 
+                v.size.toString() === selectedSize.toString()
+            );
+
+            if (currentVariant) {
+                stockDisplay.textContent = `Stock available: ${currentVariant.quantity}`;
+                validateStock(); 
             } else {
-                filtered.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v.size;
-                    const stockQty = parseInt(v.quantity) || 0;
-                    const isOutOfStock = stockQty <= 0;
-                    option.textContent = `${v.size} ${isOutOfStock ? '(Out of Stock)' : ''}`;
-                    if (isOutOfStock) option.disabled = true;
-                    sizeSelect.appendChild(option);
-                });
+                stockDisplay.textContent = '';
+                addToCartBtn.disabled = true;
             }
         });
-    });
 
-    sizeSelect.addEventListener('change', (e) => {
-        const checkedColorInput = document.querySelector('input[name="color"]:checked');
-        if (!checkedColorInput) return;
+        function validateStock() {
+            if (!currentVariant) return;
+            const requestedQty = parseInt(qtyInput.value) || 0;
+            const availableQty = parseInt(currentVariant.quantity) || 0;
 
-        const selectedColor = checkedColorInput.value.toString().trim().toLowerCase();
-        const selectedSize = e.target.value;
-
-        currentVariant = allVariants.find(v => 
-            v.color.toString().trim().toLowerCase() === selectedColor && 
-            v.size.toString() === selectedSize.toString()
-        );
-
-        if (currentVariant) {
-            stockDisplay.textContent = `Stock available: ${currentVariant.quantity}`;
-            validateStock(); 
-        } else {
-            stockDisplay.textContent = '';
-            addToCartBtn.disabled = true;
-        }
-    });
-
-    function validateStock() {
-        if (!currentVariant) return;
-        const requestedQty = parseInt(qtyInput.value) || 0;
-        const availableQty = parseInt(currentVariant.quantity) || 0;
-
-        if (requestedQty > availableQty) {
-            qtyErrorMessage.textContent = `Only ${availableQty} items available.`;
-            qtyErrorMessage.style.display = 'block';
-            addToCartBtn.disabled = true;
-        } else if (requestedQty < 1) {
-            addToCartBtn.disabled = true;
-        } else {
-            qtyErrorMessage.style.display = 'none';
-            addToCartBtn.disabled = false;
-        }
-    }
-
-    function adjustQty(amount) {
-        let val = parseInt(qtyInput.value) || 1;
-        let newVal = val + amount;
-        if (newVal >= 1) {
-            qtyInput.value = newVal;
-            validateStock();
-        }
-    }
-
-    document.getElementById('addToCartForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        // Check Login Status - Trigger Modal instead of Alert
-        if (!customerId || customerId === 0) {
-            toggleLoginModal(true);
-            return;
-        }
-
-        if (!currentVariant) {
-            alert("Please select both color and size.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('variant_id', currentVariant.variant_id);
-        formData.append('supplier_id', supplierId);
-        formData.append('quantity', qtyInput.value);
-
-        fetch(ADD_TO_CART_API, {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                cartModal.style.display = 'flex';
-                setTimeout(() => { cartModal.style.display = 'none'; }, 2000);
+            if (requestedQty > availableQty) {
+                qtyErrorMessage.textContent = `Only ${availableQty} items available.`;
+                qtyErrorMessage.style.display = 'block';
+                addToCartBtn.disabled = true;
+            } else if (requestedQty < 1) {
+                addToCartBtn.disabled = true;
             } else {
-                alert(data.message || "Error adding to cart");
+                qtyErrorMessage.style.display = 'none';
+                addToCartBtn.disabled = false;
             }
-        })
-        .catch(err => {
-            console.error('Error:', err);
+        }
+
+        function adjustQty(amount) {
+            let val = parseInt(qtyInput.value) || 1;
+            let newVal = val + amount;
+            if (newVal >= 1) {
+                qtyInput.value = newVal;
+                validateStock();
+            }
+        }
+
+        const cancelBtn = document.getElementById('cancelModalBtn'); 
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => toggleLoginModal(false));
+        }
+                                
+        window.addEventListener('click', (e) => {
+            if (e.target === loginPromptModal) {
+                toggleLoginModal(false);
+            }
         });
-    });
-</script>
+
+        document.getElementById('addToCartForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Check Login Status - Trigger Modal instead of Alert
+            if (!customerId || customerId === 0) {
+                toggleLoginModal(true);
+                return;
+            }
+
+            if (!currentVariant) {
+                alert("Please select both color and size.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('variant_id', currentVariant.variant_id);
+            formData.append('supplier_id', supplierId);
+            formData.append('quantity', qtyInput.value);
+
+            fetch(ADD_TO_CART_API, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    cartModal.style.display = 'flex';
+                    setTimeout(() => { cartModal.style.display = 'none'; }, 2000);
+                } else {
+                    alert(data.message || "Error adding to cart");
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+            });
+        });
+                                
+    </script>
 </body>
 </html>

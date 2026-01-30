@@ -77,6 +77,94 @@ $average_rating = $total_ratings > 0
     <title>Reviews</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-modal {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 50px 40px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            color: white;
+            width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .login-modal h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .login-modal p {
+            opacity: 0.8;
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        .modal-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 40px;
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .modal-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .or-divider {
+            margin: 25px 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
+
+        .or-divider::before, .or-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 15px;
+        }
+
+        .cancel-btn {
+            margin-top: 20px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: 0.3s;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+
+        .cancel-btn:hover {
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
@@ -191,33 +279,65 @@ $average_rating = $total_ratings > 0
             </div>
         </div>
 
+        <div id="loginModal" class="modal-overlay">
+            <div class="login-modal">
+                <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Log back in</h1>
+                <p style="margin-bottom: 25px; opacity: 0.8;">Choose an account to continue.</p>
+
+                <div class="or-divider">OR</div>
+                <a href="../customerLogin.php?return_url=<?= $current_url ?>" class="modal-btn">Log in to another account</a>
+                <a href="../customerRegister.php" class="modal-btn">Create account</a>
+
+                <p onclick="document.getElementById('loginModal').style.display='none'" style="cursor:pointer; margin-top:20px; font-size: 0.9rem; opacity: 0.5; transition: 0.3s;"
+                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">Cancel
+                </p>
+            </div>
+        </div>
+
         <script>
             // --- 3. FRONTEND LOGIN PROTECTION (JS) ---
             const isLoggedIn = <?= json_encode($is_logged_in) ?>;
             const reviewForm = document.getElementById('reviewForm');
             const starBoxes = document.querySelectorAll('.star-box');
             const ratingInput = document.getElementById('selected-rating');
+            const loginModal = document.getElementById('loginModal');
 
-            reviewForm.addEventListener('submit', function(e) {
-                if (!isLoggedIn) {
-                    // Stop the form from submitting
-                    e.preventDefault(); 
-                    alert("Please login to submit your review.");
-                    // Redirect to login page with return URL
-                    window.location.href = `../customerLogin.php?return_url=${encodeURIComponent(window.location.href)}`;
-                }
-            });
-
+            // Star Click Logic
             starBoxes.forEach(box => {
                 box.addEventListener('click', () => {
-                    const rating = box.dataset.rating;
-                    ratingInput.value = rating;
+                    const currentRating = parseInt(box.dataset.rating);
+                    ratingInput.value = currentRating;
 
+                    // Star အားလုံးကို ပတ်စစ်ပြီး အရောင်ပြောင်းမယ်
                     starBoxes.forEach(s => {
-                        s.classList.toggle('gray', s.dataset.rating > rating);
+                        const sRating = parseInt(s.dataset.rating);
+                        if (sRating <= currentRating) {
+                            // ရွေးထားတဲ့ rating အောက်ဆိုရင် မီးလင်းရမယ် (gray class ကို ဖယ်မယ်)
+                            s.classList.remove('gray');
+                        } else {
+                            // ရွေးထားတဲ့ rating ထက် မြင့်ရင် မီးမှိတ်ရမယ် (gray class ထည့်မယ်)
+                            s.classList.add('gray');
+                        }
                     });
                 });
             });
+
+            // Form Submit Logic
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    if (!isLoggedIn) {
+                        e.preventDefault(); // Form data မပို့အောင် တားမယ်
+                        loginModal.style.display = 'flex'; // Popup ပြမယ်
+                    }
+                });
+            }
+
+            // Modal အပြင်ဘက်ကို နှိပ်ရင် ပိတ်ပေးဖို့
+            window.onclick = function(event) {
+                if (event.target == loginModal) {
+                    loginModal.style.display = "none";
+                }
+            }
         </script>
 
 </body>

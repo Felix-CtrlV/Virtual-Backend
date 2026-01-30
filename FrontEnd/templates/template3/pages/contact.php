@@ -61,16 +61,9 @@
             <div class="form-flex">
                 <div class="form-inputs animate-left">
                     <form action="contact.php" method="POST">
+
                         <div class="input-group">
-                            <input type="text" name="name" placeholder="What's your Name?" required>
-                            <span class="focus-border"></span>
-                        </div>
-                        <div class="input-group">
-                            <input type="email" name="email" placeholder="Your Email" required>
-                            <span class="focus-border"></span>
-                        </div>
-                        <div class="input-group">
-                            <textarea name="message" rows="4" placeholder="How can we help you?" required></textarea>
+                            <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
                             <span class="focus-border"></span>
                         </div>
                         <button type="submit" name="submit" class="submit-btn">

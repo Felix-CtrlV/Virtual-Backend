@@ -44,10 +44,10 @@ $current_page = 'home.php';
     }
 
     .hero-inner {
-        min-width: 100vw;
+        /* min-width: 100vw; */
         width: 100%;
-        aspect-ratio: 16 / 9; 
-        max-height: 95vh;
+        /* aspect-ratio: 16 / 9; */
+        max-height: 70vh;
         overflow: hidden;
         display: flex;
         align-items: center;
