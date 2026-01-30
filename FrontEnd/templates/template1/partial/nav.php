@@ -33,13 +33,7 @@
                 <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=contact">Contact</a></li>
                 <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=about">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="/malltiverse/frontend/customer">Exit</a></li>
-                
-                <li class="nav-item ms-lg-3">
-                    <a href="javascript:void(0)" id="cartIconTrigger" class="nav-link position-relative cart-link">
-                        <i class="bi bi-cart fs-4"></i>
-                        <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count" style="font-size: 0.7rem;"></span>
-                    </a>
-                </li>
+               
             </ul>
         </div>
     </div>
