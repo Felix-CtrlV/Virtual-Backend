@@ -2,9 +2,9 @@
 
  // later make dynamic if needed
 
-$sql = "SELECT about, banner FROM shop_assets WHERE supplier_id = ?";
+$sql = "SELECT about, banner FROM shop_assets WHERE company_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $supplier_id);
+$stmt->bind_param("i", $company_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $shop_assets = $result->fetch_assoc();

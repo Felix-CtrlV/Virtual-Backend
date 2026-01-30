@@ -1,5 +1,4 @@
-
-    :root {
+:root {
     --overlay-color: 0, 0, 0;
     --overlay-opacity: 0.55;
     --bg-text: #ffffff;
@@ -92,7 +91,6 @@ body.about {
     opacity: 0.9;
     font-size: 1.1em;
 }
-
 
 .main-nav {
 
@@ -462,7 +460,7 @@ ABOUT PAGE STYLES
     width: 100%;
     height: 100%;
     background: rgba(var(--overlay-color), var(--overlay-opacity));
- display: flex;
+    display: flex;
     justify-content: center;
     align-items: center;
     padding: 40px;
@@ -1063,7 +1061,8 @@ CONTACT PAGE STYLES
     height: 431px;
     padding: 20px 30px;
     border-radius: 18px;
-    background: #e0e0e0; /*do not change this*/
+    background: #e0e0e0;
+    /*do not change this*/
     display: flex;
     flex-direction: column;
     box-shadow:
@@ -1956,7 +1955,7 @@ CONTACT PAGE STYLES
 
 
 .cart-link {
-
+    padding: .5rem .5rem .5rem .5rem !important;
     position: relative;
     display: inline-block;
 }
@@ -2275,4 +2274,423 @@ cart login====*/
     font-weight: 600;
     min-width: 20px;
     text-align: center;
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+   CLEANED-UP UNIVERSAL RESPONSIVE FIXES
+   ============================================================ */
+
+/* 1. Global Overflow Prevention */
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Base Hero Styling */
+.about-hero,
+.hero-section {
+    height: 100vh;
+    min-height: 500px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #222;
+    /* Fallback color so text is visible while image loads */
+}
+
+/* FIX: Ensure the background image is visible and covers the area */
+.hero-media,
+.about-hero img,
+.about-hero-img,
+.hero-section img {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover !important;
+    object-position: center;
+    z-index: 0 !important;
+    /* Changed from -1 to 0 to ensure it doesn't hide behind the section background */
+}
+
+/* ============================================================
+   LAPTOP / DESKTOP SETTINGS (min-width: 992px)
+   ============================================================ */
+@media (min-width: 992px) {
+
+    /* Create the gap between the "Exit" link and the Basket icon */
+    .collapse.navbar-collapse {
+        margin-right: 20px !important;
+    }
+
+    /* Keeps basket aligned with nav text */
+    .mobile-cart-wrapper {
+        display: flex;
+        align-items: center;
+        margin-left: 20px;
+        order: 2;
+    }
+}
+
+/* ============================================================
+   TABLET / MOBILE SETTINGS (max-width: 991px)
+   ============================================================ */
+@media (max-width: 991px) {
+
+    /* Navbar height and layout */
+    .main-nav {
+        height: auto !important;
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    /* Force Logo, Basket, and Hamburger into one line */
+    .main-nav .container-fluid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        /* gap: 20px; */
+    }
+
+    /* Basket icon positioning on mobile */
+    .mobile-cart-wrapper {
+        margin-left: auto;
+        margin-right: 15px !important;
+        order: 2 !important;
+    }
+
+    .cart-link {
+        display: block !important;
+        visibility: visible !important;
+            padding: .5rem .0px .5rem .5rem !important;
+        }
+
+    /* Cart badge alignment */
+    .cart-badge {
+        top: -2px !important;
+        right: -8px !important;
+    }
+
+    /* Hamburger Button position */
+    .navbar-toggler {
+        order: 3 !important;
+        margin-left: 0 !important;
+    }
+
+    /* Dropdown menu styling */
+    .navbar-collapse {
+        order: 4;
+        /* margin-right: 0px; */
+        width: 100%;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: var(--secondary);
+        z-index: 999;
+        text-align: center;
+        padding-bottom: 20px;
+    }
+
+    /* Product Detail Page Layout */
+    .detail_card {
+        flex-direction: column !important;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .detail_product_image img,
+    .detail_product {
+        width: 100% !important;
+        max-width: 400px;
+        height: auto !important;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 10vw, 3.5rem) !important;
+    }
+}
+
+/* ============================================================
+   SMALL PHONE SETTINGS (max-width: 576px)
+   ============================================================ */
+@media (max-width: 576px) {
+    .site-title {
+        font-size: 1rem !important;
+    }
+
+    .cart-sidebar,
+    #cartDrawer {
+        width: 100% !important;
+    }
+
+    .about-title {
+        font-size: 1.8rem !important;
+    }
+
+    /* Stack buttons for better thumb access */
+    .product-page-btn,
+    .contact-page-btn {
+        width: 100% !important;
+        margin: 10px 0 !important;
+    }
+}
+
+
+
+
+/*Image adjust*/
+.categories-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1sfr) !important;
+    /* 2 images per row */
+    gap: 15px !important;
+    padding: 10px;
+    width: 100%;
+}
+
+.category-card {
+    width: 100% !important;
+    height: 450px !important;
+    /* Fixed height to keep images uniform */
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.category-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    /* Prevents image stretching */
+    object-position: center;
+}
+
+/* Adjusts the 'Shop Now' overlay for smaller screens */
+.category-overlay h3 {
+    font-size: 1rem !important;
+    margin-bottom: 5px;
+}
+
+.shop-btn {
+    padding: 5px 15px !important;
+    font-size: 0.8rem !important;
+}
+
+
+
+
+/*Adjust quantity-selector and ADD TO BAG */
+.quantity-add {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+/* Optional: Ensure the button doesn't look squashed on mobile */
+@media (max-width: 576px) {
+    .quantity-add {
+        gap: 15px;
+        justify-content: center;
+    }
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   CONTACT PAGE UNIFIED DESIGN
+   ============================================================ */
+
+/* The outer background wrapper */
+.contact-page-bg {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* The Unified Card Container */
+.contact-page {
+    display: flex;
+    flex-direction: row;
+    /* Side by side on laptop */
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    overflow: hidden;
+    max-width: 1100px;
+    width: 100%;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* Text Content Side */
+.contact-content-wrapper {
+    flex: 1;
+    padding: 60px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    /* Matches your gray theme */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Image Side */
+.contact-image-container {
+    flex: 1;
+    line-height: 0;
+    /* Removes small gap at bottom */
+}
+
+.contact-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Icon and Grid styling */
+.contact-info-grid {
+    margin-top: 30px;
+}
+
+.info-column {
+    margin-bottom: 25px;
+}
+
+.info-column h3 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* ============================================================
+   MOBILE RESPONSIVENESS (max-width: 991px)
+   ============================================================ */
+@media (max-width: 991px) {
+    .contact-page {
+        flex-direction: column;
+        /* Stacks image and text */
+        margin-top: 20px;
+    }
+
+    .contact-content-wrapper {
+        padding: 40px 25px;
+        order: 1;
+        /* Text on top */
+    }
+
+    .contact-image-container {
+        height: 350px;
+        /* Give it a fixed height on mobile */
+        order: 2;
+        /* Image on bottom */
+    }
+
+    .contact-header h2 {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .contact-header p {
+        text-align: center;
+    }
+
+    .info-column {
+        text-align: center;
+    }
+}
+
+/* ============================================================
+    Move basket on nav bar
+   ============================================================ */
+/* Ensure the mobile action group stays visible and aligned */
+.order-lg-last {
+    display: flex;
+    margin-right: 0px !important;
+    align-items: center;
+}
+
+/* Fix the cart badge position so it doesn't float away */
+
+
+.cart-badge {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    transform: translate(25%, -25%);
+}
+
+/* Laptop/Desktop Specific Adjustments */
+@media (min-width: 992px) {
+
+    /* This makes sure the links stay in the middle and cart is on the far right */
+    navbar-collapse {
+        flex-grow: 1;
+        order: 1;
+    }
+
+    .order-lg-last {
+        order: 2;
+        /* Forces the cart to the right of the 'Exit' link */
+        margin-left: 1.5rem;
+        margin-right: 35px !important;
+    }
+
+    /* Hide the toggler on desktop (Bootstrap usually does this, but good to be safe) */
+    .navbar-toggler {
+        display: none;
+    }
+}
+
+/* Mobile Specific Adjustments */
+@media (max-width: 991px) {
+    .navbar-brand {
+        max-width: 60%;
+        /* Prevents long titles from pushing the cart off screen */
+        overflow: hidden;
+    }
+}
+
+/* =====================================
+    Change the Basket (Cart) Icon Color
+   =====================================*/
+#cartIconTrigger i.bi-cart {
+    color: #ffffff;
+    /* Change this hex code to any color you prefer */
+    /* margin-right: 20px; */
+}
+
+/* 2. Adjust the gap between 'Exit' and the Basket on Desktop */
+@media (min-width: 992px) {
+    .order-lg-last {
+        margin-left: 40px !important;
+        /* Increase or decrease this px value for the gap */
+    }
 }

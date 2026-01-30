@@ -12,7 +12,7 @@ $sql = "
     c.description
 FROM suppliers s
 JOIN companies c ON s.supplier_id = c.supplier_id
-JOIN shop_assets sa ON sa.supplier_id = s.supplier_id
+JOIN shop_assets sa ON sa.company_id = c.company_id
 WHERE s.supplier_id = ?
 LIMIT 1
  

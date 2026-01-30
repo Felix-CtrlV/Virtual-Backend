@@ -4,9 +4,7 @@
             <?php if (!empty($shop_assets['logo'])): ?>
                 <div class="logo-container">
                     <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
-                        alt="<?= htmlspecialchars($supplier['company_name']) ?> Logo" class="site-logo">
-
-
+                         alt="<?= htmlspecialchars($supplier['company_name']) ?> Logo" class="site-logo">
                 </div>
             <?php endif; ?>
             <div class="header-text">
@@ -14,9 +12,18 @@
             </div>
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="d-flex align-items-center gap-4 ms-auto order-lg-last" style="margin-right: 35px;">
+            <a href="javascript:void(0)" id="cartIconTrigger" class="position-relative cart-link"
+                onclick="<?= $isLoggedIn ? '' : 'showLoginPopup(); event.stopPropagation();' ?>">
+                <i class="bi bi-cart fs-4"></i>
+                <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count"
+                    style="font-size: 0.7rem;"></span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="color: var(--primary);">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
@@ -26,13 +33,7 @@
                 <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=contact">Contact</a></li>
                 <li class="nav-item"><a class="nav-link" href="?supplier_id=<?= $supplier_id ?>&page=about">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="/malltiverse/frontend/customer">Exit</a></li>
-                
-                <li class="nav-item ms-lg-3">
-                    <a href="javascript:void(0)" id="cartIconTrigger" class="nav-link position-relative cart-link">
-                        <i class="bi bi-cart fs-4"></i>
-                        <span class="badge rounded-pill bg-danger cart-badge" id="nav-cart-count" style="font-size: 0.7rem;"></span>
-                    </a>
-                </li>
+               
             </ul>
         </div>
     </div>
@@ -75,6 +76,8 @@
 
  
 </style>
+
+
 
 <div id="cartDrawer" class="cart-sidebar">
     <div class="cart-sidebar-header d-flex justify-content-between align-items-center">
