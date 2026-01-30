@@ -11,7 +11,7 @@ include("../../BackEnd/config/dbconfig.php");
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 3;
 
 
-$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE supplier_id = $supplier_id LIMIT 1";
+$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE company_id = $company_id LIMIT 1";
 $color_result = $conn->query($color_sql);
 $primary_color = "#c5a059";   
 $secondary_color = "#e0c08d"; 

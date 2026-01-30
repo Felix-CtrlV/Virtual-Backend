@@ -6,9 +6,21 @@ if (!isset($conn)) {
 
 $supplier_id = (int) $supplier['supplier_id'];
 
-$assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE supplier_id = ?");
+$company_stmt = mysqli_prepare($conn, "Select * from companies where supplier_id = ?");
+if($company_stmt){
+    mysqli_stmt_bind_param($company_stmt, "i", $supplier_id);
+    mysqli_stmt_execute($company_stmt);
+    $company_result = mysqli_stmt_get_result($company_stmt);
+}else{
+    $company_result = false;
+}
+
+$company_row = mysqli_fetch_assoc($company_result);
+$company_id = $company_row['company_id'];
+
+$assets_stmt = mysqli_prepare($conn, "SELECT * FROM shop_assets WHERE company_id = ?");
 if ($assets_stmt) {
-    mysqli_stmt_bind_param($assets_stmt, "i", $supplier_id);
+    mysqli_stmt_bind_param($assets_stmt, "i", $company_id);
     mysqli_stmt_execute($assets_stmt);
     $assets_result = mysqli_stmt_get_result($assets_stmt);
 } else {

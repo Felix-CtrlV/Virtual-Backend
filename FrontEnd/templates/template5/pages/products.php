@@ -1,7 +1,7 @@
 <?php
 
 $supplier_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 10;
-$query = "SELECT * FROM shop_assets WHERE supplier_id = $supplier_id";
+$query = "SELECT * FROM shop_assets WHERE company_id = $company_id";
 $result = mysqli_query($conn, $query);
 $shop_assets = mysqli_fetch_assoc($result);
 ?>

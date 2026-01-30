@@ -21,8 +21,12 @@
                     <p><?= htmlspecialchars($about2 ?? '') ?></p>
                 </header>
 
+                <form class="luxury-form">
+                    
 
-                      <div class="field">
+
+                 
+                    <div class="field">
                         <label>Message</label>
                         <textarea rows="4" placeholder="How may we assist you today?"></textarea>
                     </div>

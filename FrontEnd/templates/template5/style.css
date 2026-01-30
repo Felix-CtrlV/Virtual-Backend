@@ -2668,9 +2668,8 @@ footer css
     /* Luxury Watch Title */
     .page-title {
         font-family: var(--font-serif);
-        font-size: clamp(3rem, 6vw, 4.5rem);
-        font-weight: 300; 
-        letter-spacing: 4px;
+        font-size:20px;
+        font-weight: 200; 
         text-transform: uppercase;
         color: var(--gold-primary);
        margin: 0;
@@ -2992,8 +2991,8 @@ footer {
 
 .page-title {
     font-family: var(--font-serif);
-    font-size: 3.5rem;
-    letter-spacing: 4px;
+    font-size: 2.5rem;
+    letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--gold);
     margin: 0;
@@ -3001,7 +3000,7 @@ footer {
 
 .page-subtitle {
     text-transform: uppercase;
-    letter-spacing: 6px;
+    letter-spacing: 4px;
     font-size: 0.8rem;
     color: var(--gold-leaf);
     opacity: 0.7;
@@ -3156,7 +3155,14 @@ footer {
     border-bottom: 1px solid var(--gold);
 }
 
-
+.star-rating-select {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    color: var(--gold);
+    cursor: pointer;
+}
 
 .submit-btn {
     width: 100%;
@@ -3176,16 +3182,10 @@ footer {
 }
 .star-rating-select {
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    gap: 5px;
-}
-.star-rating-select label svg {
-    width: 30px;
-    height: 30px;
-    fill: #ddd !important; /* Bina select kiya hua star */
-    cursor: pointer;
-    transition: fill 0.3s ease;
+    flex-direction: row-reverse; 
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
 }
 
 .star-rating-select input {
@@ -3361,7 +3361,7 @@ input[name="qty"] {
 .container1 {
     display: flex;
     width: 100%;
-    max-width: 1200px; 
+    max-width: 1000px; 
     margin: 0 auto 100px auto;
     gap: 40px;
     align-items: flex-start;
@@ -3724,3 +3724,71 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+/* --- STATS DASHBOARD RESPONSIVE FIX --- */
+
+
+.stats-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 2fr; 
+    gap: 30px;
+    align-items: center;
+    padding: 40px;
+    background: #161b22; 
+    border-radius: 20px;
+    margin-bottom: 40px;
+}
+
+
+@media screen and (max-width: 768px) {
+    .stats-dashboard {
+        grid-template-columns: 1fr; 
+        padding: 25px 15px;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .big-score-block {
+        border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        padding-bottom: 20px;
+    }
+
+    .big-score {
+        font-size: 4rem; 
+        line-height: 1;
+    }
+
+
+    .hud-bar-row {
+        display: grid;
+        grid-template-columns: 60px 1fr 40px; /* Star Label | Bar | Count */
+        gap: 10px;
+        align-items: center;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .hud-label {
+        font-size: 0.9rem;
+    }
+
+    .hud-track {
+        height: 8px; /* Bar အမြင့်ကို နည်းနည်းသေးမယ် */
+    }
+
+    .stars-row {
+        justify-content: center; /* ကြယ်တွေကို အလယ်ပို့မယ် */
+        font-size: 1.5rem;
+        margin-top: 10px;
+    }
+}
+
+/* ဖုန်းအသေးစားများအတွက် (480px အောက်) */
+@media screen and (max-width: 480px) {
+    .big-score {
+        font-size: 3.5rem;
+    }
+    
+    .hud-label {
+        font-size: 0.8rem;
+    }
+}
