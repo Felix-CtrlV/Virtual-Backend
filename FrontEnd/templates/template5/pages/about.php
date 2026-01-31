@@ -90,6 +90,15 @@
         line-height: 1;
         box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
     }
+   .about-luxury-section {
+    background-color: white;
+    color: #2980b9;
+    padding: 60px 0 120px 0; 
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 1px;
+    margin-bottom: 80px; 
+}
 </style>
 
 <section class="about-luxury-section">
@@ -98,24 +107,24 @@
             
             <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5"> 
                 <h2 class="about-heading">
-                   <?= htmlspecialchars($supplier['company_name']) ?><br>
+                   <?= htmlspecialchars($supplier['company_name']) ?>
     
                 </h2>
                 
             At <?= htmlspecialchars($supplier['tags'] ?? '') ?>  <strong>
         <?= htmlspecialchars($shop_assets['about'] ?? '') ?>  
     </strong> 
-                <br>
+               
                   <div class="row">
                     <div class="col-sm-6">
-                        <br>
+                       
                         <div class="stat-box">
                             <span class="stat-number"><?= htmlspecialchars($supplier['tags']) ?></span>
                             <span class="stat-text"></span>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <br>
+                       
                         <div class="stat-box">
                             <span class="stat-number"><?= htmlspecialchars($supplier['description']) ?></span>
                             

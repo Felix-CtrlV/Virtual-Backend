@@ -3,12 +3,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Login Session ရှိမရှိ စစ်ဆေးခြင်း
+
 if (!isset($_SESSION['customer_id'])) {
-    // Session မရှိရင် Login Page ဆီ ချက်ချင်း ပြန်ပို့မယ်
-    // လမ်းကြောင်း (Path) ကို သေချာစစ်ပါ (../../ လိုအပ်ရင် ပြင်ပါ)
+   
     header("Location: ../utils/customerLogin.php"); 
-    exit(); // အောက်က database query တွေ ဆက်အလုပ်မလုပ်အောင် ရပ်လိုက်ခြင်း
+    exit(); 
 }
 
 $customer_id = $_SESSION['customer_id'];
@@ -34,7 +33,8 @@ if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
         document.addEventListener('DOMContentLoaded', function() {
             const Toast = Swal.mixin({
                 toast: true,
-                position: 'top-end',
+                // ဒီနေရာမှာ ပြောင်းလိုက်ပါ
+                position: window.innerWidth < 768 ? 'bottom' : 'top-end', 
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
@@ -836,6 +836,20 @@ $total_price = 0;
     .summary-panel-modern {
         position: static;
         width: 100%;
+    }
+}
+div.swal2-container.swal2-top-end,
+div.swal2-container.swal2-top {
+    z-index: 99999 !important; 
+}
+
+@media (max-width: 768px) {
+   
+    div.swal2-container.swal2-top-end {
+        top: 80px !important; 
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 90% !important;
     }
 }
 </style>

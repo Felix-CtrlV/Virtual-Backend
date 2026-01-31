@@ -182,41 +182,56 @@ function displayStock() {
             String(v.color).trim() === selectedColor
         );
 
-        
         if (currentVariant) {
-            fetch(`../utils/get_cart_data.php?variant_id=${currentVariant.variant_id}`)
-            .then(res => res.json())
-            .then(data => {
-                let realStock = 0;
-                
-               
-                if (data.items && data.items.length > 0) {
-                    const matchedItem = data.items.find(item => item.variant_id == currentVariant.variant_id);
-                    realStock = matchedItem ? parseInt(matchedItem.availableStock) : 0;
-                } else if (data.availableStock !== undefined) {
-                    realStock = parseInt(data.availableStock);
-                }
+            const updateStockUI = (availableStock) => {
+            
+                currentVariant.quantity = availableStock; 
 
-                
-                currentVariant.quantity = realStock; 
-
-                if (realStock <= 0) {
+                if (availableStock <= 0) {
                     stockDisplay.className = "mt-1 small fw-bold text-danger";
                     stockDisplay.innerHTML = `<i class="fas fa-times-circle me-1"></i> Out of Stock`;
                     addToCartBtn.disabled = true;
                 } else {
                     stockDisplay.className = "mt-1 small fw-bold text-success";
-                    stockDisplay.innerHTML = `<i class="fas fa-check-circle me-1"></i> Stock available: ${realStock}`;
+                    stockDisplay.innerHTML = `<i class="fas fa-check-circle me-1"></i> Stock available: ${availableStock}`;
                     addToCartBtn.disabled = false;
                 }
-                validateQty(); 
-            })
-            .catch(err => {
-                console.error("Fetch error:", err);
-                stockDisplay.innerText = "Error loading stock info";
-            });
-        } else {
+                validateQty();
+            };
+
+          
             
+            if (!isLoggedIn) {
+               
+                let dbStock = parseInt(currentVariant.quantity);
+                updateStockUI(dbStock);
+            } else {
+                
+                fetch(`../utils/get_cart_data.php?variant_id=${currentVariant.variant_id}`)
+                .then(res => res.json())
+                .then(data => {
+                    let realStock = 0;
+                    
+                    if (data.items && data.items.length > 0) {
+                        const matchedItem = data.items.find(item => item.variant_id == currentVariant.variant_id);
+                        realStock = matchedItem ? parseInt(matchedItem.availableStock) : parseInt(currentVariant.quantity);
+                    } else if (data.availableStock !== undefined) {
+                        realStock = parseInt(data.availableStock);
+                    } else {
+                       
+                        realStock = parseInt(currentVariant.quantity);
+                    }
+                    
+                    updateStockUI(realStock);
+                })
+                .catch(err => {
+                    console.error("Fetch error:", err);
+                    
+                    updateStockUI(parseInt(currentVariant.quantity));
+                });
+            }
+
+        } else {
             stockDisplay.innerText = "Variant not found";
             addToCartBtn.disabled = true;
         }
@@ -263,18 +278,35 @@ function displayStock() {
     // Add to Cart Logic
     document.getElementById('addToCartBtn').addEventListener('click', function () {
         if (!isLoggedIn) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Login Required',
-                text: 'Please login to add items to your cart.',
-                showCancelButton: true,
-                confirmButtonText: 'Login Now',
-                confirmButtonColor: '#212529'
-            }).then((result) => {
-                if (result.isConfirmed) window.location.href = '../customerLogin.php';
-            });
-            return;
+        Swal.fire({
+        title: 'Login Required',
+        text: 'Please login to add items to your cart.',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Login Now',
+        cancelButtonText: 'Maybe Later',
+        confirmButtonColor: '#212529',
+        customClass: {
+            popup: 'premium-swal',
+            title: 'premium-title',
+            htmlContainer: 'premium-text',
+            confirmButton: 'premium-confirm-btn',
+            cancelButton: 'premium-cancel-btn'
+        },
+        showClass: {
+            popup: 'animate__animated animate__fadeInUp animate__faster'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutDown animate__faster'
         }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '../customerLogin.php';
+        }
+    });
+    return;
+}   
+        
 
         if (!currentVariant) {
             Swal.fire({ icon: 'warning', title: 'Selection Missing', text: 'Please select color and size.' });
@@ -375,4 +407,46 @@ function displayStock() {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
     color: #333;
+}
+/* SweetAlert Modern Customization */
+.swal2-popup.premium-swal {
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+}
+
+.swal2-title.premium-title {
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    font-size: 1.5rem !important;
+}
+
+.swal2-html-container.premium-text {
+    color: #666 !important;
+    font-size: 1rem !important;
+}
+
+/* Button Customization */
+.swal2-confirm.premium-confirm-btn {
+    border-radius: 10px !important;
+    padding: 12px 30px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(33, 37, 41, 0.2) !important;
+}
+
+.swal2-cancel.premium-cancel-btn {
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: #dc3545 !important;
+    border: 1px solid #dc3545 !important;
+    padding: 12px 30px !important;
+    font-weight: 600 !important;
+}
+
+.swal2-icon.swal2-info {
+    border-color: #212529 !important;
+    color: #212529 !important;
 }</style>
