@@ -18,39 +18,42 @@ $activesupplierspercent = $suppliersrow['total_company'] / max($totalsuppliersro
 
 $rentquery = " SELECT
     COUNT(DISTINCT c.company_id) AS total_shops,
-    
+
     COUNT(DISTINCT CASE 
-        WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) 
-             AND rp.due_date >= CURRENT_DATE 
-        THEN c.company_id 
+        WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE)
+             AND rp.due_date >= CURRENT_DATE
+        THEN c.company_id
     END) AS paid_shops,
-    
+
     ROUND(
         COUNT(DISTINCT CASE 
-            WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) 
-                 AND rp.due_date >= CURRENT_DATE 
-            THEN c.company_id 
-        END) * 100.0 / NULLIF(COUNT(DISTINCT c.company_id), 0),
+            WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE)
+                 AND rp.due_date >= CURRENT_DATE
+            THEN c.company_id
+        END) * 100.0
+        / NULLIF(COUNT(DISTINCT c.company_id), 0),
         2
     ) AS payment_percentage,
-    
+
     COUNT(DISTINCT CASE 
-        WHEN rp.due_date < CURRENT_DATE 
-        THEN c.company_id 
+        WHEN rp.due_date < CURRENT_DATE
+        THEN c.company_id
     END) AS overdue_shops,
-    
+
     COALESCE(SUM(CASE 
-        WHEN rp.paid_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') 
+        WHEN rp.paid_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
              AND rp.paid_date <= CURRENT_DATE
-        THEN rp.paid_amount 
+        THEN rp.amount
     END), 0) AS total_collected_amount
 
 FROM suppliers s
-INNER JOIN companies c 
-    ON c.supplier_id = s.supplier_id AND c.status = 'active'
-LEFT JOIN rent_payments rp 
-    ON rp.supplier_id = s.supplier_id
+INNER JOIN companies c
+    ON c.supplier_id = s.supplier_id
+   AND c.status = 'active'
+LEFT JOIN rent_payments rp
+    ON rp.company_id = c.company_id
 WHERE s.status = 'active';
+
 ";
 $rentresult = mysqli_query($conn, $rentquery);
 $rentrow = mysqli_fetch_assoc($rentresult);
@@ -66,7 +69,7 @@ $unpaidsql = "SELECT
     s.name AS supplier_name,
     s.email,
     rp.paid_date AS last_paid_date,
-    rp.due_date AS due_date
+    rp.due_date
 FROM suppliers s
 INNER JOIN companies c
     ON c.supplier_id = s.supplier_id
@@ -74,19 +77,23 @@ LEFT JOIN (
     SELECT rp1.*
     FROM rent_payments rp1
     INNER JOIN (
-        SELECT supplier_id, MAX(paid_date) AS latest_paid
+        SELECT company_id, MAX(paid_date) AS latest_paid
         FROM rent_payments
-        GROUP BY supplier_id
+        GROUP BY company_id
     ) rp2
-    ON rp1.supplier_id = rp2.supplier_id 
+        ON rp1.company_id = rp2.company_id
        AND rp1.paid_date = rp2.latest_paid
 ) rp
-    ON rp.supplier_id = s.supplier_id
+    ON rp.company_id = c.company_id
 WHERE s.status = 'active'
   AND c.status = 'active'
-  AND (rp.paid_date IS NULL OR rp.due_date < CURRENT_DATE)
+  AND (
+        rp.paid_date IS NULL
+        OR rp.due_date < CURRENT_DATE
+      )
 ORDER BY (rp.due_date IS NULL) ASC, rp.due_date ASC
-LIMIT 8;";
+LIMIT 8;
+";
 $unpaidresult = mysqli_query($conn, $unpaidsql);
 if ($unpaidresult) {
     while ($row = mysqli_fetch_assoc($unpaidresult)) {
@@ -96,17 +103,15 @@ if ($unpaidresult) {
 
 $recentpayments = [];
 $recentpaymentssql = "SELECT 
-    rp.supplier_id,
+    rp.company_id,
     c.*,
-    rp.paid_amount,
+    rp.amount,
     rp.paid_date,
     rp.due_date
 FROM rent_payments rp
-INNER JOIN suppliers s 
-    ON s.supplier_id = rp.supplier_id
 INNER JOIN companies c
-    ON c.supplier_id = s.supplier_id AND c.status = 'active'
-WHERE s.status = 'active'
+    ON c.company_id = rp.company_id
+WHERE c.status = 'active'
 ORDER BY rp.paid_date DESC
 LIMIT 10;
 ";
@@ -288,7 +293,7 @@ if ($recentpaymentsresult) {
                                     <td style="font-weight:500;">
                                         <?= htmlspecialchars($p['company_name'] ?? 'Unknown') ?>
                                     </td>
-                                    <td>$<?= number_format((float) ($p['paid_amount'] ?? 0), 2) ?></td>
+                                    <td>$<?= number_format((float) ($p['amount'] ?? 0), 2) ?></td>
                                     <td><?= !empty($p['paid_date']) ? date('M d, Y', strtotime($p['paid_date'])) : 'N/A' ?></td>
                                     <td><?= !empty($p['due_date']) ? date('M d, Y', strtotime($p['due_date'])) : 'N/A' ?></td>
                                 </tr>

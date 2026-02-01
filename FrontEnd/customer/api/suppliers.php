@@ -16,7 +16,7 @@ FROM suppliers s
 INNER JOIN companies c 
     ON c.supplier_id = s.supplier_id
 LEFT JOIN shop_assets sa 
-    ON sa.supplier_id = s.supplier_id
+    ON sa.company_id = c.company_id
 WHERE s.status = 'active'
   AND c.status = 'active'
 ORDER BY s.supplier_id ASC";

@@ -33,7 +33,7 @@ FROM suppliers s
 LEFT JOIN companies c 
     ON c.supplier_id = s.supplier_id AND c.status = 'active'
 LEFT JOIN shop_assets sa 
-    ON s.supplier_id = sa.supplier_id
+    ON c.company_id = sa.company_id
 WHERE s.supplier_id = ?;
 
 ");
@@ -219,9 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 3. Update Database (Only if no critical upload error occurred)
         if ($msg_type !== "error") {
-            $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_type=? $logo_sql $banner_sql WHERE supplier_id=?";
+            $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_type=? $logo_sql $banner_sql WHERE company_id=?";
             $stmt2 = $conn->prepare($sql_final);
-            $stmt2->bind_param("sssssi", $p_color, $s_color, $shop_about, $shop_desc, $media_mode, $supplierid);
+            $stmt2->bind_param("sssssi", $p_color, $s_color, $shop_about, $shop_desc, $media_mode, $company_id);
 
             if ($stmt2->execute()) {
                 $msg = "Shop customization saved!";
@@ -828,8 +828,8 @@ if (!empty($company_id)) {
                         <img src="<?= $bannerPathRel ?>" alt="Shop Banner" class="banner-media">
                     <?php endif; ?>
                 <?php else: ?>
-                    <img src="https://via.placeholder.com/1400x400?text=Upload+Your+Banner" alt="Placeholder Banner"
-                        class="banner-media" style="opacity:0.3">
+                    <!-- <img src="https://via.placeholder.com/1400x400?text=Upload+Your+Banner" alt="Placeholder Banner"
+                        class="banner-media" style="opacity:0.3"> -->
                 <?php endif; ?>
             </div>
 

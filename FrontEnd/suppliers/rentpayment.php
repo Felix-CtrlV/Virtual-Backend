@@ -1,42 +1,125 @@
 <?php
 include("partials/nav.php");
 
-// 1. Logic for Payment History
-// Fetch all payment history for this supplier
-$historyStmt = $conn->prepare("SELECT * FROM rent_payments WHERE supplier_id = ? ORDER BY paid_date DESC");
-$historyStmt->bind_param("i", $supplierid);
+// --- Handle Crediverse return: payment_status=success ---
+if (
+    isset($_GET['payment_status']) &&
+    $_GET['payment_status'] === 'success' &&
+    isset($_SESSION['pending_rent'])
+) {
+    $pending = $_SESSION['pending_rent'];
+
+    $ins = $conn->prepare("
+        INSERT INTO rent_payments (company_id, paid_date, due_date, amount, status)
+        VALUES (?, ?, ?, ?, 'paid')
+    ");
+
+    if ($ins) {
+        $ins->bind_param(
+            "issd",
+            $pending['company_id'],
+            $pending['paid_date'],
+            $pending['due_date'],
+            $pending['amount']
+        );
+
+        if ($ins->execute()) {
+            unset($_SESSION['pending_rent']);
+            $ins->close();
+            // header("Location: rentpayment.php");
+            exit;
+        }
+        $ins->close();
+    }
+
+    unset($_SESSION['pending_rent']);
+    header("Location: rentpayment.php?error=insert_failed");
+    exit;
+}
+
+// 0. FETCH COMPANY ID (Crucial step since rent_payments now links to company_id)
+$compStmt = $conn->prepare("SELECT company_id, renting_price FROM companies WHERE supplier_id = ?");
+$compStmt->bind_param("i", $supplierid);
+$compStmt->execute();
+$compRes = $compStmt->get_result()->fetch_assoc();
+$compStmt->close();
+
+$companyid = $compRes['company_id'];
+// Base rent per month from companies.renting_price
+$baseMonthlyRent = (float) ($compRes['renting_price'] ?? 1000);
+
+// 1. Logic for Payment History (Using company_id)
+$historyStmt = $conn->prepare("SELECT * FROM rent_payments WHERE company_id = ? ORDER BY paid_date DESC");
+$historyStmt->bind_param("i", $companyid);
 $historyStmt->execute();
 $paymentHistory = $historyStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $historyStmt->close();
 
-// 2. Logic for Financial Stats
-// Calculate Total Rent Paid Lifetime
-$totalRentPaidStmt = $conn->prepare("SELECT SUM(paid_amount) as total_paid FROM rent_payments WHERE supplier_id = ?");
-$totalRentPaidStmt->bind_param("i", $supplierid);
+// 2. Logic for Financial Stats (Using company_id)
+$totalRentPaidStmt = $conn->prepare("SELECT SUM(amount) as total_paid FROM rent_payments WHERE company_id = ?");
+$totalRentPaidStmt->bind_param("i", $companyid);
 $totalRentPaidStmt->execute();
 $rentRow = $totalRentPaidStmt->get_result()->fetch_assoc();
 $totalRentPaid = $rentRow['total_paid'] ?? 0;
 $totalRentPaidStmt->close();
 
-$rentprice = "select renting_price from companies where supplier_id = ?";
-$rentpriceStmt = $conn->prepare($rentprice);
-$rentpriceStmt->bind_param("i", $supplierid);
-$rentpriceStmt->execute();
-$rentpriceRow = $rentpriceStmt->get_result()->fetch_assoc();
-$rentpriceStmt->close();
-$baseMonthlyRent = $rentpriceRow['renting_price'] ?? 1000.00;
+// 3. RE-CALCULATE CONTRACT STATUS (Override nav.php logic to ensure company_id usage)
+$contractStmt = $conn->prepare('SELECT rp.paid_date AS contract_start, rp.due_date AS contract_end 
+FROM rent_payments rp 
+INNER JOIN (
+    SELECT company_id, MAX(paid_date) AS latest_paid 
+    FROM rent_payments 
+    WHERE company_id = ? 
+    GROUP BY company_id
+) latest ON rp.company_id = latest.company_id AND rp.paid_date = latest.latest_paid;');
+$contractStmt->bind_param('i', $companyid);
+$contractStmt->execute();
+$contractRow = $contractStmt->get_result()->fetch_assoc();
+$contractStmt->close();
 
-if (!empty($paymentHistory)) {
-    // simplistic logic: take the most recent payment amount. 
-    // In a real app, you'd store 'monthly_rent_price' in the 'suppliers' table.
-    $lastPayment = $paymentHistory[0]['paid_amount'];
-    $baseMonthlyRent = $rentpriceRow['renting_price'] ?? 1000.00;
+// Logic for Progress Bar & Due Date
+$start = new DateTime($contractRow['contract_start'] ?? 'now');
+$end = new DateTime($contractRow['contract_end'] ?? 'now');
+$today = new DateTime();
+
+$totalDays = $start->diff($end)->days;
+$daysPassed = $start->diff($today)->days;
+
+// Calculate diff correctly: Positive = Days Left, Negative = Overdue
+$diffObj = $end->diff($today);
+$diff = $diffObj->days;
+if (!$diffObj->invert) {
+    // If today is AFTER end date, invert is false (0), so we make diff negative
+    $diff = -$diff;
 }
+
+$percent = ($totalDays > 0) ? (($totalDays - $diff) / $totalDays) * 100 : 0; // Approximate visual progress
+// Or strictly based on time passed:
+if($totalDays > 0) {
+    // If diff is positive (days left), percent is days passed / total
+    // If diff is negative (overdue), percent is 100
+    if ($diff >= 0) {
+        $percent = ($daysPassed / $totalDays) * 100;
+    } else {
+        $percent = 100;
+    }
+} else {
+    $percent = 0;
+}
+$percent = max(0, min(100, round($percent)));
+
 $statusColor = ($diff >= 0) ? 'var(--primary)' : '#cb4444';
 $statusText = ($diff >= 0) ? $diff . ' Days Left' : abs($diff) . ' Days OVERDUE';
 $progressPercent = ($diff >= 0) ? $percent : 100;
-
 ?>
+
+<?php if (!empty($_GET['error'])): ?>
+    <div class="rent-error" style="background:#fee;color:#c00;padding:12px;margin-bottom:20px;border-radius:8px;">
+        <?php
+        echo $_GET['error'] === 'no_company' ? 'Company not found.' : ($_GET['error'] === 'insert_failed' ? 'Payment recorded but something went wrong. Please check your history.' : 'An error occurred.');
+        ?>
+    </div>
+<?php endif; ?>
 
 <div class="rent-header">
     <div>
@@ -63,7 +146,7 @@ $progressPercent = ($diff >= 0) ? $percent : 100;
 
         <div class="rent-details">
             <h3 id="due-label">Next Due Date</h3>
-            <h2 id="due-date-display"><?= date('M d, Y', strtotime($contractRow['contract_end'])) ?></h2>
+            <h2 id="due-date-display"><?= date('M d, Y', strtotime($contractRow['contract_end'] ?? 'now')) ?></h2>
             <small style="color: <?= $statusColor ?>; font-weight:bold;"><?= $statusText ?></small>
         </div>
     </div>
@@ -72,7 +155,7 @@ $progressPercent = ($diff >= 0) ? $percent : 100;
         <div class="icon-box">$</div>
         <div class="rent-details">
             <h3>Total Revenue</h3>
-            <h2>$<?= number_format($totalRevenue, 2) ?></h2>
+            <h2>$<?= number_format($totalRevenue ?? 0, 2) ?></h2>
             <small>Current Balance available</small>
         </div>
     </div>
@@ -81,8 +164,8 @@ $progressPercent = ($diff >= 0) ? $percent : 100;
         <div class="icon-box" style="background: #333;">#</div>
         <div class="rent-details">
             <h3>Lifetime Rent Paid</h3>
-            <h2>$<?= number_format($baseMonthlyRent, 2) ?></h2>
-            <small>Since <?= date('M Y', strtotime($contractRow['contract_start'])) ?></small>
+            <h2>$<?= number_format($totalRentPaid, 2) ?></h2>
+            <small>Since <?= date('M Y', strtotime($contractRow['contract_start'] ?? 'now')) ?></small>
         </div>
     </div>
 </div>
@@ -103,15 +186,14 @@ $progressPercent = ($diff >= 0) ? $percent : 100;
             <tbody id="history-body">
                 <?php if (count($paymentHistory) > 0): ?>
                     <?php foreach ($paymentHistory as $pay):
-                        // Calculate approximate months covered based on amount
-                        $monthsCovered = round($pay['paid_amount'] / $baseMonthlyRent);
-                        $monthsCovered = max(1, $monthsCovered);
+                        $payAmount = $pay['amount'] ?? $pay['paid_amount'] ?? 0;
+                        $monthsCovered = isset($pay['month']) ? (int) $pay['month'] : (($baseMonthlyRent > 0 && $payAmount) ? max(1, (int) round($payAmount / $baseMonthlyRent)) : 1);
                         ?>
                         <tr class="product-row">
                             <td><?= date('M d, Y', strtotime($pay['paid_date'])) ?></td>
                             <td><?= $monthsCovered ?> Month<?= $monthsCovered > 1 ? 's' : '' ?></td>
                             <td><?= date('M d, Y', strtotime($pay['due_date'])) ?></td>
-                            <td style="font-weight:bold;">$<?= number_format($pay['paid_amount'], 2) ?></td>
+                            <td style="font-weight:bold;">$<?= number_format($payAmount, 2) ?></td>
                             <td><span class="badge ok">Paid</span></td>
                         </tr>
                     <?php endforeach; ?>
@@ -149,145 +231,33 @@ $progressPercent = ($diff >= 0) ? $percent : 100;
                 <span>Total Payment</span>
                 <span class="big-price" id="total-display">$<?= number_format($baseMonthlyRent, 2) ?></span>
             </div>
-            <button class="btn-pay" onclick="processPayment()">Confirm & Pay</button>
+            <form id="pay-form" action="utils/init_rent_payment.php" method="get" style="margin:0;">
+                <input type="hidden" name="months" id="pay-months-hidden" value="1">
+                <button type="submit" class="btn-pay">Confirm & Pay</button>
+            </form>
         </div>
     </div>
 </div>
 
-<div id="receipt-template">
-    <div class="rec-header">
-        <h2 style="margin:0;"><?= strtoupper($row['company_name']) ?></h2>
-        <div>Rent Payment Receipt</div>
-        <div>Supplier ID: <?= $supplierid ?></div>
-    </div>
-    <div class="rec-row">
-        <span>Date:</span>
-        <span id="rec-date">2025-01-01</span>
-    </div>
-    <div class="rec-row">
-        <span>Receipt #:</span>
-        <span id="rec-id">RC-9999</span>
-    </div>
-    <div style="border-bottom: 1px dashed #000; margin: 10px 0;"></div>
-    <div class="rec-row">
-        <span>Item</span>
-        <span>Amt</span>
-    </div>
-    <div class="rec-row">
-        <span id="rec-desc">Rent (1 Month)</span>
-        <span id="rec-amt">$1000.00</span>
-    </div>
-    <div class="rec-total rec-row">
-        <span>TOTAL PAID</span>
-        <span id="rec-total">$1000.00</span>
-    </div>
-    <div class="rec-footer">
-        <p>Thank you for your payment.</p>
-        <p>Auth: AUTH-<?= rand(10000, 99999) ?></p>
-    </div>
-</div>
-
 <script>
-    let currentMonths = 1;
-    const baseRent = <?= $baseMonthlyRent ?>;
+    (function () {
+        var currentMonths = 1;
+        var baseRent = <?= json_encode($baseMonthlyRent) ?>;
 
-    // Timer Logic Variables (for frontend update)
-    let currentDueDate = new Date("<?= $contractRow['contract_end'] ?>");
+        function updateMonths(change) {
+            currentMonths += change;
+            if (currentMonths < 1) currentMonths = 1;
+            if (currentMonths > 12) currentMonths = 12;
 
-    function updateMonths(change) {
-        currentMonths += change;
-        if (currentMonths < 1) currentMonths = 1;
-        if (currentMonths > 12) currentMonths = 12; // Cap at 1 year for safety
+            document.getElementById('pay-months').value = currentMonths;
+            document.getElementById('pay-months-hidden').value = currentMonths;
+            var total = currentMonths * baseRent;
+            document.getElementById('total-display').innerText = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        }
 
-        document.getElementById('pay-months').value = currentMonths;
-        const total = currentMonths * baseRent;
-        document.getElementById('total-display').innerText = '$' + total.toLocaleString('en-US', {
-            minimumFractionDigits: 2
-        });
-    }
-
-    function processPayment() {
-        if (!confirm("Confirm payment of $" + (currentMonths * baseRent) + " for " + currentMonths + " months?")) return;
-
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-        const receiptId = 'PAY-' + Math.floor(Math.random() * 1000000);
-        const totalAmount = currentMonths * baseRent;
-
-        // 1. Update Receipt Data
-        document.getElementById('rec-date').innerText = now.toISOString().split('T')[0];
-        document.getElementById('rec-id').innerText = receiptId;
-        document.getElementById('rec-desc').innerText = `Rent Extension (${currentMonths} Mo)`;
-        const formattedTotal = '$' + totalAmount.toLocaleString('en-US', {
-            minimumFractionDigits: 2
-        });
-        document.getElementById('rec-amt').innerText = formattedTotal;
-        document.getElementById('rec-total').innerText = formattedTotal;
-
-        // 2. Generate Receipt Image
-        const receiptNode = document.getElementById('receipt-template');
-
-        html2canvas(receiptNode).then(canvas => {
-            // Trigger Download
-            const link = document.createElement('a');
-            link.download = `${receiptId}_Receipt.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-
-            // 3. Update UI (Frontend simulation of "Resetting Timer")
-            alert("Payment Successful! Receipt downloaded.");
-
-            // Add new row to table
-            const tableBody = document.getElementById('history-body');
-            const newRow = document.createElement('tr');
-            newRow.className = 'product-row';
-
-            // Calculate new due date
-            currentDueDate.setMonth(currentDueDate.getMonth() + currentMonths);
-            const newDueDateStr = currentDueDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-
-            newRow.innerHTML = `
-                    <td>${dateStr}</td>
-                    <td>${currentMonths} Month${currentMonths > 1 ? 's' : ''}</td>
-                    <td>${newDueDateStr}</td>
-                    <td style="font-weight:bold;">${formattedTotal}</td>
-                    <td><span class="badge ok">Paid</span></td>
-                `;
-
-            // Insert at top
-            if (tableBody.querySelector('td[colspan="5"]')) {
-                tableBody.innerHTML = ''; // Remove "No history" text
-            }
-            tableBody.insertBefore(newRow, tableBody.firstChild);
-
-            // Reset Timer UI
-            document.getElementById('due-date-display').innerText = newDueDateStr;
-            // Calculate new diff roughly
-            const timeDiff = currentDueDate - now;
-            const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-            // Update Status text
-            const statusLabel = document.querySelector('.rent-details small');
-            statusLabel.innerText = daysLeft + " Days Left";
-            statusLabel.style.color = "var(--primary)";
-
-            document.getElementById('due-label').innerText = "New Due Date";
-
-            // Update Circle (Reset to full visual for simplicity or calc percentage)
-            document.querySelector('.inner-circle').innerText = daysLeft + "d";
-            document.querySelector('.circle-progress').style.background = `conic-gradient(var(--primary) 100%, #ddd 0)`;
-        });
-    }
+        window.updateMonths = updateMonths;
+    })();
 </script>
 
 </body>
-
 </html>
