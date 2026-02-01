@@ -286,6 +286,8 @@ function displayStock() {
         confirmButtonText: 'Login Now',
         cancelButtonText: 'Maybe Later',
         confirmButtonColor: '#212529',
+        heightAuto: false,
+        scrollbarPadding: false,
         customClass: {
             popup: 'premium-swal',
             title: 'premium-title',
@@ -449,4 +451,31 @@ function displayStock() {
 .swal2-icon.swal2-info {
     border-color: #212529 !important;
     color: #212529 !important;
+}
+
+.swal2-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px !important; 
+}
+
+.premium-swal {
+    margin: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    position: relative !important;
+    width: 90% !important; 
+    max-width: 400px !important; 
+    border-radius: 20px !important;
+}
+.premium-swal {
+    margin: auto !important;
+    max-width: 320px !important;
+    max-height: 90vh !important; 
+    overflow-y: auto !important; 
+}
+.premium-confirm-btn, .premium-cancel-btn {
+    width: 100% !important; 
+    margin-bottom: 10px !important;
 }</style>

@@ -69,13 +69,24 @@ $base_url = "?supplier_id=" . $supplier_id;
             <i class="fas fa-arrow-left me-1"></i> Back to the Mall
         </a>
 
+        <div class="nav-cart ms-auto me-3 d-lg-none">
+            <a href="javascript:void(0)" 
+               onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" 
+               class="position-relative text-dark">
+                <i class="fas fa-shopping-basket fa-lg"></i>
+                <span class="cart-badge-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                      style="font-size: 0.6rem; min-width: 18px; height: 18px; display: none;">
+                    0
+                </span>
+            </a>
+        </div>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav mx-auto gap-lg-4">
-                <?php
+               <?php
                 $nav_items = [
                     'home' => 'Home',
                     'products' => 'Products',
@@ -95,24 +106,19 @@ $base_url = "?supplier_id=" . $supplier_id;
             </ul>
 
             <div class="d-flex align-items-center gap-3">
-                <div class="nav-cart me-2">
-
+                <div class="nav-cart me-2 d-none d-lg-block">
                     <a href="javascript:void(0)" 
-                    onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" 
-                    class="position-relative text-dark">
-                    <i class="fas fa-shopping-basket fa-lg"></i>
-                    <span id="cart-badge-count"></span>
-                    </a>
-                       
-                        <span id="cart-badge-count" 
-                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                       onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" 
+                       class="position-relative text-dark">
+                        <i class="fas fa-shopping-basket fa-lg"></i>
+                        <span class="cart-badge-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
                               style="font-size: 0.6rem; min-width: 18px; height: 18px; display: none;">
                             0
                         </span>
                     </a>
                 </div>
-
-               <div class="nav-auth-section border-start ps-3">
+                
+               <div class="nav-auth-section border-start ps-3"></div>
     <?php if ($isLoggedIn): ?>
         <div class="dropdown user-dropdown">
     <a class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" 
@@ -353,3 +359,11 @@ function closeLoginAlert() {
     transform: scale(1.2); 
     }
 </style>
+<script>
+document.querySelectorAll('.cart-badge-count').forEach(el => {
+    el.innerText = count;
+    el.style.display = count > 0 ? 'block' : 'none'; 
+});
+
+
+$('.cart-badge-count').text(count).show();</script>
