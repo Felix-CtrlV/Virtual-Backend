@@ -868,7 +868,7 @@ div.swal2-container.swal2-top {
         $total_price = 0;
         $total_quantity = 0;
 
-        
+       
         while ($item = mysqli_fetch_assoc($result)): 
             $subtotal = $item['price'] * $item['quantity'];
             $total_price += $subtotal;
@@ -878,8 +878,7 @@ div.swal2-container.swal2-top {
         
         
         $shipping = $total_price > 100 ? 0 : 9.99;
-        $discount = $total_price * 0.1;
-        $grand_total = $total_price + $shipping - $discount;
+        $grand_total = $total_price + $shipping;
     ?>
         
         <div class="modern-header">
@@ -895,10 +894,7 @@ div.swal2-container.swal2-top {
     <div class="stat-value" id="total-subtotal-stat">$<?= number_format($total_price, 2) ?></div>
     <div class="stat-label">Subtotal</div>
 </div>
-<div class="stat-card">
-    <div class="stat-value" id="total-savings-stat">$<?= number_format($discount, 2) ?></div>
-    <div class="stat-label">Savings (10%)</div>
-</div>
+
 </div>
 
     <div class="modern-layout">
@@ -963,43 +959,43 @@ div.swal2-container.swal2-top {
             <?php endforeach; ?>
         </div> 
 
-        <div class="summary-panel-modern">
-            <div class="summary-header">
-                <h2 class="summary-title">Order Summary</h2>
-                <p class="summary-subtitle">Complete your purchase</p>
-            </div>
-            
-            <div class="summary-item">
-                <span class="summary-label">Subtotal</span>
-                <span class="summary-value">$<?= number_format($total_price, 2) ?></span>
-            </div>
-            
-            <div class="summary-item">
-                <span class="summary-label">Shipping</span>
-                <span class="summary-value"><?= $shipping > 0 ? '$' . number_format($shipping, 2) : 'FREE' ?></span>
-            </div>
-            
-            <div class="summary-item">
-                <span class="summary-label" style="color: var(--color-accent);">
-                    <i class="fas fa-tag"></i> Discount (10%)
-                </span>
-                <span class="summary-value" style="color: var(--color-accent);">
-                    -$<?= number_format($discount, 2) ?>
-                </span>
-            </div>
-            
-            <div class="summary-item total">
-                <span class="summary-label">Total</span>
-                <span class="summary-value total">$<?= number_format($grand_total, 2) ?></span>
-            </div>
-            
-          <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" 
-          id="checkout-btn" 
-         class="checkout-btn-modern <?= ($cart_count <= 0) ? 'disabled' : '' ?>">
+       <div class="summary-panel-modern">
+    <div class="summary-header">
+        <h2 class="summary-title">Order Summary</h2>
+        <p class="summary-subtitle">Complete your purchase</p>
+    </div>
+    
+    <?php 
+    // Cart ထဲမှာ ဘာမှမရှိရင် 0 ပဲပြအောင် သေချာအောင်လုပ်ခြင်း
+    $display_subtotal = ($cart_count > 0) ? $total_price : 0;
+    $display_shipping = ($cart_count > 0) ? $shipping : 0;
+    $display_total = ($cart_count > 0) ? $grand_total : 0;
+    ?>
+
+    <div class="summary-item">
+        <span class="summary-label">Subtotal</span>
+        <span class="summary-value" id="summary-subtotal">$<?= number_format($display_subtotal, 2) ?></span>
+    </div>
+    
+    <div class="summary-item">
+        <span class="summary-label">Shipping</span>
+        <span class="summary-value" id="summary-shipping">
+            <?= ($display_shipping > 0) ? '$' . number_format($display_shipping, 2) : ($cart_count > 0 ? 'FREE' : '$0.00') ?>
+        </span>
+    </div>
+    
+    <div class="summary-item total">
+        <span class="summary-label">Total</span>
+        <span class="summary-value total" id="summary-total">$<?= number_format($display_total, 2) ?></span>
+    </div>
+    
+    <a href="../utils/accessCheckout.php?supplier_id=<?= $supplier_id ?>" 
+       id="checkout-btn" 
+       class="checkout-btn-modern <?= ($cart_count <= 0) ? 'disabled' : '' ?>"
+       style="<?= ($cart_count <= 0) ? 'pointer-events: none; opacity: 0.5;' : '' ?>">
         <i class="fas fa-lock"></i> Secure Checkout
-        </a>
-        </div> 
-    </div> 
+    </a>
+</div>
         
     <div class="continue-shopping">
         <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="continue-link">
@@ -1248,8 +1244,10 @@ window.addEventListener('beforeunload', () => {
 function recalculateCart() {
     let grandTotal = 0;
     let totalQty = 0;
+    let discount = 0; // Discount logic မရှိသေးရင် 0 လို့ အရင်သတ်မှတ်ထားပါ
 
     document.querySelectorAll('.modern-item').forEach(item => {
+        // ဖျက်ထားတဲ့ item တွေကို ထည့်မတွက်ဖို့ display နဲ့ opacity ကို စစ်ပါတယ်
         if (item.style.display !== 'none' && item.style.opacity !== '0') {
             const price = parseFloat(item.getAttribute('data-price')) || 0;
             const qtyElement = item.querySelector('.qty-display-modern');
@@ -1259,6 +1257,7 @@ function recalculateCart() {
             grandTotal += itemSubtotal;
             totalQty += qty;
 
+            // Item တစ်ခုချင်းစီရဲ့ subtotal ကို update လုပ်ခြင်း
             const cartId = qtyElement.id.replace('qty-', '');
             const subDisplay = document.getElementById('subtotal-' + cartId);
             if (subDisplay) {
@@ -1267,24 +1266,11 @@ function recalculateCart() {
         }
     });
 
-  
-    const checkoutBtn = document.getElementById('checkout-btn');
-    if (checkoutBtn) {
-        if (totalQty <= 0) {
-            checkoutBtn.classList.add('disabled'); 
-        } else {
-            checkoutBtn.classList.remove('disabled'); 
-        }
-    }
-
-
-   
+    // --- Shipping Logic ---
     const shipping = (grandTotal > 100 || grandTotal === 0) ? 0 : 9.99;
-    const discount = grandTotal * 0.1; 
     const finalTotal = (grandTotal + shipping) - discount;
 
-    
-    
+    // --- Header & Stat Cards Update ---
     const qtyStat = document.getElementById('total-qty-stat');
     const subtotalStat = document.getElementById('total-subtotal-stat');
     const savingsStat = document.getElementById('total-savings-stat');
@@ -1295,16 +1281,31 @@ function recalculateCart() {
     if (savingsStat) savingsStat.innerText = '$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2});
     if (headerQtyText) headerQtyText.innerText = totalQty + (totalQty > 1 ? ' items' : ' item');
 
-   
-    const summaryValues = document.querySelectorAll('.summary-value');
-    if (summaryValues.length >= 4) {
-        summaryValues[0].innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}); // Subtotal
-        summaryValues[1].innerText = shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2); // Shipping
-        summaryValues[2].innerText = '-$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2}); // Discount
-        
-        document.querySelectorAll('.summary-value.total').forEach(el => {
-            el.innerText = '$' + finalTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
-        });
+    // --- Order Summary Panel Update ---
+    // Index နဲ့ ဖမ်းမယ့်အစား Class နာမည်တွေနဲ့ တိုက်ရိုက်ဖမ်းတာ ပိုစိတ်ချရပါတယ်
+    const subtotalEl = document.getElementById('summary-subtotal') || document.querySelector('.summary-item:nth-child(2) .summary-value');
+    const shippingEl = document.getElementById('summary-shipping') || document.querySelector('.summary-item:nth-child(3) .summary-value');
+    const totalEls = document.querySelectorAll('.summary-value.total');
+
+    if (subtotalEl) subtotalEl.innerText = '$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    if (shippingEl) shippingEl.innerText = (shipping === 0) ? (grandTotal === 0 ? '$0.00' : 'FREE') : '$' + shipping.toFixed(2);
+    
+    totalEls.forEach(el => {
+        el.innerText = '$' + finalTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+    });
+
+    // --- Checkout Button Logic & Layout Fix ---
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        if (totalQty <= 0) {
+            checkoutBtn.classList.add('disabled');
+            checkoutBtn.style.opacity = "0.5";
+            checkoutBtn.style.pointerEvents = "none";
+        } else {
+            checkoutBtn.classList.remove('disabled');
+            checkoutBtn.style.opacity = "1";
+            checkoutBtn.style.pointerEvents = "auto";
+        }
     }
 }
 function updateUI(tQty, sub, ship, disc, total, types) {
@@ -1356,12 +1357,27 @@ function showEmptyCartAlert() {
     transform: none !important;
 }
 
-/* Checkout ခလုတ် ပိတ်ထားချိန် ပုံစံ */
+
 .checkout-btn-modern.disabled {
     background: #cccccc !important;
     cursor: not-allowed !important;
-    pointer-events: none; /* link ကို နှိပ်လို့မရအောင် တားတာ */
+    pointer-events: none;
     box-shadow: none !important;
     transform: none !important;
+}
+/* Summary Panel container */
+.summary-panel-modern {
+    display: flex;
+    flex-direction: column;
+    height: auto !important; 
+    min-height: fit-content;
+    padding-bottom: 30px; 
+}
+
+/* Checkout Button */
+.checkout-btn-modern {
+    margin-top: auto; 
+    display: block;
+    width: 100%;
 }
 </style>
