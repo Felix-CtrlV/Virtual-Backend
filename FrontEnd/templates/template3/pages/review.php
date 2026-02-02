@@ -49,13 +49,15 @@ $reviews = [];
 $result = mysqli_query($conn, "
     SELECT 
         r.review_id,
-        r.supplier_id,
+        r.company_id,
         r.customer_id,
         r.review,
         r.rating,
         r.created_at,
         c.name,
-        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where supplier_id = 3");
+        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where company_id = $company_id");
+
+
 
 while ($row = mysqli_fetch_assoc($result)) {
     $reviews[] = $row;
