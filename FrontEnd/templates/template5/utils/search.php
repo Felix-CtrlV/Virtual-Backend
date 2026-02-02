@@ -7,6 +7,18 @@ $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : null;
 $supplierid = isset($_GET["supplier_id"]) ? intval($_GET["supplier_id"]) : 10;
 $like = "%$search%";
 
+$company_stmt = mysqli_prepare($conn, "Select * from companies where supplier_id = ?");
+if($company_stmt){
+    mysqli_stmt_bind_param($company_stmt, "i", $supplierid);
+    mysqli_stmt_execute($company_stmt);
+    $company_result = mysqli_stmt_get_result($company_stmt);
+}else{
+    $company_result = false;
+}
+
+$company_row = mysqli_fetch_assoc($company_result);
+$company_id = $company_row['company_id'];
+
 // --- PAGINATION LOGIC START ---
 $limit =4;  /* ko pya chin ta lout logic pya ng dl*/
 $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
@@ -15,11 +27,11 @@ $offset = ($page - 1) * $limit;
 
 
 if ($category_id) {
-    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE supplier_id = ? AND category_id = ? AND LOWER(product_name) LIKE LOWER(?)");
-    mysqli_stmt_bind_param($count_stmt, "iis", $supplierid, $category_id, $like);
+    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE company_id = ? AND category_id = ? AND LOWER(product_name) LIKE LOWER(?)");
+    mysqli_stmt_bind_param($count_stmt, "iis", $company_id, $category_id, $like);
 } else {
-    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE supplier_id = ? AND LOWER(product_name) LIKE LOWER(?)");
-    mysqli_stmt_bind_param($count_stmt, "is", $supplierid, $like);
+    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE company_id = ? AND LOWER(product_name) LIKE LOWER(?)");
+    mysqli_stmt_bind_param($count_stmt, "is", $company_id, $like);
 }
 
 mysqli_stmt_execute($count_stmt);
@@ -33,11 +45,11 @@ $total_pages = ceil($total_records / $limit);
 
 
 if ($category_id) {
-    $stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? AND LOWER(product_name) LIKE LOWER(?) ORDER BY created_at DESC LIMIT ? OFFSET ?");
-    mysqli_stmt_bind_param($stmt, "iisii", $supplierid, $category_id, $like, $limit, $offset);
+    $stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND category_id = ? AND LOWER(product_name) LIKE LOWER(?) ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    mysqli_stmt_bind_param($stmt, "iisii", $company_id, $category_id, $like, $limit, $offset);
 } else {
-    $stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND LOWER(product_name) LIKE LOWER(?) ORDER BY created_at ASC LIMIT ? OFFSET ?");
-    mysqli_stmt_bind_param($stmt, "isii", $supplierid, $like, $limit, $offset);
+    $stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND LOWER(product_name) LIKE LOWER(?) ORDER BY created_at ASC LIMIT ? OFFSET ?");
+    mysqli_stmt_bind_param($stmt, "isii", $company_id, $like, $limit, $offset);
 }
 
 mysqli_stmt_execute($stmt);
@@ -96,10 +108,7 @@ if ($products_result && mysqli_num_rows($products_result) > 0) {
         echo '</div>';
     }
 
-} else {
-    $error_msg = ($supplierid == 10) ? "We could not find the luxury watch..." : "No items found in this collection.";
-    echo '<div class="col-12 text-center py-4"><p class="text-muted">' . $error_msg . '</p></div>';
-}
+} 
 ?>
 
 <style>
