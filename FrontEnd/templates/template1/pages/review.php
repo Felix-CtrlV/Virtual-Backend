@@ -20,16 +20,21 @@ if (isset($_POST['submit_review'])) {
 
   if ($rating > 0 && !empty($review_text)) {
 
+    $company_id = (int)($supplier['company_id'] ?? 0);
+    if ($company_id <= 0 && $supplier_id > 0) {
+      $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+      if ($r) $company_id = (int)$r['company_id'];
+    }
     $insert_stmt = mysqli_prepare(
       $conn,
-      "INSERT INTO reviews (supplier_id, customer_id, review, rating, created_at)
+      "INSERT INTO reviews (company_id, customer_id, review, rating, created_at)
              VALUES (?, ?, ?, ?, NOW())"
     );
 
     mysqli_stmt_bind_param(
       $insert_stmt,
       "iisi",
-      $supplier_id,
+      $company_id,
       $customer_id,
       $review_text,
       $rating
@@ -51,8 +56,13 @@ if (!isset($conn)) {
 }
 
 $supplier_id = (int) $supplier['supplier_id'];
+$company_id_review = (int)($supplier['company_id'] ?? 0);
+if ($company_id_review <= 0 && $supplier_id > 0) {
+  $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+  if ($r) $company_id_review = (int)$r['company_id'];
+}
 
-// Fetch reviews with customer profile images
+// Fetch reviews with customer profile images (reviews table uses company_id)
 $review_stmt = mysqli_prepare($conn, "
     SELECT r.rating, r.review, r.created_at, c.image 
     FROM reviews r 
@@ -60,7 +70,7 @@ $review_stmt = mysqli_prepare($conn, "
     WHERE r.company_id = ?
     ORDER BY r.created_at DESC
 ");
-mysqli_stmt_bind_param($review_stmt, "i", $supplier_id);
+mysqli_stmt_bind_param($review_stmt, "i", $company_id_review);
 mysqli_stmt_execute($review_stmt);
 $review_result = mysqli_stmt_get_result($review_stmt);
 
@@ -95,12 +105,17 @@ if (isset($_POST['submit_review'])) {
   $review_text = trim($_POST['review']);
 
   if ($rating > 0 && !empty($review_text)) {
+    $company_id_ins = (int)($supplier['company_id'] ?? 0);
+    if ($company_id_ins <= 0 && isset($supplier_id) && $supplier_id > 0) {
+      $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+      if ($r) $company_id_ins = (int)$r['company_id'];
+    }
     $insert_stmt = mysqli_prepare(
       $conn,
       "INSERT INTO reviews (company_id, customer_id, review, rating, created_at) 
      VALUES (?, ?, ?, ?, NOW())"
     );
-    mysqli_stmt_bind_param($insert_stmt, "iisi", $supplier_id, $customer_id, $review_text, $rating);
+    mysqli_stmt_bind_param($insert_stmt, "iisi", $company_id_ins, $customer_id, $review_text, $rating);
     mysqli_stmt_execute($insert_stmt);
     mysqli_stmt_close($insert_stmt);
 

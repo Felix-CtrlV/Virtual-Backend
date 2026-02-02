@@ -20,12 +20,16 @@ $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
 <?php
 require_once __DIR__ . '/../../../utils/Ordered.php'; 
 
-$customer_id = $_SESSION['customer_id']; 
+$customer_id = $_SESSION['customer_id'];
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+$company_id = isset($supplier['company_id']) ? (int)$supplier['company_id'] : 0;
+if ($company_id <= 0 && $supplier_id > 0) {
+    $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+    $company_id = $r ? (int)$r['company_id'] : 0;
+}
 
-// --- PHP LOGIC REMAINS UNCHANGED ---
-if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {    
-    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
+    $is_ordered = placeOrder($conn, $customer_id, $company_id);
     
     if ($is_ordered) {
     echo "

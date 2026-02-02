@@ -13,7 +13,7 @@ $stmt = $conn->prepare("SELECT s.*, c.company_name, c.company_id, c.description 
 FROM suppliers s 
 LEFT JOIN companies c ON c.supplier_id = s.supplier_id 
 LEFT JOIN shop_assets sa ON sa.company_id = c.company_id 
-LEFT JOIN products p ON p.supplier_id = s.supplier_id 
+LEFT JOIN products p ON p.company_id = c.company_id 
 LEFT JOIN product_variant pv ON pv.product_id = p.product_id 
 WHERE s.supplier_id = ? AND c.status = 'active' limit 1;");
 
@@ -265,17 +265,18 @@ $supplierName = $row['name'];
 // 2. Product Count
 // ... rest of your code continues below ...
 
-// 2. Product Count
-$countproduct = $conn->prepare("SELECT COUNT(*) AS product_count FROM products WHERE supplier_id = ?");
-$countproduct->bind_param("i", $supplierid);
+// 2. Product Count (products table uses company_id)
+$company_id = $row['company_id'];
+$countproduct = $conn->prepare("SELECT COUNT(*) AS product_count FROM products WHERE company_id = ?");
+$countproduct->bind_param("i", $company_id);
 $countproduct->execute();
 $rowCount = $countproduct->get_result()->fetch_assoc();
 $countproduct->close();
 $productCount = $rowCount['product_count'];
 
-// 3. Order Stats (Pending/Cancelled)
-$orderCountStmt = $conn->prepare("SELECT SUM(order_status = 'pending') AS pending_count, SUM(order_status = 'cancelled') AS cancelled_count FROM orders WHERE supplier_id = ?");
-$orderCountStmt->bind_param("i", $supplierid);
+// 3. Order Stats (Pending/Cancelled) (orders table uses company_id)
+$orderCountStmt = $conn->prepare("SELECT SUM(order_status = 'pending') AS pending_count, SUM(order_status = 'cancelled') AS cancelled_count FROM orders WHERE company_id = ?");
+$orderCountStmt->bind_param("i", $company_id);
 $orderCountStmt->execute();
 $orderCounts = $orderCountStmt->get_result()->fetch_assoc();
 $orderCountStmt->close();
@@ -313,24 +314,24 @@ if (!$diffObj->invert) {
 $percent = ($totalDays > 0) ? ($daysPassed / $totalDays) * 100 : 0;
 $percent = max(0, min(100, round($percent)));
 
-// 5. Total Revenue (Current Month)
+// 5. Total Revenue (Current Month) (orders table uses company_id)
 $totalrevenuestmt = $conn->prepare("SELECT SUM(daily_revenue) OVER () AS total_revenue_month, SUM(daily_orders) OVER () AS total_orders_month
-FROM (SELECT DAY(order_date) AS day, SUM(price) AS daily_revenue, COUNT(*) AS daily_orders FROM orders WHERE supplier_id = ?
+FROM (SELECT DAY(order_date) AS day, SUM(price) AS daily_revenue, COUNT(*) AS daily_orders FROM orders WHERE company_id = ?
 AND order_status = 'confirm' AND order_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01') AND order_date < DATE_ADD(DATE_FORMAT(CURDATE(), '%Y-%m-01'), INTERVAL 1 MONTH)
 GROUP BY DAY(order_date)) t LIMIT 1;");
-$totalrevenuestmt->bind_param("i", $supplierid);
+$totalrevenuestmt->bind_param("i", $company_id);
 $totalrevenuestmt->execute();
 $totalrevenueRow = $totalrevenuestmt->get_result()->fetch_assoc();
 $totalrevenuestmt->close();
 $totalRevenue = $totalrevenueRow['total_revenue_month'] ?? 0;
 $totalOrder = $totalrevenueRow['total_orders_month'] ?? 0;
 
-// 6. Best Sellers (Top 5)
+// 6. Best Sellers (Top 5) (orders table uses company_id)
 $bestsellerstmt = $conn->prepare("SELECT p.product_id, p.product_name, p.image, MAX(variant_sales.total_sold) AS best_variant_sold 
 FROM (SELECT pv.product_id, oi.variant_id, SUM(oi.quantity) AS total_sold FROM orders o 
 JOIN order_detail oi ON o.order_id = oi.order_id 
 JOIN product_variant pv ON oi.variant_id = pv.variant_id 
-WHERE o.supplier_id = ? AND o.order_status = 'confirm' 
+WHERE o.company_id = ? AND o.order_status = 'confirm' 
 GROUP BY pv.product_id, oi.variant_id) AS variant_sales 
 JOIN products p ON p.product_id = variant_sales.product_id 
 GROUP BY p.product_id, p.product_name 
@@ -338,16 +339,16 @@ ORDER BY best_variant_sold DESC LIMIT 5;");
 
 $bestsellers = [];
 if ($bestsellerstmt) {
-    $bestsellerstmt->bind_param("i", $supplierid);
+    $bestsellerstmt->bind_param("i", $company_id);
     $bestsellerstmt->execute();
     $bestsellers = $bestsellerstmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $bestsellerstmt->close();
 }
 
-// 7. Monthly Revenue Chart with YEAR FILTER
+// 7. Monthly Revenue Chart with YEAR FILTER (orders table uses company_id)
 $selectedYear = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-$yearStmt = $conn->prepare("SELECT DISTINCT YEAR(order_date) as yr FROM orders WHERE supplier_id = ? ORDER BY yr DESC");
-$yearStmt->bind_param("i", $supplierid);
+$yearStmt = $conn->prepare("SELECT DISTINCT YEAR(order_date) as yr FROM orders WHERE company_id = ? ORDER BY yr DESC");
+$yearStmt->bind_param("i", $company_id);
 $yearStmt->execute();
 $availableYearsResult = $yearStmt->get_result();
 $availableYears = [];
@@ -359,8 +360,8 @@ if (empty($availableYears))
 $yearStmt->close();
 
 $revenue = $conn->prepare("SELECT MONTH(order_date) AS month, SUM(price) AS total_revenue FROM orders
-WHERE supplier_id = ? AND YEAR(order_date) = ? AND order_status = 'confirm' GROUP BY MONTH(order_date) ORDER BY month;");
-$revenue->bind_param("ii", $supplierid, $selectedYear);
+WHERE company_id = ? AND YEAR(order_date) = ? AND order_status = 'confirm' GROUP BY MONTH(order_date) ORDER BY month;");
+$revenue->bind_param("ii", $company_id, $selectedYear);
 $revenue->execute();
 $revenue_result = $revenue->get_result();
 $monthlyRevenue = array_fill(1, 12, 0);
@@ -369,7 +370,7 @@ while ($revenuerow = $revenue_result->fetch_assoc()) {
 }
 $revenue->close();
 
-// 8. Inventory / Best Selling Categories
+// 8. Inventory / Best Selling Categories (products table uses company_id)
 $categoryStmt = $conn->prepare("SELECT 
     c.category_name, 
     SUM(od.quantity) AS total_sold
@@ -377,14 +378,14 @@ FROM order_detail od
 JOIN product_variant pv ON od.variant_id = pv.variant_id
 JOIN products p ON pv.product_id = p.product_id
 JOIN category c ON p.category_id = c.category_id
-WHERE p.supplier_id = ?
+WHERE p.company_id = ?
 GROUP BY c.category_name
 ORDER BY total_sold DESC;
 ");
 $categoryData = [];
 $categoryLabels = [];
 if ($categoryStmt) {
-    $categoryStmt->bind_param("i", $supplierid);
+    $categoryStmt->bind_param("i", $company_id);
     $categoryStmt->execute();
     $catResult = $categoryStmt->get_result();
     while ($c = $catResult->fetch_assoc()) {

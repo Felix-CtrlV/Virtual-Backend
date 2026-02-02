@@ -42,7 +42,7 @@ include("partials/nav.php");
     r.created_at
 FROM reviews r
 LEFT JOIN companies c 
-    ON r.supplier_id = c.supplier_id
+    ON r.company_id = c.company_id
 LEFT JOIN customers cu 
     ON r.customer_id = cu.customer_id
 ORDER BY r.created_at DESC;

@@ -26,11 +26,16 @@ if ($isLoggedIn) {
     }
 }
 
-// Cart Count Logic
+// Cart Count Logic (cart table uses company_id)
+$company_id = isset($supplier['company_id']) ? (int)$supplier['company_id'] : 0;
+if ($company_id <= 0 && $supplier_id > 0 && isset($conn)) {
+    $res = mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = " . (int)$supplier_id . " LIMIT 1");
+    $company_id = $res && ($row = mysqli_fetch_assoc($res)) ? (int)$row['company_id'] : 0;
+}
 $cart_count = 0;
-if ($isLoggedIn) {
+if ($isLoggedIn && $company_id > 0 && isset($conn)) {
     $c_id = $_SESSION['customer_id'];
-    $count_res = mysqli_query($conn, "SELECT SUM(quantity) as total FROM cart WHERE customer_id = '$c_id' AND supplier_id = '$supplier_id'");
+    $count_res = mysqli_query($conn, "SELECT SUM(quantity) as total FROM cart WHERE customer_id = '$c_id' AND company_id = '$company_id'");
     $count_row = mysqli_fetch_assoc($count_res);
     $cart_count = $count_row['total'] ?? 0;
 } else {

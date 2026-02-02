@@ -1,16 +1,14 @@
 <?php
 
-function placeOrder($conn, $customer_id, $supplier_id) {
-    
-    
+function placeOrder($conn, $customer_id, $company_id) {
     $cart_query = "SELECT c.variant_id, c.quantity, p.price 
                    FROM cart c 
                    JOIN product_variant v ON c.variant_id = v.variant_id 
                    JOIN products p ON v.product_id = p.product_id 
-                   WHERE c.customer_id = ? AND c.supplier_id = ?";
+                   WHERE c.customer_id = ? AND c.company_id = ?";
     
     $stmt = mysqli_prepare($conn, $cart_query);
-    mysqli_stmt_bind_param($stmt, "ii", $customer_id, $supplier_id);
+    mysqli_stmt_bind_param($stmt, "ii", $customer_id, $company_id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     
@@ -34,11 +32,11 @@ function placeOrder($conn, $customer_id, $supplier_id) {
         $order_date = date('Y-m-d H:i:s');
 
        
-        $order_sql = "INSERT INTO orders (order_code, supplier_id, customer_id, price, payment_method, order_status, order_date) 
+        $order_sql = "INSERT INTO orders (order_code, company_id, customer_id, price, payment_method, order_status, order_date) 
                       VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         $o_stmt = mysqli_prepare($conn, $order_sql);
-        mysqli_stmt_bind_param($o_stmt, "siidsss", $order_code, $supplier_id, $customer_id, $grand_total, $payment_method, $order_status, $order_date);
+        mysqli_stmt_bind_param($o_stmt, "siidsss", $order_code, $company_id, $customer_id, $grand_total, $payment_method, $order_status, $order_date);
         
         if (!mysqli_stmt_execute($o_stmt)) {
             throw new Exception("Order insertion failed");
@@ -70,9 +68,9 @@ function placeOrder($conn, $customer_id, $supplier_id) {
         }
 
        
-        $del_sql = "DELETE FROM cart WHERE customer_id = ? AND supplier_id = ?";
+        $del_sql = "DELETE FROM cart WHERE customer_id = ? AND company_id = ?";
         $del_stmt = mysqli_prepare($conn, $del_sql);
-        mysqli_stmt_bind_param($del_stmt, "ii", $customer_id, $supplier_id);
+        mysqli_stmt_bind_param($del_stmt, "ii", $customer_id, $company_id);
         mysqli_stmt_execute($del_stmt);
 
         

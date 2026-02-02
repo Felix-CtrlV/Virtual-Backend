@@ -4,15 +4,20 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
     $customer_id = $_SESSION["customer_id"] ?? 0;
+$supplier_id = $_GET["supplier_id"] ?? 0;
+$company_id = isset($supplier['company_id']) ? (int)$supplier['company_id'] : 0;
+if ($company_id <= 0 && $supplier_id > 0) {
+    $res = mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = " . (int)$supplier_id . " LIMIT 1");
+    $company_id = $res && ($row = mysqli_fetch_assoc($res)) ? (int)$row['company_id'] : 0;
+}
 
 $sql = "SELECT c.*, t.total_items 
         FROM cart c
-        CROSS JOIN (SELECT COUNT(*) AS total_items FROM cart WHERE customer_id = ? AND supplier_id = ?) t
-        WHERE c.customer_id = ? AND c.supplier_id = ?";
+        CROSS JOIN (SELECT COUNT(*) AS total_items FROM cart WHERE customer_id = ? AND company_id = ?) t
+        WHERE c.customer_id = ? AND c.company_id = ?";
 
 $stmt = $conn->prepare($sql);
-$supplier_id = $_GET["supplier_id"];
-$stmt->bind_param("iiii", $customer_id, $supplier_id, $customer_id, $supplier_id);
+$stmt->bind_param("iiii", $customer_id, $company_id, $customer_id, $company_id);
 
 $stmt->execute();
 $result = $stmt->get_result();
