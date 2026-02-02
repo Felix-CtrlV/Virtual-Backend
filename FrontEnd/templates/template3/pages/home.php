@@ -70,9 +70,9 @@ $current_page = 'home.php';
                 <div class="featured-section mt-9">
                     <div class="row g-4">
                         <?php
-                        $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? LIMIT 6");
+                        $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? LIMIT 6");
                         if ($products_stmt) {
-                            mysqli_stmt_bind_param($products_stmt, "i", $supplier_id);
+                            mysqli_stmt_bind_param($products_stmt, "i", $company_id);
                             mysqli_stmt_execute($products_stmt);
                             $products_result = mysqli_stmt_get_result($products_stmt);
                         } else {
