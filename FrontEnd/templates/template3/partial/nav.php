@@ -87,7 +87,7 @@ while ($row = $result->fetch_assoc()) {
         display: inline-block;
         padding: 0.5rem;
         transform: scale(1.1); 
-        margin-right: 10px;
+        margin-right: 5px;
         transition: color 0.3s ease;
     }
 

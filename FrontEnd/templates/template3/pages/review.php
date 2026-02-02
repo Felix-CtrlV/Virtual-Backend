@@ -49,13 +49,15 @@ $reviews = [];
 $result = mysqli_query($conn, "
     SELECT 
         r.review_id,
-        r.supplier_id,
+        r.company_id,
         r.customer_id,
         r.review,
         r.rating,
         r.created_at,
         c.name,
-        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where supplier_id = 3");
+        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where company_id = $company_id");
+
+
 
 while ($row = mysqli_fetch_assoc($result)) {
     $reviews[] = $row;
@@ -302,20 +304,21 @@ $average_rating = $total_ratings > 0
             const ratingInput = document.getElementById('selected-rating');
             const loginModal = document.getElementById('loginModal');
 
-            // Star Click Logic
+            
             starBoxes.forEach(box => {
                 box.addEventListener('click', () => {
                     const currentRating = parseInt(box.dataset.rating);
                     ratingInput.value = currentRating;
 
-                    // Star အားလုံးကို ပတ်စစ်ပြီး အရောင်ပြောင်းမယ်
+
                     starBoxes.forEach(s => {
                         const sRating = parseInt(s.dataset.rating);
                         if (sRating <= currentRating) {
-                            // ရွေးထားတဲ့ rating အောက်ဆိုရင် မီးလင်းရမယ် (gray class ကို ဖယ်မယ်)
+
                             s.classList.remove('gray');
+
                         } else {
-                            // ရွေးထားတဲ့ rating ထက် မြင့်ရင် မီးမှိတ်ရမယ် (gray class ထည့်မယ်)
+
                             s.classList.add('gray');
                         }
                     });
@@ -326,13 +329,13 @@ $average_rating = $total_ratings > 0
             if (reviewForm) {
                 reviewForm.addEventListener('submit', function(e) {
                     if (!isLoggedIn) {
-                        e.preventDefault(); // Form data မပို့အောင် တားမယ်
-                        loginModal.style.display = 'flex'; // Popup ပြမယ်
+                        e.preventDefault();
+                        loginModal.style.display = 'flex';
                     }
                 });
             }
 
-            // Modal အပြင်ဘက်ကို နှိပ်ရင် ပိတ်ပေးဖို့
+
             window.onclick = function(event) {
                 if (event.target == loginModal) {
                     loginModal.style.display = "none";

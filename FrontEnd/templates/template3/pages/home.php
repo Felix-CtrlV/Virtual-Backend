@@ -47,7 +47,7 @@ $current_page = 'home.php';
         /* min-width: 100vw; */
         width: 100%;
         /* aspect-ratio: 16 / 9; */
-        max-height: 70vh;
+        max-height: 100vh;
         overflow: hidden;
         display: flex;
         align-items: center;
