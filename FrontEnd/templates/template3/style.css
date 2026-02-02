@@ -2009,6 +2009,14 @@ form textarea {
         visibility: visible;
         transform: translate(-50%, 0);
     }
+    
+    .navbar-collapse.hide{
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(0, 0%);
+    }
+
+
 
     /* 3. The Navigation Links */
     .navbar-nav {

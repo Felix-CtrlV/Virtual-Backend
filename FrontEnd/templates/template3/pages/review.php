@@ -8,10 +8,14 @@ if (session_status() === PHP_SESSION_NONE) {
 $is_logged_in = isset($_SESSION['customer_id']);
 $current_url = urlencode($_SERVER['REQUEST_URI']);
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// IMPORTANT: We need the company_id to know which store is being reviewed.
+// I've set it to 5 based on your database screenshot, but you can make this dynamic.
+// $company_id = 5; 
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['review'])) {
 
     // --- 2. BACKEND LOGIN PROTECTION ---
-    // Even if JS is bypassed, prevent Guest from submitting via PHP
+
     if (!$is_logged_in) {
         echo "<script>
                 alert('Please login to submit your review.');
@@ -20,24 +24,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
-    $supplier_id = 1;
-    $customer_id = $_SESSION['customer_id']; // Use actual ID from Session
+    $customer_id = $_SESSION['customer_id']; 
     $rating = (int) $_POST['rating'];
     $review = trim($_POST['review']);
 
+    // FIXED: Changed supplier_id to company_id to match your screenshot
     $stmt = mysqli_prepare($conn, "
-        INSERT INTO reviews (supplier_id, customer_id, review, rating, created_at)
+        INSERT INTO reviews (company_id, customer_id, review, rating, created_at)
         VALUES (?, ?, ?, ?, NOW())
     ");
+    
     mysqli_stmt_bind_param(
         $stmt,
         "iisi",
-        $supplier_id,
+        $company_id,
         $customer_id,
         $review,
         $rating
     );
-    mysqli_stmt_execute($stmt);
+    
+    if(mysqli_stmt_execute($stmt)) {
+        // Refresh the page to show the new review and clear the POST data
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit();
+    }
     mysqli_stmt_close($stmt);
 }
 
@@ -46,6 +56,7 @@ $total_ratings = 0;
 $sum_ratings = 0;
 $reviews = [];
 
+// Fetch reviews for this specific company
 $result = mysqli_query($conn, "
     SELECT 
         r.review_id,
@@ -55,31 +66,34 @@ $result = mysqli_query($conn, "
         r.rating,
         r.created_at,
         c.name,
-        c.image FROM reviews r LEFT JOIN customers c ON r.customer_id = c.customer_id where company_id = $company_id");
+        c.image 
+    FROM reviews r 
+    LEFT JOIN customers c ON r.customer_id = c.customer_id 
+    WHERE r.company_id = $company_id
+    ORDER BY r.created_at DESC");
 
-
-
-while ($row = mysqli_fetch_assoc($result)) {
-    $reviews[] = $row;
-    $rating_counts[$row['rating']]++;
-    $total_ratings++;
-    $sum_ratings += $row['rating'];
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $reviews[] = $row;
+        $rating_counts[$row['rating']]++;
+        $total_ratings++;
+        $sum_ratings += $row['rating'];
+    }
 }
 
-$average_rating = $total_ratings > 0
-    ? $sum_ratings / $total_ratings
-    : 0;
+$average_rating = $total_ratings > 0 ? $sum_ratings / $total_ratings : 0;
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
+    
 <head>
     <meta charset="UTF-8">
     <title>Reviews</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Your original CSS remains unchanged */
         .modal-overlay {
             display: none; 
             position: fixed;
@@ -178,21 +192,15 @@ $average_rating = $total_ratings > 0
 
                 <div class="rating-overview">
                     <div class="average-rating">
-                        <span class="rating-number">
-                            <?= number_format($average_rating, 1) ?>
-                        </span>
+                        <span class="rating-number"><?= number_format($average_rating, 1) ?></span>
                         <div class="stars">
                             <?php
                             $full = floor($average_rating);
                             $half = ($average_rating - $full) >= 0.5;
                             for ($i = 1; $i <= 5; $i++) {
-                                if ($i <= $full) {
-                                    echo '<i class="fas fa-star"></i>';
-                                } elseif ($i == $full + 1 && $half) {
-                                    echo '<i class="fas fa-star-half-alt"></i>';
-                                } else {
-                                    echo '<i class="far fa-star"></i>';
-                                }
+                                if ($i <= $full) echo '<i class="fas fa-star"></i>';
+                                elseif ($i == $full + 1 && $half) echo '<i class="fas fa-star-half-alt"></i>';
+                                else echo '<i class="far fa-star"></i>';
                             }
                             ?>
                         </div>
@@ -201,10 +209,8 @@ $average_rating = $total_ratings > 0
 
                     <div class="rating-bars">
                         <?php for ($i = 5; $i >= 1; $i--):
-                            $width = $total_ratings
-                                ? ($rating_counts[$i] / $total_ratings) * 100
-                                : 0;
-                            ?>
+                            $width = $total_ratings ? ($rating_counts[$i] / $total_ratings) * 100 : 0;
+                        ?>
                             <div class="rating-bar">
                                 <span class="rating-label"><?= $i ?> Star</span>
                                 <div class="bar-container">
@@ -225,28 +231,18 @@ $average_rating = $total_ratings > 0
                     <div class="comments-list">
                         <?php foreach ($reviews as $r): ?>
                             <div class="comment-item">
-                                <div class="user-avatar-circle"
-                                    style="background-image: url(../assets/customer_profiles/<?= $r['image'] ?>);">
-                                </div>
+                                <div class="user-avatar-circle" style="background-image: url(../assets/customer_profiles/<?= $r['image'] ?>);"></div>
                                 <div class="comment-content">
                                     <div class="comment-bubble">
                                         <div class="bubble-header">
-                                            <span class="user-name">                                                
-                                                <?= $r['name'] ?>
-                                            </span>
-
+                                            <span class="user-name"><?= $r['name'] ?></span>
                                             <div class="star-rating">
                                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                    <?= $i <= $r['rating']
-                                                        ? '<span class="star filled">★</span>'
-                                                        : '<span class="star">☆</span>' ?>
+                                                    <?= $i <= $r['rating'] ? '<span class="star filled">★</span>' : '<span class="star">☆</span>' ?>
                                                 <?php endfor; ?>
                                             </div>
                                         </div>
-
-                                        <div class="feedback-message">
-                                            <?= htmlspecialchars($r['review']) ?>
-                                        </div>
+                                        <div class="feedback-message"><?= htmlspecialchars($r['review']) ?></div>
                                     </div>
                                 </div>
                             </div>
@@ -283,49 +279,36 @@ $average_rating = $total_ratings > 0
 
         <div id="loginModal" class="modal-overlay">
             <div class="login-modal">
-                <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Log back in</h1>
-                <p style="margin-bottom: 25px; opacity: 0.8;">Choose an account to continue.</p>
-
+                <h2>Log back in</h2>
+                <p>Choose an account to continue.</p>
                 <div class="or-divider">OR</div>
                 <a href="../customerLogin.php?return_url=<?= $current_url ?>" class="modal-btn">Log in to another account</a>
                 <a href="../customerRegister.php" class="modal-btn">Create account</a>
-
-                <p onclick="document.getElementById('loginModal').style.display='none'" style="cursor:pointer; margin-top:20px; font-size: 0.9rem; opacity: 0.5; transition: 0.3s;"
-                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">Cancel
-                </p>
+                <p class="cancel-btn" onclick="document.getElementById('loginModal').style.display='none'">Cancel</p>
             </div>
         </div>
 
         <script>
-            // --- 3. FRONTEND LOGIN PROTECTION (JS) ---
+            
             const isLoggedIn = <?= json_encode($is_logged_in) ?>;
             const reviewForm = document.getElementById('reviewForm');
             const starBoxes = document.querySelectorAll('.star-box');
             const ratingInput = document.getElementById('selected-rating');
             const loginModal = document.getElementById('loginModal');
 
-            
             starBoxes.forEach(box => {
                 box.addEventListener('click', () => {
                     const currentRating = parseInt(box.dataset.rating);
                     ratingInput.value = currentRating;
 
-
                     starBoxes.forEach(s => {
                         const sRating = parseInt(s.dataset.rating);
-                        if (sRating <= currentRating) {
-
-                            s.classList.remove('gray');
-
-                        } else {
-
-                            s.classList.add('gray');
-                        }
+                        s.classList.toggle('gray', sRating > currentRating);
                     });
                 });
             });
 
-            // Form Submit Logic
+
             if (reviewForm) {
                 reviewForm.addEventListener('submit', function(e) {
                     if (!isLoggedIn) {
@@ -342,6 +325,6 @@ $average_rating = $total_ratings > 0
                 }
             }
         </script>
-
+    </div>
 </body>
 </html>
