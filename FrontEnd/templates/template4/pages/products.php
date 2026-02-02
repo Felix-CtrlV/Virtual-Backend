@@ -444,9 +444,9 @@ if (isset($_POST['ajax_load']) && $_POST['ajax_load'] == 'true') {
 
     <div class="product-grid" id="product-grid">
         <?php
-        $sql = "SELECT p.*, c.category_name FROM products p LEFT JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND status = 'available'";
+        $sql = "SELECT p.*, c.category_name FROM products p LEFT JOIN category c ON p.category_id = c.category_id WHERE p.company_id = ? AND status = 'available'";
         $types = "i";
-        $params = [$supplier_id];
+        $params = [$company_id];
 
         if ($category_filter !== 'all') {
             $sql .= " AND p.category_id = ?";

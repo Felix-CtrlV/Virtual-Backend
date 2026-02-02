@@ -34,6 +34,8 @@ camera.position.set(0, 1.6, 9);
 const raycaster = new THREE.Raycaster();
 const pointerNdc = new THREE.Vector2();
 
+const mouse = new THREE.Vector2();
+
 const clock = new THREE.Clock();
 
 const textureLoader = new THREE.TextureLoader();
@@ -1792,6 +1794,13 @@ if (btnEnter) {
   btnEnter.addEventListener('click', async () => {
     if (state.transitioning) return;
     if (overlayEl) overlayEl.hidden = true;
+    
+    // Also hide mobile button if visible
+    if (btnEnterMobile) {
+      btnEnterMobile.style.opacity = '0';
+      btnEnterMobile.style.pointerEvents = 'none';
+    }
+    
     state.cameraTargetPos.set(0, 1.65, 1.6);
     state.cameraTargetLookAt.set(0, 2.2, -2.2);
     setHud('Outside', 'Entering...');
@@ -2059,3 +2068,87 @@ await loadSuppliers();
 createOutside();
 setupSearchAndFloorSelector(); // Initialize search and floor selector
 animate();
+
+// --- Mobile Button Functionality ---
+
+// Get mobile button
+const btnEnterMobile = document.getElementById('btnEnterMobile');
+
+// Mobile enter function (same as desktop but hides mobile button)
+async function enterMallMobile() {
+  if (state.transitioning) return;
+  if (overlayEl) overlayEl.hidden = true;
+  
+  // Hide mobile button immediately
+  if (btnEnterMobile) {
+    btnEnterMobile.style.opacity = '0';
+    btnEnterMobile.style.transform = 'translateX(-50%) scale(0.9)';
+    btnEnterMobile.style.pointerEvents = 'none';
+  }
+  
+  state.cameraTargetPos.set(0, 1.65, 1.6);
+  state.cameraTargetLookAt.set(0, 2.2, -2.2);
+  setHud('Outside', 'Entering...');
+  await wait(450);
+  await transitionTo('hallway');
+}
+
+// Add event listener for mobile button
+if (btnEnterMobile) {
+  btnEnterMobile.addEventListener('click', enterMallMobile);
+}
+
+// Show/hide mobile button based on screen size
+function updateMobileButtonVisibility() {
+  if (!btnEnterMobile) return;
+  
+  const isMobile = window.innerWidth <= 768;
+  
+  if (isMobile && state.mode === 'outside' && !overlayEl.hidden) {
+    btnEnterMobile.style.display = 'block';
+    // Fade in animation
+    setTimeout(() => {
+      btnEnterMobile.style.opacity = '1';
+      btnEnterMobile.style.transform = 'translateX(-50%)';
+    }, 100);
+  } else {
+    btnEnterMobile.style.display = 'none';
+  }
+}
+
+// Initial check
+updateMobileButtonVisibility();
+
+// Update on resize
+window.addEventListener('resize', updateMobileButtonVisibility);
+
+// Also update when transitioning back to outside
+// We need to modify the transitionTo function to handle this
+const originalTransitionTo = transitionTo;
+transitionTo = async function(nextMode, opts = {}) {
+  if (state.transitioning) return;
+  state.transitioning = true;
+
+  setFade(true);
+  await wait(620);
+
+  state.mode = nextMode;
+  if (nextMode === 'outside') {
+    createOutside();
+    // Show mobile button if on mobile
+    setTimeout(updateMobileButtonVisibility, 100);
+  }
+  if (nextMode === 'hallway') {
+    if (typeof opts.floorIndex === 'number') state.floorIndex = opts.floorIndex;
+    createHallway();
+    // Hide mobile button
+    if (btnEnterMobile) btnEnterMobile.style.display = 'none';
+  }
+  if (nextMode === 'shop') createShopInterior(opts.shopId);
+
+  await wait(60);
+  setFade(false);
+  await wait(650);
+
+  state.transitioning = false;
+};

@@ -1,3 +1,4 @@
+
 html,
 body {
   height: 100%;
@@ -6,6 +7,8 @@ body {
   background: #05070c;
   color: #e9eefc;
   overflow: hidden;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior: none;
 }
 
 #app {
@@ -21,21 +24,18 @@ body {
   left: 0;
   right: 0;
   z-index: 20;
-  /* Higher than overlay so login is clickable */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* Better alignment */
   padding: 20px 30px;
   pointer-events: none;
-  /* Let clicks pass through empty spaces */
+  transition: all 0.3s ease;
 }
 
 #hudLeft,
 #hudRight,
 #hudCenter {
   pointer-events: auto;
-  /* Enable clicks on buttons/text */
 }
 
 #hudLeft {
@@ -55,7 +55,7 @@ body {
   opacity: 0.7;
 }
 
-/* --- Search Bar (Hidden by default) --- */
+/* --- Search Bar --- */
 #hudCenter {
   flex: 1;
   display: flex;
@@ -70,6 +70,7 @@ body {
   padding: 8px;
   border-radius: 8px;
   backdrop-filter: blur(5px);
+  transition: opacity 0.3s;
 }
 
 #searchBar {
@@ -79,6 +80,7 @@ body {
   border-bottom: 1px solid #555;
   padding: 5px;
   outline: none;
+  min-width: 200px;
 }
 
 #floorSelector {
@@ -86,6 +88,7 @@ body {
   color: white;
   border: none;
   border-radius: 4px;
+  padding: 0 5px;
 }
 
 /* --- Auth / Top Right --- */
@@ -100,7 +103,6 @@ body {
   align-items: center;
 }
 
-/* Login Button */
 .btn-login-nav {
   background: rgba(255, 255, 255, 0.1);
   color: white;
@@ -117,7 +119,6 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Profile Pill */
 .profile-pill {
   display: flex;
   align-items: center;
@@ -127,6 +128,13 @@ body {
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-pill:hover {
+  background: rgba(30, 41, 59, 0.8);
 }
 
 .nav-profile-img {
@@ -143,156 +151,6 @@ body {
   margin-right: 5px;
 }
 
-.btn-logout {
-  background: none;
-  border: none;
-  color: #f87171;
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 5px;
-}
-
-.btn-logout:hover {
-  color: #ef4444;
-  transform: scale(1.1);
-}
-
-/* Back Button */
-#btnBack {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* --- The Overlay (Relayout) --- */
-.overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  /* Removed the centered flexbox to allow custom positioning */
-  display: block;
-  background: radial-gradient(circle at center, transparent 0%, rgba(5, 7, 12, 0.8) 100%);
-  transition: opacity 0.8s ease;
-}
-
-.overlay[hidden] {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* New Side Panel Layout */
-.overlaySidePanel {
-  position: absolute;
-  bottom: 80px;
-  /* Positioned at bottom left */
-  left: 60px;
-  width: 450px;
-  max-width: 90%;
-  padding: 40px;
-
-  /* Glassmorphism */
-  background: rgba(5, 7, 12, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-
-  animation: slideIn 1s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.overlayKicker {
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #38bdf8;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
-.overlayTitle {
-  font-family: "Playfair Display", serif;
-  font-size: 3rem;
-  /* Slightly smaller to fit side */
-  line-height: 1;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 20px;
-}
-
-.overlayTitleEm {
-  font-style: italic;
-  color: #94a3b8;
-}
-
-.overlayDesc {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: rgba(233, 238, 252, 0.8);
-  margin-bottom: 30px;
-}
-
-/* Buttons */
-.btnPrimary {
-  background: #e9eefc;
-  color: #05070c;
-  border: none;
-  padding: 14px 28px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border-radius: 4px;
-}
-
-.btnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(233, 238, 252, 0.4);
-}
-
-/* --- Canvas Wrap --- */
-#canvasWrap {
-  width: 100%;
-  height: 100%;
-}
-
-#threeCanvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  outline: none;
-}
-
-/* --- Append to customer.css --- */
-
-/* Profile Pill Enhancement */
-.profile-pill {
-  position: relative;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.profile-pill:hover {
-  background: rgba(30, 41, 59, 0.8);
-}
-
-/* Modern Dropdown Menu */
 .profile-dropdown {
   position: absolute;
   top: 55px;
@@ -300,12 +158,10 @@ body {
   width: 280px;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 15px;
   display: none;
-  /* Hidden by default */
   flex-direction: column;
   gap: 10px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -319,18 +175,10 @@ body {
 }
 
 @keyframes dropFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Dropdown Header */
 .dropdown-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 10px;
@@ -354,7 +202,6 @@ body {
   text-overflow: ellipsis;
 }
 
-/* Dropdown Actions */
 .dropdown-btn {
   display: flex;
   align-items: center;
@@ -384,4 +231,232 @@ body {
 .dropdown-btn.logout:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
+}
+
+#btnBack {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* --- Overlay --- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: block;
+  background: radial-gradient(circle at center, transparent 0%, rgba(5, 7, 12, 0.8) 100%);
+  transition: opacity 0.8s ease;
+}
+
+.overlay[hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlaySidePanel {
+  position: absolute;
+  bottom: 80px;
+  left: 60px;
+  width: 450px;
+  max-width: 90%;
+  padding: 40px;
+  background: rgba(5, 7, 12, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 1s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.overlayKicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #38bdf8;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.overlayTitle {
+  font-family: "Playfair Display", serif;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.overlayTitleEm {
+  font-style: italic;
+  color: #94a3b8;
+}
+
+.overlayDesc {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(233, 238, 252, 0.8);
+  margin-bottom: 30px;
+}
+
+.btnPrimary {
+  background: #e9eefc;
+  color: #05070c;
+  border: none;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 4px;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(233, 238, 252, 0.4);
+}
+
+/* Mobile Enter Button (Default Hidden) */
+.mobile-enter-btn {
+  display: none; /* Hidden on desktop */
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e9eefc;
+  color: #05070c;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 50px;
+  box-shadow: 0 0 20px rgba(233, 238, 252, 0.4);
+  animation: pulseMobile 2s infinite ease-in-out;
+  z-index: 100;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@keyframes pulseMobile {
+  0% { box-shadow: 0 0 0 0 rgba(233, 238, 252, 0.4); transform: translateX(-50%) scale(1); }
+  70% { box-shadow: 0 0 0 15px rgba(233, 238, 252, 0); transform: translateX(-50%) scale(1.02); }
+  100% { box-shadow: 0 0 0 0 rgba(233, 238, 252, 0); transform: translateX(-50%) scale(1); }
+}
+
+#canvasWrap {
+  width: 100%;
+  height: 100%;
+}
+
+#threeCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none; /* CRITICAL: Prevents scroll/zoom on mobile */
+}
+
+/* --- RESPONSIVE MEDIA QUERIES --- */
+
+@media (max-width: 768px) {
+  /* HUD Reorganization */
+  #hud {
+    padding: 15px;
+    flex-wrap: wrap; /* Allow items to wrap */
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  /* 1. Top Left: Title */
+  #hudLeft {
+    order: 1;
+    flex: 1;
+  }
+  
+  #sceneTitle {
+    font-size: 0.8rem;
+  }
+  
+  #sceneHint {
+    font-size: 10px;
+  }
+
+  /* 2. Top Right: Auth & Back */
+  #hudRight {
+    order: 2;
+    gap: 8px;
+  }
+
+  /* Compact Auth Pill */
+  .profile-pill {
+    padding: 4px;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+  
+  .nav-profile-img {
+    margin: 0;
+    width: 30px;
+    height: 30px;
+  }
+  
+  .profile-name, .fa-chevron-down {
+    display: none !important; /* Hide name and arrow */
+  }
+
+  /* Dropdown Alignment */
+  .profile-dropdown {
+    top: 50px;
+    right: 5px;
+    width: 200px;
+  }
+
+  /* 3. Second Row: Search & Floor */
+  #hudCenter {
+    order: 3;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  #searchContainer {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+  }
+
+  #searchBar {
+    flex: 1;
+    min-width: 0; /* Allows shrinking */
+    font-size: 14px;
+  }
+
+  /* Overlay Changes */
+  .overlaySidePanel {
+    display: none !important; /* Hide desktop panel */
+  }
+
+  /* Show Mobile Button */
+  .mobile-enter-btn {
+    display: block !important;
+  }
+  
+  /* Adjust Overlay Background */
+  .overlay {
+    background: radial-gradient(circle at center, transparent 0%, rgba(5, 7, 12, 0.9) 100%);
+  }
+}
 }

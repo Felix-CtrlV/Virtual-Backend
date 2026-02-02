@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Malltiverse</title>
   <link rel="stylesheet" href="customer.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,8 +30,7 @@
       </div>
 
       <div id="hudRight">
-        <div id="authContainer" class="auth-container">
-            </div>
+        <div id="authContainer" class="auth-container"></div>
         <button id="btnBack" type="button" hidden>Back</button>
       </div>
     </div>
@@ -49,6 +49,8 @@
           <button id="btnEnter" type="button" class="btnPrimary">Enter the Mall</button>
         </div>
       </div>
+      
+      <button id="btnEnterMobile" type="button" class="mobile-enter-btn">Tap to Enter</button>
     </div>
 
     <div id="canvasWrap">
@@ -69,3 +71,4 @@
   <script type="module" src="customer.js"></script>
 </body>
 </html>
+}
