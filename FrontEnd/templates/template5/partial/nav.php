@@ -1,5 +1,5 @@
 <?php
-// ၁။ PHP Session နှင့် User Data ဆွဲထုတ်ခြင်း
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -16,22 +16,27 @@ $first_letter = "G";
 
 if ($isLoggedIn) {
     $c_id = $_SESSION['customer_id'];
-    // $conn ရှိမှ Query စစ်မည်
     if(isset($conn)) {
         $user_query = mysqli_query($conn, "SELECT * FROM customers WHERE customer_id = '$c_id'");
         if($user_row = mysqli_fetch_assoc($user_query)) {
             $user_name = $user_row['customer_name'] ?? $user_row['name']; 
             $user_email = $user_row['customer_email'] ?? $user_row['email'];
-            // နာမည်၏ ပထမစာလုံးကို ယူခြင်း
             $first_letter = strtoupper(substr($user_name, 0, 1));
         }
     }
 }
 
-// Cart Count (အစ်ကို့ Session logic အတိုင်း)
+// Cart Count Logic
 $cart_count = 0;
-if (isset($_SESSION['cart'])) {
-    foreach($_SESSION['cart'] as $qty) { $cart_count += $qty; }
+if ($isLoggedIn) {
+    $c_id = $_SESSION['customer_id'];
+    $count_res = mysqli_query($conn, "SELECT SUM(quantity) as total FROM cart WHERE customer_id = '$c_id' AND supplier_id = '$supplier_id'");
+    $count_row = mysqli_fetch_assoc($count_res);
+    $cart_count = $count_row['total'] ?? 0;
+} else {
+    if (isset($_SESSION['cart'])) {
+        foreach($_SESSION['cart'] as $qty) { $cart_count += (int)$qty; }
+    }
 }
 ?>
 
@@ -43,12 +48,10 @@ if (isset($_SESSION['cart'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- General Styles --- */
         body { font-family: 'Inter', sans-serif; background-color: #fff; }
         .user-dropdown .dropdown-toggle::after { display: none; }
         .dropdown-menu { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: none; overflow: hidden; }
 
-        /* --- Google Style Avatar --- */
         .google-avatar-circle {
             width: 35px; height: 35px; border-radius: 50%;
             background-color: #1a73e8; color: white;
@@ -56,7 +59,6 @@ if (isset($_SESSION['cart'])) {
             font-weight: 600; font-size: 15px; text-transform: uppercase;
         }
 
-        /* --- Back to Mall Button --- */
         .shopping-back {
             display: inline-flex; align-items: center; padding: 8px 18px;
             background-color: #ffffff; color: #333 !important;
@@ -65,14 +67,26 @@ if (isset($_SESSION['cart'])) {
         }
         .shopping-back:hover { background-color: #2c3e50; color: #fff !important; transform: translateX(-3px); }
 
-        /* --- Profile Info Box (Google Style) --- */
+        /* --- Cart Badge Fix --- */
+        .cart-badge-count {
+            font-size: 0.65rem !important;
+            min-width: 18px;
+            height: 18px;
+            top: -8px !important;
+            right: -10px !important;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px !important;
+        }
+
         .profile-info-box { padding: 16px; min-width: 240px; background: #fff; }
         .user-full-name { font-weight: 700; color: #202124; font-size: 0.95rem; margin-bottom: 2px; }
         .user-full-email { color: #5f6368; font-size: 0.85rem; margin-bottom: 0; }
         .logout-link { color: #d93025 !important; font-weight: 500; transition: 0.2s; }
         .logout-link:hover { background-color: #fff5f5; }
 
-        /* --- Login Alert Modal --- */
         .login-alert-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
@@ -89,13 +103,10 @@ if (isset($_SESSION['cart'])) {
         .btn-login { flex: 1; padding: 12px; background: #1a1a1a; color: #fff; text-decoration: none; border-radius: 12px; font-weight: 600; }
         .btn-cancel { flex: 1; padding: 12px; border: 1.5px solid #eee; background: #fff; color: #666; border-radius: 12px; cursor: pointer; }
 
-        /* --- Animations --- */
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.4); opacity: 0; } }
 
-        /* --- Mobile Responsive --- */
         @media (max-width: 991px) {
-            .google-avatar-circle { width: 40px; height: 40px; }
             .nav-auth-section { display: none; }
             .mobile-user-profile { background: #f8f9fa; border-radius: 12px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
         }
@@ -125,8 +136,8 @@ if (isset($_SESSION['cart'])) {
         <div class="nav-cart ms-auto me-3 d-lg-none">
             <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
                 <i class="fas fa-shopping-basket fa-lg"></i>
-                <span class="cart-badge-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                      style="font-size: 0.6rem; min-width: 18px; height: 18px; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
+                <span class="cart-badge-count position-absolute badge rounded-pill bg-danger" 
+                      style="<?= $cart_count > 0 ? '' : 'display:none;' ?>">
                     <?= $cart_count ?>
                 </span>
             </a>
@@ -164,15 +175,15 @@ if (isset($_SESSION['cart'])) {
             </ul>
 
             <div class="d-none d-lg-flex align-items-center gap-3">
-                <div class="nav-cart me-2">
-                    <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
-                        <i class="fas fa-shopping-basket fa-lg"></i>
-                        <span class="cart-badge-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                              style="font-size: 0.6rem; min-width: 18px; height: 18px; <?= $cart_count > 0 ? '' : 'display:none;' ?>">
-                            <?= $cart_count ?>
-                        </span>
-                    </a>
-                </div>
+               <div class="nav-cart me-2">
+    <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
+        <i class="fas fa-shopping-basket fa-lg"></i>
+        <span class="cart-badge-count badge rounded-pill bg-danger" 
+              style="<?= $cart_count > 0 ? 'display:flex;' : 'display:none;' ?>">
+            <?= $cart_count ?>
+        </span>
+    </a>
+</div>
 
                 <div class="nav-auth-section border-start ps-3">
                     <?php if ($isLoggedIn): ?>
@@ -209,10 +220,9 @@ if (isset($_SESSION['cart'])) {
 
 <div id="loginAlertModal" class="login-alert-overlay">
     <div class="login-alert-box">
-        <button class="close-x" onclick="closeLoginAlert()">&times;</button>
         <div class="icon-wrapper"><div class="pulse-ring"></div><i class="fas fa-user-shield"></i></div>
         <h3>Login Required</h3>
-        <p>To access your shopping cart and enjoy a seamless experience, please sign in to your account.</p>
+        <p>To access your shopping cart, please sign in to your account.</p>
         <div class="login-alert-btns">
             <button onclick="closeLoginAlert()" class="btn-cancel">Later</button>
             <a href="../customerLogin.php" class="btn-login">Login Now</a>
@@ -233,13 +243,55 @@ if (isset($_SESSION['cart'])) {
         document.getElementById('loginAlertModal').style.display = 'none';
     }
 
-    // Cart Count Update (JS)
-    const count = <?= $cart_count ?>;
-    document.querySelectorAll('.cart-badge-count').forEach(el => {
-        el.innerText = count;
-        el.style.display = count > 0 ? 'block' : 'none';
-    });
+    function refreshBag() {
+    const supplierId = "<?= $supplier_id ?>";
+    fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
+    .then(res => res.json())
+    .then(data => {
+       
+        const count = parseInt(data.total_count) || 0;
+        
+        document.querySelectorAll('.cart-badge-count').forEach(el => {
+            el.innerText = count;
+           
+            if (count > 0) {
+                el.style.setProperty('display', 'flex', 'important');
+            } else {
+                el.style.setProperty('display', 'none', 'important');
+            }
+        });
+    })
+    .catch(err => console.error("Error:", err));
+}
+
+
+document.addEventListener('DOMContentLoaded', refreshBag);
 </script>
 
 </body>
 </html>
+<style>
+.nav-cart a.position-relative {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.cart-badge-count {
+    position: absolute !important;
+    top: -8px !important;    
+    right: -10px !important; 
+    background-color: #07799c !important; 
+    color: white !important;
+    font-size: 0.65rem !important;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex !important; 
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border: 1px solid white;
+}</style>
