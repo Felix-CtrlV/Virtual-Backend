@@ -27,10 +27,24 @@ if (!isset($_POST['variant_id'], $_POST['supplier_id'], $_POST['quantity'])) {
     exit;
 }
 
-$customer_id = $_SESSION['customer_id'] ?? 1; 
+
+
+$customer_id = $_SESSION['customer_id'] ?? 1;
 
 $variant_id = (int) $_POST['variant_id'];
-$supplier_id = (int) $_POST['supplier_id'];
+$supplier_id = 10;
+$company_stmt = mysqli_prepare($conn, query: "Select * from companies where supplier_id = ");
+if($company_stmt){
+    mysqli_stmt_bind_param($company_stmt, "i", $supplier_id);
+    mysqli_stmt_execute($company_stmt);
+    $company_result = mysqli_stmt_get_result($company_stmt);
+}else{
+    $company_result = false;
+}
+
+$company_row = mysqli_fetch_assoc($company_result);
+$company_id = $company_row['company_id'];
+
 $quantity_to_add = (int) $_POST['quantity'];
 
 $stock_query = "SELECT quantity FROM product_variant WHERE variant_id = ?";
@@ -64,8 +78,8 @@ if ($db_stock >= $total_requested) {
         mysqli_stmt_bind_param($update_stmt, "ii", $total_requested, $cart_data['cart_id']);
         $success = mysqli_stmt_execute($update_stmt);
     } else {
-        $insert_stmt = mysqli_prepare($conn, "INSERT INTO cart (customer_id, supplier_id, variant_id, quantity) VALUES (?, ?, ?, ?)");
-        mysqli_stmt_bind_param($insert_stmt, "iiii", $customer_id, $supplier_id, $variant_id, $quantity_to_add);
+        $insert_stmt = mysqli_prepare($conn, "INSERT INTO cart (customer_id, company_id, variant_id, quantity) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($insert_stmt, "iiii", $customer_id, $company_id, $variant_id, $quantity_to_add);
         $success = mysqli_stmt_execute($insert_stmt);
     }
 
