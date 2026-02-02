@@ -5,7 +5,7 @@
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 1;
 
 // Fetch colors from shop_assets (Keeping logic, though we enforce White/Black in CSS now)
-$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE supplier_id = $supplier_id LIMIT 1";
+$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE company_id = $company_id LIMIT 1";
 $color_result = $conn->query($color_sql);
 $primary_color = "#FFFFFF"; // Force White for this design
 $secondary_color = "#000000"; // Force Black for this design
@@ -22,37 +22,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $review_text = trim($_POST['review_text']);
 
     if ($rating > 0 && !empty($review_text)) {
-        if (!empty($email)) {
-            $cust_stmt = $conn->prepare("SELECT customer_id FROM customers WHERE email = ?");
-            $cust_stmt->bind_param("s", $email);
-            $cust_stmt->execute();
-            $res = $cust_stmt->get_result();
+        // if (!empty($email)) {
+        //     $cust_stmt = $conn->prepare("SELECT customer_id FROM customers WHERE email = ?");
+        //     $cust_stmt->bind_param("s", $email);
+        //     $cust_stmt->execute();
+        //     $res = $cust_stmt->get_result();
 
-            if ($res->num_rows > 0) {
-                $customer = $res->fetch_assoc();
-                $cid = $customer['customer_id'];
+        //     if ($res->num_rows > 0) {
+        //         $customer = $res->fetch_assoc();
+                $cid = $_SESSION['customer_id']; 
 
-                $stmt = $conn->prepare("INSERT INTO reviews (supplier_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
-                $stmt->bind_param("iisi", $supplier_id, $cid, $review_text, $rating);
+                $stmt = $conn->prepare("INSERT INTO reviews (company_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
+                $stmt->bind_param("iisi", $company_id, $cid, $review_text, $rating);
 
                 if ($stmt->execute()) {
                     echo "<script>alert('Review published.'); window.location.href='?supplier_id=$supplier_id&page=review';</script>";
                 } else {
                     echo "<script>alert('System error.');</script>";
                 }
-            } else {
-                echo "<script>alert('Email not associated with an account.');</script>";
-            }
+            
         } else {
             echo "<script>alert('Email required.');</script>";
         }
     } else {
         echo "<script>alert('Rating and review text required.');</script>";
     }
-}
+
 
 // 3. Fetch Stats
-$sql_stats = "SELECT rating FROM reviews WHERE supplier_id = $supplier_id";
+$sql_stats = "SELECT rating FROM reviews WHERE company_id = $company_id";
 $result_stats = $conn->query($sql_stats);
 
 $total_reviews = 0;
@@ -76,7 +74,7 @@ $sql_reviews = "
     SELECT r.*, c.name, c.image 
     FROM reviews r 
     JOIN customers c ON r.customer_id = c.customer_id 
-    WHERE r.supplier_id = $supplier_id 
+    WHERE r.company_id = $company_id 
     ORDER BY r.created_at DESC LIMIT 10";
 $reviews_res = $conn->query($sql_reviews);
 ?>

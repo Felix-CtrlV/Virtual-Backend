@@ -54,6 +54,30 @@
     </div>
 </section>
 
+<style>@media (max-width: 991px) {
+    .hero-container {
+        display: flex !important;
+        flex-direction: column-reverse !important; 
+        text-align: center; 
+        padding-top: 20px;
+    }
+
+    .hero-content {
+        width: 100% !important;
+        padding: 40px 20px !important;
+    }
+
+    .hero-banner {
+        width: 100% !important;
+        margin-bottom: 20px;
+    }
+
+   
+    .banner-shape-wrapper {
+        margin: 0 auto;
+        max-width: 90%;
+    }
+}</style>
 
 
     

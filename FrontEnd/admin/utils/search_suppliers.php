@@ -11,19 +11,23 @@ SELECT
     sa.logo,
     sa.banner,
 
-    (SELECT ROUND(AVG(rating), 1)
-     FROM reviews
-     WHERE supplier_id = s.supplier_id) AS avg_rating,
+    (
+        SELECT ROUND(AVG(r.rating), 1)
+        FROM reviews r
+        WHERE r.company_id = c.company_id
+    ) AS avg_rating,
 
-    (SELECT COUNT(*)
-     FROM reviews
-     WHERE supplier_id = s.supplier_id) AS review_count
+    (
+        SELECT COUNT(*)
+        FROM reviews r
+        WHERE r.company_id = c.company_id
+    ) AS review_count
 
 FROM suppliers s
 LEFT JOIN companies c 
     ON c.supplier_id = s.supplier_id
 LEFT JOIN shop_assets sa 
-    ON sa.supplier_id = s.supplier_id
+    ON sa.company_id = c.company_id
 
 WHERE (
     c.company_name LIKE ?
@@ -33,7 +37,6 @@ WHERE (
 )
 
 ORDER BY s.created_at DESC;
-
 ";
 
 $stmt = $conn->prepare($sql);

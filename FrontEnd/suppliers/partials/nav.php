@@ -9,15 +9,261 @@ if (!isset($_SESSION["supplier_logged_in"])) {
 $supplierid = $_SESSION["supplierid"];
 
 // 1. Fetch Supplier & Shop Details
-$stmt = $conn->prepare("SELECT  s.*, c.company_name, c.description AS company_description, sa.*, p.product_id, p.product_name, p.price, pv.variant_id, pv.size, pv.color, pv.quantity
-FROM suppliers s LEFT JOIN companies c ON c.supplier_id = s.supplier_id LEFT JOIN shop_assets sa ON sa.supplier_id = s.supplier_id LEFT JOIN products p 
-ON p.supplier_id = s.supplier_id LEFT JOIN product_variant pv ON pv.product_id = p.product_id WHERE s.supplier_id = ? AND c.status = 'active';");
+$stmt = $conn->prepare("SELECT s.*, c.company_name, c.company_id, c.description AS company_description, sa.*, p.product_id, p.product_name, p.price, pv.variant_id, pv.size, pv.color, pv.quantity
+FROM suppliers s 
+LEFT JOIN companies c ON c.supplier_id = s.supplier_id 
+LEFT JOIN shop_assets sa ON sa.company_id = c.company_id 
+LEFT JOIN products p ON p.supplier_id = s.supplier_id 
+LEFT JOIN product_variant pv ON pv.product_id = p.product_id 
+WHERE s.supplier_id = ? AND c.status = 'active' limit 1;");
+
 $stmt->bind_param("i", $supplierid);
 $stmt->execute();
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $stmt->close();
+
+// --- [START] FIX: CHECK IF ACCOUNT IS ACTIVE ---
+if (!$row) {
+    // If $row is null, it means no 'active' company was found for this supplier.
+    // We display the waiting screen and exit the script immediately.
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Account Pending</title>
+        <script src="https://cdn.lordicon.com/lordicon.js"></script>
+        <style>
+            body {
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f8f9fa;
+                color: #333;
+                text-align: center;
+            }
+
+            .status-card {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                max-width: 400px;
+                width: 90%;
+            }
+
+            h2 {
+                margin-top: 20px;
+                color: #2c3e50;
+            }
+
+            p {
+                color: #6c757d;
+                line-height: 1.6;
+            }
+
+            .btn-logout {
+                margin-top: 25px;
+                padding: 12px 30px;
+                background-color: #dc3545;
+                color: white;
+                text-decoration: none;
+                border-radius: 50px;
+                font-weight: bold;
+                display: inline-block;
+                transition: background 0.3s;
+            }
+
+            .btn-logout:hover {
+                background-color: #c82333;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="status-card">
+            <lord-icon src="https://cdn.lordicon.com/lupuorrc.json" trigger="loop" delay="2000"
+                colors="primary:#121331,secondary:#08a88a" style="width:120px;height:120px">
+            </lord-icon>
+
+            <h2>Waiting for Approval</h2>
+            <p>Your shop setup is currently under review or incomplete. Please wait for the administrator to approve your
+                company details.</p>
+
+            <a href="../utils/signout.php" class="btn-logout">Logout</a>
+        </div>
+    </body>
+
+    </html>
+    <?php
+    exit(); // IMPORTANT: Stops the rest of the page (and errors) from loading
+}
+
+// ... (The "Account Pending" block ends above here) ...
+
+// --- [START] HANDLE PAYMENT SUCCESS REDIRECT (unpaid-rent gate only) ---
+// When return from Crediverse with success and no pending_rent, we came from the unpaid-rent gate:
+// update the existing unpaid record and redirect to dashboard.
+// When pending_rent is set, we came from rentpayment.php flow; rentpayment.php will INSERT and redirect.
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success' && !isset($_SESSION['pending_rent'])) {
+    $updateRent = $conn->prepare("UPDATE rent_payments SET status = 'paid', paid_date = NOW() WHERE company_id = ? AND status = 'unpaid'");
+    $updateRent->bind_param("i", $row['company_id']);
+    
+    if ($updateRent->execute()) {
+        $updateRent->close();
+        echo "<script>window.location.href='dashboard.php';</script>";
+        exit();
+    }
+    $updateRent->close();
+}
+// --- [END] HANDLE PAYMENT SUCCESS REDIRECT ---
+
+
+// --- [START] NEW: CHECK FOR UNPAID RENT ---
+// (Paste the previous unpaid rent check code here)
+// ...
+
+$rentStmt = $conn->prepare("SELECT payment_id, amount, status FROM rent_payments WHERE company_id = ? AND status = 'unpaid' LIMIT 1");
+$rentStmt->bind_param("i", $row['company_id']);
+$rentStmt->execute();
+$rentResult = $rentStmt->get_result();
+$rentRow = $rentResult->fetch_assoc();
+$rentStmt->close();
+
+// If an unpaid rent record exists, we block access and show the payment screen
+if ($rentRow) {
+    
+    // 2. Fetch Admin Account Number (Receiver)
+    // We fetch the first admin's account number to receive the money
+    $adminStmt = $conn->prepare("SELECT account_number FROM admins LIMIT 1");
+    $adminStmt->execute();
+    $adminResult = $adminStmt->get_result();
+    $adminRow = $adminResult->fetch_assoc();
+    $adminStmt->close();
+
+    $admin_account = $adminRow['account_number'] ?? '0000000000'; // Fallback if admin has no account set
+
+    // 3. Construct the Payment URL
+    // We dynamically build the return URL to point back to this dashboard
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+    $host = $_SERVER['HTTP_HOST'];
+    $current_path = dirname($_SERVER['PHP_SELF']); 
+    $return_url = $protocol . "://" . $host . $current_path . "/dashboard.php?placeholder=1";
+
+    $payment_url = "https://crediverse.base44.app/payment?" . http_build_query([
+        'amount'         => $rentRow['amount'],
+        'merchant'       => 'MALLTIVERSE',
+        'return_url'     => $return_url,
+        'account_number' => $admin_account
+    ]);
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Required</title>
+        <script src="https://cdn.lordicon.com/lordicon.js"></script>
+        <style>
+            body {
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f0f2f5;
+                color: #333;
+                text-align: center;
+            }
+            .payment-card {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                max-width: 450px;
+                width: 90%;
+            }
+            h2 { margin-top: 10px; color: #2d3748; }
+            p { color: #718096; line-height: 1.6; margin-bottom: 30px; }
+            .amount-box {
+                background: #f7fafc;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 2rem;
+                font-weight: bold;
+                color: #2d3748;
+                margin-bottom: 25px;
+                border: 2px dashed #cbd5e0;
+            }
+            .btn-pay {
+                display: block;
+                width: 100%;
+                padding: 15px 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 12px;
+                font-weight: bold;
+                font-size: 1.1rem;
+                transition: transform 0.2s, box-shadow 0.2s;
+                margin-bottom: 15px;
+            }
+            .btn-pay:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
+            }
+            .btn-logout {
+                color: #718096;
+                text-decoration: none;
+                font-size: 0.9rem;
+            }
+            .btn-logout:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class="payment-card">
+            <lord-icon
+                src="https://cdn.lordicon.com/jtiihjyw.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#121331,secondary:#08a88a"
+                style="width:100px;height:100px">
+            </lord-icon>
+            
+            <h2>Rent Payment Due</h2>
+            <p>Your shop is approved! To activate your dashboard features, please settle your outstanding rent payment.</p>
+            
+            <div class="amount-box">
+                $<?= number_format($rentRow['amount'], 2) ?>
+            </div>
+            
+            <a href="<?= htmlspecialchars($payment_url) ?>" class="btn-pay">
+                Pay Securely via Crediverse
+            </a>
+            
+            <a href="../utils/signout.php" class="btn-logout">Log out and pay later</a>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit(); // Stop the rest of the dashboard from loading
+}
+
+// --- [END] FIX ---
+
 $supplierName = $row['name'];
+
+// 2. Product Count
+// ... rest of your code continues below ...
 
 // 2. Product Count
 $countproduct = $conn->prepare("SELECT COUNT(*) AS product_count FROM products WHERE supplier_id = ?");
@@ -37,10 +283,19 @@ $pendingOrders = $orderCounts['pending_count'] ?? 0;
 $cancelledOrders = $orderCounts['cancelled_count'] ?? 0;
 
 // 4. Contract / Rent Logic
-$contractStmt = $conn->prepare('SELECT rp.paid_date AS contract_start, rp.due_date AS contract_end FROM rent_payments rp INNER JOIN (
-SELECT supplier_id, MAX(paid_date) AS latest_paid FROM rent_payments WHERE supplier_id = ? GROUP BY supplier_id) latest ON rp.supplier_id = latest.supplier_id
-AND rp.paid_date = latest.latest_paid;');
-$contractStmt->bind_param('i', $supplierid);
+$contractStmt = $conn->prepare('SELECT 
+    rp.paid_date AS contract_start,
+    rp.due_date  AS contract_end
+FROM rent_payments rp
+INNER JOIN (
+    SELECT company_id, MAX(paid_date) AS latest_paid
+    FROM rent_payments
+    WHERE company_id = ?
+    GROUP BY company_id
+) latest
+    ON rp.company_id = latest.company_id
+   AND rp.paid_date = latest.latest_paid;');
+$contractStmt->bind_param('i', $row['company_id']);
 $contractStmt->execute();
 $contractRow = $contractStmt->get_result()->fetch_assoc();
 $contractStmt->close();
@@ -99,7 +354,8 @@ $availableYears = [];
 while ($y = $availableYearsResult->fetch_assoc()) {
     $availableYears[] = $y['yr'];
 }
-if(empty($availableYears)) $availableYears[] = date('Y');
+if (empty($availableYears))
+    $availableYears[] = date('Y');
 $yearStmt->close();
 
 $revenue = $conn->prepare("SELECT MONTH(order_date) AS month, SUM(price) AS total_revenue FROM orders
@@ -152,14 +408,14 @@ $reviewStmt = $conn->prepare("SELECT
     u.image
 FROM reviews r
 LEFT JOIN customers u ON r.customer_id = u.customer_id
-WHERE r.supplier_id = ?
+WHERE r.company_id = ?
   AND r.created_at >= DATE_SUB(NOW(), INTERVAL 100 DAY)
 ORDER BY r.created_at DESC;
 ");
 
 $recentReviews = [];
 if ($reviewStmt) {
-    $reviewStmt->bind_param("i", $supplierid);
+    $reviewStmt->bind_param("i", $company_id);
     $reviewStmt->execute();
     $recentReviews = $reviewStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $reviewStmt->close();
@@ -197,11 +453,16 @@ if ($chat_query) {
 $current_page = basename($_SERVER["PHP_SELF"]);
 if (!isset($active)) {
     $active = '';
-    if ($current_page === "dashboard.php") $active = "dashboard";
-    elseif ($current_page === "rentpayment.php") $active = "rentpayment";
-    elseif ($current_page === "setting.php" || $current_page === "customize.php") $active = "setting";
-    elseif ($current_page === "inventory.php") $active = "inventory";
-    elseif ($current_page === "orders.php") $active = "orders";
+    if ($current_page === "dashboard.php")
+        $active = "dashboard";
+    elseif ($current_page === "rentpayment.php")
+        $active = "rentpayment";
+    elseif ($current_page === "setting.php" || $current_page === "customize.php")
+        $active = "setting";
+    elseif ($current_page === "inventory.php")
+        $active = "inventory";
+    elseif ($current_page === "orders.php")
+        $active = "orders";
 }
 
 $pendingOrderList = [
@@ -219,29 +480,70 @@ $pendingOrderList = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supplier Dashboard - <?= htmlspecialchars($row['company_name']) ?> Style</title>
     <link rel="stylesheet" href="css/supplierCss.css">
-    
+
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <script src="https://kit.fontawesome.com/7867607d9e.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
-            --primary: <?= htmlspecialchars($row['primary_color']) ?>;
-            --secondary: <?= htmlspecialchars($row['secondary_color']) ?>;
+            --primary:
+                <?= htmlspecialchars($row['primary_color']) ?>
+            ;
+            --secondary:
+                <?= htmlspecialchars($row['secondary_color']) ?>
+            ;
         }
-        
+
         /* Modal Styles */
         .modal-overlay {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
+
         .modal-content {
-            background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; animation: popIn 0.3s ease;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: popIn 0.3s ease;
         }
-        @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #888; }
-        .star-gold { color: #f5c518; }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .star-gold {
+            color: #f5c518;
+        }
 
         /* ============================
            FLOATING EXPANDABLE CHAT (Telegram Style)
@@ -256,7 +558,7 @@ $pendingOrderList = [
             height: 60px;
             background: var(--primary);
             border-radius: 50%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -277,12 +579,13 @@ $pendingOrderList = [
             right: 30px;
             width: 60px;
             height: 60px;
-            background: #ffffff; /* Supplier theme usually light */
+            background: #ffffff;
+            /* Supplier theme usually light */
             border-radius: 50%;
             z-index: 9001;
             overflow: hidden;
             transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-            box-shadow: 0 0 0 0 rgba(0,0,0,0);
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
             opacity: 0;
             pointer-events: none;
         }
@@ -304,7 +607,8 @@ $pendingOrderList = [
             width: 100%;
             height: 100%;
             opacity: 0;
-            transition: opacity 0.3s ease 0.2s; /* Delay fade-in until expanded */
+            transition: opacity 0.3s ease 0.2s;
+            /* Delay fade-in until expanded */
             background: #f1f5f9;
         }
 
@@ -333,7 +637,7 @@ $pendingOrderList = [
 
         .btn-close-chat {
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             color: white;
             width: 32px;
             height: 32px;
@@ -346,7 +650,7 @@ $pendingOrderList = [
         }
 
         .btn-close-chat:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .chat-search-box {
@@ -377,7 +681,8 @@ $pendingOrderList = [
             transition: background 0.2s;
         }
 
-        .contact-item:hover, .contact-item.active {
+        .contact-item:hover,
+        .contact-item.active {
             background: #f1f5f9;
         }
 
@@ -406,11 +711,35 @@ $pendingOrderList = [
             object-fit: cover;
         }
 
-        .contact-info { flex: 1; overflow: hidden; }
-        .contact-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .contact-name { font-weight: 600; color: #334155; font-size: 0.95rem; }
-        .contact-time { font-size: 0.75rem; color: #94a3b8; }
-        .contact-msg { font-size: 0.85rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .contact-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .contact-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .contact-time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .contact-msg {
+            font-size: 0.85rem;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         /* --- MAIN CHAT AREA --- */
         .chat-main-view {
@@ -431,13 +760,34 @@ $pendingOrderList = [
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
         }
 
-        .header-user { display: flex; align-items: center; gap: 15px; color: #334155; }
-        .header-user img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
-        .header-info h4 { margin: 0; font-size: 1rem; }
-        .header-info span { font-size: 0.8rem; color: var(--primary); font-weight: bold; }
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #334155;
+        }
+
+        .header-user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+        }
+
+        .header-info h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .header-info span {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
 
         .chat-messages-area {
             flex: 1;
@@ -447,10 +797,18 @@ $pendingOrderList = [
             flex-direction: column;
             gap: 15px;
         }
-        
+
         /* Custom Scrollbar */
-        .chat-messages-area::-webkit-scrollbar, .chat-contacts-list::-webkit-scrollbar { width: 6px; }
-        .chat-messages-area::-webkit-scrollbar-thumb, .chat-contacts-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .chat-messages-area::-webkit-scrollbar,
+        .chat-contacts-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages-area::-webkit-scrollbar-thumb,
+        .chat-contacts-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
 
         .message-bubble {
             max-width: 65%;
@@ -459,7 +817,7 @@ $pendingOrderList = [
             font-size: 0.95rem;
             line-height: 1.5;
             position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
         .msg-incoming {
@@ -472,7 +830,8 @@ $pendingOrderList = [
         .msg-outgoing {
             align-self: flex-end;
             background: var(--primary);
-            color: white; /* Assuming primary is dark enough, else need logic */
+            color: white;
+            /* Assuming primary is dark enough, else need logic */
             border-bottom-right-radius: 4px;
         }
 
@@ -504,7 +863,9 @@ $pendingOrderList = [
             font-size: 0.95rem;
         }
 
-        .chat-input-box:focus { border-color: var(--primary); }
+        .chat-input-box:focus {
+            border-color: var(--primary);
+        }
 
         .send-btn {
             width: 45px;
@@ -520,14 +881,28 @@ $pendingOrderList = [
             transition: transform 0.2s;
         }
 
-        .send-btn:hover { transform: scale(1.1); }
+        .send-btn:hover {
+            transform: scale(1.1);
+        }
 
         /* Mobile Logic */
         @media (max-width: 768px) {
-            .chat-sidebar-panel { width: 80px; }
-            .contact-info, .chat-search-box { display: none; }
-            .chat-sidebar-header { justify-content: center; }
-            .contact-avatar { margin-right: 0; }
+            .chat-sidebar-panel {
+                width: 80px;
+            }
+
+            .contact-info,
+            .chat-search-box {
+                display: none;
+            }
+
+            .chat-sidebar-header {
+                justify-content: center;
+            }
+
+            .contact-avatar {
+                margin-right: 0;
+            }
         }
     </style>
 </head>
@@ -537,29 +912,46 @@ $pendingOrderList = [
   radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--primary) 30%, transparent) 0%, transparent 40%);
 ">
 
-    <header>
-        <div class="logo"><?= htmlspecialchars($row['company_name']) ?></div>
-        <div class="navline">
-            <nav class="nav-links">
-                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>>Dashboard</a>
-                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?>>Inventory</a>
-                <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?>>Orders</a>
-                <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?>>Rent Payment</a>
-                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?>>Settings</a>
+    <!-- Mobile menu panel (same pattern as FrontEnd/index.html) -->
+    <div id="mobile-menu-panel" class="panel-overlay">
+        <div class="panel-content panel-nav-content">
+            <div class="panel-close" onclick="togglePanel('mobile-menu-panel')" aria-label="Close">×</div>
+            <nav class="panel-nav">
+                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
+                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Inventory</a>
+                <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Orders</a>
+                <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Rent Payment</a>
+                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Settings</a>
             </nav>
-            <button class="btn-logout" onclick="window.location.href='../utils/signout.php'">Logout</button>
+            <a href="../utils/signout.php" class="btn-logout panel-logout">Logout</a>
         </div>
-    </header>
-    
+    </div>
+
+    <nav class="main-nav">
+        <div class="brand"><?= htmlspecialchars($row['company_name']) ?></div>
+        <div class="nav-right">
+            <a href="dashboard.php" class="nav-link <?= $active === "dashboard" ? 'active' : '' ?>">Dashboard</a>
+            <a href="inventory.php" class="nav-link <?= $active === "inventory" ? 'active' : '' ?>">Inventory</a>
+            <a href="orders.php" class="nav-link <?= $active === "orders" ? 'active' : '' ?>">Orders</a>
+            <a href="rentpayment.php" class="nav-link <?= $active === "rentpayment" ? 'active' : '' ?>">Rent Payment</a>
+            <a href="setting.php" class="nav-link <?= $active === "setting" ? 'active' : '' ?>">Settings</a>
+            <a href="../utils/signout.php" class="btn-logout">Logout</a>
+        </div>
+        <div class="mobile-toggle" onclick="togglePanel('mobile-menu-panel')" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </div>
+    </nav>
+
     <div class="container">
 
         <div class="chat-fab" onclick="toggleChatInterface()">
-            <lord-icon src="https://cdn.lordicon.com/fdxqrdfe.json" trigger="loop" delay="2000" colors="primary:#ffffff" style="width:30px;height:30px"></lord-icon>
+            <lord-icon src="https://cdn.lordicon.com/fdxqrdfe.json" trigger="loop" delay="2000" colors="primary:#ffffff"
+                style="width:30px;height:30px"></lord-icon>
         </div>
 
         <div class="chat-overlay-container" id="chatOverlay">
             <div class="chat-interface-inner">
-                
+
                 <div class="chat-sidebar-panel">
                     <div class="chat-sidebar-header">
                         <h3 style="margin:0; color:white;">Messages</h3>
@@ -574,10 +966,16 @@ $pendingOrderList = [
 
                     <div class="chat-contacts-list">
                         <?php if (!empty($conversations)): ?>
-                            <?php foreach ($conversations as $conv): ?>
-                                <div class="contact-item" onclick="loadChat(<?php echo $conv['conversation_id']; ?>, '<?php echo htmlspecialchars($conv['name']); ?>', '<?php echo $conv['image']; ?>', this)">
+                            <?php foreach ($conversations as $conv):
+                                // FIX: Handle empty messages (New Conversations)
+                                $hasMessage = !empty($conv['last_msg']);
+                                $displayMsg = $hasMessage ? htmlspecialchars($conv['last_msg']) : "<em>Start a conversation</em>";
+                                $displayTime = $hasMessage ? date('H:i', strtotime($conv['last_time'])) : "";
+                                ?>
+                                <div class="contact-item"
+                                    onclick="loadChat(<?php echo $conv['conversation_id']; ?>, '<?php echo htmlspecialchars($conv['name']); ?>', '<?php echo $conv['image']; ?>', this)">
                                     <div class="contact-avatar">
-                                        <?php if($conv['image'] && $conv['image'] !== 'default_admin.png'): ?>
+                                        <?php if ($conv['image'] && $conv['image'] !== 'default_admin.png'): ?>
                                             <img src="../assets/customer_profiles/<?php echo $conv['image']; ?>" alt="Adm">
                                         <?php else: ?>
                                             <span><?php echo strtoupper(substr($conv['name'], 0, 1)); ?></span>
@@ -585,10 +983,11 @@ $pendingOrderList = [
                                     </div>
                                     <div class="contact-info">
                                         <div class="contact-top">
-                                            <span class="contact-name"><?php echo htmlspecialchars($conv['name']); ?> (Admin)</span>
-                                            <span class="contact-time"><?php echo date('H:i', strtotime($conv['last_time'])); ?></span>
+                                            <span class="contact-name"><?php echo htmlspecialchars($conv['name']); ?>
+                                                (Admin)</span>
+                                            <span class="contact-time"><?php echo $displayTime; ?></span>
                                         </div>
-                                        <div class="contact-msg"><?php echo htmlspecialchars($conv['last_msg']); ?></div>
+                                        <div class="contact-msg"><?php echo $displayMsg; ?></div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -602,8 +1001,11 @@ $pendingOrderList = [
                 </div>
 
                 <div class="chat-main-view">
-                    <div id="chat-empty-view" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#64748b;">
-                        <lord-icon src="https://cdn.lordicon.com/zpxybbhl.json" trigger="hover" colors="primary:#64748b,secondary:<?= htmlspecialchars($row['primary_color']) ?>" style="width:100px;height:100px"></lord-icon>
+                    <div id="chat-empty-view"
+                        style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#64748b;">
+                        <lord-icon src="https://cdn.lordicon.com/zpxybbhl.json" trigger="hover"
+                            colors="primary:#64748b,secondary:<?= htmlspecialchars($row['primary_color']) ?>"
+                            style="width:100px;height:100px"></lord-icon>
                         <h3>Select a conversation</h3>
                         <p>Choose the Admin from the list to start messaging.</p>
                     </div>
@@ -620,18 +1022,19 @@ $pendingOrderList = [
                         </div>
 
                         <div class="chat-messages-area" id="messages-container">
-                            </div>
+                        </div>
 
                         <div class="chat-input-area">
                             <input type="hidden" id="current-conv-id">
-                            <input type="text" class="chat-input-box" id="message-input" placeholder="Write a message...">
+                            <input type="text" class="chat-input-box" id="message-input"
+                                placeholder="Write a message...">
                             <button class="send-btn" onclick="sendMessage()">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
 
@@ -646,16 +1049,16 @@ $pendingOrderList = [
             // 1. Toggle Chat (Open/Close)
             function toggleChatInterface() {
                 overlay.classList.toggle('active');
-                
+
                 // Stop polling if closed
                 if (!overlay.classList.contains('active')) {
                     if (chatInterval) clearInterval(chatInterval);
                 } else {
                     // Resume polling if a chat was previously open
                     const activeId = currentConvIdInput.value;
-                    if(activeId) {
-                         fetchMessages(activeId, true);
-                         chatInterval = setInterval(() => fetchMessages(activeId, true), 3000);
+                    if (activeId) {
+                        fetchMessages(activeId, true);
+                        chatInterval = setInterval(() => fetchMessages(activeId, true), 3000);
                     }
                 }
             }
@@ -664,29 +1067,28 @@ $pendingOrderList = [
             function loadChat(conversationId, name, image, element) {
                 // Highlight sidebar item
                 document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
-                if(element) element.classList.add('active');
+                if (element) element.classList.add('active');
 
                 // UI Updates
                 document.getElementById('chat-empty-view').style.display = 'none';
                 document.getElementById('chat-active-view').style.display = 'flex';
                 document.getElementById('active-chat-name').innerText = name;
                 currentConvIdInput.value = conversationId;
-                
+
                 // Determine image source
                 let imgPath = '';
-                // if(image && image !== 'default_admin.png') {
-                console.log(image);
+                if (image && image !== 'default_admin.png') {
                     imgPath = `../assets/customer_profiles/${image}`;
-                // } else {
-                    // imgPath = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
-                // }
-                
+                } else {
+                    imgPath = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
+                }
+
                 // Error handling for image loading
                 const imgEl = document.getElementById('active-chat-img');
                 imgEl.src = imgPath;
-                // imgEl.onerror = function() {
-                //      this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
-                // };
+                imgEl.onerror = function () {
+                    this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
+                };
 
                 // Load Messages
                 msgContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Loading...</div>';
@@ -699,11 +1101,7 @@ $pendingOrderList = [
 
             // 3. Fetch Messages from DB
             function fetchMessages(conversationId, silent = false) {
-                // Adjust path based on file structure. Assuming nav.php is in 'supplier/inc/' and utils in 'supplier/utils/'
-                // 'adminnav.php' used 'utils/get_messages.php'. 
-                // Since this file is likely included in pages like 'supplier/dashboard.php', the path relative to the RUNNING script is 'utils/...'.
-                // If this doesn't work, try '../utils/' depending on where dashboard.php is located vs utils folder.
-                
+                // Using path from user's previous code
                 fetch(`../admin/utils/get_messages.php?conversation_id=${conversationId}`)
                     .then(response => response.json())
                     .then(data => {
@@ -720,13 +1118,19 @@ $pendingOrderList = [
 
                 let html = '';
                 if (messages.length === 0) {
-                    html = '<div style="text-align:center; margin-top:50px; color:#64748b; font-size:0.9rem;">No messages yet.<br>Start the conversation!</div>';
+                    html = `
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#64748b; text-align:center;">
+                            <lord-icon src="https://cdn.lordicon.com/zpxybbhl.json" trigger="loop" delay="2000" colors="primary:#64748b,secondary:<?= htmlspecialchars($row['primary_color']) ?>" style="width:80px;height:80px"></lord-icon>
+                            <h3 style="margin:10px 0 5px 0;">No messages yet</h3>
+                            <p style="margin:0; font-size:0.9rem;">Type below to start the conversation!</p>
+                        </div>
+                    `;
                 } else {
                     messages.forEach(msg => {
                         // 'supplier' matches sender_type in your message table for THIS user
                         const isMe = (msg.sender_type === 'supplier');
                         const bubbleClass = isMe ? 'msg-outgoing' : 'msg-incoming';
-                        
+
                         const dateObj = new Date(msg.created_at);
                         const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -777,4 +1181,20 @@ $pendingOrderList = [
             chatInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') sendMessage();
             });
+
+            // Mobile menu panel (same as FrontEnd/index.html)
+            window.togglePanel = function(id) {
+                var panel = document.getElementById(id);
+                if (!panel) return;
+                if (!panel.classList.contains('active')) {
+                    panel.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    panel.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            };
         </script>
+</body>
+
+</html>

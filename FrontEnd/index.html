@@ -2,451 +2,1321 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Mall Platform</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MALLTIVERSE | The 12-Dimension Retail Experience</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="assets/images/virtual-mall-image.avif">
-  <link rel="website icon" href="assets/images/virtual mall image.avif">
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-  <!-- Icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-  <!-- Spline -->
-  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.22/build/spline-viewer.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
-  <!--Label-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --obsidian: #050505;
+            --void: #000000;
+            --starlight: #ffffff;
+            --nebula-purple: #7000ff;
+            --cyan-glow: #00f3ff;
+            --danger-red: #ff0055;
+            --glass: rgba(255, 255, 255, 0.03);
 
-  <!--Websie Icon-->
-  <link rel="website icon" href="..//FrontEnd/assets/images/websiteicon.jpg">
+            --font-display: 'Syncopate', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
 
+            --ease-lux: cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        html {
+            background-color: var(--void);
+            scrollbar-width: none;
+        }
 
+        body {
+            color: var(--starlight);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -ms-overflow-style: none;
+        }
 
+        body::-webkit-scrollbar {
+            display: none;
+        }
 
-  <!-- 3D Background -->
-  <spline-viewer class="background" url="https://prod.spline.design/t2YIwW1EsI2cSOEN/scene.splinecode">
-  </spline-viewer>
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
 
+        /* --- VISUAL NOISE OVERLAY --- */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
 
+        /* --- 2.0 SCI-FI HUD SCROLLBAR --- */
+        .hud-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100vh;
+            z-index: 9000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            pointer-events: none;
+            mix-blend-mode: exclusion;
+        }
 
+        /* The Ticks (Ruler) */
+        .hud-ruler {
+            position: absolute;
+            right: 0;
+            top: 10vh;
+            bottom: 10vh;
+            width: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+            background-size: 100% 2vh;
+            /* Distance between ticks */
+            opacity: 0.3;
+        }
 
+        /* The Moving Indicator */
+        .hud-thumb-wrap {
+            position: absolute;
+            top: 10vh;
+            right: 5px;
+            width: 30px;
+            height: 0px;
+            /* Helper to position toggle */
+            transform: translateY(0px);
+            /* JS Updates this */
+        }
 
-  <!--Arrow Scroll-->
+        .hud-reticle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            transform: translateY(-50%);
+        }
 
-  <!--Arrow Scroll Start-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        .hud-value {
+            font-family: var(--font-display);
+            font-size: 10px;
+            color: var(--cyan-glow);
+            text-shadow: 0 0 5px var(--cyan-glow);
+        }
 
-  <button id="scrollToTop" class="scroll-top-btn">
-    <i class="fas fa-arrow-up"></i>
-  </button>
-  <script>
-    const scrollBtn = document.getElementById("scrollToTop");
+        .hud-marker {
+            width: 10px;
+            height: 10px;
+            border: 1px solid var(--cyan-glow);
+            background: rgba(0, 243, 255, 0.2);
+            transform: rotate(45deg);
+            box-shadow: 0 0 10px var(--cyan-glow);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
 
-    // Show/Hide button based on scroll position
-    window.addEventListener("scroll", () => {
-      if (window.pageYOffset > 400) {
-        scrollBtn.classList.add("show");
-      } else {
-        scrollBtn.classList.remove("show");
-      }
-    });
+        /* High Velocity State */
+        .hud-marker.warp-speed {
+            background: var(--danger-red);
+            border-color: var(--danger-red);
+            box-shadow: 0 0 15px var(--danger-red);
+        }
 
-    // Smooth scroll to top
-    scrollBtn.addEventListener("click", () => {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    });
-  </script>
-  <!--Arrow Section End-->
+        /* --- THREE.JS BACKGROUND --- */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.6;
+            pointer-events: none;
+        }
 
+        /* --- CURSOR --- */
+        .cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+            transition: width 0.3s var(--ease-lux), height 0.3s var(--ease-lux);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
 
+        @media (pointer: fine) {
+            .cursor {
+                display: flex;
+            }
 
-  <!--Logo Section-->
-  <header>
-    <nav class="home">
-      <div class="mall-logo">
-        <div class="logo-icon">
-          <i class="fas fa-vr-cardboard"></i>
+            * {
+                cursor: none;
+            }
+        }
+
+        .cursor::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cursor.hovered {
+            width: 60px;
+            height: 60px;
+            background: rgba(112, 0, 255, 0.15);
+            border-color: var(--nebula-purple);
+            backdrop-filter: blur(2px);
+        }
+
+        /* --- PRELOADER --- */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background: var(--void);
+            z-index: 11000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loader-text {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            color: var(--nebula-purple);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .loader-bar {
+            width: 150px;
+            height: 1px;
+            background: #222;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            width: 0%;
+            height: 100%;
+            background: var(--starlight);
+            animation: load 2s var(--ease-lux) forwards;
+        }
+
+        @keyframes load {
+            to {
+                width: 100%;
+            }
+        }
+
+        /* --- NAV --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            mix-blend-mode: exclusion;
+        }
+
+        .brand {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .magnetic {
+            display: inline-block;
+        }
+
+        .nav-link {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            padding: 10px;
+            display: block;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 10px;
+            width: 0%;
+            height: 1px;
+            background: var(--nebula-purple);
+            transition: 0.3s var(--ease-lux);
+        }
+
+        .nav-link:hover::after {
+            width: calc(100% - 20px);
+        }
+
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            width: 30px;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        .mobile-toggle span {
+            width: 100%;
+            height: 2px;
+            background: white;
+            transition: 0.3s;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-main,
+        .btn-ghost {
+            padding: 15px 30px;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.4s var(--ease-lux);
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-main {
+            background: var(--starlight);
+            color: var(--void);
+            border: 1px solid var(--starlight);
+        }
+
+        .btn-main:hover {
+            background: transparent;
+            color: var(--starlight);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--starlight);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--nebula-purple);
+            color: var(--nebula-purple);
+            box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
+        }
+
+        /* --- PANELS --- */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 5000;
+            transform: translateX(100%);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .panel-content {
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            background: var(--obsidian);
+            border-left: 1px solid var(--nebula-purple);
+            padding: 80px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 2rem;
+            opacity: 0.7;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .panel-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 20px;
+            color: var(--starlight);
+        }
+
+        .panel-text {
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 300;
+            font-size: 0.95rem;
+        }
+
+        /* --- HERO --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 10vw, 8rem);
+            line-height: 0.9;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            text-shadow: 0px 0px 20px rgba(112, 0, 255, 0.3);
+            /* Important for text scramble */
+            opacity: 1;
+        }
+
+        .hero-btn-container {
+            opacity: 0;
+            animation: fadeUp 1s 2.2s var(--ease-lux) forwards;
+        }
+
+        @keyframes fadeUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- TECH STRIP --- */
+        .tech-strip {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .tech-item {
+            flex: 1;
+            min-width: 120px;
+            padding: 30px 10px;
+            text-align: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tech-item:last-child {
+            border-right: none;
+        }
+
+        .tech-val {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: var(--nebula-purple);
+        }
+
+        .tech-label {
+            color: #666;
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+        }
+
+        /* --- SPLIT SECTION --- */
+        .section-split {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .split-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .split-scroll {
+            padding: 100px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 100px;
+        }
+
+        .sticky-headline {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            line-height: 1.1;
+            margin-bottom: 30px;
+        }
+
+        .sticky-desc {
+            color: #999;
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+
+        .img-card {
+            width: 100%;
+            height: 60vh;
+            background: #111;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .img-card img {
+            width: 100%;
+            height: 120%;
+            object-fit: cover;
+            filter: grayscale(100%);
+            transition: filter 0.5s, transform 0.5s;
+        }
+
+        .img-card:hover img {
+            filter: grayscale(0%);
+            transform: scale(1.05);
+        }
+
+        /* --- FEATURES --- */
+        .features-section {
+            padding: 100px 60px;
+            background: linear-gradient(180deg, var(--void) 0%, #0a0514 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .features-header {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .features-header h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .features-header p {
+            color: #888;
+            max-width: 500px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            transition: 0.4s var(--ease-lux);
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card:hover {
+            border-color: var(--nebula-purple);
+            transform: translateY(-5px);
+            background: rgba(112, 0, 255, 0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            color: var(--nebula-purple);
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        .feature-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* --- GALLERY --- */
+        .gallery-wrap {
+            /* Default: Desktop Horizontal */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0a0514, var(--void));
+        }
+
+        .gallery-track {
+            display: flex;
+            gap: 60px;
+            padding-left: 10vw;
+            width: fit-content;
+        }
+
+        .gallery-item {
+            width: 40vw;
+            height: 60vh;
+            background: #222;
+            position: relative;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: opacity 0.5s;
+        }
+
+        .gallery-item:hover img {
+            opacity: 1;
+        }
+
+        .gallery-meta {
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            color: var(--nebula-purple);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 60px 40px;
+            background: var(--obsidian);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 40px;
+        }
+
+        .footer-left h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-col h4 {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .footer-col a {
+            display: block;
+            margin-bottom: 10px;
+            color: #aaa;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+
+        .footer-col a:hover {
+            color: var(--nebula-purple);
+            padding-left: 5px;
+        }
+
+        /* --- 📱 RESPONSIVE ADJUSTMENTS & ANIMATIONS --- */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 25px 20px;
+            }
+
+            .nav-right {
+                display: none;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .hud-container {
+                display: none;
+            }
+
+            /* Hide Gauge on Mobile */
+
+            .section-split {
+                display: block;
+            }
+
+            .split-sticky {
+                height: auto;
+                padding: 50px 20px;
+                border-right: none;
+                position: relative;
+                text-align: left;
+            }
+
+            .split-scroll {
+                padding: 0 20px 50px;
+                gap: 40px;
+            }
+
+            .img-card {
+                height: 40vh;
+            }
+
+            .tech-item {
+                flex: 1 1 50%;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 20px 0;
+            }
+
+            .features-section {
+                padding: 60px 20px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* --- IMPROVED MOBILE GALLERY (CARD STACK) --- */
+            .gallery-wrap {
+                height: auto;
+                display: block;
+                padding: 100px 20px;
+                background: var(--void);
+            }
+
+            .gallery-track {
+                display: block;
+                width: 100%;
+                padding-left: 0;
+            }
+
+            .gallery-item {
+                width: 100%;
+                height: 60vh;
+                margin-bottom: 83vh;
+                /* Spacing for pinning duration */
+                position: relative;
+                /* Shadows for depth */
+                box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.8);
+            }
+
+            /* .gallery-item:last-child {
+                margin-bottom: 0;
+            } */
+
+            footer {
+                grid-template-columns: 1fr;
+                padding: 40px 20px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .panel-content {
+                padding: 80px 30px;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="loading">
+
+    <div class="noise-overlay"></div>
+
+    <div class="hud-container">
+        <div class="hud-ruler"></div>
+        <div class="hud-thumb-wrap">
+            <div class="hud-reticle">
+                <span class="hud-value">000</span>
+                <div class="hud-marker"></div>
+            </div>
         </div>
-        <div class="logo-text">
-          <span class="v-text">Malltiverse</span>
-          <span class="m-text">Virtual MALL</span>
+    </div>
+
+    <canvas id="webgl-canvas"></canvas>
+    <div class="cursor"></div>
+
+    <div class="loader">
+        <div class="loader-text">SYSTEM INITIALIZATION</div>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
         </div>
-      </div>
+    </div>
 
-      <div class="nav-links">
-        <a href="#home"><i class="fa fa-house"></i>Home</a>
-        <a href="#aboutus" class="nav-link">
-          <i class="fas fa-users"></i> About
-        </a>
+    <div id="about-panel" class="panel-overlay">
+        <div class="panel-content">
+            <div class="panel-close hover-target" onclick="togglePanel('about-panel')">×</div>
+            <h2 class="panel-title">MALLTIVERSE</h2>
+            <p class="panel-text">
+                We are the first inter-dimensional retail hub. We connect carbon-based lifeforms with goods sourced from
+                the edges of the known universe.
+                <br><br>
+                Gravity is optional. Style is mandatory.
+            </p>
+            <div class="magnetic" style="margin-top: 20px;">
+                <a href="customer/index.html" class="btn-main hover-target">Start Shopping</a>
+            </div>
+        </div>
+    </div>
 
-        <a href="#contact">
-          <i class="fa-solid fa-shop"></i> Contact
-        </a>
-        <a href="login.php" class="login-link">
-          <i class="fas fa-sign-in-alt"></i> Login</a>
-      </div>
+    <div id="contact-panel" class="panel-overlay">
+        <div class="panel-content">
+            <div class="panel-close hover-target" onclick="togglePanel('contact-panel')">×</div>
+            <h2 class="panel-title">SIGNAL US</h2>
+            <p class="panel-text">
+                For vendor inquiries or particle-transport issues:<br><br>
+                <span style="color: var(--starlight);">help@malltiverse.com</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="mobile-menu-panel" class="panel-overlay">
+        <div class="panel-content" style="justify-content: flex-start; padding-top: 100px;">
+            <div class="panel-close hover-target" onclick="togglePanel('mobile-menu-panel')">×</div>
+            <nav style="position: relative; display: flex; flex-direction: column; gap: 20px; padding: 0;">
+                <a href="pricing.php" class="panel-title hover-target" style="font-size: 1.5rem;">Vendor Access</a>
+                <a href="#" class="panel-title hover-target" style="font-size: 1.5rem;"
+                    onclick="togglePanel('mobile-menu-panel'); togglePanel('about-panel');">About</a>
+                <a href="#" class="panel-title hover-target" style="font-size: 1.5rem;"
+                    onclick="togglePanel('mobile-menu-panel'); togglePanel('contact-panel');">Contact</a>
+            </nav>
+            <div style="margin-top: 40px;">
+                <a href="customer/index.html" class="btn-main hover-target" style="width: 100%;">Enter Orbit</a>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="brand hover-target">MALLTIVERSE</div>
+        <div class="nav-right">
+            <div class="magnetic"><a href="pricing.php" class="nav-link hover-target" style="color: #aaa;">Vendor
+                    Access</a></div>
+            <div class="magnetic"><a href="#" class="nav-link hover-target"
+                    onclick="togglePanel('about-panel'); return false;">About</a></div>
+            <div class="magnetic"><a href="#" class="nav-link hover-target"
+                    onclick="togglePanel('contact-panel'); return false;">Contact</a></div>
+            <div class="magnetic"><a href="customer/index.html" class="btn-main hover-target">Enter Orbit</a></div>
+        </div>
+        <div class="mobile-toggle hover-target" onclick="togglePanel('mobile-menu-panel')">
+            <span></span><span></span><span></span>
+        </div>
     </nav>
-  </header>
 
-
-  <!--Virtual Mall Platform Floating Image Section-->
-  <section class="virtual-mall-hero" id="home">
-    <div class="hero-content">
-      <span class="badge">Next-Gen Shopping</span>
-      <h2><span class="gradient-text">Virtual Mall Platform</span><br><span class="gradient-text">Warmely Welcome to
-          Visit Malltiverse</span></h2>
-      <p>Step into the future of e-commerce. Remix, build, and explore virtual mall website by our global community.</p>
-      <div class="hero-btns">
-        <a href="supplierLogin.php" style="text-decoration: none;" class="btn1 Hdr_box__Djvoy">Rent a Shop</a>
-        <a href="customer/index.html" style="text-decoration: none;" class="btn2 Hdr_box__Djvoy">Buy Product</a>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="floating-card">
-        <div class="card-inner">
-          <div class="card-front">
-            <img src="..//FrontEnd/assets/images/virtual mall image.jpg" alt="3D Mall Preview">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!--Floating End Section-->
-
-  <div class="brand-section">
-    <div class="logo-grid">
-      <div class="logo-track2">
-        <div class="logo-item">
-          <p class="nike-text">Nike</p>
-        </div>
-        <div class="logo-item">
-          <p class="burger-king">Burger King</p>
-        </div>
-        <div class="logo-item">
-          <p class="cosmetics">Cosmectics</p>
-        </div>
-        <div class="logo-item">
-          <p class="dior">Dior</p>
-        </div>
-        <div class="logo-item">
-          <p class="sport-text">Sports Wear</p>
-        </div>
-        <div class="logo-item">
-          <p class="SkinCate-text">SkinCare</p>
-        </div>
-        <div class="logo-item">
-          <p class="nike-text">Nike</p>
-        </div>
-        <div class="logo-item">
-          <p class="burger-king">Burger King</p>
-        </div>
-        <div class="logo-item">
-          <p class="cosmetics">Cosmectics</p>
-        </div>
-        <div class="logo-item">
-          <p class="dior">Dior</p>
-        </div>
-        <div class="logo-item">
-          <p class="sport-text">Sports Wear</p>
-        </div>
-        <div class="logo-item">
-          <p class="SkinCate-text">SkinCare</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="logo-grid1" id="aboutus">
-      <div class="logo-track">
-        <div class="logo-item1">
-          <p class="nike-text">Nike</p>
-        </div>
-        <div class="logo-item1">
-          <p class="burger-king">Burger King</p>
-        </div>
-        <div class="logo-item1">
-          <p class="cosmetics">Cosmectics</p>
-        </div>
-        <div class="logo-item1">
-          <p class="dior">Dior</p>
-        </div>
-        <div class="logo-item1">
-          <p class="sport-text">Sports Wear</p>
-        </div>
-        <div class="logo-item1">
-          <p class="SkinCate-text">SkinCare</p>
-        </div>
-        <div class="logo-item1">
-          <p class="nike-text">Nike</p>
-        </div>
-        <div class="logo-item1">
-          <p class="burger-king">Burger King</p>
-        </div>
-        <div class="logo-item1">
-          <p class="cosmetics">Cosmectics</p>
-        </div>
-        <div class="logo-item1">
-          <p class="dior">Dior</p>
-        </div>
-        <div class="logo-item1">
-          <p class="sport-text">Sports Wear</p>
-        </div>
-        <div class="logo-item1">
-          <p class="SkinCate-text">SkinCare</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <br><br><br>
-
-
-
-  <section id="aboutus">
-    <!--Future Shopping Malls Section-->
-    <div class="vr-container">
-      <h1 class="main-title">WHY VIRTUAL MALL REALITY IS<br>THE FUTURE FOR SHOPPING MALLS</h1>
-
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="icon">↗</div>
-          <h2>Interactive Storefront</h2>
-          <p>Create a metaverse shopping centre with customers able to enter virtual storefronts, interact with
-            products, and try on clothing or accessories in a virtual fitting room.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon">⊞</div>
-          <h2>Virtual Shopping Mall</h2>
-          <p>Allow shoppers to wander through a fully immersive 3D shopping mall, from the comfort of their home,
-            browsing shops and products as if they were really there.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon">⬡</div>
-          <h2>Personalized Virtual Shopping Experience</h2>
-          <p>Based on a customers shopping history, you can help customers discover new items, new stores and introduce
-            them to exclusive offers.</p>
-        </div>
-      </div>
-  </section>
-
-
-  <!--Main Style-->
-  <section class="collection-section">
-    <h2 class="section-title"><i>COLLECTION</i></h2>
-
-    <div class="collection-container">
-      <div class="collection-card">
-        <div class="image-wrapper">
-          <img src="..//FrontEnd/assets/images/men collection.webp" alt="Mens Collection">
-        </div>
-        <h3>MEN'S Collection</h3>
-        <p><b><i>Shop for trendy men's clothing at The Virtual Mall. Keep your look fresh with the latest arrivals in
-              men's clothing, accessories and shoes.</i></b></p>
-        <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
-      </div>
-
-
-
-      <div class="collection-card">
-        <div class="image-wrapper">
-          <img src="..//FrontEnd/assets/images/women collection.webp" alt="Womens Collection">
-        </div>
-        <h3>WOMEN'S Collection</h3>
-        <p><b><i>Discover 2021 Women's Collection. Shop dresses, tops, jackets, jeans, sweaters and more from a variety
-              of brands and designers.</i></b></p>
-        <!--<a href="#" class="btn">OUR LATEST STYLES</a>-->
-      </div>
-
-      <div class="collection-card">
-        <div class="image-wrapper">
-          <img src="..//FrontEnd/assets/images/accessories2.jpg" alt="Accessories Collection">
-        </div>
-        <h3>ACCESSORIES Collection</h3>
-        <p><b><i>Discover our newest accessories at The Virtual Mall, including handbags, watches, jewelry, sunglasses
-              and more.</i></b></p><br>
-        <!-- <a href="#" class="btn">OUR LATEST STYLES</a>-->
-      </div>
-    </div>
-  </section>
-
-  <div class="main-wrapper">
-    <section class="feature-card">
-      <div class="text-content">
-        <h2 class="title">Virtual Mall Advandages</h2>
-        <p class="description">Welcome to The Virtual Mall We bridge the gap between high-end boutique shopping and the
-          digital world.</p>
-        <ul class="check-list">
-          <li>"The Future of Retail, Redefined."</li>
-          <li>"Your Global Boutique, Just a Click Away."</li>
-          <li>"Elevate Your Lifestyle. Explore the Virtual Mall."</li>
-          <li>"Luxury Fashion. Digital Convenience.</li>
-
-        </ul>
-      </div>
-      <div class="graphic-area">
-        <div class="button-3d">
-          <div class="icon-ring"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="feature-card data-card">
-      <div class="text-content">
-        <h2 class="title">Benefits of using this virtual mall</h2>
-        <ul class="check-list">
-          <li>You spend less time scrolling through low-quality items and more time looking at "trendy" and "fresh"
-            styles that fit your aesthetic.</li>
-          <li>Whether it’s 2 AM or during your lunch break, you can shop for the latest Mens, Womens, and Accessory
-            collections from the comfort of your home.</li>
-          <li>With descriptions that highlight specific trends (like the "2021 Collection" or "Trendy Men's Clothing"),
-            you get a mini-stylist experience that helps you put outfits together easily.</li>
-        </ul>
-      </div>
-      <div class="graphic-area">
-        <div class="data-node">
-          <div class="glow-core"></div>
-        </div>
-        <div class="floating-icon cloud"></div>
-        <div class="floating-icon ai"></div>
-      </div>
-    </section>
-  </div>
-  <br><br>
-
-  <!--Contact Section-->
-
-
-  <section id="contact" class="contact-section">
-    <div class="contact-wrapper">
-      <div class="contact-content">
-        <div class="contact-text">
-          <div class="mall-logo">
-            <div class="logo-icon">
-              <i class="fas fa-vr-cardboard"></i>
+    <main>
+        <section class="hero">
+            <h1 class="hero-title decode-text">MALLTIVERSE</h1>
+            <div class="hero-btn-container magnetic">
+                <a href="customer/index.html" class="btn-ghost hover-target">Enter Orbit</a>
             </div>
-            <div class="logo-text">
-              <span class="v-text">Malltiverse</span>
-              <span class="m-text">Virtual MALL</span>
+        </section>
+
+        <div class="tech-strip">
+            <div class="tech-item hover-target">
+                <span class="tech-val counter" data-target="12">0</span>
+                <span class="tech-label">Dimensions</span>
             </div>
-          </div>
-          <h2>Get in Touch</h2>
-          <p>Have questions about our VR shopping experience? Our team is available 24/7 to help you navigate the mall.
-          </p>
-
-          <ul class="contact-details">
-            <li><i class="fa-solid fa-location-dot"></i> Metro IT and Japanese Language Centre, Yangon City</li>
-            <li><i class="fa-solid fa-envelope"></i> support@kaungpyaesone@gmail.com</li>
-            <li><i class="fa-solid fa-phone"></i> +95123456 VR-MALL</li>
-          </ul>
-        </div>
-
-        <div class="contact-form-container">
-          <form class="contact-main-form">
-            <div class="form-row">
-              <input type="text" placeholder="Your Name" required>
-              <input type="email" placeholder="Your Email" required>
+            <div class="tech-item hover-target">
+                <span class="tech-val">0.0</span>
+                <span class="tech-label">Gravity</span>
             </div>
-            <input type="text" placeholder="Subject">
-            <textarea placeholder="Message" rows="5" required></textarea>
-            <button type="submit" class="contact-submit">SEND MESSAGE</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-  <!--Footer Section-->
-  <footer class="spline-footer">
-    <div class="footer-main">
-      <div class="footer-brand">
-
-        <div class="mall-logo">
-          <div class="logo-icon">
-            <i class="fas fa-vr-cardboard"></i>
-          </div>
-          <div class="logo-text">
-            <span class="v-text">Malltiverse</span>
-            <span class="m-text">Virtual MALL</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-nav">
-        <div class="nav-col">
-          <h3>Reference</h3>
-          <ul>
-            <li><a href="#">3D Design Virtual Mall</a></li>
-            <li><a href="#">Vitual Mall Builder</a></li>
-            <li><a href="#">Spline</a></li>
-
-
-          </ul>
+            <div class="tech-item hover-target">
+                <span class="tech-val">∞</span>
+                <span class="tech-label">Possibilities</span>
+            </div>
         </div>
 
-        <div class="nav-col">
-          <h3>Resources</h3>
-          <ul>
-            <li><a href="#">Contra</a></li>
-            <li><a href="#">Hackathon</a></li>
-            <li><a href="#">Education</a></li>
-            <li><a href="#">Enterprise</a></li>
-            <li><a href="#">Solutions</a></li>
-          </ul>
-        </div>
+        <section class="section-split">
+            <div class="split-sticky">
+                <h2 class="sticky-headline decode-text">THE EVENT<br>HORIZON</h2>
+                <p class="sticky-desc">
+                    Retail is no longer bound by physics. Explore collections that defy standard geometry and time.
+                </p>
+                <div class="magnetic">
+                    <a href="customer/index.html" class="nav-link hover-target"
+                        style="display: inline-block; width: fit-content; color: var(--nebula-purple); padding-left: 0;">View
+                        Collections &rarr;</a>
+                </div>
+            </div>
+            <div class="split-scroll">
+                <div class="img-card hover-target">
+                    <img src="assets/images/websiteicondark.png" style="height: 100%;" alt="Logo" loading="lazy"
+                        decoding="async">
+                </div>
+                <div class="img-card hover-target">
+                    <img src="assets/images/virtual mall image.jpg" alt="Mall" loading="lazy" decoding="async">
+                </div>
+                <div class="img-card hover-target">
+                    <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1000&auto=format&fit=crop"
+                        alt="Living" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+                </div>
+            </div>
+        </section>
 
-        <div class="nav-col">
-          <h3>Company</h3>
-          <ul>
-            <li><a href="#">Metro IT&Japanese Language Center</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Terms & Conditions</a></li>
-            <li><a href="#">Privacy</a></li>
-            <li><a href="#">Security</a></li>
-          </ul>
-        </div>
+        <section class="features-section">
+            <div class="features-header">
+                <div class="magnetic">
+                    <h2 class="decode-text">SYSTEM CAPABILITIES</h2>
+                </div>
+                <p>What You Can Do in Malltiverse</p>
+            </div>
 
-        <div class="nav-col">
-          <h3>Contact</h3>
-          <ul>
-            <li><a href="">kaungpyaesone@gmail.com</a></li>
-            <li><a href="">kaungswan59@gmail.com</a></li>
-            <li><a href="">aungkgmyat@gmail.com</a></li>
+            <div class="features-grid">
+                <div class="feature-card hover-target">
+                    <i class="fa-solid fa-store feature-icon"></i>
+                    <h3 class="feature-title">Build Your Store</h3>
+                    <p class="feature-desc">Suppliers can launch their virtual shops using professionally designed
+                        templates—no design skills required.</p>
+                </div>
+                <div class="feature-card hover-target">
+                    <i class="fa-solid fa-wand-magic-sparkles feature-icon"></i>
+                    <h3 class="feature-title">Choose. Customize. Launch.</h3>
+                    <p class="feature-desc">Pick a template, personalize layouts, colors, and content, and open your
+                        shop inside the Malltiverse.</p>
+                </div>
+                <div class="feature-card hover-target">
+                    <i class="fa-solid fa-globe feature-icon"></i>
+                    <h3 class="feature-title">Explore New Dimensions</h3>
+                    <p class="feature-desc">Customers navigate through a futuristic mall, discovering brands as if
+                        traveling across dimensions.</p>
+                </div>
+                <div class="feature-card hover-target">
+                    <i class="fa-solid fa-chart-line feature-icon"></i>
+                    <h3 class="feature-title">Smart Management</h3>
+                    <p class="feature-desc">Manage products, rentals, and payments from one powerful dashboard with
+                        total control.</p>
+                </div>
+                <div class="feature-card hover-target">
+                    <i class="fa-solid fa-shield-halved feature-icon"></i>
+                    <h3 class="feature-title">Secure & Structured</h3>
+                    <p class="feature-desc">Role-based access ensures safe interactions between customers, suppliers,
+                        and administrators.</p>
+                </div>
+                <div class="feature-card hover-target">
+                    <i class="fa-solid fa-rocket feature-icon"></i>
+                    <h3 class="feature-title">Designed for the Future</h3>
+                    <p class="feature-desc">Cinematic visuals, smooth motion, and immersive design redefine the online
+                        shopping experience.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-wrap">
+            <div class="gallery-track">
+                <div class="gallery-item hover-target mobile-card">
+                    <img src="assets/images/men collection.webp" loading="lazy" decoding="async">
+                    <div class="gallery-meta"><span>Men Collections</span></div>
+                </div>
+                <div class="gallery-item hover-target mobile-card">
+                    <img src="assets/images/women collection.webp" loading="lazy" decoding="async">
+                    <div class="gallery-meta"><span>Women Collections</span></div>
+                </div>
+                <div class="gallery-item hover-target mobile-card">
+                    <img src="assets/images/pc and mobile phone.webp" loading="lazy" decoding="async">
+                    <div class="gallery-meta"><span>Electronics</span></div>
+                </div>
+                <div class="gallery-item hover-target mobile-card">
+                    <img src="assets/images/accessories2.jpg" loading="lazy" decoding="async">
+                    <div class="gallery-meta"><span>Accessories</span></div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-left">
+                <h3>MALLTIVERSE</h3>
+                <p style="color: #666; font-size: 0.8rem;">EST. 3024 // YANGON NODE</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>EXPLORE</h4>
+                    <a href="customer/index.html" class="hover-target">Enter Orbit</a>
+                    <a href="#" class="hover-target">Collections</a>
+                </div>
+                <div class="footer-col">
+                    <h4>PARTNER</h4>
+                    <a href="pricing.php" class="hover-target">Rent a Space</a>
+                    <a href="#" class="hover-target">Vendor Login</a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // --- 1. LENIS SMOOTH SCROLL ---
+            const lenis = new Lenis({
+                duration: 1.5,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smooth: true,
+                smoothTouch: true,
+                touchMultiplier: 1.5
+            });
+
+            // --- NEW HUD SCROLLBAR LOGIC ---
+            const hudThumb = document.querySelector('.hud-thumb-wrap');
+            const hudValue = document.querySelector('.hud-value');
+            const hudMarker = document.querySelector('.hud-marker');
+            // Define active scroll height (10vh top to 10vh bottom padding)
+            const hudPad = window.innerHeight * 0.1;
+            const hudTrackHeight = window.innerHeight * 0.8;
+
+            lenis.on('scroll', ({ progress, velocity }) => {
+                // Position
+                const yPos = progress * hudTrackHeight;
+                hudThumb.style.transform = `translateY(${yPos}px)`;
+
+                // Value Update (000 - 999)
+                hudValue.innerText = Math.floor(progress * 999).toString().padStart(3, '0');
+
+                // Velocity Reaction (Warp Speed Effect)
+                const v = Math.abs(velocity);
+                if (v > 1.5) {
+                    hudMarker.classList.add('warp-speed');
+                    hudValue.style.color = "var(--danger-red)";
+                } else {
+                    hudMarker.classList.remove('warp-speed');
+                    hudValue.style.color = "var(--cyan-glow)";
+                }
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            // --- 2. GSAP REGISTER ---
+            gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+            // Loader Exit
+            const loader = document.querySelector('.loader');
+            // Initial decode effect for hero title immediately after load
+            setTimeout(() => {
+                gsap.to(loader, {
+                    y: '-100%', duration: 1.2, ease: 'power4.inOut', onComplete: () => {
+                        // Trigger hero text scramble
+                        scrambleText(".hero-title");
+                    }
+                });
+            }, 1000);
+
+            // --- 3. TEXT SCRAMBLE EFFECT ---
+            // Helper function to scramble text
+            function scrambleText(selector) {
+                document.querySelectorAll(selector).forEach(el => {
+                    let originalText = el.innerText;
+                    gsap.to(el, {
+                        duration: 1.5,
+                        text: {
+                            value: originalText,
+                            delimiter: "",
+                            padSpace: true
+                        },
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 80%",
+                            onEnter: () => {
+                                // Reset text to random chars then resolve
+                                el.innerText = "░▒▓█▀▄▌▐";
+                                gsap.fromTo(el,
+                                    { text: "X010101" },
+                                    { duration: 1, text: originalText, ease: "power2.out" }
+                                );
+                            }
+                        }
+                    });
+                });
+            }
+            // Initialize other decode texts
+            scrambleText(".decode-text:not(.hero-title)");
+
+            // --- 4. ANIMATIONS ---
+
+            // Tech Strip Counter
+            document.querySelectorAll('.counter').forEach(counter => {
+                gsap.to(counter, {
+                    innerText: +counter.getAttribute('data-target'),
+                    duration: 2,
+                    snap: { innerText: 1 },
+                    scrollTrigger: { trigger: ".tech-strip", start: "top 95%" }
+                });
+            });
+
+            // Features Grid
+            ScrollTrigger.batch(".feature-card", {
+                onEnter: batch => gsap.to(batch, { autoAlpha: 1, y: 0, stagger: 0.1, overwrite: true }),
+                start: "top 90%"
+            });
+
+            // --- 5. RESPONSIVE ANIMATION LOGIC ---
+            ScrollTrigger.matchMedia({
+
+                // DESKTOP: Horizontal Scroll
+                "(min-width: 1025px)": function () {
+                    let sections = gsap.utils.toArray(".gallery-item");
+                    gsap.to(sections, {
+                        xPercent: -100 * (sections.length - 1),
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: ".gallery-wrap",
+                            pin: true,
+                            scrub: 1,
+                            end: "+=3000"
+                        }
+                    });
+                },
+
+                // MOBILE: Stacking Cards Effect
+                "(max-width: 1024px)": function () {
+                    const cards = gsap.utils.toArray(".mobile-card");
+
+                    cards.forEach((card, i) => {
+                        ScrollTrigger.create({
+                            trigger: card,
+                            start: "center center",
+                            end: "bottom top",
+                            pin: true,
+                            pinSpacing: false,
+                            scrub: true,
+                            // As you scroll past, scale it down and fade it out to create depth
+                            onUpdate: (self) => {
+                                const prog = self.progress;
+                                gsap.to(card, {
+                                    scale: 1 - (prog * 0.1), // shrink slightly
+                                    opacity: 1 - (prog * 0.5), // fade slightly
+                                    filter: `blur(${prog * 5}px)`, // blur as it goes back
+                                    overwrite: 'auto'
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+
+            // --- 6. INTERACTION & CURSOR ---
+            window.togglePanel = function (id) {
+    const panel = document.getElementById(id);
+    const content = panel.querySelector('.panel-content');
+
+    if (!panel.classList.contains('active')) {
+        panel.classList.add('active');
+        gsap.to(panel, { xPercent: -100, duration: 0.6, ease: "power4.inOut" });
+        gsap.fromTo(
+            content,
+            { x: 30, opacity: 0 },
+            { x: 0, opacity: 1, delay: 0.2, duration: 0.4 }
+        );
+    } else {
+        gsap.to(panel, {
+            xPercent: 0,
+            duration: 0.6,
+            ease: "power4.inOut",
+            onComplete: () => panel.classList.remove('active')
+        });
+    }
+};
 
 
-          </ul>
-        </div>
-      </div>
-    </div>
+            if (window.matchMedia("(pointer: fine)").matches) {
+                // Magnetic Effect
+                document.querySelectorAll('.magnetic').forEach(mag => {
+                    mag.addEventListener('mousemove', (e) => {
+                        const rect = mag.getBoundingClientRect();
+                        gsap.to(mag.children[0], {
+                            x: (e.clientX - rect.left - rect.width / 2) * 0.5,
+                            y: (e.clientY - rect.top - rect.height / 2) * 0.5,
+                            duration: 0.3
+                        });
+                    });
+                    mag.addEventListener('mouseleave', () => {
+                        gsap.to(mag.children[0], { x: 0, y: 0, duration: 0.8, ease: "elastic.out(1, 0.3)" });
+                    });
+                });
 
-    <div class="footer-bottom">
-      <div class="copyright">© 2026 Malltiverse. Powered by immersive digital experiences.</div>
-      <div class="social-icons">
-        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-        <a href="#" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
-      </div>
-    </div>
-  </footer>
-  </section>
+                // Cursor Logic
+                const cursor = document.querySelector('.cursor');
+                document.addEventListener('mousemove', e => {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                });
+                document.addEventListener('mouseover', e => {
+                    if (e.target.closest('.hover-target')) cursor.classList.add('hovered');
+                    else cursor.classList.remove('hovered');
+                });
+            }
 
-  </body>
+            // --- 7. THREE.JS STARFIELD (ENHANCED WARP) ---
+            const canvas = document.querySelector('#webgl-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 1000;
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const starCount = window.innerWidth < 768 ? 1000 : 5000;
+            const starGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(starCount * 3);
+
+            // Initial random spread
+            for (let i = 0; i < starCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 2000;
+            }
+
+            starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const starMat = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 1.2,
+                transparent: true,
+                opacity: 0.8
+            });
+            const stars = new THREE.Points(starGeo, starMat);
+            scene.add(stars);
+
+            function animate() {
+                // Velocity from Lenis (Smooth Scroll)
+                const vel = Math.abs(lenis.velocity || 0);
+
+                // Warp Effect: Stretch stars based on speed
+                // If scrolling fast, stretch z-axis or size
+                if (vel > 5) {
+                    stars.rotation.z += 0.02; // Spin faster
+                    starMat.size = 2; // Stretch size illusion
+                } else {
+                    stars.rotation.z += 0.0005; // Base idle spin
+                    starMat.size = 1.2;
+                }
+
+                const pos = stars.geometry.attributes.position.array;
+                for (let i = 2; i < starCount * 3; i += 3) {
+                    // Move stars towards camera based on scroll speed
+                    // Base speed 2, plus multiplier of scroll velocity
+                    pos[i] += 2 + (vel * 3);
+
+                    if (pos[i] > 1000) {
+                        pos[i] = -1000; // Reset to back
+                    }
+                }
+                stars.geometry.attributes.position.needsUpdate = true;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                ScrollTrigger.refresh();
+            });
+
+            window.addEventListener('load', () => ScrollTrigger.refresh());
+        });
+    </script>
+</body>
 
 </html>

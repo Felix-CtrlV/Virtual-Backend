@@ -448,7 +448,7 @@ if ($statsStmt) {
             <div style="text-align:right;">
                 <small style="display:block; color:#666; font-size:0.75rem;">REVENUE (THIS MONTH)</small>
                 <div style="font-weight:800; color: var(--primary); font-size:1.1rem;">
-                    $<?= number_format($stats['revenue'], 2) ?>
+                    $<?= number_format($stats['revenue'] ?? 0, 2) ?>
                 </div>
             </div>
             <svg class="icon-svg" style="color:var(--primary);" viewBox="0 0 24 24">

@@ -87,11 +87,44 @@ if ($ratinglastmonthcount > 0) {
 
 // ...................................................................................................................................................
 
-$rentquery = " SELECT
-COUNT(DISTINCT s.supplier_id) AS total_shops, COUNT(DISTINCT CASE WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) AND rp.due_date  >= CURRENT_DATE THEN s.supplier_id END) AS paid_shops,
-ROUND( COUNT(DISTINCT CASE WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE) AND rp.due_date  >= CURRENT_DATE THEN s.supplier_id END) * 100.0 / NULLIF(COUNT(DISTINCT s.supplier_id), 0),2) AS payment_percentage,
-COUNT(DISTINCT CASE WHEN rp.due_date < CURRENT_DATE THEN s.supplier_id END) AS overdue_shops,COALESCE(SUM(CASE WHEN rp.paid_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND rp.paid_date <= CURRENT_DATE
-THEN rp.paid_amount END), 0) AS total_collected_amount FROM suppliers s LEFT JOIN rent_payments rp ON rp.supplier_id = s.supplier_id WHERE s.status = 'active';";
+$rentquery = "SELECT
+    COUNT(DISTINCT c.company_id) AS total_shops,
+
+    COUNT(DISTINCT CASE
+        WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE)
+         AND rp.due_date >= CURRENT_DATE
+        THEN c.company_id
+    END) AS paid_shops,
+
+    ROUND(
+        COUNT(DISTINCT CASE
+            WHEN rp.paid_date <= LAST_DAY(CURRENT_DATE)
+             AND rp.due_date >= CURRENT_DATE
+            THEN c.company_id
+        END) * 100.0
+        / NULLIF(COUNT(DISTINCT c.company_id), 0),
+        2
+    ) AS payment_percentage,
+
+    COUNT(DISTINCT CASE
+        WHEN rp.due_date < CURRENT_DATE
+        THEN c.company_id
+    END) AS overdue_shops,
+
+    COALESCE(SUM(CASE
+        WHEN rp.paid_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
+         AND rp.paid_date <= CURRENT_DATE
+        THEN rp.amount
+    END), 0) AS total_collected_amount
+
+FROM suppliers s
+INNER JOIN companies c
+    ON c.supplier_id = s.supplier_id
+   AND c.status = 'active'
+LEFT JOIN rent_payments rp
+    ON rp.company_id = c.company_id
+WHERE s.status = 'active';
+";
 $rentresult = mysqli_query($conn, $rentquery);
 $rentrow = mysqli_fetch_assoc($rentresult);
 ?>

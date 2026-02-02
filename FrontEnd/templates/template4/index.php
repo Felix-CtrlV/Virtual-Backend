@@ -9,6 +9,13 @@ if (!isset($_GET['supplier_id'])) {
 
 $supplier_id = (int) $_GET['supplier_id'];
 
+$company_stmt = mysqli_prepare($conn, "Select * from companies where supplier_id = ?");
+mysqli_stmt_bind_param($company_stmt, "i", $supplier_id);
+mysqli_stmt_execute($company_stmt);
+$company_result = mysqli_stmt_get_result($company_stmt);
+$company_row = mysqli_fetch_assoc($company_result);
+$company_id = $company_row['company_id'];
+
 $supplier_stmt = mysqli_prepare(
     $conn,
     "SELECT 
@@ -34,13 +41,15 @@ mysqli_stmt_close($supplier_stmt);
 
 $assets_result = false;
 
+
+
 $assets_stmt = mysqli_prepare(
     $conn,
-    "SELECT * FROM shop_assets WHERE supplier_id = ? LIMIT 1"
+    "SELECT * FROM shop_assets WHERE company_id = ? LIMIT 1"
 );
 
 if ($assets_stmt) {
-    mysqli_stmt_bind_param($assets_stmt, "i", $supplier_id);
+    mysqli_stmt_bind_param($assets_stmt, "i", $company_id);
     mysqli_stmt_execute($assets_stmt);
     $assets_result = mysqli_stmt_get_result($assets_stmt);
     mysqli_stmt_close($assets_stmt);

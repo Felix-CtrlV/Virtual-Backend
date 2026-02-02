@@ -14,6 +14,19 @@ if ($supplierid <= 0) {
     exit;
 }
 
+$company_stmt = $conn->prepare("SELECT company_id FROM companies WHERE supplier_id = ?");
+$company_stmt->bind_param("i", $supplierid);
+$company_stmt->execute();
+$company_result = $company_stmt->get_result();
+if ($company_result->num_rows === 0) {
+    echo '<div class="section-header"><div><p></p></div><div class="section-actions"><a href="viewsuppliers.php?adminid='.urlencode($adminid).'" class="btn btn-ghost">Back to List</a></div></div>';
+    echo '<section class="section active"><div class="card"><p style="text-align: center; padding: 30px; color: var(--muted);">No company found for the selected supplier.</p></div></section>';
+    echo '<script src="script.js"></script></body></html>';
+    exit;
+}
+$company_data = $company_result->fetch_assoc();
+$company_id = $company_data['company_id'];
+
 $supplierquery = "SELECT 
     s.*, 
     c.*,
@@ -26,18 +39,19 @@ FROM suppliers s
 LEFT JOIN companies c 
     ON c.supplier_id = s.supplier_id
 LEFT JOIN shop_assets sa 
-    ON sa.supplier_id = s.supplier_id 
+    ON sa.company_id = c.company_id
 LEFT JOIN (
-    SELECT rp1.* FROM rent_payments rp1 
+    SELECT rp1.*
+    FROM rent_payments rp1
     INNER JOIN (
-        SELECT supplier_id, MAX(paid_date) AS latest_paid
+        SELECT company_id, MAX(paid_date) AS latest_paid
         FROM rent_payments
-        GROUP BY supplier_id
+        GROUP BY company_id
     ) rp2 
-    ON rp1.supplier_id = rp2.supplier_id 
+        ON rp1.company_id = rp2.company_id
        AND rp1.paid_date = rp2.latest_paid
 ) rp 
-    ON rp.supplier_id = s.supplier_id
+    ON rp.company_id = c.company_id
 WHERE s.supplier_id = $supplierid;
 ";
 $supplierresult = mysqli_query($conn, $supplierquery);
@@ -47,7 +61,7 @@ $companyid = $supplierrow['company_id'];
 
 $reviewquery = "SELECT ROUND(AVG(rating),1) AS avg_rating, COUNT(*) AS total_reviews 
     FROM reviews 
-    WHERE supplier_id = $supplierid";
+    WHERE company_id = $company_id";
 $reviewresult = mysqli_query($conn, $reviewquery);
 $reviewrow = mysqli_fetch_assoc($reviewresult);
 

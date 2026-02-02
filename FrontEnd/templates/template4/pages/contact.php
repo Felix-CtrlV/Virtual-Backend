@@ -9,7 +9,7 @@ $tagline = $supplier['tagline'] ?? 'Get in touch.';
 
 // Fetch colors from shop_assets
 $supplier_id = $supplier['supplier_id'] ?? 1;
-$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE supplier_id = $supplier_id LIMIT 1";
+$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE company_id = $company_id LIMIT 1";
 $color_result = $conn->query($color_sql);
 $primary_color = "#000000"; // Default
 $secondary_color = "#ededed"; // Default

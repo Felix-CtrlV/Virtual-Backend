@@ -11,7 +11,7 @@ include("../../BackEnd/config/dbconfig.php");
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 3;
 
 
-$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE supplier_id = $supplier_id LIMIT 1";
+$color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE company_id = $company_id LIMIT 1";
 $color_result = $conn->query($color_sql);
 $primary_color = "#c5a059";   
 $secondary_color = "#e0c08d"; 
@@ -37,8 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['review_text'])) {
         echo "<script>alert('Please write your review text.');</script>";
     } else {
         
-        $stmt = $conn->prepare("INSERT INTO reviews (supplier_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
-        $stmt->bind_param("iisi", $supplier_id, $cid, $review_text, $rating);
+        $stmt = $conn->prepare("INSERT INTO reviews (company_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
+       $stmt->bind_param("iisi", $company_id, $cid, $review_text, $rating);
 
         if ($stmt->execute()) {
            echo "
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['review_text'])) {
 }
 
 // 4. Logic for Stats Dashboard (Fixes the "Undefined" warnings)
-$sql_stats = "SELECT rating FROM reviews WHERE supplier_id = $supplier_id";
+$sql_stats = "SELECT rating FROM reviews WHERE company_id = $company_id";
 $result_stats = $conn->query($sql_stats);
 
 $total_reviews = 0;
@@ -96,7 +96,7 @@ $sql_reviews = "
     SELECT r.*, c.name, c.image 
     FROM reviews r 
     JOIN customers c ON r.customer_id = c.customer_id 
-    WHERE r.supplier_id = $supplier_id 
+    WHERE r.company_id = $company_id 
     ORDER BY r.created_at DESC LIMIT 10";
 $reviews_res = $conn->query($sql_reviews);
 ?>

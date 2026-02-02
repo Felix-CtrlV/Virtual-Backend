@@ -17,7 +17,7 @@ require_once __DIR__ . '/../../utils/Ordered.php';
 
 
 // 3. ORDER PROCESSING LOGIC
-$customer_id = $_SESSION['customer_id'] ?? 1; // Use session if available, else 1
+$customer_id = $_SESSION['customer_id'] ?? 0; // Use session if available, else 1
 $supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
 $company_query = mysqli_prepare($conn, "select * from companies where supplier_id = ?");
