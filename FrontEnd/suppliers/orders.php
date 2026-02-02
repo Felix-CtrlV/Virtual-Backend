@@ -5,6 +5,9 @@ session_start();
 if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
     include("../../BackEnd/config/dbconfig.php");
     $supplier_id = $_SESSION['supplierid'];
+    $company_id = 0;
+    $cr = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = " . (int)$supplier_id . " AND status = 'active' LIMIT 1"));
+    if ($cr) $company_id = (int)$cr['company_id'];
 
     // A. FETCH ORDERS LIST (Populates the Table)
     if (isset($_GET['ajax_action']) && $_GET['ajax_action'] === 'fetch_orders') {
@@ -14,9 +17,9 @@ if (isset($_GET['ajax_action']) || isset($_POST['ajax_action'])) {
 
         $sql = "SELECT DISTINCT o.order_id, o.order_code, o.order_date, o.order_status, o.payment_method, o.price AS total_amount, c.name AS customer_name, p.product_id FROM orders o
 LEFT JOIN customers c ON o.customer_id = c.customer_id JOIN order_detail od ON o.order_id = od.order_id JOIN product_variant pv ON od.variant_id = pv.variant_id JOIN products p ON pv.product_id = p.product_id
-WHERE o.supplier_id = ? AND MONTH(o.order_date) = ? AND YEAR(o.order_date) = ?";
+WHERE o.company_id = ? AND MONTH(o.order_date) = ? AND YEAR(o.order_date) = ?";
 
-        $params = [$supplier_id, $month, $year];
+        $params = [$company_id, $month, $year];
         $types = "iii";
 
         if (!empty($search)) {
@@ -88,14 +91,14 @@ WHERE o.supplier_id = ? AND MONTH(o.order_date) = ? AND YEAR(o.order_date) = ?";
                 SELECT o.*, c.name, c.email, c.address, c.phone 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customer_id = c.customer_id 
-                WHERE o.order_id = ? AND o.supplier_id = ?");
+                WHERE o.order_id = ? AND o.company_id = ?");
 
         if (!$stmt) {
             echo json_encode(['error' => 'Order Query SQL Error: ' . $conn->error]);
             exit;
         }
 
-        $stmt->bind_param("ii", $order_id, $supplier_id);
+        $stmt->bind_param("ii", $order_id, $company_id);
         $stmt->execute();
         $orderResult = $stmt->get_result();
 
@@ -132,16 +135,16 @@ WHERE o.supplier_id = ? AND MONTH(o.order_date) = ? AND YEAR(o.order_date) = ?";
 include("partials/nav.php");
 include("../../BackEnd/config/dbconfig.php"); // Ensure DB is connected for stats
 
-// Stats Calculation
-$supplier_id = $_SESSION['supplierid'];
+// Stats Calculation (orders table uses company_id)
+$company_id = $row['company_id'] ?? 0;
 $statsStmt = $conn->prepare("SELECT 
     COUNT(*) as total, 
     SUM(CASE WHEN order_status = 'pending' THEN 1 ELSE 0 END) as pending,
     SUM(CASE WHEN order_status = 'confirm' THEN price ELSE 0 END) as revenue
-    FROM orders WHERE supplier_id = ? AND MONTH(order_date) = MONTH(CURRENT_DATE())");
+    FROM orders WHERE company_id = ? AND MONTH(order_date) = MONTH(CURRENT_DATE())");
 
 if ($statsStmt) {
-    $statsStmt->bind_param("i", $supplier_id);
+    $statsStmt->bind_param("i", $company_id);
     $statsStmt->execute();
     $stats = $statsStmt->get_result()->fetch_assoc();
 } else {

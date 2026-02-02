@@ -96,11 +96,11 @@ function splitHeroTitle(string $title): array
         $conn,
         "SELECT c.category_id, c.category_name
          FROM category c
-         WHERE c.supplier_id = ?
+         WHERE c.company_id = ?
          LIMIT 4"
     );
 
-    mysqli_stmt_bind_param($category_stmt, "i", $supplier_id);
+    mysqli_stmt_bind_param($category_stmt, "i", $company_id);
     mysqli_stmt_execute($category_stmt);
     $category_result = mysqli_stmt_get_result($category_stmt);
 

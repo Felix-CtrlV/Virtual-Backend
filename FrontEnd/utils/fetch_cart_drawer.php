@@ -4,19 +4,25 @@ session_start();
 include '../../BackEnd/config/dbconfig.php';
 
 
-$customer_id = $_SESSION['customer_id'] ?? 1; 
-$supplier_id = (int)$_GET['supplier_id'];
+$customer_id = (int)($_SESSION['customer_id'] ?? 0);
+$supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+$company_id = isset($_GET['company_id']) ? (int)$_GET['company_id'] : 0;
 
-
+if ($company_id <= 0 && $supplier_id > 0) {
+    $res = mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1");
+    if ($res && $row = mysqli_fetch_assoc($res)) {
+        $company_id = (int)$row['company_id'];
+    }
+}
 
 $query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p.product_id, v.color, v.size 
           FROM cart c 
           JOIN product_variant v ON c.variant_id = v.variant_id 
           JOIN products p ON v.product_id = p.product_id 
-          WHERE c.customer_id = ? AND c.supplier_id = ?";
+          WHERE c.customer_id = ? AND c.company_id = ?";
 
 $stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, "ii", $customer_id, $supplier_id);
+mysqli_stmt_bind_param($stmt, "ii", $customer_id, $company_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 

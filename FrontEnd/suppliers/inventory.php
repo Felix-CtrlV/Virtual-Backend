@@ -6,7 +6,8 @@ include("partials/nav.php");
 
 // --- CONFIGURATION ---
 $items_per_page = 6;
-$supplier_id = $_SESSION['supplierid'] ?? 6;
+$supplier_id = $_SESSION['supplierid'] ?? 0;
+$company_id = $row['company_id'] ?? 0;
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
@@ -24,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $final_cat_id = null;
         if (!empty($_POST['new_category_name'])) {
             $new_cat_name = trim($_POST['new_category_name']);
-            $checkCat = $conn->prepare("SELECT category_id FROM category WHERE category_name = ? AND supplier_id = ?");
-            $checkCat->bind_param("si", $new_cat_name, $supplier_id);
+            $checkCat = $conn->prepare("SELECT category_id FROM category WHERE category_name = ? AND company_id = ?");
+            $checkCat->bind_param("si", $new_cat_name, $company_id);
             $checkCat->execute();
             $checkCat->store_result();
             if ($checkCat->num_rows > 0) {
@@ -33,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $checkCat->fetch();
                 $final_cat_id = $existing_id;
             } else {
-                $insCat = $conn->prepare("INSERT INTO category (supplier_id, category_name) VALUES (?, ?)");
-                $insCat->bind_param("is", $supplier_id, $new_cat_name);
+                $insCat = $conn->prepare("INSERT INTO category (company_id, category_name) VALUES (?, ?)");
+                $insCat->bind_param("is", $company_id, $new_cat_name);
                 $insCat->execute();
                 $final_cat_id = $conn->insert_id;
                 $insCat->close();
@@ -49,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         // B. Insert Product
         $temp_image_name = 'placeholder.png';
-        $stmt = $conn->prepare("INSERT INTO products (supplier_id, category_id, product_name, description, price, image, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'available', NOW())");
-        $stmt->bind_param("iissds", $supplier_id, $final_cat_id, $p_name, $p_desc, $p_price, $temp_image_name);
+        $stmt = $conn->prepare("INSERT INTO products (company_id, category_id, product_name, description, price, image, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'available', NOW())");
+        $stmt->bind_param("iissds", $company_id, $final_cat_id, $p_name, $p_desc, $p_price, $temp_image_name);
         $stmt->execute();
         $new_product_id = $conn->insert_id;
         $stmt->close();
@@ -117,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $new_status = $_POST['product_status']; // 'available' or 'unavailable'
 
         // 1. Update Base Product
-        $stmt = $conn->prepare("UPDATE products SET price = ?, status = ? WHERE product_id = ? AND supplier_id = ?");
-        $stmt->bind_param("dsii", $new_price, $new_status, $pid, $supplier_id);
+        $stmt = $conn->prepare("UPDATE products SET price = ?, status = ? WHERE product_id = ? AND company_id = ?");
+        $stmt->bind_param("dsii", $new_price, $new_status, $pid, $company_id);
         $stmt->execute();
         $stmt->close();
 
@@ -170,18 +171,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // --- DATA FETCHING ---
-$catQuery = $conn->prepare("SELECT category_id, category_name FROM category WHERE supplier_id = ?");
-$catQuery->bind_param("i", $supplier_id);
+$catQuery = $conn->prepare("SELECT category_id, category_name FROM category WHERE company_id = ?");
+$catQuery->bind_param("i", $company_id);
 $catQuery->execute();
 $categories = $catQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 $catQuery->close();
 
-$productQuery = $conn->prepare('SELECT p.product_id, p.supplier_id, p.product_name, p.price, p.image, p.status, 
+$productQuery = $conn->prepare('SELECT p.product_id, p.company_id, p.product_name, p.price, p.image, p.status, 
                                      v.variant_id, v.size, v.color, v.quantity
                                 FROM products p 
                                 LEFT JOIN product_variant v ON p.product_id = v.product_id 
-                                WHERE p.supplier_id = ? ORDER BY p.product_id DESC');
-$productQuery->bind_param('i', $supplier_id);
+                                WHERE p.company_id = ? ORDER BY p.product_id DESC');
+$productQuery->bind_param('i', $company_id);
 $productQuery->execute();
 $result = $productQuery->get_result();
 
@@ -965,7 +966,7 @@ ob_end_flush();
             <div class="action-bar">
                 <div>
                     <h1 style="margin:0; font-weight:300; font-size:2rem; color:#0f172a;">Product <b>Inventory</b></h1>
-                    <small style="color:#64748b;">Managing Supplier ID: <?= $supplier_id ?></small>
+                    <small style="color:#64748b;">Company ID: <?= (int)($company_id ?? 0) ?></small>
                 </div>
                 <button class="btn-main" onclick="openModal('addModal')"><span>+</span> Add Product</button>
             </div>

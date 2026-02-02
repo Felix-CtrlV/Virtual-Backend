@@ -28,7 +28,7 @@ $stmt = $conn->prepare("
     sa.secondary_color,
     sa.about AS shop_about,
     sa.description AS shop_description,
-    sa.template_type
+    sa.template_id
 FROM suppliers s
 LEFT JOIN companies c 
     ON c.supplier_id = s.supplier_id AND c.status = 'active'
@@ -85,8 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $upd1->bind_param("ssi", $name, $email, $supplierid);
 
         // 2️⃣ Update companies table (phone, address)
-        $upd2 = $conn->prepare("UPDATE companies SET phone=?, address=? WHERE supplier_id=? AND status='active'");
-        $upd2->bind_param("ssi", $phone, $address, $supplierid);
+        $upd2 = $conn->prepare("UPDATE companies SET phone=?, address=? WHERE company_id=? AND status='active'");
+        $upd2->bind_param("ssi", $phone, $address, $company_id);
 
         if ($upd1->execute() && $upd2->execute()) {
             $msg = "Profile updated successfully.";
@@ -109,8 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $c_name = $_POST['company_name'];
         $tags = $_POST['tags'];
         $desc = $_POST['description'];
-        $upd = $conn->prepare("UPDATE suppliers SET company_name=?, tags=?, description=? WHERE supplier_id=?");
-        $upd->bind_param("sssi", $c_name, $tags, $desc, $supplierid);
+        $upd = $conn->prepare("UPDATE companies SET company_name=?, tags=?, description=? WHERE company_id=?");
+        $upd->bind_param("sssi", $c_name, $tags, $desc, $company_id);
         if ($upd->execute()) {
             $msg = "Company details updated.";
             $msg_type = "success";
@@ -219,9 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 3. Update Database (Only if no critical upload error occurred)
         if ($msg_type !== "error") {
-            $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_type=? $logo_sql $banner_sql WHERE company_id=?";
+            $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_id=? $logo_sql $banner_sql WHERE company_id=?";
             $stmt2 = $conn->prepare($sql_final);
-            $stmt2->bind_param("sssssi", $p_color, $s_color, $shop_about, $shop_desc, $media_mode, $company_id);
+            $stmt2->bind_param("ssssii", $p_color, $s_color, $shop_about, $shop_desc, $selected_template, $company_id);
 
             if ($stmt2->execute()) {
                 $msg = "Shop customization saved!";
@@ -232,7 +232,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $user['secondary_color'] = $s_color;
                 $user['shop_about'] = $shop_about;
                 $user['shop_description'] = $shop_desc;
-                $user['template_type'] = $media_mode;
                 $user['template_id'] = $selected_template;
             } else {
                 $msg = "Database Error: " . $stmt2->error;
@@ -240,9 +239,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             $stmt2->close();
 
-            // Update template_id in suppliers table
-            $stmt3 = $conn->prepare("UPDATE companies SET template_id=? WHERE supplier_id=?");
-            $stmt3->bind_param("ii", $selected_template, $supplierid);
+            // Update template_id in companies table
+            $stmt3 = $conn->prepare("UPDATE companies SET template_id=? WHERE company_id=?");
+            $stmt3->bind_param("ii", $selected_template, $company_id);
             $stmt3->execute();
             $stmt3->close();
         }

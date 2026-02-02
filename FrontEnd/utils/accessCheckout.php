@@ -5,18 +5,21 @@ include '../../BackEnd/config/dbconfig.php';
 // Use session ID for testing with different laptops
 $customer_id = $_SESSION['customer_id'] ?? 1;
 $supplier_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
-
+$company_id = 0;
 if ($supplier_id > 0) {
-    // 1. LIVE STOCK VALIDATION PHASE
-    // We pull the actual current quantity from the database to compare with the user's cart
+    $cr = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+    $company_id = $cr ? (int)$cr['company_id'] : 0;
+}
+
+if ($company_id > 0) {
     $check_stock_query = "SELECT p.product_name, c.quantity AS cart_qty, v.quantity AS actual_stock 
                           FROM cart c 
                           JOIN product_variant v ON c.variant_id = v.variant_id 
                           JOIN products p ON v.product_id = p.product_id 
-                          WHERE c.customer_id = ? AND c.supplier_id = ?";
+                          WHERE c.customer_id = ? AND c.company_id = ?";
 
     $stock_stmt = mysqli_prepare($conn, $check_stock_query);
-    mysqli_stmt_bind_param($stock_stmt, "ii", $customer_id, $supplier_id);
+    mysqli_stmt_bind_param($stock_stmt, "ii", $customer_id, $company_id);
     mysqli_stmt_execute($stock_stmt);
     $stock_result = mysqli_stmt_get_result($stock_stmt);
 
@@ -59,10 +62,10 @@ WHERE s.supplier_id = ?
                     FROM cart c 
                     JOIN product_variant v ON c.variant_id = v.variant_id 
                     JOIN products p ON v.product_id = p.product_id 
-                    WHERE c.customer_id = ? AND c.supplier_id = ?";
+                    WHERE c.customer_id = ? AND c.company_id = ?";
 
     $price_stmt = mysqli_prepare($conn, $price_query);
-    mysqli_stmt_bind_param($price_stmt, "ii", $customer_id, $supplier_id);
+    mysqli_stmt_bind_param($price_stmt, "ii", $customer_id, $company_id);
     mysqli_stmt_execute($price_stmt);
     $price_result = mysqli_stmt_get_result($price_stmt);
     $price_data = mysqli_fetch_assoc($price_result);
@@ -79,6 +82,6 @@ WHERE s.supplier_id = ?
     header("Location: " . $bank_url);
     exit();
 } else {
-    die("Error: Invalid Supplier ID.");
+    die("Error: Invalid Supplier ID or Company not found.");
 }
 ?>

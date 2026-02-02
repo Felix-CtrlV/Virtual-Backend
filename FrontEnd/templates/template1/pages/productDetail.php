@@ -12,11 +12,11 @@ $stmt = mysqli_prepare(
     "SELECT p.*, c.category_name
      FROM products p
      LEFT JOIN category c ON p.category_id = c.category_id
-     WHERE p.product_id = ? AND p.supplier_id = ? AND p.status != 'unavailable'
+     WHERE p.product_id = ? AND p.company_id = ? AND p.status != 'unavailable'
      LIMIT 1"
 );
 
-mysqli_stmt_bind_param($stmt, "ii", $product_id, $supplier_id);
+mysqli_stmt_bind_param($stmt, "ii", $product_id, $company_id);
 mysqli_stmt_execute($stmt);
 $product = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 mysqli_stmt_close($stmt);
@@ -270,10 +270,10 @@ mysqli_stmt_close($variant_stmt);
             $current_cat_id = $product['category_id'];
 
             // Query to fetch products from the same category, excluding the current product
-            $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE supplier_id = ? AND category_id = ? AND product_id != ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT 4");
+            $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND category_id = ? AND product_id != ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT 4");
 
             if ($products_stmt) {
-                mysqli_stmt_bind_param($products_stmt, "iii", $supplier_id, $current_cat_id, $product_id);
+                mysqli_stmt_bind_param($products_stmt, "iii", $company_id, $current_cat_id, $product_id);
                 mysqli_stmt_execute($products_stmt);
                 $products_result = mysqli_stmt_get_result($products_stmt);
             }

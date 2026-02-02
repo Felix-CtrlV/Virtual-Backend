@@ -22,15 +22,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_POST['variant_id'], $_POST['supplier_id'], $_POST['quantity'])) {
+if (!isset($_POST['variant_id'], $_POST['quantity'])) {
     echo json_encode(['status' => 'error', 'message' => 'Missing data']);
     exit;
 }
 
-$customer_id = $_SESSION['customer_id'] ?? 1; 
-
+$customer_id = (int) ($_SESSION['customer_id'] ?? 0);
 $variant_id = (int) $_POST['variant_id'];
-$supplier_id = (int) $_POST['supplier_id'];
+
+// Get company_id from variant -> product (cart table uses company_id)
+$company_stmt = mysqli_prepare($conn, "SELECT p.company_id FROM product_variant v JOIN products p ON v.product_id = p.product_id WHERE v.variant_id = ?");
+mysqli_stmt_bind_param($company_stmt, "i", $variant_id);
+mysqli_stmt_execute($company_stmt);
+$company_result = mysqli_stmt_get_result($company_stmt);
+$company_row = mysqli_fetch_assoc($company_result);
+mysqli_stmt_close($company_stmt);
+
+if (!$company_row) {
+    echo json_encode(['status' => 'error', 'message' => 'Product not found']);
+    exit;
+}
+$company_id = (int) $company_row['company_id'];
+
 $quantity_to_add = (int) $_POST['quantity'];
 
 $stock_query = "SELECT quantity FROM product_variant WHERE variant_id = ?";
@@ -47,9 +60,9 @@ if (!$stock_data) {
 
 $db_stock = (int)$stock_data['quantity'];
 
-$cart_check_query = "SELECT cart_id, quantity FROM cart WHERE customer_id = ? AND variant_id = ?";
+$cart_check_query = "SELECT cart_id, quantity FROM cart WHERE customer_id = ? AND company_id = ? AND variant_id = ?";
 $cart_check_stmt = mysqli_prepare($conn, $cart_check_query);
-mysqli_stmt_bind_param($cart_check_stmt, "ii", $customer_id, $variant_id);
+mysqli_stmt_bind_param($cart_check_stmt, "iii", $customer_id, $company_id, $variant_id);
 mysqli_stmt_execute($cart_check_stmt);
 $cart_result = mysqli_stmt_get_result($cart_check_stmt);
 $cart_data = mysqli_fetch_assoc($cart_result);
@@ -64,8 +77,8 @@ if ($db_stock >= $total_requested) {
         mysqli_stmt_bind_param($update_stmt, "ii", $total_requested, $cart_data['cart_id']);
         $success = mysqli_stmt_execute($update_stmt);
     } else {
-        $insert_stmt = mysqli_prepare($conn, "INSERT INTO cart (customer_id, supplier_id, variant_id, quantity) VALUES (?, ?, ?, ?)");
-        mysqli_stmt_bind_param($insert_stmt, "iiii", $customer_id, $supplier_id, $variant_id, $quantity_to_add);
+        $insert_stmt = mysqli_prepare($conn, "INSERT INTO cart (customer_id, company_id, variant_id, quantity) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($insert_stmt, "iiii", $customer_id, $company_id, $variant_id, $quantity_to_add);
         $success = mysqli_stmt_execute($insert_stmt);
     }
 

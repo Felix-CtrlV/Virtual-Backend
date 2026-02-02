@@ -1975,7 +1975,6 @@ form textarea {
 
 @media (max-width: 991px) {
 
-    /* 1. Header Container Tweaks */
     .nav-container {
         padding: 10px 15px;
         position: relative;
@@ -1985,29 +1984,39 @@ form textarea {
         align-items: center;
     }
 
-    /* 2. The Menu Box - Centered & Compact */
     .navbar-collapse {
         position: absolute;
         top: 80px;
-        /* Adjust based on your header height */
         left: 50%;
-        transform: translateX(-50%);
-        /* This perfectly centers the box */
         width: 85%;
-        /* Don't let it touch the edges */
         max-width: 350px;
-        /* Keep it narrow like a laptop menu */
-
-        background: rgba(255, 255, 255, 0.95);
-        /* Light background for readability */
-        backdrop-filter: blur(10px);
+        background: linear-gradient(145deg, var(--primary-bright), var(--primary-dark));
+        backdrop-filter: blur(20px);
         padding: 20px;
         border-radius: 20px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         border: 1px solid rgba(0, 0, 0, 0.05);
         z-index: 9999;
-        height: auto;
+        display: block !important;
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(-50%, -20px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    .navbar-collapse.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, 0);
+    }
+    
+    .navbar-collapse.hide{
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(0, 0%);
+    }
+
+
 
     /* 3. The Navigation Links */
     .navbar-nav {
@@ -2061,6 +2070,7 @@ form textarea {
         box-shadow: none !important;
     }
 }
+
 
 
 
