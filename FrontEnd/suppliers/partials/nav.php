@@ -115,7 +115,7 @@ if (!$row) {
 if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success' && !isset($_SESSION['pending_rent'])) {
     $updateRent = $conn->prepare("UPDATE rent_payments SET status = 'paid', paid_date = NOW() WHERE company_id = ? AND status = 'unpaid'");
     $updateRent->bind_param("i", $row['company_id']);
-    
+
     if ($updateRent->execute()) {
         $updateRent->close();
         echo "<script>window.location.href='dashboard.php';</script>";
@@ -139,7 +139,7 @@ $rentStmt->close();
 
 // If an unpaid rent record exists, we block access and show the payment screen
 if ($rentRow) {
-    
+
     // 2. Fetch Admin Account Number (Receiver)
     // We fetch the first admin's account number to receive the money
     $adminStmt = $conn->prepare("SELECT account_number FROM admins LIMIT 1");
@@ -154,18 +154,19 @@ if ($rentRow) {
     // We dynamically build the return URL to point back to this dashboard
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'];
-    $current_path = dirname($_SERVER['PHP_SELF']); 
+    $current_path = dirname($_SERVER['PHP_SELF']);
     $return_url = $protocol . "://" . $host . $current_path . "/dashboard.php?placeholder=1";
 
     $payment_url = "https://crediverse.base44.app/payment?" . http_build_query([
-        'amount'         => $rentRow['amount'],
-        'merchant'       => 'MALLTIVERSE',
-        'return_url'     => $return_url,
+        'amount' => $rentRow['amount'],
+        'merchant' => 'MALLTIVERSE',
+        'return_url' => $return_url,
         'account_number' => $admin_account
     ]);
     ?>
     <!DOCTYPE html>
     <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -184,16 +185,27 @@ if ($rentRow) {
                 color: #333;
                 text-align: center;
             }
+
             .payment-card {
                 background: white;
                 padding: 40px;
                 border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
                 max-width: 450px;
                 width: 90%;
             }
-            h2 { margin-top: 10px; color: #2d3748; }
-            p { color: #718096; line-height: 1.6; margin-bottom: 30px; }
+
+            h2 {
+                margin-top: 10px;
+                color: #2d3748;
+            }
+
+            p {
+                color: #718096;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+
             .amount-box {
                 background: #f7fafc;
                 padding: 15px;
@@ -204,6 +216,7 @@ if ($rentRow) {
                 margin-bottom: 25px;
                 border: 2px dashed #cbd5e0;
             }
+
             .btn-pay {
                 display: block;
                 width: 100%;
@@ -217,42 +230,45 @@ if ($rentRow) {
                 transition: transform 0.2s, box-shadow 0.2s;
                 margin-bottom: 15px;
             }
+
             .btn-pay:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
             }
+
             .btn-logout {
                 color: #718096;
                 text-decoration: none;
                 font-size: 0.9rem;
             }
-            .btn-logout:hover { text-decoration: underline; }
+
+            .btn-logout:hover {
+                text-decoration: underline;
+            }
         </style>
     </head>
+
     <body>
         <div class="payment-card">
-            <lord-icon
-                src="https://cdn.lordicon.com/jtiihjyw.json"
-                trigger="loop"
-                delay="2000"
-                colors="primary:#121331,secondary:#08a88a"
-                style="width:100px;height:100px">
+            <lord-icon src="https://cdn.lordicon.com/jtiihjyw.json" trigger="loop" delay="2000"
+                colors="primary:#121331,secondary:#08a88a" style="width:100px;height:100px">
             </lord-icon>
-            
+
             <h2>Rent Payment Due</h2>
             <p>Your shop is approved! To activate your dashboard features, please settle your outstanding rent payment.</p>
-            
+
             <div class="amount-box">
                 $<?= number_format($rentRow['amount'], 2) ?>
             </div>
-            
+
             <a href="<?= htmlspecialchars($payment_url) ?>" class="btn-pay">
                 Pay Securely via Crediverse
             </a>
-            
+
             <a href="../utils/signout.php" class="btn-logout">Log out and pay later</a>
         </div>
     </body>
+
     </html>
     <?php
     exit(); // Stop the rest of the dashboard from loading
@@ -410,7 +426,7 @@ $reviewStmt = $conn->prepare("SELECT
 FROM reviews r
 LEFT JOIN customers u ON r.customer_id = u.customer_id
 WHERE r.company_id = ?
-  AND r.created_at >= DATE_SUB(NOW(), INTERVAL 100 DAY)
+  AND r.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 ORDER BY r.created_at DESC;
 ");
 
@@ -918,11 +934,16 @@ $pendingOrderList = [
         <div class="panel-content panel-nav-content">
             <div class="panel-close" onclick="togglePanel('mobile-menu-panel')" aria-label="Close">×</div>
             <nav class="panel-nav">
-                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
-                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Inventory</a>
-                <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Orders</a>
-                <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Rent Payment</a>
-                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Settings</a>
+                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
+                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Inventory</a>
+                <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Orders</a>
+                <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Rent Payment</a>
+                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Settings</a>
             </nav>
             <a href="../utils/signout.php" class="btn-logout panel-logout">Logout</a>
         </div>
@@ -1184,7 +1205,7 @@ $pendingOrderList = [
             });
 
             // Mobile menu panel (same as FrontEnd/index.html)
-            window.togglePanel = function(id) {
+            window.togglePanel = function (id) {
                 var panel = document.getElementById(id);
                 if (!panel) return;
                 if (!panel.classList.contains('active')) {
