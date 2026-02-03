@@ -11,9 +11,6 @@ $company_id = $row['company_id'] ?? 0;
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-// ==========================================
-// 1. UNIFIED HANDLE: ADD PRODUCT (CREATE)
-// ==========================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_full_product') {
     $conn->begin_transaction();
     try {
@@ -123,15 +120,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $stmt->execute();
         $stmt->close();
 
-        // 2. Delete Marked Variants
+        // 2. Soft Delete Marked Variants (Set to Unavailable)
         if (!empty($_POST['deleted_variants_ids'])) {
             $ids_to_delete = explode(',', $_POST['deleted_variants_ids']);
             $ids_to_delete = array_map('intval', $ids_to_delete);
 
             if (!empty($ids_to_delete)) {
                 $in_clause = implode(',', $ids_to_delete);
+
+                // Remove from carts first (optional, but good practice)
                 $conn->query("DELETE FROM cart WHERE variant_id IN ($in_clause)");
-                $conn->query("DELETE FROM product_variant WHERE variant_id IN ($in_clause) AND product_id = $pid");
+
+                // SOFT DELETE: Update status instead of DELETE FROM
+                $conn->query("UPDATE product_variant SET status = 'unavailable' WHERE variant_id IN ($in_clause) AND product_id = $pid");
             }
         }
 
@@ -177,8 +178,9 @@ $catQuery->execute();
 $categories = $catQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 $catQuery->close();
 
+// UPDATED QUERY: Added v.status
 $productQuery = $conn->prepare('SELECT p.product_id, p.company_id, p.product_name, p.price, p.image, p.status, 
-                                     v.variant_id, v.size, v.color, v.quantity
+                                     v.variant_id, v.size, v.color, v.quantity, v.status as variant_status
                                 FROM products p 
                                 LEFT JOIN product_variant v ON p.product_id = v.product_id 
                                 WHERE p.company_id = ? ORDER BY p.product_id DESC');
@@ -201,15 +203,33 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
     if ($row['variant_id']) {
+        $v_status = $row['variant_status'] ?? 'available';
+
         $grouped_products[$pid]['variants'][] = [
             'variant_id' => $row['variant_id'],
             'size' => $row['size'],
             'color' => $row['color'],
-            'quantity' => $row['quantity']
+            'quantity' => $row['quantity'],
+            'status' => $v_status // Store status
         ];
-        $grouped_products[$pid]['total_stock'] += $row['quantity'];
+
+        // Only add to total stock count if available
+        if ($v_status === 'available') {
+            $grouped_products[$pid]['total_stock'] += $row['quantity'];
+        }
     }
 }
+
+// SORTING LOGIC: Move 'unavailable' variants to the bottom for every product
+foreach ($grouped_products as &$prod) {
+    usort($prod['variants'], function ($a, $b) {
+        if ($a['status'] === $b['status'])
+            return 0;
+        return ($a['status'] === 'unavailable') ? 1 : -1;
+    });
+}
+unset($prod); // Break reference
+
 $my_products = array_values($grouped_products);
 
 // Pagination
@@ -242,9 +262,7 @@ ob_end_flush();
     <style>
         /* --- CORE STYLES & OVERRIDES --- */
         :root {
-            --primary: #2563eb;
-            /* Standard Dashboard Blue */
-            --primary-grad: linear-gradient(135deg, #2563eb, #1d4ed8);
+            --primary-grad: color-mix(in srgb, var(--primary) 100%, #FFFFFF 10%);
             --bg: #f8f9fa;
             --surface: #ffffff;
             --border: #e2e8f0;
@@ -260,12 +278,20 @@ ob_end_flush();
             background: var(--bg);
             color: var(--text);
             margin: 0;
+            box-sizing: border-box;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
         }
 
         /* --- PAGE LAYOUT --- */
         .page-container {
             margin: 30px auto;
             padding: 0 20px;
+            max-width: 1400px;
         }
 
         .stats-grid {
@@ -303,6 +329,8 @@ ob_end_flush();
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .btn-main {
@@ -318,10 +346,11 @@ ob_end_flush();
             gap: 8px;
             transition: 0.2s;
             box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            white-space: nowrap;
         }
 
         .btn-main:hover {
-            background: #1d4ed8;
+            background: var(--primary-grad);
             transform: translateY(-1px);
         }
 
@@ -331,11 +360,16 @@ ob_end_flush();
             border: 1px solid var(--border);
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            /* Important for table responsiveness */
+            width: 100%;
+            overflow-x: auto;
         }
 
         .custom-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 700px;
+            /* Forces scroll on small screens */
         }
 
         .custom-table th {
@@ -346,6 +380,7 @@ ob_end_flush();
             color: #475569;
             border-bottom: 1px solid var(--border);
             font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         .custom-table td {
@@ -373,6 +408,7 @@ ob_end_flush();
             object-fit: cover;
             border: 1px solid var(--border);
             background: #eee;
+            flex-shrink: 0;
         }
 
         .badge {
@@ -380,6 +416,7 @@ ob_end_flush();
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .badge.ok {
@@ -404,6 +441,7 @@ ob_end_flush();
             backdrop-filter: blur(4px);
             opacity: 0;
             transition: opacity 0.3s ease;
+            padding: 10px;
         }
 
         .modal-overlay.open {
@@ -413,7 +451,7 @@ ob_end_flush();
         .modal-box {
             background: white;
             width: 1000px;
-            max-width: 95vw;
+            max-width: 100%;
             height: 85vh;
             border-radius: var(--modal-radius);
             display: flex;
@@ -444,10 +482,11 @@ ob_end_flush();
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            /* Contains scroll inside */
         }
 
-        /* -- HEADER STYLES (NEW VS OLD) -- */
-        /* New Product Header (Gradient) */
+        /* -- HEADER STYLES -- */
         .modal-header-new {
             padding: 24px 32px;
             background: var(--primary-grad);
@@ -473,7 +512,6 @@ ob_end_flush();
             color: white;
         }
 
-        /* Old Edit Header (Standard) */
         .modal-header-edit {
             padding: 24px 32px;
             background: #fff;
@@ -525,6 +563,12 @@ ob_end_flush();
             margin-top: 10px;
         }
 
+        .form-row-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
         .form-group {
             margin-bottom: 24px;
         }
@@ -560,7 +604,6 @@ ob_end_flush();
             width: 100%;
             height: auto;
             min-height: 250px;
-            /* Fixed min height for consistency */
             aspect-ratio: 1;
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
@@ -585,11 +628,9 @@ ob_end_flush();
             width: 100%;
             height: 100%;
             object-fit: contain;
-            /* Ensures image fits nicely */
             border-radius: 12px;
             display: none;
             padding: 10px;
-            /* Padding so image doesn't touch dashed border */
             box-sizing: border-box;
             background: white;
         }
@@ -714,6 +755,13 @@ ob_end_flush();
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 20px;
+        }
+
+        .var-input-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
         }
 
         .added-variants-grid {
@@ -941,6 +989,351 @@ ob_end_flush();
             gap: 8px;
             margin-top: 12px;
         }
+
+        /* ========================================= */
+        /* RESPONSIVE MEDIA QUERIES */
+        /* ========================================= */
+        @media (max-width: 1024px) {
+            .modal-box {
+                width: 95vw;
+                height: 90vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 0 15px;
+            }
+
+            /* Stack Action Bar */
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .action-bar .btn-main {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Table Scrolling */
+            .inventory-panel {
+                overflow-x: auto;
+            }
+
+            /* Modal Mobile Layout - Stack Sidebar on Top */
+            .modal-box {
+                flex-direction: column;
+                height: 95vh;
+                width: 100vw;
+                border-radius: 0;
+            }
+
+            .modal-sidebar {
+                width: 100%;
+                height: auto;
+                /* Shrink to fit content */
+                max-height: 250px;
+                flex-direction: row;
+                padding: 15px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                overflow-y: auto;
+                gap: 15px;
+            }
+
+            .image-drop-zone {
+                width: 150px;
+                min-height: 150px;
+            }
+
+            .modal-content-area {
+                width: 100%;
+                flex: 1;
+                /* Take remaining height */
+            }
+
+            .modal-body-scroll {
+                padding: 20px;
+            }
+
+            .modal-header-new,
+            .modal-header-edit {
+                padding: 15px 20px;
+            }
+
+            /* Stack Form Grid */
+            .form-row-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            /* Variant Creator adjustments */
+            .var-input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .var-input-row>div {
+                flex: none;
+                width: 100%;
+            }
+
+            .btn-add-var {
+                margin-top: 5px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Edit Modal Specifics */
+            .modal-header-edit {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            /* Variant Table in Edit */
+            .var-table th,
+            .var-table td {
+                padding: 10px 5px;
+                font-size: 0.85rem;
+            }
+
+            /* Hide large preview image in Edit Sidebar on mobile to save space */
+            #variantModal .modal-sidebar {
+                display: none;
+            }
+
+            /* Make inputs in edit table grid-like or smaller */
+            .variant-input-group {
+                grid-template-columns: 1fr 1fr;
+                grid-auto-flow: row;
+            }
+
+            .variant-input-group button {
+                grid-column: span 2;
+                width: 100%;
+            }
+        }
+
+        /* Container for the table to prevent layout overflow */
+        <style>
+        /* ... (Keep your root variables and basic body styles) ... */
+
+        /* --- MINIMAL TABLE STYLES --- */
+        .inventory-panel {
+            background: transparent;
+            /* Remove container bg to let cards breathe on mobile */
+            border: none;
+            box-shadow: none;
+            width: 100%;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            /* Allows spacing between rows */
+            border-spacing: 0 10px;
+            /* Space between rows (Desktop) */
+        }
+
+        /* Table Head (Desktop) */
+        .custom-table thead th {
+            background: transparent;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0 20px 10px 20px;
+            border: none;
+        }
+
+        /* Table Body Rows (Desktop Card-Row) */
+        .custom-table tbody tr {
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .custom-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-table td {
+            padding: 20px;
+            border: none;
+            vertical-align: middle;
+        }
+
+        /* First and Last Cells Rounding */
+        .custom-table td:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+
+        .custom-table td:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* Product Column Specifics */
+        .product-flex {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .thumb-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .product-meta h4 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .product-meta span {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge.ok {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .badge.low {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        /* Action Icon */
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            transition: 0.2s;
+        }
+
+        .custom-table tr:hover .action-icon {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        /* ========================================= */
+        /* RESPONSIVE MOBILE VIEW (The Minimal Transform) */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            .custom-table {
+                display: block;
+            }
+
+            .custom-table thead {
+                display: none;
+                /* Hide headers */
+            }
+
+            .custom-table tbody {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                /* Auto Grid */
+                gap: 33px;
+            }
+
+            .custom-table tbody tr {
+                width: 87vw;
+                padding: 16px;
+                border: 1px solid #e2e8f0;
+                box-shadow: none;
+            }
+
+            .custom-table td {
+                display: block;
+                padding: 0;
+                border: none;
+            }
+
+            .custom-table td:first-child,
+            .custom-table td:last-child {
+                border-radius: 0;
+            }
+
+            /* 1. Product Info (Image + Title) */
+            .custom-table td:nth-child(1) {
+                margin-bottom: 15px;
+            }
+
+            /* 2. Price (Make big) */
+            .custom-table td:nth-child(2) {
+                order: 2;
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .custom-table td:nth-child(2)::before {
+                content: "Price: ";
+                font-size: 0.8rem;
+                color: #94a3b8;
+                font-weight: 500;
+                vertical-align: middle;
+                margin-right: 5px;
+            }
+
+            /* 3. Stock & Status (Row layout) */
+            .stock-status-wrapper {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: auto;
+                padding-top: 12px;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            /* Hide original cells for 3 & 4 and reuse in wrapper logic if needed, 
+           but CSS-only reordering is tricky with tables. 
+           Instead, we style them to sit next to each other visually. */
+
+            .custom-table td:nth-child(3) {
+                /* Stock */
+                display: inline-block;
+                width: auto;
+                margin-right: 10px;
+            }
+
+            .custom-table td:nth-child(4) {
+                /* Status */
+                display: inline-block;
+                width: auto;
+            }
+
+            /* Hide the Action Text/Column on mobile, click card to edit */
+            .custom-table td:nth-child(5) {
+                display: none;
+            }
+        }
+    </style>
     </style>
 </head>
 
@@ -957,7 +1350,8 @@ ob_end_flush();
                     <span class="stat-title">Inventory Value</span>
                     <div class="stat-value">$<?= number_format($total_value, 2) ?></div>
                 </div>
-                <div class="stat-card" style="border-bottom: 4px solid <?= $low_stock_count > 0 ? 'var(--danger)' : 'var(--success)' ?>">
+                <div class="stat-card"
+                    style="border-bottom: 4px solid <?= $low_stock_count > 0 ? 'var(--danger)' : 'var(--success)' ?>">
                     <span class="stat-title">Low Stock Alerts</span>
                     <div class="stat-value"><?= $low_stock_count ?></div>
                 </div>
@@ -966,7 +1360,7 @@ ob_end_flush();
             <div class="action-bar">
                 <div>
                     <h1 style="margin:0; font-weight:300; font-size:2rem; color:#0f172a;">Product <b>Inventory</b></h1>
-                    <small style="color:#64748b;">Company ID: <?= (int)($company_id ?? 0) ?></small>
+                    <small style="color:#64748b;">Company ID: <?= (int) ($company_id ?? 0) ?></small>
                 </div>
                 <button class="btn-main" onclick="openModal('addModal')"><span>+</span> Add Product</button>
             </div>
@@ -975,47 +1369,64 @@ ob_end_flush();
                 <table class="custom-table">
                     <thead>
                         <tr>
-                            <th width="45%">Product</th>
-                            <th>Base Price</th>
-                            <th>Total Stock</th>
+                            <th>Product Details</th>
+                            <th>Price</th>
+                            <th>Stock Level</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th style="text-align:right">Edit</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($paginated_products as $p): ?>
-                            <tr class="product-row" onclick='openVariantModal(<?= json_encode($p) ?>)'>
+                            <tr onclick='openVariantModal(<?= json_encode($p) ?>)'>
                                 <td>
                                     <div class="product-flex">
-                                        <img src="../uploads/products/<?= $p['product_id'] ?>_<?= $p['image'] ?>" class="thumb-img">
-                                        <div>
-                                            <div style="font-weight:600; color:#0f172a;"><?= htmlspecialchars($p['product_name']) ?></div>
-                                            <small style="color:#94a3b8;">SKU: <?= $p['product_id'] ?></small>
+                                        <img src="../uploads/products/<?= $p['image'] ? $p['product_id'] . '_' . $p['image'] : 'placeholder.png' ?>"
+                                            class="thumb-img">
+                                        <div class="product-meta">
+                                            <h4><?= htmlspecialchars($p['product_name']) ?></h4>
+                                            <span>ID: #<?= $p['product_id'] ?></span>
                                         </div>
                                     </div>
                                 </td>
-                                <td style="font-weight:600; color:#334155;">$<?= number_format($p['price'], 2) ?></td>
+
+                                <td style="font-weight: 700; color: #334155;">
+                                    $<?= number_format($p['price'], 2) ?>
+                                </td>
+
                                 <td>
                                     <span class="badge <?= $p['total_stock'] < 10 ? 'low' : 'ok' ?>">
                                         <?= $p['total_stock'] ?> Units
                                     </span>
                                 </td>
-                                <td><span style="color:<?= $p['status'] == 'available' ? '#22c55e' : '#cbd5e1' ?>; font-size:1.2em; vertical-align:middle;">•</span> <?= ucfirst($p['status']) ?></td>
-                                <td style="color:#64748b; font-weight:500;">Edit <span style="font-size:0.8em;">✏️</span></td>
+
+                                <td>
+                                    <div
+                                        style="display:flex; align-items:center; gap:6px; font-size:0.9rem; color: #475569;">
+                                        <span
+                                            style="height:8px; width:8px; border-radius:50%; background:<?= $p['status'] == 'available' ? '#22c55e' : '#cbd5e1' ?>; display:block;"></span>
+                                        <?= ucfirst($p['status']) ?>
+                                    </div>
+                                </td>
+
+                                <td style="text-align:right">
+                                    <div class="action-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M9 18l6-6-6-6" />
+                                        </svg>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
-                        <?php if (empty($paginated_products)): ?>
-                            <tr>
-                                <td colspan="5" style="text-align:center; padding: 40px; color:#94a3b8;">No products found in inventory.</td>
-                            </tr>
-                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
 
             <div style="margin-top:20px; text-align:center;">
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?= $i ?>" style="padding:8px 14px; margin:0 3px; background:<?= $i == $page ? 'var(--primary)' : 'white' ?>; color:<?= $i == $page ? 'white' : 'var(--primary)' ?>; text-decoration:none; border-radius:6px; border: 1px solid #e2e8f0; font-size:0.9rem; font-weight:500;"><?= $i ?></a>
+                    <a href="?page=<?= $i ?>"
+                        style="padding:8px 14px; margin:0 3px; background:<?= $i == $page ? 'var(--primary)' : 'white' ?>; color:<?= $i == $page ? 'white' : 'var(--primary)' ?>; text-decoration:none; border-radius:6px; border: 1px solid #e2e8f0; font-size:0.9rem; font-weight:500;"><?= $i ?></a>
                 <?php endfor; ?>
             </div>
         </div>
@@ -1028,7 +1439,8 @@ ob_end_flush();
                         <small style="color:#94a3b8;">Primary display image</small>
                     </div>
                     <div class="image-drop-zone">
-                        <input type="file" name="image" form="createProductForm" class="file-input" accept="image/*" required onchange="previewFile(this)">
+                        <input type="file" name="image" form="createProductForm" class="file-input" accept="image/*"
+                            required onchange="previewFile(this)">
                         <div class="upload-msg" id="uploadPlaceholder" style="text-align:center; pointer-events:none;">
                             <div style="font-size:2rem; margin-bottom:10px;">📷</div>
                             <span style="font-weight:600; color:#64748b; font-size:0.9rem;">Upload Photo</span>
@@ -1038,7 +1450,8 @@ ob_end_flush();
                 </div>
 
                 <div class="modal-content-area">
-                    <form method="POST" id="createProductForm" enctype="multipart/form-data" style="display:flex; flex-direction:column; height:100%;" onsubmit="return prepareSubmission()">
+                    <form method="POST" id="createProductForm" enctype="multipart/form-data"
+                        style="display:flex; flex-direction:column; height:100%;" onsubmit="return prepareSubmission()">
                         <input type="hidden" name="action" value="create_full_product">
                         <input type="hidden" name="variants_data" id="hiddenVariantsJson">
                         <input type="hidden" name="new_category_name" id="hiddenNewCatName">
@@ -1050,22 +1463,25 @@ ob_end_flush();
 
                         <div class="modal-body-scroll">
                             <div class="form-section-title">General Info</div>
-                            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+                            <div class="form-row-grid">
                                 <div class="form-group">
                                     <label class="form-label">Product Name</label>
-                                    <input type="text" name="product_name" class="input-std" placeholder="e.g. Classic Cotton Tee" required>
+                                    <input type="text" name="product_name" class="input-std"
+                                        placeholder="e.g. Classic Cotton Tee" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Price</label>
                                     <div style="position:relative;">
                                         <span style="position:absolute; left:12px; top:10px; color:#64748b;">$</span>
-                                        <input type="number" step="0.01" name="price" class="input-std" style="padding-left:25px;" placeholder="0.00" required>
+                                        <input type="number" step="0.01" name="price" class="input-std"
+                                            style="padding-left:25px;" placeholder="0.00" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Description</label>
-                                <textarea name="description" class="input-std" placeholder="Describe the product details, material, and fit..."></textarea>
+                                <textarea name="description" class="input-std"
+                                    placeholder="Describe the product details, material, and fit..."></textarea>
                             </div>
 
                             <div class="form-section-title">Category</div>
@@ -1073,28 +1489,34 @@ ob_end_flush();
                                 <div class="pill-container">
                                     <?php foreach ($categories as $cat): ?>
                                         <label>
-                                            <input type="radio" name="category_id" value="<?= $cat['category_id'] ?>" class="pill-radio" onclick="clearNewCat()">
+                                            <input type="radio" name="category_id" value="<?= $cat['category_id'] ?>"
+                                                class="pill-radio" onclick="clearNewCat()">
                                             <span class="pill-label"><?= htmlspecialchars($cat['category_name']) ?></span>
                                         </label>
                                     <?php endforeach; ?>
                                     <label id="tempNewCatPill" style="display:none;">
                                         <input type="radio" checked class="pill-radio">
-                                        <span class="pill-label" style="background:#0f172a; color:white; border-color:#0f172a;">
+                                        <span class="pill-label"
+                                            style="background:#0f172a; color:white; border-color:#0f172a;">
                                             <span id="tempNewCatText"></span>
-                                            <span onclick="removeNewCat()" style="margin-left:8px; cursor:pointer; opacity:0.7;">&times;</span>
+                                            <span onclick="removeNewCat()"
+                                                style="margin-left:8px; cursor:pointer; opacity:0.7;">&times;</span>
                                         </span>
                                     </label>
-                                    <div class="pill-add-btn" onclick="toggleCatInput()" title="Add New Category">+</div>
+                                    <div class="pill-add-btn" onclick="toggleCatInput()" title="Add New Category">+
+                                    </div>
                                 </div>
                                 <div class="new-cat-box" id="newCatInputBox">
-                                    <input type="text" id="inputNewCatName" class="input-std" style="width:200px;" placeholder="New Category Name">
-                                    <button type="button" class="btn-secondary" style="padding:10px 15px;" onclick="stageNewCategory()">Add</button>
+                                    <input type="text" id="inputNewCatName" class="input-std" style="width:200px;"
+                                        placeholder="New Category Name">
+                                    <button type="button" class="btn-secondary" style="padding:10px 15px;"
+                                        onclick="stageNewCategory()">Add</button>
                                 </div>
                             </div>
 
                             <div class="form-section-title">Variants & Stock</div>
                             <div class="variant-creator-card">
-                                <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end;">
+                                <div class="var-input-row">
                                     <div style="flex:2; min-width:200px;">
                                         <label class="form-label">Size</label>
                                         <div class="size-chips">
@@ -1102,16 +1524,20 @@ ob_end_flush();
                                             <div class="size-chip" onclick="selectSize(this, 'M')">M</div>
                                             <div class="size-chip" onclick="selectSize(this, 'L')">L</div>
                                             <div class="size-chip" onclick="selectSize(this, 'XL')">XL</div>
-                                            <input type="text" id="stageSize" class="input-std" style="width:80px; padding:0 10px; height:40px;" placeholder="Custom">
+                                            <input type="text" id="stageSize" class="input-std"
+                                                style="width:80px; padding:0 10px; height:40px;" placeholder="Custom">
                                         </div>
                                     </div>
                                     <div style="flex:1; min-width:120px;">
                                         <label class="form-label">Color</label>
                                         <div class="color-wrapper">
-                                            <input type="color" id="stageColor" value="#000000" class="color-input-hidden" onchange="updateColorDisplay(this)">
+                                            <input type="color" id="stageColor" value="#000000"
+                                                class="color-input-hidden" onchange="updateColorDisplay(this)">
                                             <div class="color-display">
-                                                <div id="colorCircle" class="color-circle" style="background:#000;"></div>
-                                                <span id="colorHexText" style="font-size:0.85rem; color:#64748b;">#000000</span>
+                                                <div id="colorCircle" class="color-circle" style="background:#000;">
+                                                </div>
+                                                <span id="colorHexText"
+                                                    style="font-size:0.85rem; color:#64748b;">#000000</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1123,12 +1549,14 @@ ob_end_flush();
                                             <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
                                         </div>
                                     </div>
-                                    <button type="button" class="btn-add-var" onclick="addVariantToQueue()">+ Add</button>
+                                    <button type="button" class="btn-add-var" onclick="addVariantToQueue()">+
+                                        Add</button>
                                 </div>
 
                                 <div id="variantPreviewBody" class="added-variants-grid">
                                 </div>
-                                <div id="noVariantsMsg" style="text-align:center; color:#94a3b8; font-size:0.9rem; margin-top:10px;">
+                                <div id="noVariantsMsg"
+                                    style="text-align:center; color:#94a3b8; font-size:0.9rem; margin-top:10px;">
                                     No variants added. Default "One Size" will be created.
                                 </div>
                             </div>
@@ -1150,7 +1578,8 @@ ob_end_flush();
                 </div>
 
                 <div class="modal-content-area">
-                    <form method="POST" id="editForm" onsubmit="return submitEditForm()" style="display:flex; flex-direction:column; height:100%;">
+                    <form method="POST" id="editForm" onsubmit="return submitEditForm()"
+                        style="display:flex; flex-direction:column; height:100%;">
                         <input type="hidden" name="action" value="update_existing">
                         <input type="hidden" name="product_id" id="varModalId">
                         <input type="hidden" name="new_variants_json" id="editNewVariantsJson">
@@ -1161,7 +1590,8 @@ ob_end_flush();
                             <div>
                                 <h2 id="varModalTitle" class="modal-title">Product Name</h2>
                                 <div style="display:flex; align-items:center; margin-top:5px;">
-                                    <span class="status-label" id="statusLabelText" style="margin-right:10px; font-weight:600; color:#22c55e;">Available</span>
+                                    <span class="status-label" id="statusLabelText"
+                                        style="margin-right:10px; font-weight:600; color:#22c55e;">Available</span>
                                     <label class="switch">
                                         <input type="checkbox" id="statusToggle" onchange="toggleStatus(this)">
                                         <span class="slider round"></span>
@@ -1169,10 +1599,15 @@ ob_end_flush();
                                 </div>
                             </div>
                             <div style="text-align:right;">
-                                <label style="font-size:0.75rem; color:#64748b; font-weight:600; display:block; margin-bottom:2px;">BASE PRICE</label>
+                                <label
+                                    style="font-size:0.75rem; color:#64748b; font-weight:600; display:block; margin-bottom:2px;">BASE
+                                    PRICE</label>
                                 <div style="position:relative; display:inline-block;">
-                                    <span style="position:absolute; left:0; top:5px; font-weight:bold; color:#64748b;">$</span>
-                                    <input type="number" step="0.01" name="product_price" id="varModalPrice" class="input-std" style="width:100px; padding: 5px 5px 5px 15px; border:none; border-bottom:2px solid #e2e8f0; border-radius:0; font-weight:700; font-size:1.2rem; text-align:right;">
+                                    <span
+                                        style="position:absolute; left:0; top:5px; font-weight:bold; color:#64748b;">$</span>
+                                    <input type="number" step="0.01" name="product_price" id="varModalPrice"
+                                        class="input-std"
+                                        style="width:100px; padding: 5px 5px 5px 15px; border:none; border-bottom:2px solid #e2e8f0; border-radius:0; font-weight:700; font-size:1.2rem; text-align:right;">
                                 </div>
                             </div>
                         </div>
@@ -1197,15 +1632,18 @@ ob_end_flush();
 
                             <div class="form-section-title">Add New Variant</div>
                             <div class="variant-input-group" style="background:#fff; border:1px dashed #cbd5e1;">
-                                <input type="color" id="editNewColor" value="#000000" style="width:35px; height:35px; border:none; cursor:pointer; background:none;">
+                                <input type="color" id="editNewColor" value="#000000"
+                                    style="width:35px; height:35px; border:none; cursor:pointer; background:none;">
                                 <input type="text" id="editNewSize" placeholder="New Size" class="input-std">
                                 <input type="number" id="editNewQty" placeholder="Qty" class="input-std">
-                                <button type="button" class="btn-secondary" onclick="stageNewVariantOnEdit()">+ Add</button>
+                                <button type="button" class="btn-secondary" onclick="stageNewVariantOnEdit()">+
+                                    Add</button>
                             </div>
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn-secondary" onclick="closeModal('variantModal')">Cancel</button>
+                            <button type="button" class="btn-secondary"
+                                onclick="closeModal('variantModal')">Cancel</button>
                             <button type="submit" class="btn-create">Save Changes</button>
                         </div>
                     </form>
@@ -1236,7 +1674,7 @@ ob_end_flush();
             setTimeout(() => el.style.display = 'none', 300);
             document.body.style.overflow = '';
         }
-        window.onclick = function(e) {
+        window.onclick = function (e) {
             if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
         }
 
@@ -1245,7 +1683,7 @@ ob_end_flush();
             const file = input.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = document.getElementById('imagePreview');
                     const msg = document.getElementById('uploadPlaceholder');
                     img.src = e.target.result;
@@ -1393,16 +1831,41 @@ ob_end_flush();
             // Populate Existing Variants
             if (p.variants && p.variants.length > 0) {
                 p.variants.forEach(v => {
+                    const isUnavailable = (v.status === 'unavailable');
+
+                    // UI STYLES FOR UNAVAILABLE
+                    const rowBg = isUnavailable ? '#f1f5f9' : 'transparent';
+                    const textColor = isUnavailable ? '#94a3b8' : '#475569';
+                    const opacity = isUnavailable ? '0.6' : '1';
+                    const decoration = isUnavailable ? 'line-through' : 'none';
+
                     const row = document.createElement('tr');
                     row.id = 'var-row-' + v.variant_id;
+                    row.style.background = rowBg;
+                    row.style.color = textColor;
+                    // Note: We don't set display:none, we show them!
+
                     row.innerHTML = `
-                        <td><div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:18px;height:18px;background:${v.color};border-radius:50%;border:1px solid #ddd;"></span> ${v.color}</div></td>
-                        <td style="color:#475569; font-weight:500;">${v.size}</td>
-                        <td><input type="number" name="stock[${v.variant_id}]" value="${v.quantity}" class="qty-box" min="0"></td>
-                        <td>
-                            <button type="button" class="btn-icon-danger" onclick="markVariantForDeletion(${v.variant_id})" title="Delete Variant">🗑️</button>
-                        </td>
-                    `;
+                <td style="opacity:${opacity}">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="display:inline-block;width:18px;height:18px;background:${v.color};border-radius:50%;border:1px solid #ddd;"></span> 
+                        ${v.color}
+                        ${isUnavailable ? '<span style="font-size:0.7rem; border:1px solid #cbd5e1; padding:0 4px; border-radius:4px;">Inactive</span>' : ''}
+                    </div>
+                </td>
+                <td style="font-weight:500; text-decoration:${decoration}; opacity:${opacity}">
+                    ${v.size}
+                </td>
+                <td style="opacity:${opacity}">
+                    <input type="number" name="stock[${v.variant_id}]" value="${v.quantity}" class="qty-box" min="0" ${isUnavailable ? 'disabled' : ''}>
+                </td>
+                <td>
+                    ${isUnavailable
+                            ? `<button type="button" class="btn-icon-danger" style="filter:grayscale(1); opacity:0.5; cursor:not-allowed;" disabled>🚫</button>`
+                            : `<button type="button" class="btn-icon-danger" onclick="markVariantForDeletion(${v.variant_id})" title="Mark Unavailable">🗑️</button>`
+                        }
+                </td>
+            `;
                     tbody.appendChild(row);
                 });
             } else {
@@ -1431,14 +1894,39 @@ ob_end_flush();
         }
 
         function markVariantForDeletion(variantId) {
-            if (!confirm("Are you sure you want to remove this variant? It will be deleted when you click Save.")) return;
+            if (!confirm("Are you sure? This will mark the variant as unavailable upon saving.")) return;
 
-            // Add to delete queue
+            // Add to delete queue (The PHP will treat these IDs as "set to unavailable")
             deletedVariantsIds.push(variantId);
 
-            // Visually hide the row
+            // Visually transform the row to look "Greyed Out" immediately
             const row = document.getElementById('var-row-' + variantId);
-            if (row) row.style.display = 'none';
+            if (row) {
+                // Apply the "Unavailable" look
+                row.style.background = '#f1f5f9';
+                row.style.color = '#94a3b8';
+                row.style.transition = 'all 0.3s ease';
+
+                // Disable inputs
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => input.disabled = true);
+
+                // Strikethrough text
+                const textCells = row.querySelectorAll('td');
+                textCells.forEach(td => td.style.opacity = '0.6');
+                if (row.cells[1]) row.cells[1].style.textDecoration = 'line-through';
+
+                // Disable the delete button
+                const btn = row.querySelector('.btn-icon-danger');
+                if (btn) {
+                    btn.innerHTML = '🚫';
+                    btn.disabled = true;
+                    btn.style.filter = 'grayscale(1)';
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.title = "Marked for unavailability";
+                }
+            }
         }
 
         function stageNewVariantOnEdit() {

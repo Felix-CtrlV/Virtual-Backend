@@ -13,9 +13,6 @@
         rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -31,10 +28,8 @@
             --cyan-glow: #00f3ff;
             --danger-red: #ff0055;
             --glass: rgba(255, 255, 255, 0.03);
-
             --font-display: 'Syncopate', sans-serif;
             --font-body: 'Space Grotesk', sans-serif;
-
             --ease-lux: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -78,7 +73,7 @@
             opacity: 0.4;
         }
 
-        /* --- 2.0 SCI-FI HUD SCROLLBAR --- */
+        /* --- HUD SCROLLBAR --- */
         .hud-container {
             position: fixed;
             top: 0;
@@ -91,9 +86,9 @@
             justify-content: center;
             pointer-events: none;
             mix-blend-mode: exclusion;
+            transition: opacity 0.5s;
         }
 
-        /* The Ticks (Ruler) */
         .hud-ruler {
             position: absolute;
             right: 0;
@@ -103,20 +98,16 @@
             border-right: 1px solid rgba(255, 255, 255, 0.2);
             background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
             background-size: 100% 2vh;
-            /* Distance between ticks */
             opacity: 0.3;
         }
 
-        /* The Moving Indicator */
         .hud-thumb-wrap {
             position: absolute;
             top: 10vh;
             right: 5px;
             width: 30px;
             height: 0px;
-            /* Helper to position toggle */
             transform: translateY(0px);
-            /* JS Updates this */
         }
 
         .hud-reticle {
@@ -147,7 +138,6 @@
             transition: background 0.2s, box-shadow 0.2s;
         }
 
-        /* High Velocity State */
         .hud-marker.warp-speed {
             background: var(--danger-red);
             border-color: var(--danger-red);
@@ -162,7 +152,7 @@
             width: 100%;
             height: 100vh;
             z-index: -1;
-            opacity: 0.6;
+            /* opacity: 0.8; */
             pointer-events: none;
         }
 
@@ -189,7 +179,6 @@
             .cursor {
                 display: flex;
             }
-
             * {
                 cursor: none;
             }
@@ -252,6 +241,72 @@
             }
         }
 
+        /* --- THE HYPER-PORTAL (VISIBLE) --- */
+        #warp-portal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            /* The "Singularity" starts small */
+            border-radius: 50%;
+            
+            /* High contrast white center, like a collapsing star or exit gate */
+            background: #ffffff;
+            
+            /* Powerful glow */
+            box-shadow: 
+                0 0 20px #ffffff,
+                0 0 40px var(--cyan-glow),
+                0 0 80px var(--nebula-purple);
+            
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 20000;
+            pointer-events: none;
+            
+            /* Blend mode helps it cut through the dark scene */
+            mix-blend-mode: normal;
+        }
+
+        /* The shockwave ring */
+        #warp-portal::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            border-radius: 50%;
+            border: 2px solid white;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .portal-active {
+            animation: pulsePortal 0.2s infinite alternate;
+        }
+
+        @keyframes pulsePortal {
+            from { box-shadow: 0 0 20px #fff, 0 0 40px var(--cyan-glow); }
+            to { box-shadow: 0 0 50px #fff, 0 0 100px var(--cyan-glow); }
+        }
+
+        /* Loading text that appears INSIDE the white void */
+        .portal-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20001;
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: 5px;
+            font-size: 2rem;
+            color: black; /* Contrast against white portal */
+            opacity: 0;
+            pointer-events: none;
+        }
+
         /* --- NAV --- */
         nav {
             position: fixed;
@@ -263,6 +318,7 @@
             align-items: center;
             z-index: 1000;
             mix-blend-mode: exclusion;
+            transition: opacity 0.5s;
         }
 
         .brand {
@@ -423,6 +479,8 @@
             justify-content: center;
             position: relative;
             padding: 0 20px;
+            perspective: 1000px; /* Essential for 3D fly-through */
+            transform-style: preserve-3d;
         }
 
         .hero-title {
@@ -435,25 +493,21 @@
             letter-spacing: -1px;
             margin-bottom: 40px;
             text-shadow: 0px 0px 20px rgba(112, 0, 255, 0.3);
-            /* Important for text scramble */
             opacity: 1;
+            /* Will be animated in 3D space */
+            transform: translateZ(0); 
         }
 
         .hero-btn-container {
             opacity: 0;
             animation: fadeUp 1s 2.2s var(--ease-lux) forwards;
+            /* Will be animated in 3D space */
+            transform: translateZ(0); 
         }
 
         @keyframes fadeUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* --- TECH STRIP --- */
@@ -464,6 +518,7 @@
             flex-wrap: wrap;
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(5px);
+            transition: opacity 0.5s;
         }
 
         .tech-item {
@@ -474,9 +529,7 @@
             border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .tech-item:last-child {
-            border-right: none;
-        }
+        .tech-item:last-child { border-right: none; }
 
         .tech-val {
             display: block;
@@ -498,6 +551,7 @@
             display: grid;
             grid-template-columns: 40% 60%;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: opacity 0.5s;
         }
 
         .split-sticky {
@@ -568,7 +622,7 @@
             margin-bottom: 60px;
             text-align: center;
         }
-
+        
         .features-header h2 {
             font-family: var(--font-display);
             font-size: clamp(1.5rem, 4vw, 3rem);
@@ -630,7 +684,6 @@
 
         /* --- GALLERY --- */
         .gallery-wrap {
-            /* Default: Desktop Horizontal */
             height: 100vh;
             display: flex;
             align-items: center;
@@ -720,105 +773,30 @@
             padding-left: 5px;
         }
 
-        /* --- 📱 RESPONSIVE ADJUSTMENTS & ANIMATIONS --- */
+        /* --- 📱 RESPONSIVE ADJUSTMENTS --- */
         @media (max-width: 1024px) {
-            nav {
-                padding: 25px 20px;
-            }
-
-            .nav-right {
-                display: none;
-            }
-
-            .mobile-toggle {
-                display: flex;
-            }
-
-            .hud-container {
-                display: none;
-            }
-
-            /* Hide Gauge on Mobile */
-
-            .section-split {
-                display: block;
-            }
-
-            .split-sticky {
-                height: auto;
-                padding: 50px 20px;
-                border-right: none;
-                position: relative;
-                text-align: left;
-            }
-
-            .split-scroll {
-                padding: 0 20px 50px;
-                gap: 40px;
-            }
-
-            .img-card {
-                height: 40vh;
-            }
-
-            .tech-item {
-                flex: 1 1 50%;
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 20px 0;
-            }
-
-            .features-section {
-                padding: 60px 20px;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            /* --- IMPROVED MOBILE GALLERY (CARD STACK) --- */
-            .gallery-wrap {
-                height: auto;
-                display: block;
-                padding: 100px 20px;
-                background: var(--void);
-            }
-
-            .gallery-track {
-                display: block;
-                width: 100%;
-                padding-left: 0;
-            }
-
-            .gallery-item {
-                width: 100%;
-                height: 60vh;
-                margin-bottom: 83vh;
-                /* Spacing for pinning duration */
-                position: relative;
-                /* Shadows for depth */
-                box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.8);
-            }
-
-            /* .gallery-item:last-child {
-                margin-bottom: 0;
-            } */
-
-            footer {
-                grid-template-columns: 1fr;
-                padding: 40px 20px;
-            }
-
-            .footer-links {
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .panel-content {
-                padding: 80px 30px;
-                width: 100%;
-                max-width: 100%;
-            }
+            nav { padding: 25px 20px; }
+            .nav-right { display: none; }
+            .mobile-toggle { display: flex; }
+            .hud-container { display: none; }
+            
+            .section-split { display: block; }
+            .split-sticky { height: auto; padding: 50px 20px; border-right: none; text-align: left; }
+            .split-scroll { padding: 0 20px 50px; gap: 40px; }
+            .img-card { height: 40vh; }
+            
+            .tech-item { flex: 1 1 50%; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 20px 0; }
+            
+            .features-section { padding: 60px 20px; }
+            .features-grid { grid-template-columns: 1fr; }
+            
+            .gallery-wrap { height: auto; display: block; padding: 100px 20px; background: var(--void); }
+            .gallery-track { display: block; width: 100%; padding-left: 0; }
+            .gallery-item { width: 100%; height: 60vh; margin-bottom: 83vh; box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.8); }
+            
+            footer { grid-template-columns: 1fr; padding: 40px 20px; }
+            .footer-links { flex-direction: column; gap: 30px; }
+            .panel-content { padding: 80px 30px; width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -826,6 +804,9 @@
 <body class="loading">
 
     <div class="noise-overlay"></div>
+
+    <div id="warp-portal"></div>
+    <div class="portal-msg">ENTERING ORBIT...</div>
 
     <div class="hud-container">
         <div class="hud-ruler"></div>
@@ -858,7 +839,7 @@
                 Gravity is optional. Style is mandatory.
             </p>
             <div class="magnetic" style="margin-top: 20px;">
-                <a href="customer/index.html" class="btn-main hover-target">Start Shopping</a>
+                <a href="customer/index.html" class="btn-main hover-target warp-trigger">Start Shopping</a>
             </div>
         </div>
     </div>
@@ -878,14 +859,14 @@
         <div class="panel-content" style="justify-content: flex-start; padding-top: 100px;">
             <div class="panel-close hover-target" onclick="togglePanel('mobile-menu-panel')">×</div>
             <nav style="position: relative; display: flex; flex-direction: column; gap: 20px; padding: 0;">
-                <a href="pricing.php" class="panel-title hover-target" style="font-size: 1.5rem;">Vendor Access</a>
+                <a href="supplierLogin.php" class="panel-title hover-target" style="font-size: 1.5rem;">Vendor Access</a>
                 <a href="#" class="panel-title hover-target" style="font-size: 1.5rem;"
                     onclick="togglePanel('mobile-menu-panel'); togglePanel('about-panel');">About</a>
                 <a href="#" class="panel-title hover-target" style="font-size: 1.5rem;"
                     onclick="togglePanel('mobile-menu-panel'); togglePanel('contact-panel');">Contact</a>
             </nav>
             <div style="margin-top: 40px;">
-                <a href="customer/index.html" class="btn-main hover-target" style="width: 100%;">Enter Orbit</a>
+                <a href="customer/index.html" class="btn-main hover-target warp-trigger" style="width: 100%;">Enter Orbit</a>
             </div>
         </div>
     </div>
@@ -899,7 +880,7 @@
                     onclick="togglePanel('about-panel'); return false;">About</a></div>
             <div class="magnetic"><a href="#" class="nav-link hover-target"
                     onclick="togglePanel('contact-panel'); return false;">Contact</a></div>
-            <div class="magnetic"><a href="customer/index.html" class="btn-main hover-target">Enter Orbit</a></div>
+            <div class="magnetic"><a href="customer/index.html" class="btn-main hover-target warp-trigger">Enter Orbit</a></div>
         </div>
         <div class="mobile-toggle hover-target" onclick="togglePanel('mobile-menu-panel')">
             <span></span><span></span><span></span>
@@ -910,7 +891,7 @@
         <section class="hero">
             <h1 class="hero-title decode-text">MALLTIVERSE</h1>
             <div class="hero-btn-container magnetic">
-                <a href="customer/index.html" class="btn-ghost hover-target">Enter Orbit</a>
+                <a href="customer/index.html" class="btn-ghost hover-target warp-trigger">Enter Orbit</a>
             </div>
         </section>
 
@@ -936,15 +917,14 @@
                     Retail is no longer bound by physics. Explore collections that defy standard geometry and time.
                 </p>
                 <div class="magnetic">
-                    <a href="customer/index.html" class="nav-link hover-target"
+                    <a href="customer/index.html" class="nav-link hover-target warp-trigger"
                         style="display: inline-block; width: fit-content; color: var(--nebula-purple); padding-left: 0;">View
                         Collections &rarr;</a>
                 </div>
             </div>
             <div class="split-scroll">
                 <div class="img-card hover-target">
-                    <img src="assets/images/websiteicondark.png" style="height: 100%;" alt="Logo" loading="lazy"
-                        decoding="async">
+                    <img src="assets/images/websiteicondark.png" style="height: 100%;" alt="Logo" loading="lazy" decoding="async">
                 </div>
                 <div class="img-card hover-target">
                     <img src="assets/images/virtual mall image.jpg" alt="Mall" loading="lazy" decoding="async">
@@ -1033,7 +1013,7 @@
             <div class="footer-links">
                 <div class="footer-col">
                     <h4>EXPLORE</h4>
-                    <a href="customer/index.html" class="hover-target">Enter Orbit</a>
+                    <a href="customer/index.html" class="hover-target warp-trigger">Enter Orbit</a>
                     <a href="#" class="hover-target">Collections</a>
                 </div>
                 <div class="footer-col">
@@ -1056,23 +1036,16 @@
                 touchMultiplier: 1.5
             });
 
-            // --- NEW HUD SCROLLBAR LOGIC ---
+            // --- HUD LOGIC ---
             const hudThumb = document.querySelector('.hud-thumb-wrap');
             const hudValue = document.querySelector('.hud-value');
             const hudMarker = document.querySelector('.hud-marker');
-            // Define active scroll height (10vh top to 10vh bottom padding)
-            const hudPad = window.innerHeight * 0.1;
             const hudTrackHeight = window.innerHeight * 0.8;
 
             lenis.on('scroll', ({ progress, velocity }) => {
-                // Position
                 const yPos = progress * hudTrackHeight;
                 hudThumb.style.transform = `translateY(${yPos}px)`;
-
-                // Value Update (000 - 999)
                 hudValue.innerText = Math.floor(progress * 999).toString().padStart(3, '0');
-
-                // Velocity Reaction (Warp Speed Effect)
                 const v = Math.abs(velocity);
                 if (v > 1.5) {
                     hudMarker.classList.add('warp-speed');
@@ -1094,18 +1067,15 @@
 
             // Loader Exit
             const loader = document.querySelector('.loader');
-            // Initial decode effect for hero title immediately after load
             setTimeout(() => {
                 gsap.to(loader, {
                     y: '-100%', duration: 1.2, ease: 'power4.inOut', onComplete: () => {
-                        // Trigger hero text scramble
                         scrambleText(".hero-title");
                     }
                 });
             }, 1000);
 
-            // --- 3. TEXT SCRAMBLE EFFECT ---
-            // Helper function to scramble text
+            // --- 3. TEXT SCRAMBLE ---
             function scrambleText(selector) {
                 document.querySelectorAll(selector).forEach(el => {
                     let originalText = el.innerText;
@@ -1121,7 +1091,6 @@
                             trigger: el,
                             start: "top 80%",
                             onEnter: () => {
-                                // Reset text to random chars then resolve
                                 el.innerText = "░▒▓█▀▄▌▐";
                                 gsap.fromTo(el,
                                     { text: "X010101" },
@@ -1132,12 +1101,9 @@
                     });
                 });
             }
-            // Initialize other decode texts
             scrambleText(".decode-text:not(.hero-title)");
 
-            // --- 4. ANIMATIONS ---
-
-            // Tech Strip Counter
+            // --- 4. GENERAL ANIMATIONS ---
             document.querySelectorAll('.counter').forEach(counter => {
                 gsap.to(counter, {
                     innerText: +counter.getAttribute('data-target'),
@@ -1147,16 +1113,12 @@
                 });
             });
 
-            // Features Grid
             ScrollTrigger.batch(".feature-card", {
                 onEnter: batch => gsap.to(batch, { autoAlpha: 1, y: 0, stagger: 0.1, overwrite: true }),
                 start: "top 90%"
             });
 
-            // --- 5. RESPONSIVE ANIMATION LOGIC ---
             ScrollTrigger.matchMedia({
-
-                // DESKTOP: Horizontal Scroll
                 "(min-width: 1025px)": function () {
                     let sections = gsap.utils.toArray(".gallery-item");
                     gsap.to(sections, {
@@ -1170,11 +1132,8 @@
                         }
                     });
                 },
-
-                // MOBILE: Stacking Cards Effect
                 "(max-width: 1024px)": function () {
                     const cards = gsap.utils.toArray(".mobile-card");
-
                     cards.forEach((card, i) => {
                         ScrollTrigger.create({
                             trigger: card,
@@ -1183,13 +1142,12 @@
                             pin: true,
                             pinSpacing: false,
                             scrub: true,
-                            // As you scroll past, scale it down and fade it out to create depth
                             onUpdate: (self) => {
                                 const prog = self.progress;
                                 gsap.to(card, {
-                                    scale: 1 - (prog * 0.1), // shrink slightly
-                                    opacity: 1 - (prog * 0.5), // fade slightly
-                                    filter: `blur(${prog * 5}px)`, // blur as it goes back
+                                    scale: 1 - (prog * 0.1),
+                                    opacity: 1 - (prog * 0.5),
+                                    filter: `blur(${prog * 5}px)`,
                                     overwrite: 'auto'
                                 });
                             }
@@ -1198,32 +1156,25 @@
                 }
             });
 
-            // --- 6. INTERACTION & CURSOR ---
+            // --- 5. INTERACTION ---
             window.togglePanel = function (id) {
-    const panel = document.getElementById(id);
-    const content = panel.querySelector('.panel-content');
-
-    if (!panel.classList.contains('active')) {
-        panel.classList.add('active');
-        gsap.to(panel, { xPercent: -100, duration: 0.6, ease: "power4.inOut" });
-        gsap.fromTo(
-            content,
-            { x: 30, opacity: 0 },
-            { x: 0, opacity: 1, delay: 0.2, duration: 0.4 }
-        );
-    } else {
-        gsap.to(panel, {
-            xPercent: 0,
-            duration: 0.6,
-            ease: "power4.inOut",
-            onComplete: () => panel.classList.remove('active')
-        });
-    }
-};
-
+                const panel = document.getElementById(id);
+                const content = panel.querySelector('.panel-content');
+                if (!panel.classList.contains('active')) {
+                    panel.classList.add('active');
+                    gsap.to(panel, { xPercent: -100, duration: 0.6, ease: "power4.inOut" });
+                    gsap.fromTo(content, { x: 30, opacity: 0 }, { x: 0, opacity: 1, delay: 0.2, duration: 0.4 });
+                } else {
+                    gsap.to(panel, {
+                        xPercent: 0,
+                        duration: 0.6,
+                        ease: "power4.inOut",
+                        onComplete: () => panel.classList.remove('active')
+                    });
+                }
+            };
 
             if (window.matchMedia("(pointer: fine)").matches) {
-                // Magnetic Effect
                 document.querySelectorAll('.magnetic').forEach(mag => {
                     mag.addEventListener('mousemove', (e) => {
                         const rect = mag.getBoundingClientRect();
@@ -1238,7 +1189,6 @@
                     });
                 });
 
-                // Cursor Logic
                 const cursor = document.querySelector('.cursor');
                 document.addEventListener('mousemove', e => {
                     cursor.style.left = e.clientX + 'px';
@@ -1250,58 +1200,121 @@
                 });
             }
 
-            // --- 7. THREE.JS STARFIELD (ENHANCED WARP) ---
+            // --- 6. ADVANCED THREE.JS STARFIELD ---
             const canvas = document.querySelector('#webgl-canvas');
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            // Fog to fade stars in distance
+            scene.fog = new THREE.FogExp2(0x000000, 0.0005); 
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
             camera.position.z = 1000;
             const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
 
-            const starCount = window.innerWidth < 768 ? 1000 : 5000;
+            // A. Helper to create a circular soft particle texture
+            function createStarTexture() {
+                const size = 64;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+                gradient.addColorStop(0, 'rgba(255,255,255,1)');
+                gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+                gradient.addColorStop(0.5, 'rgba(255,255,255,0.2)');
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, size, size);
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+
+            // B. Create Regular Stars
+            const starCount = 3000;
             const starGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(starCount * 3);
-
-            // Initial random spread
-            for (let i = 0; i < starCount * 3; i++) {
-                positions[i] = (Math.random() - 0.5) * 2000;
+            const sizes = new Float32Array(starCount);
+            
+            for (let i = 0; i < starCount; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 2000; // x
+                positions[i*3+1] = (Math.random() - 0.5) * 2000; // y
+                positions[i*3+2] = (Math.random() - 0.5) * 2000; // z
+                sizes[i] = Math.random() * 2; // varied sizes
             }
 
             starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
             const starMat = new THREE.PointsMaterial({
                 color: 0xffffff,
-                size: 1.2,
+                map: createStarTexture(), // Use created texture
+                size: 2, // Base size
+                sizeAttenuation: true, // Stars get smaller further away
                 transparent: true,
-                opacity: 0.8
+                opacity: 0.9,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
             });
             const stars = new THREE.Points(starGeo, starMat);
             scene.add(stars);
 
+            // C. Create Warp Lines (Hidden initially, visible on warp)
+            // These simulate the streak effect
+            const lineCount = 500;
+            const lineGeo = new THREE.BufferGeometry();
+            const linePos = [];
+            for(let i=0; i<lineCount; i++) {
+                let x = (Math.random() - 0.5) * 1000;
+                let y = (Math.random() - 0.5) * 1000;
+                let z = (Math.random() - 0.5) * 1000;
+                // Line start
+                linePos.push(x,y,z);
+                // Line end (stretched in Z)
+                linePos.push(x,y,z - 200); 
+            }
+            lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+            const lineMat = new THREE.LineBasicMaterial({
+                color: 0x00f3ff, // Cyan tint for warp
+                transparent: true,
+                opacity: 0
+            });
+            const warpLines = new THREE.LineSegments(lineGeo, lineMat);
+            scene.add(warpLines);
+
+            // State
+            const warpState = { speed: 0, fov: 75 };
+
             function animate() {
-                // Velocity from Lenis (Smooth Scroll)
-                const vel = Math.abs(lenis.velocity || 0);
-
-                // Warp Effect: Stretch stars based on speed
-                // If scrolling fast, stretch z-axis or size
-                if (vel > 5) {
-                    stars.rotation.z += 0.02; // Spin faster
-                    starMat.size = 2; // Stretch size illusion
-                } else {
-                    stars.rotation.z += 0.0005; // Base idle spin
-                    starMat.size = 1.2;
-                }
-
+                const scrollVel = Math.abs(lenis.velocity || 0);
+                const totalVel = scrollVel + warpState.speed;
+                
+                // 1. Move Stars
                 const pos = stars.geometry.attributes.position.array;
                 for (let i = 2; i < starCount * 3; i += 3) {
-                    // Move stars towards camera based on scroll speed
-                    // Base speed 2, plus multiplier of scroll velocity
-                    pos[i] += 2 + (vel * 3);
-
-                    if (pos[i] > 1000) {
-                        pos[i] = -1000; // Reset to back
-                    }
+                    pos[i] += 1 + (scrollVel * 2) + (warpState.speed * 20); // Z movement
+                    if (pos[i] > 1000) pos[i] = -1000;
                 }
                 stars.geometry.attributes.position.needsUpdate = true;
+                
+                // 2. Warp Effect Logic
+                if(warpState.speed > 0.1) {
+                    // Make streaks visible
+                    lineMat.opacity = Math.min(warpState.speed * 0.05, 0.8);
+                    
+                    // Move streaks
+                    const lPos = warpLines.geometry.attributes.position.array;
+                    for(let i=2; i<lPos.length; i+=3) {
+                        lPos[i] += warpState.speed * 40;
+                        if(lPos[i] > 1000) lPos[i] = -1000;
+                    }
+                    warpLines.geometry.attributes.position.needsUpdate = true;
+
+                    // Camera Shake / FOV distortion
+                    camera.fov = warpState.fov + (Math.random() * warpState.speed * 0.1);
+                    camera.updateProjectionMatrix();
+                }
+
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
             }
@@ -1314,7 +1327,72 @@
                 ScrollTrigger.refresh();
             });
 
-            window.addEventListener('load', () => ScrollTrigger.refresh());
+
+            // --- 7. THE "UNSEEN STUDIO" STYLE PORTAL TRANSITION ---
+            const warpLinks = document.querySelectorAll('.warp-trigger');
+            
+            warpLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetUrl = link.getAttribute('href');
+
+                    // 1. Lock scrolling
+                    lenis.stop();
+
+                    const tl = gsap.timeline({
+                        onComplete: () => { window.location.href = targetUrl; }
+                    });
+
+                    // STEP A: POV Fly-Through (Split Title)
+                    // Move Title UP and scale aggressively to simulate flying under it
+                    tl.to('.hero-title', {
+                        y: -window.innerHeight,
+                        scale: 10,
+                        opacity: 0,
+                        duration: 1.5,
+                        ease: "power3.in"
+                    }, 0);
+
+                    // Move Button DOWN
+                    tl.to('.hero-btn-container', {
+                        y: window.innerHeight,
+                        scale: 10,
+                        opacity: 0,
+                        duration: 1.5,
+                        ease: "power3.in"
+                    }, 0);
+
+                    // Fade out UI
+                    tl.to(['nav', '.hud-container', '.tech-strip', '.section-split'], { opacity: 0, duration: 0.5 }, 0);
+
+                    // STEP B: Warp Speed & FOV Pull
+                    // We animate the 'warpState' object
+                    tl.to(warpState, {
+                        speed: 50, // Massive speed
+                        fov: 120, // Dolly zoom out effect
+                        duration: 2,
+                        ease: "expo.in"
+                    }, 0);
+
+                    // STEP C: The Visible "White Hole" Portal
+                    // 1. Appear
+                    const portal = document.getElementById('warp-portal');
+                    portal.classList.add('portal-active');
+                    
+                    // 2. Scale Up "Unseen Studio" style - A massive expanding circle
+                    tl.to(portal, {
+                        scale: 300, // Enough to cover any screen
+                        duration: 1.5,
+                        ease: "power4.in", // Slow start, extremely fast finish
+                    }, 0.5);
+
+                    // 3. Show loading text INSIDE the white void (contrast text)
+                    tl.to('.portal-msg', { opacity: 1, duration: 0.3 }, 1.5);
+
+                    // 4. Hold briefly so user registers the whiteout
+                    tl.to({}, { duration: 0.5 });
+                });
+            });
         });
     </script>
 </body>

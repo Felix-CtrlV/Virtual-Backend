@@ -48,7 +48,8 @@ include("partials/nav.php");
                                     <div
                                         style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                         <h5 style="margin: 0; font-size: 0.9rem;">
-                                            <?= htmlspecialchars($review['customer_name']) ?></h5>
+                                            <?= htmlspecialchars($review['customer_name']) ?>
+                                        </h5>
                                         <div class="stars" style="font-size: 0.8rem;">
                                             <?php for ($i = 1; $i <= 5; $i++)
                                                 echo ($i <= $review['rating']) ? '<span class="star-gold">★</span>' : '<span style="color:#ddd">★</span>'; ?>
@@ -255,53 +256,53 @@ include("partials/nav.php");
 
     // 3. REVIEW MODAL LOGIC (FIXED)
     // 3. REVIEW MODAL LOGIC
-const modal = document.getElementById('reviewModal');
+    const modal = document.getElementById('reviewModal');
 
-// Note: Added 'event' as the first parameter
-function openReviewModal(event, review) {
-    // PREVENT IMMEDIATE CLOSING:
-    event.stopPropagation(); // Stops the click from reaching window.onclick
-    event.preventDefault();  // Prevents page reload if inside a link/form
+    // Note: Added 'event' as the first parameter
+    function openReviewModal(event, review) {
+        // PREVENT IMMEDIATE CLOSING:
+        event.stopPropagation(); // Stops the click from reaching window.onclick
+        event.preventDefault();  // Prevents page reload if inside a link/form
 
-    // Data Mapping
-    document.getElementById('modalName').textContent = review.customer_name;
-    document.getElementById('modalProduct').textContent = review.product_name ? 'Purchased: ' + review.product_name : 'Verified Purchase';
-    document.getElementById('modalComment').textContent = review.review; 
-    document.getElementById('modalDate').textContent = review.created_at;
-    
-    // Image handling
-    const img = document.getElementById('modalImg');
-    const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(review.customer_name) + '&background=random';
-    
-    if (review.image) {
-        img.src = '../assets/customer_profiles/' + review.image;
-    } else {
-        img.src = defaultImg;
+        // Data Mapping
+        document.getElementById('modalName').textContent = review.customer_name;
+        document.getElementById('modalProduct').textContent = review.product_name ? 'Purchased: ' + review.product_name : 'Verified Purchase';
+        document.getElementById('modalComment').textContent = review.review;
+        document.getElementById('modalDate').textContent = review.created_at;
+
+        // Image handling
+        const img = document.getElementById('modalImg');
+        const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(review.customer_name) + '&background=random';
+
+        if (review.image) {
+            img.src = '../assets/customer_profiles/' + review.image;
+        } else {
+            img.src = defaultImg;
+        }
+
+        img.onerror = function () { this.src = defaultImg; };
+
+        // Star generation
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            starsHtml += (i <= review.rating) ? '<span class="star-gold">★</span>' : '<span style="color:#ddd">★</span>';
+        }
+        document.getElementById('modalStars').innerHTML = starsHtml;
+
+        // Show Modal
+        modal.style.display = 'flex';
     }
-    
-    img.onerror = function() { this.src = defaultImg; };
 
-    // Star generation
-    let starsHtml = '';
-    for(let i=1; i<=5; i++) {
-        starsHtml += (i <= review.rating) ? '<span class="star-gold">★</span>' : '<span style="color:#ddd">★</span>';
+    function closeReviewModal() {
+        modal.style.display = 'none';
     }
-    document.getElementById('modalStars').innerHTML = starsHtml;
 
-    // Show Modal
-    modal.style.display = 'flex';
-}
-
-function closeReviewModal() {
-    modal.style.display = 'none';
-}
-
-// Close on outside click
-window.onclick = function(event) {
-    if (event.target == modal) {
-        closeReviewModal();
+    // Close on outside click
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            closeReviewModal();
+        }
     }
-}
 </script>
 
 </body>
