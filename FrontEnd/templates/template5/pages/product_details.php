@@ -351,38 +351,28 @@ function displayStock() {
         });
     });
 
-   function refreshBag() {
-    const supplierId = document.getElementById('supplier_id').value;
-    
-    // Debug လုပ်ရန် Console တွင်ထုတ်ကြည့်မည်
-    console.log("Fetching cart for supplier:", supplierId);
-
+ function refreshBag() {
+    const supplierId = "<?= $supplier_id ?>";
     fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
     .then(res => res.json())
     .then(data => {
-        console.log("Cart Data Received:", data); // Console မှာ data ဝင်မဝင် စစ်ပါ
-
-        const count = parseInt(data.total_count) || 0;
-
-        // နည်းလမ်း (၁) - ID ဖြင့်ရှာခြင်း
-        const badgeById = document.getElementById('cart-badge-count');
-        if (badgeById) {
-            badgeById.innerText = count;
-            badgeById.style.display = count > 0 ? 'inline-block' : 'none';
+        // data.total_count ရှိမရှိ အရင်စစ်ပါ
+        if (data.total_count !== undefined) {
+            const count = parseInt(data.total_count) || 0;
+            
+            document.querySelectorAll('.cart-badge-count').forEach(el => {
+                el.innerText = count;
+                if (count > 0) {
+                    el.style.setProperty('display', 'flex', 'important');
+                } else {
+                    el.style.setProperty('display', 'none', 'important');
+                }
+            });
         }
-
-        // နည်းလမ်း (၂) - Class ဖြင့်ရှာခြင်း (ပိုသေချာသည်)
-        // User ရဲ့ Header မှာ class="cart-badge-count" လို့ ပေးထားရင် ဒါက အလုပ်လုပ်ပါမယ်
-        const badgesByClass = document.querySelectorAll('.cart-badge-count');
-        badgesByClass.forEach(el => {
-            el.innerText = count;
-            // style.display = 'flex' သို့မဟုတ် 'inline-block' ကို CSS ပေါ်မူတည်ပြီး ချိန်ပါ
-            el.style.setProperty('display', count > 0 ? 'flex' : 'none', 'important');
-        });
-        
     })
     .catch(err => console.error("Error refreshing bag:", err));
 }
+
 </script>
 
 <style>

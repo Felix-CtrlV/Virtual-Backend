@@ -969,7 +969,6 @@ div.swal2-container.swal2-top {
     </div>
     
     <?php 
-    // Cart ထဲမှာ ဘာမှမရှိရင် 0 ပဲပြအောင် သေချာအောင်လုပ်ခြင်း
     $display_subtotal = ($cart_count > 0) ? $total_price : 0;
     $display_shipping = ($cart_count > 0) ? $shipping : 0;
     $display_total = ($cart_count > 0) ? $grand_total : 0;
@@ -1176,54 +1175,36 @@ function initiateRemove(cartId) {
     const itemElement = document.querySelector(`#qty-${cartId}`)?.closest('.modern-item');
     if (!itemElement) return;
 
-    // UI Animation
+   
     itemElement.style.transition = 'all 0.4s ease';
     itemElement.style.transform = 'translateX(100px)';
     itemElement.style.opacity = '0';
 
     setTimeout(() => {
-        if (itemElement.style.opacity === '0') {
-            itemElement.style.display = 'none';
-            recalculateCart();
-        }
+        itemElement.remove(); 
+        recalculateCart(); 
     }, 400);
 
-    localStorage.setItem('pending_delete_' + cartId, 'true');
-
-   
-    deleteTimeouts[cartId] = setTimeout(() => {
-        finalizeDelete(cartId);
-    }, 5000);
-
-   
-    const UndoToast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: true,
-        confirmButtonText: 'UNDO',
-        confirmButtonColor: '#6366f1',
-        timer: 3000,
-        timerProgressBar: true
-    });
-
-    UndoToast.fire({ icon: 'info', title: 'Item removed' }).then((result) => {
-        if (result.isConfirmed) {
+    
+    const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
+    fetch(rootPath, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ 'cart_id': cartId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            modernToast.fire({ icon: 'success', title: 'Item removed successfully' });
             
-            clearTimeout(deleteTimeouts[cartId]);
-            delete deleteTimeouts[cartId];
-            localStorage.removeItem('pending_delete_' + cartId);
-
-            itemElement.style.display = 'grid'; 
-            setTimeout(() => {
-                itemElement.style.transform = 'translateX(0)';
-                itemElement.style.opacity = '1';
-                recalculateCart();
-            }, 10);
-            modernToast.fire({ icon: 'success', title: 'Item restored' });
+            // Cart ထဲမှာ ပစ္စည်း လုံးဝမရှိတော့ရင် Page ကို Reload လုပ်ပြီး "Cart is Empty" ပြပေးမယ်
+            const remainingItems = document.querySelectorAll('.modern-item').length;
+            if (remainingItems === 0) {
+                setTimeout(() => location.reload(), 1000);
+            }
         }
     });
 }
-
 
 function finalizeDelete(cartId) {
     const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
@@ -1348,6 +1329,7 @@ function showEmptyCartAlert() {
         confirmButtonColor: '#6366f1',
     });
 }</script>
+
 <style>
 .disabled-btn {
     background: #cccccc !important;
