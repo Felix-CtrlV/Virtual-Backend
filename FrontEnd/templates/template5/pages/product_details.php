@@ -356,7 +356,7 @@ function displayStock() {
     fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
     .then(res => res.json())
     .then(data => {
-        // data.total_count ရှိမရှိ အရင်စစ်ပါ
+      
         if (data.total_count !== undefined) {
             const count = parseInt(data.total_count) || 0;
             
@@ -469,23 +469,75 @@ function displayStock() {
     justify-content: center !important;
     padding: 10px !important; 
 }
-
 .premium-swal {
-    margin: auto !important;
-    left: 0 !important;
-    right: 0 !important;
-    position: relative !important;
-    width: 90% !important; 
-    max-width: 400px !important; 
     border-radius: 20px !important;
-}
-.premium-swal {
+    padding: 2rem !important;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    
+    
     margin: auto !important;
-    max-width: 320px !important;
-    max-height: 90vh !important; 
-    overflow-y: auto !important; 
+    width: 90% !important;
+    max-width: 320px !important; 
+    max-height: 90vh !important;
+    overflow-y: auto !important;
 }
+
+
+@media screen and (min-width: 768px) {
+    .premium-swal {
+        max-width: 700px !important; 
+        width: auto !important;
+        padding: 3rem !important; 
+    }
+    
+    .swal2-title.premium-title {
+        font-size: 2rem !important; 
+    }
+}
+
+/* Titles and Text */
+.swal2-title.premium-title {
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    font-size: 1.5rem !important;
+}
+
+.swal2-html-container.premium-text {
+    color: #666 !important;
+    font-size: 1rem !important;
+}
+
+/* Buttons */
 .premium-confirm-btn, .premium-cancel-btn {
-    width: 100% !important; 
+    width: 100% !important;
     margin-bottom: 10px !important;
-}</style>
+    border-radius: 10px !important;
+    padding: 12px 30px !important;
+    font-weight: 600 !important;
+}
+
+.swal2-confirm.premium-confirm-btn {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(33, 37, 41, 0.2) !important;
+}
+
+.swal2-cancel.premium-cancel-btn {
+    background: transparent !important;
+    color: #dc3545 !important;
+    border: 1px solid #dc3545 !important;
+}
+
+.swal2-icon.swal2-info {
+    border-color: #212529 !important;
+    color: #212529 !important;
+}
+
+.swal2-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px !important;
+}
+</style>

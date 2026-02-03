@@ -26,12 +26,11 @@ if ($isLoggedIn) {
     }
 }
 
-// Cart Count Logic
-// Cart Count Logic
+
 $cart_count = 0;
 if ($isLoggedIn) {
     $c_id = $_SESSION['customer_id'];
-    // company_id နဲ့ supplier_id ကွဲလွဲမှုမရှိစေရန် သေချာစစ်ပါ
+    
     $count_res = mysqli_query($conn, "SELECT SUM(quantity) as total FROM cart WHERE customer_id = '$c_id' AND company_id = '$supplier_id'");
     if ($count_res) {
         $count_row = mysqli_fetch_assoc($count_res);
