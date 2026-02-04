@@ -11,6 +11,119 @@ $message = "";
     <title>Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/Css/supplier.css">
+    <style>
+        /* Responsive CSS Overrides */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #1e1e24 0%, #2a2a35 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            color: white;
+        }
+        
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            background: #fff;
+            overflow-y: auto;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f8f8;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .submit-btn:hover { background: #333; }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        
+        .top-row { display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { color: white; text-decoration: none; opacity: 0.8; }
+        .logo-icon { font-size: 30px; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                display: none; /* Hide visual panel on mobile */
+            }
+
+            .right-panel {
+                width: 100%;
+                padding: 25px;
+                height: 100%;
+                justify-content: flex-start;
+                padding-top: 60px;
+                box-sizing: border-box;
+            }
+            
+            @media (max-width: 400px) {
+                .social-login { flex-direction: column; }
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -25,16 +138,16 @@ $message = "";
 
             <div class="bottom-row">
                 <div class="quote">
-                    <h2>Where Malls,<br>Transcend Reality.</h2>
+                    <h2 style="font-size: 36px; line-height: 1.2;">Where Malls,<br>Transcend Reality.</h2>
                 </div>
             </div>
         </div>
 
         <div class="right-panel">
             <h1>Login</h1>
-            <p class="sub-text">Doesn't have an account? <a href="pricing.php">Create Account</a></p>
+            <p class="sub-text" style="margin-bottom: 30px; color: #666;">Doesn't have an account? <a href="pricing.php" style="color: #000; font-weight: 600;">Create Account</a></p>
 
-            <p id="message"> <?= $message; ?> </p>
+            <p id="message" style="color: red; margin-bottom: 10px;"> <?= $message; ?> </p>
             <form id="loginform" method="POST">
                 <div class="row">
                     <div class="input-group">
@@ -48,7 +161,7 @@ $message = "";
 
                 <div class="input-group password-container">
                     <input autocomplete="off" type="password" id="password" name="password" placeholder="Enter your password" required>
-                    <i id="togglePassword" class="fa-regular fa-eye eye-icon"></i>
+                    <i id="togglePassword" class="fa-regular fa-eye eye-icon" style="position: absolute; right: 15px; top: 18px; cursor: pointer; color: #666;"></i>
                 </div>
                 
                 <div style="text-align: right; margin-bottom: 15px;">
@@ -58,7 +171,7 @@ $message = "";
                 <button type="submit" name="submit" class="submit-btn">Login</button>
             </form>
 
-            <div class="divider">
+            <div class="divider" style="text-align: center; margin: 25px 0; color: #999; font-size: 14px; position: relative;">
                 <span>Or Login with</span>
             </div>
 
@@ -67,19 +180,18 @@ $message = "";
                     <i class="fa-brands fa-google" style="color:#DB4437;"></i> Google
                 </button>
                 <button type="button" class="social-btn" onclick="window.location.href='utils/github_oauth.php?type=supplier'">
-                    <i class="fa-brands fa-github" style="color:#fff;"></i> GitHub
+                    <i class="fa-brands fa-github" style="color:#333;"></i> GitHub
                 </button>
             </div>
             
-            <!-- Forgot Password Modal -->
             <div id="forgot-password-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-                <div style="background: linear-gradient(rgb(111 22 253 / 60%), rgb(73 73 120 / 90%)); padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
-                    <h3 style="margin-top: 0;">Reset Password</h3>
-                    <p id="forgot-message" style="color: #666; font-size: 0.9rem;"></p>
-                    <input type="email" id="forgot-email" placeholder="Enter your email" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="background: #fff; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                    <h3 style="margin-top: 0; color: #333;">Reset Password</h3>
+                    <p id="forgot-message" style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Enter your email to receive a reset link.</p>
+                    <input type="email" id="forgot-email" placeholder="Enter your email" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button onclick="document.getElementById('forgot-password-modal').style.display='none'" style="flex: 1; padding: 10px; background: #f5f5f5; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
-                        <button onclick="handleForgotPassword()" style="flex: 1; padding: 10px; background: #000; color: white; border: none; border-radius: 5px; cursor: pointer;">Send Reset Link</button>
+                        <button onclick="document.getElementById('forgot-password-modal').style.display='none'" style="flex: 1; padding: 10px; background: #f5f5f5; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;">Cancel</button>
+                        <button onclick="handleForgotPassword()" style="flex: 1; padding: 10px; background: #000; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;">Send Link</button>
                     </div>
                 </div>
             </div>

@@ -119,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $due_date = date('Y-m-d', strtotime("+$months_to_add month"));
         $paid_amount = $renting_price;
 
-        $sql_rent = "INSERT INTO rent_payments (company_id, paid_date, due_date, paid_amount) 
+        $sql_rent = "INSERT INTO rent_payments (company_id, paid_date, due_date, amount) 
                      VALUES (?, ?, ?, ?)";
         $stmt_rent = $conn->prepare($sql_rent);
         $stmt_rent->bind_param("issd", $company_id, $paid_date, $due_date, $paid_amount);

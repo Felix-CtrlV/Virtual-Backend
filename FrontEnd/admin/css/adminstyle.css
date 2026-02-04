@@ -156,6 +156,8 @@ a {
 .main {
     flex: 1;
     padding: 18px 26px;
+    padding-bottom: 100px;
+    /* padding-right: 90px; */
     display: flex;
     flex-direction: column;
     gap: 18px;
@@ -439,44 +441,6 @@ td {
     background: rgba(148, 163, 184, 0.12);
     color: var(--muted);
     margin-left: 5px;
-}
-
-@media (max-width: 960px) {
-    .sidebar {
-        display: none;
-    }
-
-    body {
-        display: block;
-    }
-
-    .main {
-        padding: 14px;
-    }
-
-    .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 640px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
-
-    .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .topbar-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .search input {
-        width: 100%;
-    }
 }
 
 .status-select {
