@@ -16,23 +16,7 @@ ob_start();
 include '../../BackEnd/config/dbconfig.php';
 
 // 2. Get supplier ID
-if (isset($_GET['supplier_id'])) {
-    $supplier_id = (int) $_GET['supplier_id'];
-} elseif (isset($_GET['company_id'])) {
-    $company_id = (int) $_GET['company_id'];
-    $stmt = mysqli_prepare($conn, "SELECT supplier_id FROM companies WHERE company_id = ?");
-    mysqli_stmt_bind_param($stmt, "i", $company_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($result);
-    if ($row) {
-        $supplier_id = (int) $row['supplier_id'];
-    } else {
-        $supplier_id = 0;
-    }
-} else {
-    $supplier_id = 0;
-}
+$supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
 if ($supplier_id <= 0) {
     die("Invalid supplier ID.");
