@@ -1197,7 +1197,7 @@ function initiateRemove(cartId) {
         if (data.status === 'success') {
             modernToast.fire({ icon: 'success', title: 'Item removed successfully' });
             
-            // Cart ထဲမှာ ပစ္စည်း လုံးဝမရှိတော့ရင် Page ကို Reload လုပ်ပြီး "Cart is Empty" ပြပေးမယ်
+            
             const remainingItems = document.querySelectorAll('.modern-item').length;
             if (remainingItems === 0) {
                 setTimeout(() => location.reload(), 1000);
