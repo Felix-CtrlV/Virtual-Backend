@@ -26,16 +26,15 @@ if ($isLoggedIn) {
     }
 }
 
-// Cart Count Logic
+
 $cart_count = 0;
 if ($isLoggedIn) {
     $c_id = $_SESSION['customer_id'];
-    $count_res = mysqli_query($conn, "SELECT SUM(quantity) as total FROM cart WHERE customer_id = '$c_id' AND supplier_id = '$supplier_id'");
-    $count_row = mysqli_fetch_assoc($count_res);
-    $cart_count = $count_row['total'] ?? 0;
-} else {
-    if (isset($_SESSION['cart'])) {
-        foreach($_SESSION['cart'] as $qty) { $cart_count += (int)$qty; }
+    
+    $count_res = mysqli_query($conn, "SELECT SUM(quantity) as total FROM cart WHERE customer_id = '$c_id' AND company_id = '$supplier_id'");
+    if ($count_res) {
+        $count_row = mysqli_fetch_assoc($count_res);
+        $cart_count = (int)($count_row['total'] ?? 0);
     }
 }
 ?>
@@ -133,15 +132,7 @@ if ($isLoggedIn) {
             <i class="fas fa-arrow-left me-2"></i> Back to the Mall
         </a>
 
-        <div class="nav-cart ms-auto me-3 d-lg-none">
-            <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
-                <i class="fas fa-shopping-basket fa-lg"></i>
-                <span class="cart-badge-count position-absolute badge rounded-pill bg-danger" 
-                      style="<?= $cart_count > 0 ? '' : 'display:none;' ?>">
-                    <?= $cart_count ?>
-                </span>
-            </a>
-        </div>
+       
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>

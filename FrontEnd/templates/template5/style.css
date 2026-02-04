@@ -3792,3 +3792,20 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
         font-size: 0.8rem;
     }
 }
+.cart-badge-count {
+    position: absolute !important;
+    top: -8px !important;    
+    right: -12px !important; 
+    background-color: #07799c !important; 
+    color: white !important;
+    font-size: 0.65rem !important;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border: 1.5px solid white; 
+}

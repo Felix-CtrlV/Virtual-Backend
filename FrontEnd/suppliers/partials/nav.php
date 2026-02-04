@@ -13,7 +13,7 @@ $stmt = $conn->prepare("SELECT s.*, c.company_name, c.company_id, c.description 
 FROM suppliers s 
 LEFT JOIN companies c ON c.supplier_id = s.supplier_id 
 LEFT JOIN shop_assets sa ON sa.company_id = c.company_id 
-LEFT JOIN products p ON p.supplier_id = s.supplier_id 
+LEFT JOIN products p ON p.company_id = c.company_id 
 LEFT JOIN product_variant pv ON pv.product_id = p.product_id 
 WHERE s.supplier_id = ? AND c.status = 'active' limit 1;");
 
@@ -115,7 +115,7 @@ if (!$row) {
 if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success' && !isset($_SESSION['pending_rent'])) {
     $updateRent = $conn->prepare("UPDATE rent_payments SET status = 'paid', paid_date = NOW() WHERE company_id = ? AND status = 'unpaid'");
     $updateRent->bind_param("i", $row['company_id']);
-    
+
     if ($updateRent->execute()) {
         $updateRent->close();
         echo "<script>window.location.href='dashboard.php';</script>";
@@ -139,7 +139,7 @@ $rentStmt->close();
 
 // If an unpaid rent record exists, we block access and show the payment screen
 if ($rentRow) {
-    
+
     // 2. Fetch Admin Account Number (Receiver)
     // We fetch the first admin's account number to receive the money
     $adminStmt = $conn->prepare("SELECT account_number FROM admins LIMIT 1");
@@ -154,18 +154,19 @@ if ($rentRow) {
     // We dynamically build the return URL to point back to this dashboard
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'];
-    $current_path = dirname($_SERVER['PHP_SELF']); 
+    $current_path = dirname($_SERVER['PHP_SELF']);
     $return_url = $protocol . "://" . $host . $current_path . "/dashboard.php?placeholder=1";
 
     $payment_url = "https://crediverse.base44.app/payment?" . http_build_query([
-        'amount'         => $rentRow['amount'],
-        'merchant'       => 'MALLTIVERSE',
-        'return_url'     => $return_url,
+        'amount' => $rentRow['amount'],
+        'merchant' => 'MALLTIVERSE',
+        'return_url' => $return_url,
         'account_number' => $admin_account
     ]);
     ?>
     <!DOCTYPE html>
     <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -184,16 +185,27 @@ if ($rentRow) {
                 color: #333;
                 text-align: center;
             }
+
             .payment-card {
                 background: white;
                 padding: 40px;
                 border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
                 max-width: 450px;
                 width: 90%;
             }
-            h2 { margin-top: 10px; color: #2d3748; }
-            p { color: #718096; line-height: 1.6; margin-bottom: 30px; }
+
+            h2 {
+                margin-top: 10px;
+                color: #2d3748;
+            }
+
+            p {
+                color: #718096;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+
             .amount-box {
                 background: #f7fafc;
                 padding: 15px;
@@ -204,6 +216,7 @@ if ($rentRow) {
                 margin-bottom: 25px;
                 border: 2px dashed #cbd5e0;
             }
+
             .btn-pay {
                 display: block;
                 width: 100%;
@@ -217,42 +230,45 @@ if ($rentRow) {
                 transition: transform 0.2s, box-shadow 0.2s;
                 margin-bottom: 15px;
             }
+
             .btn-pay:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
             }
+
             .btn-logout {
                 color: #718096;
                 text-decoration: none;
                 font-size: 0.9rem;
             }
-            .btn-logout:hover { text-decoration: underline; }
+
+            .btn-logout:hover {
+                text-decoration: underline;
+            }
         </style>
     </head>
+
     <body>
         <div class="payment-card">
-            <lord-icon
-                src="https://cdn.lordicon.com/jtiihjyw.json"
-                trigger="loop"
-                delay="2000"
-                colors="primary:#121331,secondary:#08a88a"
-                style="width:100px;height:100px">
+            <lord-icon src="https://cdn.lordicon.com/jtiihjyw.json" trigger="loop" delay="2000"
+                colors="primary:#121331,secondary:#08a88a" style="width:100px;height:100px">
             </lord-icon>
-            
+
             <h2>Rent Payment Due</h2>
             <p>Your shop is approved! To activate your dashboard features, please settle your outstanding rent payment.</p>
-            
+
             <div class="amount-box">
                 $<?= number_format($rentRow['amount'], 2) ?>
             </div>
-            
+
             <a href="<?= htmlspecialchars($payment_url) ?>" class="btn-pay">
                 Pay Securely via Crediverse
             </a>
-            
+
             <a href="../utils/signout.php" class="btn-logout">Log out and pay later</a>
         </div>
     </body>
+
     </html>
     <?php
     exit(); // Stop the rest of the dashboard from loading
@@ -265,17 +281,18 @@ $supplierName = $row['name'];
 // 2. Product Count
 // ... rest of your code continues below ...
 
-// 2. Product Count
-$countproduct = $conn->prepare("SELECT COUNT(*) AS product_count FROM products WHERE supplier_id = ?");
-$countproduct->bind_param("i", $supplierid);
+// 2. Product Count (products table uses company_id)
+$company_id = $row['company_id'];
+$countproduct = $conn->prepare("SELECT COUNT(*) AS product_count FROM products WHERE company_id = ?");
+$countproduct->bind_param("i", $company_id);
 $countproduct->execute();
 $rowCount = $countproduct->get_result()->fetch_assoc();
 $countproduct->close();
 $productCount = $rowCount['product_count'];
 
-// 3. Order Stats (Pending/Cancelled)
-$orderCountStmt = $conn->prepare("SELECT SUM(order_status = 'pending') AS pending_count, SUM(order_status = 'cancelled') AS cancelled_count FROM orders WHERE supplier_id = ?");
-$orderCountStmt->bind_param("i", $supplierid);
+// 3. Order Stats (Pending/Cancelled) (orders table uses company_id)
+$orderCountStmt = $conn->prepare("SELECT SUM(order_status = 'pending') AS pending_count, SUM(order_status = 'cancelled') AS cancelled_count FROM orders WHERE company_id = ?");
+$orderCountStmt->bind_param("i", $company_id);
 $orderCountStmt->execute();
 $orderCounts = $orderCountStmt->get_result()->fetch_assoc();
 $orderCountStmt->close();
@@ -313,24 +330,24 @@ if (!$diffObj->invert) {
 $percent = ($totalDays > 0) ? ($daysPassed / $totalDays) * 100 : 0;
 $percent = max(0, min(100, round($percent)));
 
-// 5. Total Revenue (Current Month)
+// 5. Total Revenue (Current Month) (orders table uses company_id)
 $totalrevenuestmt = $conn->prepare("SELECT SUM(daily_revenue) OVER () AS total_revenue_month, SUM(daily_orders) OVER () AS total_orders_month
-FROM (SELECT DAY(order_date) AS day, SUM(price) AS daily_revenue, COUNT(*) AS daily_orders FROM orders WHERE supplier_id = ?
+FROM (SELECT DAY(order_date) AS day, SUM(price) AS daily_revenue, COUNT(*) AS daily_orders FROM orders WHERE company_id = ?
 AND order_status = 'confirm' AND order_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01') AND order_date < DATE_ADD(DATE_FORMAT(CURDATE(), '%Y-%m-01'), INTERVAL 1 MONTH)
 GROUP BY DAY(order_date)) t LIMIT 1;");
-$totalrevenuestmt->bind_param("i", $supplierid);
+$totalrevenuestmt->bind_param("i", $company_id);
 $totalrevenuestmt->execute();
 $totalrevenueRow = $totalrevenuestmt->get_result()->fetch_assoc();
 $totalrevenuestmt->close();
 $totalRevenue = $totalrevenueRow['total_revenue_month'] ?? 0;
 $totalOrder = $totalrevenueRow['total_orders_month'] ?? 0;
 
-// 6. Best Sellers (Top 5)
+// 6. Best Sellers (Top 5) (orders table uses company_id)
 $bestsellerstmt = $conn->prepare("SELECT p.product_id, p.product_name, p.image, MAX(variant_sales.total_sold) AS best_variant_sold 
 FROM (SELECT pv.product_id, oi.variant_id, SUM(oi.quantity) AS total_sold FROM orders o 
 JOIN order_detail oi ON o.order_id = oi.order_id 
 JOIN product_variant pv ON oi.variant_id = pv.variant_id 
-WHERE o.supplier_id = ? AND o.order_status = 'confirm' 
+WHERE o.company_id = ? AND o.order_status = 'confirm' 
 GROUP BY pv.product_id, oi.variant_id) AS variant_sales 
 JOIN products p ON p.product_id = variant_sales.product_id 
 GROUP BY p.product_id, p.product_name 
@@ -338,16 +355,16 @@ ORDER BY best_variant_sold DESC LIMIT 5;");
 
 $bestsellers = [];
 if ($bestsellerstmt) {
-    $bestsellerstmt->bind_param("i", $supplierid);
+    $bestsellerstmt->bind_param("i", $company_id);
     $bestsellerstmt->execute();
     $bestsellers = $bestsellerstmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $bestsellerstmt->close();
 }
 
-// 7. Monthly Revenue Chart with YEAR FILTER
+// 7. Monthly Revenue Chart with YEAR FILTER (orders table uses company_id)
 $selectedYear = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-$yearStmt = $conn->prepare("SELECT DISTINCT YEAR(order_date) as yr FROM orders WHERE supplier_id = ? ORDER BY yr DESC");
-$yearStmt->bind_param("i", $supplierid);
+$yearStmt = $conn->prepare("SELECT DISTINCT YEAR(order_date) as yr FROM orders WHERE company_id = ? ORDER BY yr DESC");
+$yearStmt->bind_param("i", $company_id);
 $yearStmt->execute();
 $availableYearsResult = $yearStmt->get_result();
 $availableYears = [];
@@ -359,8 +376,8 @@ if (empty($availableYears))
 $yearStmt->close();
 
 $revenue = $conn->prepare("SELECT MONTH(order_date) AS month, SUM(price) AS total_revenue FROM orders
-WHERE supplier_id = ? AND YEAR(order_date) = ? AND order_status = 'confirm' GROUP BY MONTH(order_date) ORDER BY month;");
-$revenue->bind_param("ii", $supplierid, $selectedYear);
+WHERE company_id = ? AND YEAR(order_date) = ? AND order_status = 'confirm' GROUP BY MONTH(order_date) ORDER BY month;");
+$revenue->bind_param("ii", $company_id, $selectedYear);
 $revenue->execute();
 $revenue_result = $revenue->get_result();
 $monthlyRevenue = array_fill(1, 12, 0);
@@ -369,7 +386,7 @@ while ($revenuerow = $revenue_result->fetch_assoc()) {
 }
 $revenue->close();
 
-// 8. Inventory / Best Selling Categories
+// 8. Inventory / Best Selling Categories (products table uses company_id)
 $categoryStmt = $conn->prepare("SELECT 
     c.category_name, 
     SUM(od.quantity) AS total_sold
@@ -377,14 +394,14 @@ FROM order_detail od
 JOIN product_variant pv ON od.variant_id = pv.variant_id
 JOIN products p ON pv.product_id = p.product_id
 JOIN category c ON p.category_id = c.category_id
-WHERE p.supplier_id = ?
+WHERE p.company_id = ?
 GROUP BY c.category_name
 ORDER BY total_sold DESC;
 ");
 $categoryData = [];
 $categoryLabels = [];
 if ($categoryStmt) {
-    $categoryStmt->bind_param("i", $supplierid);
+    $categoryStmt->bind_param("i", $company_id);
     $categoryStmt->execute();
     $catResult = $categoryStmt->get_result();
     while ($c = $catResult->fetch_assoc()) {
@@ -409,7 +426,7 @@ $reviewStmt = $conn->prepare("SELECT
 FROM reviews r
 LEFT JOIN customers u ON r.customer_id = u.customer_id
 WHERE r.company_id = ?
-  AND r.created_at >= DATE_SUB(NOW(), INTERVAL 100 DAY)
+  AND r.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 ORDER BY r.created_at DESC;
 ");
 
@@ -917,11 +934,16 @@ $pendingOrderList = [
         <div class="panel-content panel-nav-content">
             <div class="panel-close" onclick="togglePanel('mobile-menu-panel')" aria-label="Close">×</div>
             <nav class="panel-nav">
-                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
-                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Inventory</a>
-                <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Orders</a>
-                <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Rent Payment</a>
-                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?> onclick="togglePanel('mobile-menu-panel')">Settings</a>
+                <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
+                <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Inventory</a>
+                <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Orders</a>
+                <a href="rentpayment.php" <?= $active === "rentpayment" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Rent Payment</a>
+                <a href="setting.php" <?= $active === "setting" ? 'class="active"' : '' ?>
+                    onclick="togglePanel('mobile-menu-panel')">Settings</a>
             </nav>
             <a href="../utils/signout.php" class="btn-logout panel-logout">Logout</a>
         </div>
@@ -1183,7 +1205,7 @@ $pendingOrderList = [
             });
 
             // Mobile menu panel (same as FrontEnd/index.html)
-            window.togglePanel = function(id) {
+            window.togglePanel = function (id) {
                 var panel = document.getElementById(id);
                 if (!panel) return;
                 if (!panel.classList.contains('active')) {

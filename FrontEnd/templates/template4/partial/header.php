@@ -1,8 +1,13 @@
-
 <?php
-// 1. LOGIC: Handle Successful Payment Return
-if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
-    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+if (!isset($company_id) || $company_id <= 0) {
+    $company_id = isset($supplier['company_id']) ? (int)$supplier['company_id'] : 0;
+    if ($company_id <= 0 && !empty($supplier_id) && isset($conn)) {
+        $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = " . (int)$supplier_id . " LIMIT 1"));
+        $company_id = $r ? (int)$r['company_id'] : 0;
+    }
+}
+if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success' && !empty($customer_id)) {
+    $is_ordered = placeOrder($conn, $customer_id, $company_id);
 
     if ($is_ordered) {
         echo "

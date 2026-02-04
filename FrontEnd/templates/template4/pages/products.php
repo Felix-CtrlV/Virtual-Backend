@@ -429,14 +429,14 @@ if (isset($_POST['ajax_load']) && $_POST['ajax_load'] == 'true') {
         </div>
 
         <div class="filter-container">
-            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="category-btn <?= $category_filter == 'all' ? 'active' : '' ?>">All</a>
+            <a href="?company_id=<?= $company_id ?>&page=products" class="category-btn <?= $category_filter == 'all' ? 'active' : '' ?>">All</a>
             <?php
-            $cat_query = mysqli_query($conn, "SELECT * FROM category WHERE supplier_id = $supplier_id ORDER BY category_name ASC");
+            $cat_query = mysqli_query($conn, "SELECT * FROM category WHERE company_id = $company_id ORDER BY category_name ASC");
             while ($cat = mysqli_fetch_assoc($cat_query)) {
                 $cId = $cat['category_id'];
                 $active = ($category_filter == $cId) ? 'active' : '';
                 $searchStr = $search_query ? "&search=" . urlencode($search_query) : "";
-                echo "<a href='?supplier_id=$supplier_id&page=products&category_id=$cId$searchStr' class='category-btn $active'>" . htmlspecialchars($cat['category_name']) . "</a>";
+                echo "<a href='?company_id=$company_id&page=products&category_id=$cId$searchStr' class='category-btn $active'>" . htmlspecialchars($cat['category_name']) . "</a>";
             }
             ?>
         </div>
@@ -444,9 +444,9 @@ if (isset($_POST['ajax_load']) && $_POST['ajax_load'] == 'true') {
 
     <div class="product-grid" id="product-grid">
         <?php
-        $sql = "SELECT p.*, c.category_name FROM products p LEFT JOIN category c ON p.category_id = c.category_id WHERE p.supplier_id = ? AND status = 'available'";
+        $sql = "SELECT p.*, c.category_name FROM products p LEFT JOIN category c ON p.category_id = c.category_id WHERE p.company_id = ? AND status = 'available'";
         $types = "i";
-        $params = [$supplier_id];
+        $params = [$company_id];
 
         if ($category_filter !== 'all') {
             $sql .= " AND p.category_id = ?";

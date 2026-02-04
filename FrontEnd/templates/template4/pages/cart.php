@@ -1,12 +1,18 @@
 <?php
 
 require_once __DIR__ . '/../../../utils/Ordered.php';
+include '../../BackEnd/config/dbconfig.php';
 
-$customer_id = 1; // Testing 
+$customer_id = isset($_SESSION['customer_id']) ? (int)$_SESSION['customer_id'] : 0;
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
+$company_id = isset($supplier['company_id']) ? (int)$supplier['company_id'] : 0;
+if ($company_id <= 0 && $supplier_id > 0) {
+    $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+    $company_id = $r ? (int)$r['company_id'] : 0;
+}
 
-if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
-    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+if ($customer_id > 0 && isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
+    $is_ordered = placeOrder($conn, $customer_id, $company_id);
 
     if ($is_ordered) {
         echo "<script>alert('Order Placed Successfully!'); window.location.href='?supplier_id=$supplier_id&page=cart';</script>";
@@ -18,10 +24,10 @@ $cart_query = "SELECT c.cart_id, c.quantity, p.product_name, p.price, p.image, p
                FROM cart c 
                JOIN product_variant v ON c.variant_id = v.variant_id 
                JOIN products p ON v.product_id = p.product_id 
-               WHERE c.customer_id = ? AND c.supplier_id = ?";
+               WHERE c.customer_id = ? AND c.company_id = ?";
 
 $stmt = mysqli_prepare($conn, $cart_query);
-mysqli_stmt_bind_param($stmt, "ii", $customer_id, $supplier_id);
+mysqli_stmt_bind_param($stmt, "ii", $customer_id, $company_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $cart_count = mysqli_num_rows($result);

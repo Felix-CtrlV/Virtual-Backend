@@ -54,30 +54,50 @@
     </div>
 </section>
 
-<style>@media (max-width: 991px) {
+<style>
+@media (max-width: 991px) {
     .hero-container {
         display: flex !important;
-        flex-direction: column-reverse !important; 
+        flex-direction: column !important; 
         text-align: center; 
-        padding-top: 20px;
-    }
-
-    .hero-content {
-        width: 100% !important;
-        padding: 40px 20px !important;
+        padding-top: 10px;
     }
 
     .hero-banner {
         width: 100% !important;
-        margin-bottom: 20px;
+        margin-bottom: 20px !important; 
+        order: 1; 
     }
 
-   
+    .hero-content {
+        width: 100% !important;
+        padding: 20px !important;
+        order: 2; 
+    }
+
     .banner-shape-wrapper {
         margin: 0 auto;
-        max-width: 90%;
+        max-width: 95%; 
+        height: auto !important; 
+        background: transparent !important; 
+        clip-path: none !important; 
+        -webkit-clip-path: none !important;
+        border-radius: 20px; 
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-}</style>
+
+    .fashion-banner {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        transform: scale(1) !important;
+        object-fit: contain; 
+    }
+}
+</style>
 
 
     

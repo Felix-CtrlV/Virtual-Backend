@@ -4,6 +4,54 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$is_logged_in = isset($_SESSION['customer_id']) && $_SESSION['customer_id'] > 0;
+?>
+
+<?php
+if (isset($_POST['submit_review'])) {
+
+  if (!$is_logged_in) {
+    header("Location: /Malltiverse/FrontEnd/customerLogin.php");
+    exit;
+  }
+
+  $customer_id = (int) $_SESSION['customer_id'];
+  $rating = (int) $_POST['rating'];
+  $review_text = trim($_POST['review']);
+
+  if ($rating > 0 && !empty($review_text)) {
+
+    $company_id = (int)($supplier['company_id'] ?? 0);
+    if ($company_id <= 0 && $supplier_id > 0) {
+      $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+      if ($r) $company_id = (int)$r['company_id'];
+    }
+    $insert_stmt = mysqli_prepare(
+      $conn,
+      "INSERT INTO reviews (company_id, customer_id, review, rating, created_at)
+             VALUES (?, ?, ?, ?, NOW())"
+    );
+
+    mysqli_stmt_bind_param(
+      $insert_stmt,
+      "iisi",
+      $company_id,
+      $customer_id,
+      $review_text,
+      $rating
+    );
+
+    mysqli_stmt_execute($insert_stmt);
+    mysqli_stmt_close($insert_stmt);
+
+    header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id);
+    exit;
+  }
+}
+?>
+
+
+<?php
 if (!isset($conn)) {
     include '../../../BackEnd/config/dbconfig.php';
 }
@@ -13,8 +61,44 @@ $isLoggedIn = isset($_SESSION['customer_id']);
 $current_customer_id = $isLoggedIn ? $_SESSION['customer_id'] : null;
 
 $supplier_id = (int) $supplier['supplier_id'];
+$company_id_review = (int)($supplier['company_id'] ?? 0);
+if ($company_id_review <= 0 && $supplier_id > 0) {
+  $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+  if ($r) $company_id_review = (int)$r['company_id'];
+}
 
-// Handle form submission
+// Fetch reviews with customer profile images (reviews table uses company_id)
+$review_stmt = mysqli_prepare($conn, "
+    SELECT r.rating, r.review, r.created_at, c.image 
+    FROM reviews r 
+    LEFT JOIN customers c ON r.customer_id = c.customer_id 
+    WHERE r.company_id = ?
+    ORDER BY r.created_at DESC
+");
+mysqli_stmt_bind_param($review_stmt, "i", $company_id_review);
+mysqli_stmt_execute($review_stmt);
+$review_result = mysqli_stmt_get_result($review_stmt);
+
+$ratings = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+$reviews = [];
+$total_rating = 0;
+$total_count = 0;
+
+while ($row = mysqli_fetch_assoc($review_result)) {
+  $rating = (int) $row['rating'];
+  $ratings[$rating]++;
+  $total_rating += $rating;
+  $total_count++;
+  $reviews[] = $row;
+}
+
+$average_rating = $total_count > 0 ? round($total_rating / $total_count, 1) : 0;
+mysqli_stmt_close($review_stmt);
+?>
+<?php
+
+
+
 if (isset($_POST['submit_review'])) {
     // SECURITY: Prevent guests from submitting via POST even if they bypass JS
     if (!$isLoggedIn) {
@@ -26,11 +110,20 @@ if (isset($_POST['submit_review'])) {
     $review_text = trim($_POST['review']);
     $customer_id = $current_customer_id; // Use the actual logged-in ID
 
-    if ($rating > 0 && !empty($review_text)) {
-        $insert_stmt = mysqli_prepare($conn, "INSERT INTO reviews (supplier_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
-        mysqli_stmt_bind_param($insert_stmt, "iisi", $supplier_id, $customer_id, $review_text, $rating);
-        mysqli_stmt_execute($insert_stmt);
-        mysqli_stmt_close($insert_stmt);
+  if ($rating > 0 && !empty($review_text)) {
+    $company_id_ins = (int)($supplier['company_id'] ?? 0);
+    if ($company_id_ins <= 0 && isset($supplier_id) && $supplier_id > 0) {
+      $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
+      if ($r) $company_id_ins = (int)$r['company_id'];
+    }
+    $insert_stmt = mysqli_prepare(
+      $conn,
+      "INSERT INTO reviews (company_id, customer_id, review, rating, created_at) 
+     VALUES (?, ?, ?, ?, NOW())"
+    );
+    mysqli_stmt_bind_param($insert_stmt, "iisi", $company_id_ins, $customer_id, $review_text, $rating);
+    mysqli_stmt_execute($insert_stmt);
+    mysqli_stmt_close($insert_stmt);
 
         header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id . "&page=review");
         exit();

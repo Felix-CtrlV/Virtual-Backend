@@ -34,7 +34,7 @@ $company_id = $company_row['company_id'];
 
 
 if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
-    $is_ordered = placeOrder($conn, $customer_id, $supplier_id);
+    $is_ordered = placeOrder($conn, $customer_id, $company_id);
 
     if (!$is_ordered) {
         echo "<script>alert('Order failed: Stock may have changed or cart is empty.');</script>";
