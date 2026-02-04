@@ -1365,4 +1365,42 @@ function showEmptyCartAlert() {
     display: block;
     width: 100%;
 }
+
+@media (max-width: 768px) {
+    /* Reset the container to allow proper centering */
+    div.swal2-container.swal2-top-end,
+    div.swal2-container.swal2-top {
+        top: 20px !important; 
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        
+        /* Use flexbox for perfect alignment */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+        
+        /* Remove the conflicting transform */
+        transform: none !important; 
+        pointer-events: none; 
+    }
+
+    /* Style the actual toast box */
+    div.swal2-popup.swal2-toast {
+        width: auto !important;
+        max-width: 90% !important; 
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        pointer-events: auto; 
+    }
+    
+    /* Ensure text is readable and centered */
+    .swal2-html-container {
+        white-space: normal !important;
+        text-align: center !important;
+        padding: 5px 10px !important;
+    }
+}
 </style>
