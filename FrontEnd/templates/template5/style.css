@@ -778,40 +778,58 @@ h1 {
         filter: blur(0);
     }
 }
-/*View Details CSS */
 .btn-order-now {
-  display: inline-block;
-  padding: 12px 32px;
-  background: transparent;
-  color: #111;
-  text-decoration: none;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border: 1px solid #111;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    display: inline-block;
+    padding: 12px 28px;
+    background: transparent;
+    color: #1a202c;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.btn-order-now::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #805ad5;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
 .btn-order-now::after {
-  content: '→';
-  margin-left: 10px;
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: all 0.3s ease;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #805ad5;
+    transform: scale(1.1);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
 .btn-order-now:hover {
-  padding-right: 45px;
-  background: #111;
-  color: #fff;
+    color: #805ad5;
+}
+
+.btn-order-now:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
 }
 
 .btn-order-now:hover::after {
-  opacity: 1;
-  transform: translateX(0);
+    opacity: 1;
+    transform: scale(1);
 }
 .card-product {
     overflow: hidden; 
