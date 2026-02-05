@@ -5,6 +5,20 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include("../../BackEnd/config/dbconfig.php");
 
+/**
+ * PATH FIX: 
+ * Using absolute path to include unavailable.php utility.
+ */
+$unavailablePath = __DIR__ . "/../../utils/unavailable.php";
+if (file_exists($unavailablePath)) {
+    require_once($unavailablePath);
+} else {
+    $fallbackPath = __DIR__ . "/../utils/unavailable.php";
+    if (file_exists($fallbackPath)) {
+        require_once($fallbackPath);
+    }
+}
+
 $product_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 if ($product_id <= 0) {
     die("Invalid product");
@@ -30,8 +44,9 @@ $colors = [];
 $sizes = [];
 $variants = [];
 
+// Fetch Product Variants
 $stmt2 = mysqli_prepare($conn, "
-    SELECT variant_id, color, size, quantity
+    SELECT variant_id, color, size, quantity, status
     FROM product_variant
     WHERE product_id = ?
 ");
@@ -40,16 +55,32 @@ mysqli_stmt_execute($stmt2);
 $result2 = mysqli_stmt_get_result($stmt2);
 
 while ($row = mysqli_fetch_assoc($result2)) {
-    $variants[] = $row;
-    if (!in_array($row['color'], $colors)) {
-        $colors[] = $row['color'];
+    $isAvailable = true;
+    
+    // Use InventoryUtil to filter out Unavailable variants
+    if (class_exists('InventoryUtil')) {
+        $statusInfo = InventoryUtil::getVariantStatus($row['quantity'], $row['status']);
+        if ($statusInfo['status'] === 'Unavailable') {
+            $isAvailable = false;
+        }
+    } else {
+        // Fallback: Hide if stock is 0 if class doesn't exist
+        if ((int)$row['quantity'] <= 0) {
+            $isAvailable = false;
+        }
     }
-    if (!in_array($row['size'], $sizes)) {
-        $sizes[] = $row['size'];
+
+    if ($isAvailable) {
+        $variants[] = $row;
+        // Only add colors that have at least one available variant
+        if (!in_array($row['color'], $colors)) {
+            $colors[] = $row['color'];
+        }
+        if (!in_array($row['size'], $sizes)) {
+            $sizes[] = $row['size'];
+        }
     }
 }
-
-// Login Status
 $isLoggedIn = isset($_SESSION['customer_id']) ? 'true' : 'false';
 $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 ?>
@@ -64,16 +95,17 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Existing Styles */
+
         .qty-error { color: #ff4d4d; font-size: 0.9rem; margin-top: 8px; display: none; font-weight: 600; }
         .add-cart:disabled { background-color: #d1d1d1 !important; cursor: not-allowed; opacity: 0.7; }
         .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }        
-        /* Success Modal */
+        
         .cart-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .cart-modal { background: white; padding: 40px; border-radius: 10px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease; }
-        .success-icon { width: 80px; height: 80px; background-color: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }         
+        .success-icon { width: 80px; height: 80px; background-color: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }           
         .success-icon::after { content: ''; width: 60px; height: 60px; background-color: #2196f3; border-radius: 50%; position: absolute; }
         .success-icon i { color: white; font-size: 30px; z-index: 1; }
+        
         .login-prompt-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -93,21 +125,13 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
             padding: 45px 35px;
             border-radius: 28px;
             text-align: center;
-            
             position: relative;
             border: 1px solid rgba(255, 255, 255, 0.4);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
 
-        .login-prompt-card h2 { 
-            color: #ffffff; font-size: 30px; margin-bottom: 12px; font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .login-prompt-card p { 
-            color: #ffffff; opacity: 0.9; margin-bottom: 35px; font-size: 16px;
-            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-        }
+        .login-prompt-card h2 { color: #ffffff; font-size: 30px; margin-bottom: 12px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
+        .login-prompt-card p { color: #ffffff; opacity: 0.9; margin-bottom: 35px; font-size: 16px; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); }
         
         .modal-action-btn {
             display: block; width: 100%; padding: 14px; margin-bottom: 15px;
@@ -116,26 +140,11 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
             text-align: center;
         }
 
-        .btn-login-alt { 
-            background: rgba(255, 255, 255, 0.15); color: #ffffff; 
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        .btn-login-alt:hover { 
-            background: #ffffff; color: #000000;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-        }
-
-        .btn-create-alt { 
-            background: transparent; color: #ffffff; 
-            border: 1px solid rgba(255, 255, 255, 0.3); 
-        }
-
+        .btn-login-alt { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.6); }
+        .btn-login-alt:hover { background: #ffffff; color: #000000; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+        .btn-create-alt { background: transparent; color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); }
         .btn-create-alt:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.1); }
-        .divider-container { 
-            color: #ffffff; font-weight: 500; opacity: 0.7; display: flex; align-items: center; margin: 25px 0; 
-        }
-
+        .divider-container { color: #ffffff; font-weight: 500; opacity: 0.7; display: flex; align-items: center; margin: 25px 0; }
         .divider-container::before, .divider-container::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.4); }
         .divider-container:not(:empty)::before { margin-right: 15px; }
         .divider-container:not(:empty)::after { margin-left: 15px; }      
@@ -143,29 +152,29 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 </head>
 
 <body>
+    <!-- Login Prompt Modal -->
     <div class="login-prompt-overlay" id="loginPromptModal">
         <div class="login-prompt-card">
-            <!-- <span class="close-login" onclick="toggleLoginModal(false)">&times;</span> -->
+
             <h2>Log back in</h2>
             <p>Choose an account to continue.</p>
-            
+
             <div class="divider-container">OR</div>
 
             <div class="modal-buttons">
                 <a href="../customerLogin.php?return_url=<?= $currentUrl ?>" class="modal-action-btn btn-login-alt">Log in to another account</a>
                 <a href="../customerRegister.php" class="modal-action-btn btn-create-alt">Create account</a>
-                <p onclick="toggleLoginModal(false)" style="cursor:pointer; margin-top:20px; font-size: 0.9rem; opacity: 0.5; transition: 0.3s;"
-                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">Cancel
-                </p>
+                <p onclick="toggleLoginModal(false)" style="cursor:pointer; margin-top:20px; font-size: 0.9rem; opacity: 0.5;">Cancel</p>
             </div>
         </div>
     </div>
 
+    <!-- Add to Cart Success Modal -->
     <div class="cart-modal-overlay" id="cartModal">
         <div class="cart-modal">
             <div class="success-icon"><i class="fas fa-check"></i></div>
             <h2>Added to Cart</h2>
-            <p>The item has been added.</p>
+            <p>The item has been successfully added to your cart.</p>
         </div>
     </div>
 
@@ -230,7 +239,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
         const ADD_TO_CART_API = "../utils/add_to_cart.php";
         const allVariants = <?= json_encode($variants) ?>;
         const supplierId = <?= isset($product['supplier_id']) ? $product['supplier_id'] : 0 ?>; 
-                                
+                                        
         const colorInputs = document.querySelectorAll('input[name="color"]');
         const sizeSelect = document.getElementById('sizeSelect');
         const qtyInput = document.getElementById('qtyInput');
@@ -268,6 +277,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
                         option.value = v.size;
                         const stockQty = parseInt(v.quantity) || 0;
                         const isOutOfStock = stockQty <= 0;
+                        
                         option.textContent = `${v.size} ${isOutOfStock ? '(Out of Stock)' : ''}`;
                         if (isOutOfStock) option.disabled = true;
                         sizeSelect.appendChild(option);
@@ -323,11 +333,6 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
             }
         }
 
-        const cancelBtn = document.getElementById('cancelModalBtn'); 
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', () => toggleLoginModal(false));
-        }
-                                
         window.addEventListener('click', (e) => {
             if (e.target === loginPromptModal) {
                 toggleLoginModal(false);
@@ -337,7 +342,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
         document.getElementById('addToCartForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Check Login Status - Trigger Modal instead of Alert
+
             if (!customerId || customerId === 0) {
                 toggleLoginModal(true);
                 return;
@@ -366,11 +371,9 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
                     alert(data.message || "Error adding to cart");
                 }
             })
-            .catch(err => {
-                console.error('Error:', err);
-            });
+            .catch(err => { console.error('Error:', err); });
         });
-                                
+
     </script>
 </body>
 </html>

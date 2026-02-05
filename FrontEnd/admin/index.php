@@ -1,5 +1,6 @@
 <?php
 include("../../BackEnd/config/dbconfig.php");
+include("partials/mobile_block.php");
 // Start session to handle potential OAuth errors or messages
 ?>
 

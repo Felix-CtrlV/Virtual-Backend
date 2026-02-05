@@ -1,6 +1,7 @@
 <?php
 // Ensure this path is correct relative to where nav.php is included
 include("../../BackEnd/config/dbconfig.php");
+include(__DIR__ . "/mobile_block.php");
 
 // Session Check
 if (!isset($_SESSION["admin_logged_in"])) {
