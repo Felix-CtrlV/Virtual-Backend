@@ -219,7 +219,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 3. Update Database (Only if no critical upload error occurred)
         if ($msg_type !== "error") {
-            $sql_final = "UPDATE shop_assets SET primary_color=?, secondary_color=?, about=?, description=?, template_id=? $logo_sql $banner_sql WHERE company_id=?";
+            $sql_final = "UPDATE shop_assets sa
+JOIN companies c ON sa.company_id = c.company_id
+SET 
+    sa.primary_color = ?,
+    sa.secondary_color = ?,
+    sa.about = ?,
+    sa.description = ?
+    $logo_sql
+    $banner_sql,
+    c.template_id = ?
+WHERE sa.company_id = ?
+";
             $stmt2 = $conn->prepare($sql_final);
             $stmt2->bind_param("ssssii", $p_color, $s_color, $shop_about, $shop_desc, $selected_template, $company_id);
 

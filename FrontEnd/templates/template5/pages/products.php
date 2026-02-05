@@ -37,7 +37,7 @@ $shop_assets = mysqli_fetch_assoc($result);
 
        
         function fetchProduct(query = "", page = 1) {
-           /* resultContainer.style.opacity = "0.5"; */
+         
 
             fetch("../templates/template5/utils/search.php?supplier_id=" + supplierId, {
                 method: "POST",

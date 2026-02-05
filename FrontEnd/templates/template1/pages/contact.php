@@ -1,227 +1,210 @@
 <?php
+require_once "../utils/messages.php";
 
-require_once "../utils/messages.php"; // Include the message helper
-
-// Make sure user is logged in
 if (!isset($_SESSION['customer_id'])) {
     die("You must be logged in to send a message.");
 }
 
-$customer_id = $_SESSION['customer_id'];
-$supplier_id = $supplier_id; // Already set in your existing code
+$customer_id = (int)$_SESSION['customer_id'];
+// $supplier_id MUST be defined before this file loads
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
+// Handle form submit
+$feedback = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['message'])) {
     $message_text = trim($_POST['message']);
+
     $sent = sendContactMessage($conn, $customer_id, $supplier_id, $message_text);
-    
-    if ($sent) {
-        $feedback = "Message sent successfully!";
-    } else {
-        $feedback = "Failed to send message. Please try again.";
-    }
+
+    $feedback = $sent
+        ? "Message sent successfully!"
+        : "Failed to send message. Please try again.";
 }
 
-
-
-$base_path = "../uploads/shops/{$supplier_id}/";
-$allowed_ext = ['jpg', 'png', 'webp'];
-
-$image_to_use = "../assets/images/contact-placeholder.jpg";
-foreach ($allowed_ext as $ext) {
-    $path = $base_path . "{$supplier_id}_contact.$ext";
-    if (file_exists($path)) {
-        $image_to_use = $path;
-        break;
-    }
-}
-
-// CONTACT PAGE BACKGROUND IMAGE
-$bg_base_path = "../uploads/shops/{$supplier_id}/";
-$bg_allowed_ext = ['jpg', 'png', 'webp'];
-$contact_bg_image = "../assets/images/contact-bg-placeholder.jpg";
-foreach ($bg_allowed_ext as $ext) {
-    $bg_path = $bg_base_path . "contact-bg.$ext";
-    if (file_exists($bg_path)) {
-        $contact_bg_image = $bg_path;
-        break;
-    }
-}
-
-// CONTACT PAGE SUPPLIER DATA
-$supplier_stmt = mysqli_prepare(
+// Fetch supplier data
+$stmt = mysqli_prepare(
     $conn,
     "SELECT 
         c.company_name,
         c.description,
-        s.email,
         c.phone,
-        c.address
+        c.address,
+        s.email
      FROM suppliers s
      JOIN companies c ON s.supplier_id = c.supplier_id
      WHERE s.supplier_id = ?"
 );
 
-mysqli_stmt_bind_param($supplier_stmt, "i", $supplier_id);
-mysqli_stmt_execute($supplier_stmt);
-$result = mysqli_stmt_get_result($supplier_stmt);
-$supplier_data = mysqli_fetch_assoc($result);
-mysqli_stmt_close($supplier_stmt);
+mysqli_stmt_bind_param($stmt, "i", $supplier_id);
+mysqli_stmt_execute($stmt);
+$data = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+mysqli_stmt_close($stmt);
 
-$supplier_data = $supplier_data ?: [
+// Fallbacks
+$data = $data ?: [
     'company_name' => '',
     'description'  => '',
-    'email'        => '',
     'phone'        => '',
+    'email'        => '',
     'address'      => ''
 ];
 
-
+// Logo
+$logo = "../assets/images/logo-placeholder.png";
+foreach (['png','jpg','webp'] as $ext) {
+    $path = "../uploads/shops/{$supplier_id}/{$supplier_id}_logo.$ext";
+    if (file_exists($path)) {
+        $logo = $path;
+        break;
+    }
+}
 ?>
 
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contact Us</title>
 
 <style>
-:root {
-  --scale: 1.2; /* 40% bigger */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.contact-page-bg {
-  background-size: cover;
-  background-position: center;
-  padding: calc(80px * var(--scale)) 20px;
+body {
+    background: #60708d;
+    color: #000;
+    min-height: 100vh;
 }
 
-.contact-wrapper {
-  max-width: calc(1100px * var(--scale));
-  margin: auto;
-  display: grid;
-  grid-template-columns: calc(420px * var(--scale)) 1fr;
-  gap: calc(40px * var(--scale));
+.contact-section {
+    text-align: center;
+    padding: 80px 20px;
 }
 
-/* LEFT CARD */
-.contact-form-card {
-  background: #e6e6e6;
-  padding: calc(40px * var(--scale));
-  border-radius: 6px;
-  color: #333;
+.small-title {
+    color: #959dab;
+    letter-spacing: 2px;
+    font-size: 12px;
+    margin-bottom: 10px;
 }
 
-.contact-form-card h2 {
-  margin: 0 0 calc(10px * var(--scale));
-  font-size: calc(28px * var(--scale));
+.main-title {
+    font-size: 42px;
+    font-weight: 600;
+    margin-bottom: 50px;
 }
 
-.contact-form-card p {
-  margin-bottom: calc(25px * var(--scale));
-  color: #666;
-  font-size: calc(16px * var(--scale));
+.contact-card {
+    max-width: 420px;
+    margin: auto;
+    background: #959dab;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
 }
 
-.contact-form-card textarea {
-  width: 100%;
-  min-height: calc(160px * var(--scale));
-  padding: calc(15px * var(--scale));
-  border: none;
-  resize: none;
-  background: #9aa57a;
-  color: #fff;
-  border-radius: 4px;
-  font-size: calc(16px * var(--scale));
+/* Brand */
+.brand-logo {
+    width: 64px;
+    margin-bottom: 15px;
 }
 
-.contact-form-card button {
-  margin-top: calc(20px * var(--scale));
-  padding: calc(12px * var(--scale)) calc(30px * var(--scale));
-  border: none;
-  background: #6c74ff;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: calc(16px * var(--scale));
+.brand-name {
+    font-size: 20px;
+    margin-bottom: 8px;
 }
 
-/* RIGHT SIDE */
-.contact-info {
-  display: grid;
-  /* Image taller, info boxes shorter */
-  grid-template-rows:
-    calc(180px * var(--scale) * 1.15)  /* IMAGE: +15% height */
-    auto
-    auto;
-  gap: calc(20px * var(--scale));
+.brand-desc {
+    font-size: 14px;
+    color: #959dab;
+    margin-bottom: 25px;
 }
 
-.contact-image {
-  border-radius: 6px;
-  overflow: hidden;
+/* Info */
+.contact-info p {
+    font-size: 14px;
+    color: #ddd;
+    margin-bottom: 8px;
 }
 
-.contact-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Form */
+.contact-form {
+    margin-top: 25px;
 }
 
-.info-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: calc(20px * var(--scale));
+.contact-form textarea {
+    width: 100%;
+    height: 120px;
+    background: #0b0b0b;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 12px;
+    color: #fff;
+    resize: none;
+    margin-bottom: 15px;
 }
 
-.info-box {
-  background: #c83b3b;
-  color: #fff;
-  padding: calc(22px * var(--scale) * 0.85); /* 15% smaller height */
-  border-radius: 6px;
-  text-align: center;
-  font-size: calc(16px * var(--scale));
+.contact-form textarea::placeholder {
+    color: #777;
 }
 
-.info-box.full {
-  width: 100%;
+.contact-form button {
+    width: 100%;
+    background: #60708d;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .contact-wrapper {
-    grid-template-columns: 1fr;
-  }
+.contact-form button:hover {
+    background: #959dab;
+}
+
+.feedback {
+    margin-bottom: 15px;
+    color: #959dab;
+    font-size: 14px;
 }
 </style>
-  <div class="contact-wrapper">
+</head>
 
-    <!-- LEFT FORM -->
-    <div class="contact-form-card">
-      <h2>Contact us</h2>
-      <p>Let us know your thoughts</p>
-      <textarea placeholder="Type your message here..."></textarea>
-      <button>Send</button>
-    </div>
+<body>
 
-    <!-- RIGHT INFO -->
-    <div class="contact-info">
+<section class="contact-section">
+    <p class="small-title">CONTACT</p>
+    <h1 class="main-title">Get in touch with us</h1>
 
-      <div class="contact-image">
-        <img src="<?= htmlspecialchars($image_to_use) ?>" alt="<?= htmlspecialchars($supplier_data['company_name']) ?>">
-      </div>
+    <div class="contact-card">
 
-      <div class="info-row">
-        <div class="info-box">
-          <strong>PH</strong><br>
-          <?= htmlspecialchars($supplier_data['phone']) ?>
+        <img src="<?= htmlspecialchars($logo) ?>" class="brand-logo" alt="Logo">
+
+        <h2 class="brand-name"><?= htmlspecialchars($data['company_name']) ?></h2>
+
+        <p class="brand-desc"><?= htmlspecialchars($data['description']) ?></p>
+
+        <div class="contact-info">
+            <p><strong>Phone:</strong> <?= htmlspecialchars($data['phone']) ?></p>
+            <p><strong>Email:</strong> <?= htmlspecialchars($data['email']) ?></p>
+            <p><strong>Address:</strong> <?= htmlspecialchars($data['address']) ?></p>
         </div>
-        <div class="info-box">
-          <strong>@</strong><br>
-          <?= htmlspecialchars($supplier_data['email']) ?>
-        </div>
-      </div>
 
-      <div class="info-box full">
-        <strong>ADDRESS</strong><br>
-        <?= htmlspecialchars($supplier_data['address']) ?>
-      </div>
+        <?php if ($feedback): ?>
+            <div class="feedback"><?= htmlspecialchars($feedback) ?></div>
+        <?php endif; ?>
+
+        <form method="POST" class="contact-form">
+            <textarea name="message" placeholder="Write your message here..." required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
 
     </div>
+</section>
 
-  </div>
-</div>
+</body>
+</html>

@@ -132,7 +132,15 @@ if ($isLoggedIn) {
             <i class="fas fa-arrow-left me-2"></i> Back to the Mall
         </a>
 
-       
+        <div class="nav-cart ms-auto me-3 d-lg-none">
+            <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
+                <i class="fas fa-shopping-basket fa-lg"></i>
+                <span class="cart-badge-count badge rounded-pill bg-danger" 
+                      style="<?= $cart_count > 0 ? 'display:flex;' : 'display:none;' ?>">
+                    <?= $cart_count ?>
+                </span>
+            </a>
+        </div>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
@@ -166,15 +174,15 @@ if ($isLoggedIn) {
             </ul>
 
             <div class="d-none d-lg-flex align-items-center gap-3">
-               <div class="nav-cart me-2">
-    <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
-        <i class="fas fa-shopping-basket fa-lg"></i>
-        <span class="cart-badge-count badge rounded-pill bg-danger" 
-              style="<?= $cart_count > 0 ? 'display:flex;' : 'display:none;' ?>">
-            <?= $cart_count ?>
-        </span>
-    </a>
-</div>
+                <div class="nav-cart me-2">
+                    <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
+                        <i class="fas fa-shopping-basket fa-lg"></i>
+                        <span class="cart-badge-count badge rounded-pill bg-danger" 
+                              style="<?= $cart_count > 0 ? 'display:flex;' : 'display:none;' ?>">
+                            <?= $cart_count ?>
+                        </span>
+                    </a>
+                </div>
 
                 <div class="nav-auth-section border-start ps-3">
                     <?php if ($isLoggedIn): ?>
