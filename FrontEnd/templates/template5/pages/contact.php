@@ -104,8 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_message'])) {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // URL လမ်းကြောင်းကို တိုက်ရိုက်မရေးဘဲ လက်ရှိ Query String (supplier_id) ကိုပဲ ပြန်သုံးပါမယ်
-                    // ဒါဆိုရင် Not Found မဖြစ်တော့ပါဘူး
+                 
                     window.location.href = window.location.pathname + window.location.search;
                 }
             });
