@@ -5,7 +5,7 @@ if (!isset($conn)) {
 
 $supplier_id = (int) $supplier['supplier_id'];
 
-$company_stmt = mysqli_prepare($conn,'Select * from companies where supplier_id = ?');
+$company_stmt = mysqli_prepare($conn, 'Select * from companies where supplier_id = ?');
 $company_stmt->bind_param('i', $supplier_id);
 $company_stmt->execute();
 $company_result = $company_stmt->get_result();
@@ -44,7 +44,7 @@ for ($i = 0; $i < $banner_count; $i++) {
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
-$allowed_pages = ['home', 'about', 'collection', 'contact', 'review', 'product_details','cart'];
+$allowed_pages = ['home', 'about', 'product', 'contact', 'review', 'product_details', 'cart'];
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
@@ -60,7 +60,7 @@ $page_path = __DIR__ . "/pages/$page.php";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($supplier['company_name']) ?></title>
     <link rel="stylesheet" href="../templates/<?= basename(__DIR__) ?>/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --primary:

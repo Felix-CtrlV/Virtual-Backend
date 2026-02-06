@@ -146,7 +146,7 @@
                              class="main-img img-fluid shadow-lg">
                     <?php endif; ?>
                     
-                   <!-- <div style="position: absolute; bottom: -15px; left: -15px; width: 120px; height: 120px; border-bottom: 3px solid black; border-left: 3px solid black; z-index: 1;"></div>-->
+                 
                 </div>
             </div>
 

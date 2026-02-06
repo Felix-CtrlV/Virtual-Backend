@@ -38,8 +38,39 @@ const mouse = new THREE.Vector2();
 
 const clock = new THREE.Clock();
 
-const textureLoader = new THREE.TextureLoader();
+/* customer.js - Replacement for textureLoader definition */
 
+// 1. Setup Loading Manager
+const loadingManager = new THREE.LoadingManager();
+const loaderBar = document.getElementById('loader-bar');
+const loadingScreen = document.getElementById('loading-screen');
+
+// Update progress bar based on actual Three.js asset loading
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  const progress = (itemsLoaded / itemsTotal) * 100;
+  if (loaderBar) loaderBar.style.width = `${progress}%`;
+};
+
+// When all assets are loaded
+loadingManager.onLoad = () => {
+  // Add a small delay for visual smoothness before fading out
+  setTimeout(() => {
+    if (loaderBar) loaderBar.style.width = '100%';
+    
+    // Check if we are done with the initial startup
+    if (loadingScreen) {
+        loadingScreen.classList.add('fade-out');
+        
+        // Remove from DOM after fade completes to save resources
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 800);
+    }
+  }, 500);
+};
+
+// 2. Pass the manager to the loader
+const textureLoader = new THREE.TextureLoader(loadingManager);
 let hallwayParticles = null;
 let hallwayParticlesMeta = null;
 
@@ -1693,7 +1724,7 @@ function onResize() {
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
-}
+} 
 
 window.addEventListener('resize', onResize);
 
@@ -1703,6 +1734,42 @@ function setPointerFromEvent(e) {
   const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
   pointerNdc.set(x, y);
 }
+
+/* customer.js - Bottom Initialization Logic */
+
+// Initialize UI
+updateAuthUI();
+onResize();
+
+// Start the loading sequence
+(async () => {
+  // 1. Manually set bar to 10% to show activity starts
+  if (loaderBar) loaderBar.style.width = '10%';
+
+  // 2. Fetch Data (Not tracked by Three.js, so we handle UI manually)
+  await loadSuppliers();
+  if (loaderBar) loaderBar.style.width = '30%'; // Data fetched
+
+  // 3. Create Scene
+  // Note: createOutside() generates textures procedurally (synchronous).
+  // If no external images are loaded, LoadingManager won't fire automatically.
+  createOutside();
+  setupSearchAndFloorSelector();
+
+  // 4. Start Animation Loop
+  animate();
+
+  // 5. Finalize Loading
+  // We explicitly tell the manager to check status. 
+  // If createOutside() added external assets, the manager is already running.
+  // If createOutside() was purely procedural, we manually trigger completion.
+  // This ensures the screen never gets stuck.
+  const itemsPending = loadingManager.itemStart.length - loadingManager.itemEnd.length;
+  if (itemsPending <= 0 || isNaN(itemsPending)) {
+      if (loaderBar) loaderBar.style.width = '100%';
+      loadingManager.onLoad(); 
+  }
+})();
 
 canvas.addEventListener('pointerdown', async (e) => {
   if (state.transitioning) return;

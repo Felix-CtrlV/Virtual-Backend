@@ -121,7 +121,7 @@ if ($isLoggedIn) {
                      class="rounded-circle me-2" style="height: 40px; width: 40px; object-fit: cover;">
             <?php endif; ?>
             <div class="header-text">
-                <h1 class="fs-6 fw-bold mb-0"><?= htmlspecialchars($supplier['tags'] ?? 'Shop Name') ?></h1>
+                <h1 class="fs-6 fw-bold mb-0"><?= htmlspecialchars($supplier['tags'] ?? '') ?></h1>
                 <?php if (!empty($supplier['tagline'])): ?>
                     <p class="mb-0 text-muted" style="font-size: 0.65rem;"><?= htmlspecialchars($supplier['tagline']) ?></p>
                 <?php endif; ?>
@@ -135,10 +135,10 @@ if ($isLoggedIn) {
         <div class="nav-cart ms-auto me-3 d-lg-none">
             <a href="javascript:void(0)" onclick="handleCartClick(<?= $isLoggedIn ? 'true' : 'false' ?>)" class="position-relative text-dark">
                 <i class="fas fa-shopping-basket fa-lg"></i>
-                <span class="cart-badge-count badge rounded-pill bg-danger" 
-                      style="<?= $cart_count > 0 ? 'display:flex;' : 'display:none;' ?>">
-                    <?= $cart_count ?>
-                </span>
+               <span class="cart-badge-count badge rounded-pill" 
+      style="display: <?= ($cart_count > 0) ? 'flex' : 'none' ?> !important;">
+    <?= $cart_count ?>
+</span>
             </a>
         </div>
 
@@ -244,10 +244,10 @@ if ($isLoggedIn) {
 
     function refreshBag() {
     const supplierId = "<?= $supplier_id ?>";
+   
     fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
     .then(res => res.json())
     .then(data => {
-       
         const count = parseInt(data.total_count) || 0;
         
         document.querySelectorAll('.cart-badge-count').forEach(el => {
@@ -264,11 +264,14 @@ if ($isLoggedIn) {
 }
 
 
+
+
 document.addEventListener('DOMContentLoaded', refreshBag);
 </script>
 
 </body>
 </html>
+
 <style>
 .nav-cart a.position-relative {
     display: inline-flex !important;
@@ -288,7 +291,6 @@ document.addEventListener('DOMContentLoaded', refreshBag);
     min-width: 18px;
     height: 18px;
     border-radius: 50%;
-    display: flex !important; 
     align-items: center;
     justify-content: center;
     z-index: 1000;

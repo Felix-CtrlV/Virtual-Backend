@@ -48,7 +48,7 @@ while ($row = $result->fetch_assoc()) {
                     <p class="site-tagline"><?= htmlspecialchars($supplier['tagline']) ?></p>
                 <?php endif; ?>
             </div>
-            <button class="navbar-toggler" id="navToggle" type="button">
+        <button class="navbar-toggler" id="navToggle" type="button" >
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
@@ -56,16 +56,11 @@ while ($row = $result->fetch_assoc()) {
         <div class="collapse navbar-collapse" id="navMenuContent">
             <ul class="navbar-nav ms-auto align-items-lg-center">
                 <?php $base_url = "?supplier_id=" . $supplier_id; ?>
-                <li class="nav-item"><a class="navlink <?= $page === 'home' ? 'active' : '' ?>"
-                        href="<?= $base_url ?>&page=home">Home</a></li>
-                <li class="nav-item"><a class="navlink <?= $page === 'about' ? 'active' : '' ?>"
-                        href="<?= $base_url ?>&page=about">About Us</a></li>
-                <li class="nav-item"><a class="navlink <?= $page === 'product' ? 'active' : '' ?>"
-                        href="<?= $base_url ?>&page=product">Product</a></li>
-                <li class="nav-item"><a class="navlink <?= $page === 'contact' ? 'active' : '' ?>"
-                        href="<?= $base_url ?>&page=contact">Contact</a></li>
-                <li class="nav-item"><a class="navlink <?= $page === 'review' ? 'active' : '' ?>"
-                        href="<?= $base_url ?>&page=review">Review</a></li>
+                <li class="nav-item"><a class="navlink <?= $page === 'home' ? 'active' : '' ?>" href="<?= $base_url ?>&page=home">Home</a></li>
+                <li class="nav-item"><a class="navlink <?= $page === 'about' ? 'active' : '' ?>" href="<?= $base_url ?>&page=about">About Us</a></li>
+                <li class="nav-item"><a class="navlink <?= $page === 'product' ? 'active' : '' ?>" href="<?= $base_url ?>&page=product">Product</a></li>
+                <li class="nav-item"><a class="navlink <?= $page === 'contact' ? 'active' : '' ?>" href="<?= $base_url ?>&page=contact">Contact</a></li>
+                <li class="nav-item"><a class="navlink <?= $page === 'review' ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">Review</a></li>
 
                 <li class="nav-item">
                     <a class="navlink exit-btn" href="/malltiverse/frontend/customer"
@@ -117,6 +112,7 @@ while ($row = $result->fetch_assoc()) {
     }
 </style>
 <script>
+<<<<<<< HEAD
     const toggleBtn = document.getElementById('navToggle');
     const menu = document.getElementById('navMenuContent');
 
@@ -128,3 +124,17 @@ while ($row = $result->fetch_assoc()) {
         }
     });
 </script>
+=======
+const toggleBtn = document.getElementById('navToggle');
+const menu = document.getElementById('navMenuContent');
+
+toggleBtn.addEventListener('click', () => {
+    if (menu.classList.contains('show')) {
+        menu.classList.remove('show');
+    } else {
+        menu.classList.add('show');
+    }
+});
+</script>
+
+>>>>>>> 1ba3fa93b45a20bb385c19fd8e14df7efbc296d2

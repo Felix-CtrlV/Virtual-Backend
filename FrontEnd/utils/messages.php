@@ -6,8 +6,8 @@ function sendContactMessage($conn, $customer_id, $company_id, $message) {
 
     $stmt = mysqli_prepare(
         $conn,
-        "INSERT INTO contact_messages
-         (customer_id, company_id, message, status, created_at)
+        "INSERT INTO contact_messages 
+         (customer_id, company_id, message, status, created_at) 
          VALUES (?, ?, ?, 'pending', NOW())"
     );
 
@@ -19,8 +19,8 @@ function sendContactMessage($conn, $customer_id, $company_id, $message) {
     }
 
     mysqli_stmt_close($stmt);
-    
-    return $success;
+
+
+    return $success; 
 }
-
-
+?>
