@@ -48,7 +48,7 @@ while ($row = $result->fetch_assoc()) {
                     <p class="site-tagline"><?= htmlspecialchars($supplier['tagline']) ?></p>
                 <?php endif; ?>
             </div>
-            <button class="navbar-toggler border-0 ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navMenuContent">
+        <button class="navbar-toggler" id="navToggle" type="button" >
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
@@ -109,3 +109,16 @@ while ($row = $result->fetch_assoc()) {
         transform: translate(20%, -20%);
     }
 </style>
+<script>
+const toggleBtn = document.getElementById('navToggle');
+const menu = document.getElementById('navMenuContent');
+
+toggleBtn.addEventListener('click', () => {
+    if (menu.classList.contains('show')) {
+        menu.classList.remove('show');
+    } else {
+        menu.classList.add('show');
+    }
+});
+</script>
+
