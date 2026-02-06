@@ -37,7 +37,7 @@ if (!$stmt) {
 
 mysqli_stmt_bind_param($stmt, "i", $supplier_id);
 mysqli_stmt_execute($stmt);
-$result   = mysqli_stmt_get_result($stmt);
+$result = mysqli_stmt_get_result($stmt);
 $supplier = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
 
@@ -289,8 +289,7 @@ $final_content = preg_replace(
     $final_content,
     1
 );
-$final_js = $loader_js . '<script>const USER_LOGGED_IN = ' . ($isLoggedIn ? 'true' : 'false') . '; const IS_LOGGED_IN = USER_LOGGED_IN;
-</script>';
+$final_js = $loader_js . '<script>window.USER_LOGGED_IN = ' . ($isLoggedIn ? 'true' : 'false') . '; window.IS_LOGGED_IN = window.USER_LOGGED_IN;</script>';
 
 $final_content = preg_replace(
     '/<\/body>/i',

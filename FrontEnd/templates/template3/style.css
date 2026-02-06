@@ -1218,7 +1218,7 @@ body {
 .textarea-group label {
     font-size: 17px;
     color: #333;
-    ;
+
     font-weight: 600;
 }
 
@@ -1754,7 +1754,7 @@ form textarea {
 
 form input:focus,
 form textarea:focus {
-    background: #fff;
+    background: #f8fafd;
     box-shadow: 0 10px 25px rgba(0, 188, 212, 0.15);
     transform: translateY(-3px);
 }
@@ -1983,6 +1983,9 @@ form textarea {
         justify-content: space-between;
         align-items: center;
     }
+    
+    
+
 
     .navbar-collapse {
         position: absolute;
@@ -2009,13 +2012,7 @@ form textarea {
         visibility: visible;
         transform: translate(-50%, 0);
     }
-    
-    .navbar-collapse.hide{
-        opacity: 0;
-        visibility: hidden;
-        transform: translate(0, 0%);
-    }
-    
+
 
     /* 3. The Navigation Links */
     .navbar-nav {
@@ -2058,7 +2055,7 @@ form textarea {
         margin: 0px;
     }
 
-    .cart-linkk{
+    .cart-linkk {
         margin-right: none;
     }
 
@@ -2069,10 +2066,3 @@ form textarea {
         box-shadow: none !important;
     }
 }
-
-
-
-
-
-
-
