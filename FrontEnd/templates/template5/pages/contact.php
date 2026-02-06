@@ -1,12 +1,12 @@
 <?php
-// ၁။ Session စတင်ခြင်း
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 require_once __DIR__ . '/../../../utils/messages.php'; 
 
-// ၂။ ID များ ရယူခြင်း
+
 $supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
 $company_id = 0;
 
@@ -18,11 +18,11 @@ if ($supplier_id > 0) {
     }
 }
 
-// အောင်မြင်မှု အခြေအနေကို မှတ်ရန် Variable
+
 $show_success_modal = false;
 $error_message = "";
 
-// ၃။ Form Submit လုပ်ခြင်းကို ကိုင်တွယ်ခြင်း
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_message'])) {
     
     $message = trim($_POST['contact_message']);
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_message'])) {
         $is_sent = sendContactMessage($conn, $customer_id, $company_id, $message);
 
         if ($is_sent) {
-            // Redirect မလုပ်တော့ဘဲ modal ပြရန် variable ကို true ပေးလိုက်ပါ
+          
             $show_success_modal = true;
         }
     } else {

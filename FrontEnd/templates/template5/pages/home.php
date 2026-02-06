@@ -146,7 +146,7 @@ body {
 }
 
 .editorial-title {
-    font-size: clamp(3rem, 7vw, 6rem);
+    font-size: clamp(3rem, 5vw, 5rem);
     font-weight: 900;
     line-height: 0.9;
     letter-spacing: -2px;
