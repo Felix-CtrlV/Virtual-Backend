@@ -58,7 +58,7 @@ while ($row = $result->fetch_assoc()) {
                 <?php $base_url = "?supplier_id=" . $supplier_id; ?>
                 <li class="nav-item"><a class="navlink <?= $page === 'home' ? 'active' : '' ?>" href="<?= $base_url ?>&page=home">Home</a></li>
                 <li class="nav-item"><a class="navlink <?= $page === 'about' ? 'active' : '' ?>" href="<?= $base_url ?>&page=about">About Us</a></li>
-                <li class="nav-item"><a class="navlink <?= $page === 'collection' ? 'active' : '' ?>" href="<?= $base_url ?>&page=collection">Collection</a></li>
+                <li class="nav-item"><a class="navlink <?= $page === 'product' ? 'active' : '' ?>" href="<?= $base_url ?>&page=product">Product</a></li>
                 <li class="nav-item"><a class="navlink <?= $page === 'contact' ? 'active' : '' ?>" href="<?= $base_url ?>&page=contact">Contact</a></li>
                 <li class="nav-item"><a class="navlink <?= $page === 'review' ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">Review</a></li>
 

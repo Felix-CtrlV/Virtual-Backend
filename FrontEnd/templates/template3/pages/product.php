@@ -9,7 +9,7 @@
     .page-btn:disabled { color: #ccc; cursor: not-allowed; }
 </style>
 
-<section class="page-content collection-page">    
+<section class="page-content product-page">    
     <div class="container" style="padding-top: 0;">        
         <h2 class="text-center">Latest Stock Items</h2>
         <div class="search-bar">

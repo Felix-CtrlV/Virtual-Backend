@@ -1218,7 +1218,7 @@ body {
 .textarea-group label {
     font-size: 17px;
     color: #333;
-    ;
+
     font-weight: 600;
 }
 
@@ -1754,7 +1754,7 @@ form textarea {
 
 form input:focus,
 form textarea:focus {
-    background: #fff;
+    background: #f8fafd;
     box-shadow: 0 10px 25px rgba(0, 188, 212, 0.15);
     transform: translateY(-3px);
 }

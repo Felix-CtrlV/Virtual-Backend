@@ -429,14 +429,14 @@ if (isset($_POST['ajax_load']) && $_POST['ajax_load'] == 'true') {
         </div>
 
         <div class="filter-container">
-            <a href="?company_id=<?= $company_id ?>&page=products" class="category-btn <?= $category_filter == 'all' ? 'active' : '' ?>">All</a>
+            <a href="?supplier_id=<?= $supplier_id ?>&page=products" class="category-btn <?= $category_filter == 'all' ? 'active' : '' ?>">All</a>
             <?php
             $cat_query = mysqli_query($conn, "SELECT * FROM category WHERE company_id = $company_id ORDER BY category_name ASC");
             while ($cat = mysqli_fetch_assoc($cat_query)) {
                 $cId = $cat['category_id'];
                 $active = ($category_filter == $cId) ? 'active' : '';
                 $searchStr = $search_query ? "&search=" . urlencode($search_query) : "";
-                echo "<a href='?company_id=$company_id&page=products&category_id=$cId$searchStr' class='category-btn $active'>" . htmlspecialchars($cat['category_name']) . "</a>";
+                echo "<a href='?supplier_id=$supplier_id&page=products&category_id=$cId$searchStr' class='category-btn $active'>" . htmlspecialchars($cat['category_name']) . "</a>";
             }
             ?>
         </div>
