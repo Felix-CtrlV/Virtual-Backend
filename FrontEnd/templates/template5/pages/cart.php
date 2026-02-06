@@ -1175,34 +1175,60 @@ function initiateRemove(cartId) {
     const itemElement = document.querySelector(`#qty-${cartId}`)?.closest('.modern-item');
     if (!itemElement) return;
 
-   
+    // ၁. UI မှာ ယာယီ ဖျောက်ထားမယ် (User Experience ကောင်းအောင်)
     itemElement.style.transition = 'all 0.4s ease';
     itemElement.style.transform = 'translateX(100px)';
     itemElement.style.opacity = '0';
 
-    setTimeout(() => {
-        itemElement.remove(); 
-        recalculateCart(); 
-    }, 400);
-
+    // ၂. Backend (PHP) ကို လှမ်းဖျက်မယ်
+    // မှတ်ချက်: '../utils/removeFromCart.php' က file structure ပေါ်မူတည်ပြီး ပြောင်းလဲနိုင်ပါတယ်
+    // အကောင်းဆုံးကတော့ PHP ဘက်ကနေ base_url ကို variable တစ်ခုအနေနဲ့ echo ထုတ်ပေးထားတာ ပိုကောင်းပါတယ်
     
-    const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php';
+    // မိတ်ဆွေရဲ့ လက်ရှိ path အတိုင်းသုံးမယ်ဆိုရင် folder name မှန်မမှန် အရင်စစ်ပါ
+    const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php'; 
+
     fetch(rootPath, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Cache-Control': 'no-cache' // Cache မမိအောင် ထည့်မယ်
+        },
         body: new URLSearchParams({ 'cart_id': cartId })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return res.json();
+    })
     .then(data => {
         if (data.status === 'success') {
+            
+            setTimeout(() => {
+                itemElement.remove(); 
+                recalculateCart(); 
+            }, 300);
+
             modernToast.fire({ icon: 'success', title: 'Item removed successfully' });
             
-            
+          
             const remainingItems = document.querySelectorAll('.modern-item').length;
-            if (remainingItems === 0) {
+            if (remainingItems <= 1) { 
                 setTimeout(() => location.reload(), 1000);
             }
+        } else {
+           
+            itemElement.style.transform = 'translateX(0)';
+            itemElement.style.opacity = '1';
+            modernToast.fire({ icon: 'error', title: 'Failed to remove item' });
         }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+       
+        itemElement.style.transform = 'translateX(0)';
+        itemElement.style.opacity = '1';
+        modernToast.fire({ icon: 'error', title: 'Connection error. Try again.' });
     });
 }
 
@@ -1228,10 +1254,10 @@ window.addEventListener('beforeunload', () => {
 function recalculateCart() {
     let grandTotal = 0;
     let totalQty = 0;
-    let discount = 0; // Discount logic မရှိသေးရင် 0 လို့ အရင်သတ်မှတ်ထားပါ
+    let discount = 0; 
 
     document.querySelectorAll('.modern-item').forEach(item => {
-        // ဖျက်ထားတဲ့ item တွေကို ထည့်မတွက်ဖို့ display နဲ့ opacity ကို စစ်ပါတယ်
+        
         if (item.style.display !== 'none' && item.style.opacity !== '0') {
             const price = parseFloat(item.getAttribute('data-price')) || 0;
             const qtyElement = item.querySelector('.qty-display-modern');
@@ -1241,7 +1267,7 @@ function recalculateCart() {
             grandTotal += itemSubtotal;
             totalQty += qty;
 
-            // Item တစ်ခုချင်းစီရဲ့ subtotal ကို update လုပ်ခြင်း
+          
             const cartId = qtyElement.id.replace('qty-', '');
             const subDisplay = document.getElementById('subtotal-' + cartId);
             if (subDisplay) {
@@ -1265,8 +1291,7 @@ function recalculateCart() {
     if (savingsStat) savingsStat.innerText = '$' + discount.toLocaleString(undefined, {minimumFractionDigits: 2});
     if (headerQtyText) headerQtyText.innerText = totalQty + (totalQty > 1 ? ' items' : ' item');
 
-    // --- Order Summary Panel Update ---
-    // Index နဲ့ ဖမ်းမယ့်အစား Class နာမည်တွေနဲ့ တိုက်ရိုက်ဖမ်းတာ ပိုစိတ်ချရပါတယ်
+  
     const subtotalEl = document.getElementById('summary-subtotal') || document.querySelector('.summary-item:nth-child(2) .summary-value');
     const shippingEl = document.getElementById('summary-shipping') || document.querySelector('.summary-item:nth-child(3) .summary-value');
     const totalEls = document.querySelectorAll('.summary-value.total');
