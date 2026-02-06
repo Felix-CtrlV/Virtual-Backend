@@ -1,3 +1,35 @@
+<?php
+// Since this file is INCLUDED by index.php, the path 
+// starts from the Shop/ folder location.
+require_once '../utils/messages.php'; 
+
+$message_sent = false;
+$error_message = "";
+
+// Capture the supplier_id from the URL (?supplier_id=1)
+
+if (isset($_POST['submit'])) {
+    $message = htmlspecialchars(trim($_POST['message']));
+    $customer_id = 1; // Replace with $_SESSION['user_id'] if available
+
+    if (!empty($message) && $company_id > 0) {
+        // $conn comes from the include in index.php
+        $success = sendContactMessage($conn, $customer_id, $company_id, $message);
+        
+        if ($success) {
+            $message_sent = true;
+        } else {
+            $error_message = "Database error: Could not save message.";
+        }
+    } else {
+        $error_message = "Please enter a message and ensure a valid supplier is selected.";
+    }
+}
+
+// Simple Alert for the user
+if ($message_sent) echo "<script>alert('Message Sent!');</script>";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,7 +92,7 @@
         <div class="form-outer-box">
             <div class="form-flex">
                 <div class="form-inputs animate-left">
-                    <form action="contact.php" method="POST">
+                    <form method="POST">
 
                         <div class="input-group">
                             <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
@@ -89,12 +121,11 @@
 
     <?php
     if(isset($_POST['submit'])){
-        $name = htmlspecialchars($_POST['name']);
-        $email = htmlspecialchars($_POST['email']);
+        
         $message = htmlspecialchars($_POST['message']);
         
         // Logic for sending email would go here
-        echo "<script>alert('Thank you, $name! Your message has been sent.');</script>";
+        echo "<script>alert('Thank you! Your message has been sent.');</script>";
     }
     ?>
 </body>

@@ -260,7 +260,7 @@ if ($customer_id > 0 && $company_id > 0) {
                             PROCEED TO CHECKOUT
                         </a>
 
-                        <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="continue-shopping-btn">
+                        <a href="?supplier_id=<?= $supplier_id ?>&page=product" class="continue-shopping-btn">
                             <i class="fas fa-arrow-left"></i> Continue Shopping
                         </a>
                     </div>
@@ -271,7 +271,7 @@ if ($customer_id > 0 && $company_id > 0) {
         <div class="text-center py-5">
             <i class="fas fa-cart-arrow-down fs-1 text-muted"></i>
             <p class="mt-3">Your cart is empty.</p>
-            <a href="?supplier_id=<?= $supplier_id ?>&page=collection" class="btn btn-primary"
+            <a href="?supplier_id=<?= $supplier_id ?>&page=product" class="btn btn-primary"
                 style="background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6)); border: none;">
                 Shop Now
             </a>
