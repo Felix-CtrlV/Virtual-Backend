@@ -209,13 +209,15 @@ if ($rev_res) {
 }
 
 // --- BEST / WORST COMPANIES: Rank by revenue for selected year (and optional month) ---
-$best_companies_sql = "SELECT c.company_id, c.company_name, SUM(o.price) AS revenue, COUNT(o.order_id) AS order_count
-    FROM orders o
-    JOIN companies c ON o.company_id = c.company_id
-    WHERE YEAR(o.order_date) = $filter_year " . ($filter_month ? "AND MONTH(o.order_date) = $filter_month" : "") . "
-    GROUP BY c.company_id, c.company_name
-    ORDER BY revenue DESC
-    LIMIT 15";
+$best_companies_sql = "
+SELECT c.company_id, c.company_name, SUM(o.price) AS revenue
+FROM orders o
+JOIN companies c ON o.company_id = c.company_id
+WHERE YEAR(o.order_date) = $filter_year
+GROUP BY c.company_id, c.company_name
+ORDER BY revenue DESC
+LIMIT 15";
+
 $best_companies_res = mysqli_query($conn, $best_companies_sql);
 $best_companies = [];
 $rank = 1;
@@ -558,7 +560,6 @@ if (!empty($top_company_ids)) {
             });
         }
 
-        // Line chart: customers & companies per month
         var lineCtx = document.getElementById('dashboardLineChart');
         if (lineCtx) {
             new Chart(lineCtx, {

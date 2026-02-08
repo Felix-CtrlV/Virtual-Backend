@@ -718,7 +718,7 @@ if ($chat_query) {
                 <lord-icon src="https://cdn.lordicon.com/kwnsnjyg.json" trigger="loop" delay="2000"
                     colors="primary:#ffffff" style="width:25px;height:25px">
                 </lord-icon>
-                <span class="nav-label-main">Dashboard</span>
+                <span class="nav-label-main">Overview</span>
                 <span class="nav-badge">Today</span>
             </a>
         </ul>
@@ -739,7 +739,7 @@ if ($chat_query) {
                     colors="primary:#ffffff,secondary:#ffffff,tertiary:#000000,quaternary:#ffffff,quinary:#ffffff"
                     style="width:25px;height:25px">
                 </lord-icon>
-                <span class="nav-label-main">View Companies</span>
+                <span class="nav-label-main">Companies</span>
             </a>
             <a class="nav-button <?php echo $active === 'reviews' ? 'active' : ''; ?>"
                 href="reviews.php?adminid=<?php echo urlencode($adminid); ?>">
@@ -821,7 +821,7 @@ if ($chat_query) {
                     </div>
                 </div>
 
-                <div class="avatar"><?php echo strtoupper(substr($name, 0, 1)); ?></div>
+                <img class="avatar" style="border: 1px solid white;" src="../assets/customer_profiles/<?php echo $admininfo['image']; ?>" alt="Avatar">
             </div>
         </div>
 

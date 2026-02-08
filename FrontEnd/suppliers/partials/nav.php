@@ -36,7 +36,33 @@ if (!$row) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Account Pending</title>
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
+        <script>
+            (function () {
+                const currentTheme = localStorage.getItem('theme');
+                if (currentTheme === 'dark-mode') {
+                    document.documentElement.classList.add('dark-mode');
+                }
+            })();
+        </script>
         <style>
+            :root {
+                --bg: #f8f9fa;
+                --surface: #ffffff;
+                --text: #333;
+                --heading: #2c3e50;
+                --muted: #6c757d;
+                --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            :root.dark-mode {
+                --bg: #121212;
+                --surface: #1e1e1e;
+                --text: #e0e0e0;
+                --heading: #ffffff;
+                --muted: #a0a0a0;
+                --shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+            }
+
             body {
                 margin: 0;
                 height: 100vh;
@@ -45,27 +71,27 @@ if (!$row) {
                 justify-content: center;
                 align-items: center;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #f8f9fa;
-                color: #333;
+                background-color: var(--bg);
+                color: var(--text);
                 text-align: center;
             }
 
             .status-card {
-                background: white;
+                background: var(--surface);
                 padding: 40px;
                 border-radius: 20px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                box-shadow: var(--shadow);
                 max-width: 400px;
                 width: 90%;
             }
 
             h2 {
                 margin-top: 20px;
-                color: #2c3e50;
+                color: var(--heading);
             }
 
             p {
-                color: #6c757d;
+                color: var(--muted);
                 line-height: 1.6;
             }
 
@@ -935,7 +961,7 @@ $pendingOrderList = [
             <div class="panel-close" onclick="togglePanel('mobile-menu-panel')" aria-label="Close">×</div>
             <nav class="panel-nav">
                 <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>
-                    onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
+                    onclick="togglePanel('mobile-menu-panel')">Overview</a>
                 <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?>
                     onclick="togglePanel('mobile-menu-panel')">Inventory</a>
                 <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?>
@@ -957,6 +983,14 @@ $pendingOrderList = [
             <a href="orders.php" class="nav-link <?= $active === "orders" ? 'active' : '' ?>">Orders</a>
             <a href="rentpayment.php" class="nav-link <?= $active === "rentpayment" ? 'active' : '' ?>">Rent Payment</a>
             <a href="setting.php" class="nav-link <?= $active === "setting" ? 'active' : '' ?>">Settings</a>
+
+            <div class="theme-switch-wrapper" style="margin-right: 15px;">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider-theme"></div>
+                </label>
+            </div>
+
             <a href="../utils/signout.php" class="btn-logout">Logout</a>
         </div>
         <div class="mobile-toggle" onclick="togglePanel('mobile-menu-panel')" aria-label="Menu">
@@ -1216,6 +1250,32 @@ $pendingOrderList = [
                     document.body.style.overflow = '';
                 }
             };
+        </script>
+        <script>
+            // --- DARK MODE LOGIC ---
+            const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+            const currentTheme = localStorage.getItem('theme');
+
+            // 1. Check LocalStorage on load
+            if (currentTheme) {
+                document.body.classList.add(currentTheme); // Adds 'dark-mode' class
+                if (currentTheme === 'dark-mode') {
+                    toggleSwitch.checked = true;
+                }
+            }
+
+            // 2. Handle Switch Event
+            function switchTheme(e) {
+                if (e.target.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            toggleSwitch.addEventListener('change', switchTheme, false);
         </script>
 </body>
 

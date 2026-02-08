@@ -181,9 +181,9 @@ include("partials/nav.php");
             <div id="modalStars" style="font-size: 1.2rem; margin-top: 5px;"></div>
         </div>
         <h5 id="modalProduct" style="color: var(--primary); text-align: center; margin-bottom: 15px;"></h5>
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto;">
-            <p id="modalComment" style="color: #444; line-height: 1.6; margin: 0;"></p>
-        </div>
+        <div style="background: var(--surface-secondary); padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+    <p id="modalComment" style="color: var(--text-main); line-height: 1.6; margin: 0;"></p>
+</div>
         <div style="text-align: right; margin-top: 10px;">
             <small id="modalDate" style="color: #999;"></small>
         </div>
@@ -191,10 +191,18 @@ include("partials/nav.php");
 </div>
 
 <script>
+    // HELPER: Get CSS Variable Color
+    function getThemeColor(variable) {
+        return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+    }
+
     // 1. PERFORMANCE CHART (Line Chart)
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const performanceData = <?= json_encode(array_values($monthlyRevenue ?? [])) ?>;
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+    const primaryColor = getThemeColor('--primary') || '#4f46e5';
+    const textColor = getThemeColor('--text-main'); // Dynamic Text Color
+    const gridColor = getThemeColor('--border-color'); // Dynamic Grid Color
+    
     const ctx = document.getElementById('performanceChart').getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
     gradient.addColorStop(0, primaryColor + '88');
@@ -220,8 +228,17 @@ include("partials/nav.php");
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { ticks: { color: '#000' }, title: { display: true, text: 'Month' } },
-                y: { beginAtZero: true, ticks: { color: '#000' }, title: { display: true, text: 'Revenue ($)' } }
+                x: { 
+                    ticks: { color: textColor }, 
+                    grid: { color: gridColor },
+                    title: { display: true, text: 'Month', color: textColor } 
+                },
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { color: textColor }, 
+                    grid: { color: gridColor },
+                    title: { display: true, text: 'Revenue ($)', color: textColor } 
+                }
             }
         }
     });
@@ -231,7 +248,7 @@ include("partials/nav.php");
     const categoryLabels = <?= json_encode($categoryLabels) ?>;
     const categoryData = <?= json_encode($categoryData) ?>;
 
-    // Generate colors dynamically based on primary color or preset palette
+    // Generate colors dynamically
     const bgColors = [primaryColor, '#ea982a', '#cb4444', '#4caf50', '#673ab7', '#3f51b5'];
 
     new Chart(catCtx, {
@@ -241,36 +258,38 @@ include("partials/nav.php");
             datasets: [{
                 data: categoryData,
                 backgroundColor: bgColors,
-                borderWidth: 2,
-                borderColor: '#ffffff'
+                borderWidth: 0, // Remove white border for clean look
+                borderColor: getThemeColor('--bg-color') // Match background if border needed
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } }
+                legend: { 
+                    position: 'right', 
+                    labels: { 
+                        boxWidth: 10, 
+                        font: { size: 10 },
+                        color: textColor // Dynamic Legend Text
+                    } 
+                }
             }
         }
     });
 
-    // 3. REVIEW MODAL LOGIC (FIXED)
-    // 3. REVIEW MODAL LOGIC
+    // 3. REVIEW MODAL LOGIC (Kept same, but style handled by CSS now)
     const modal = document.getElementById('reviewModal');
 
-    // Note: Added 'event' as the first parameter
     function openReviewModal(event, review) {
-        // PREVENT IMMEDIATE CLOSING:
-        event.stopPropagation(); // Stops the click from reaching window.onclick
-        event.preventDefault();  // Prevents page reload if inside a link/form
+        event.stopPropagation();
+        event.preventDefault();
 
-        // Data Mapping
         document.getElementById('modalName').textContent = review.customer_name;
         document.getElementById('modalProduct').textContent = review.product_name ? 'Purchased: ' + review.product_name : 'Verified Purchase';
         document.getElementById('modalComment').textContent = review.review;
         document.getElementById('modalDate').textContent = review.created_at;
 
-        // Image handling
         const img = document.getElementById('modalImg');
         const defaultImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(review.customer_name) + '&background=random';
 
@@ -279,17 +298,13 @@ include("partials/nav.php");
         } else {
             img.src = defaultImg;
         }
-
         img.onerror = function () { this.src = defaultImg; };
 
-        // Star generation
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
-            starsHtml += (i <= review.rating) ? '<span class="star-gold">★</span>' : '<span style="color:#ddd">★</span>';
+            starsHtml += (i <= review.rating) ? '<span class="star-gold">★</span>' : '<span style="color:var(--border-color)">★</span>';
         }
         document.getElementById('modalStars').innerHTML = starsHtml;
-
-        // Show Modal
         modal.style.display = 'flex';
     }
 
@@ -297,7 +312,6 @@ include("partials/nav.php");
         modal.style.display = 'none';
     }
 
-    // Close on outside click
     window.onclick = function (event) {
         if (event.target == modal) {
             closeReviewModal();
