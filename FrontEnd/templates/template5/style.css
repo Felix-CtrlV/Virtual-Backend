@@ -3846,3 +3846,34 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
     z-index: 1000;
     border: 1.5px solid white; 
 }
+
+@media (max-width: 768px) {
+    .content-side header {
+        margin-top: -70px !important; 
+    }
+    
+    .visual-side {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block; 
+    }
+
+    .visual-side img {
+        width: 100vw !important;  
+        height: auto !important;
+        display: block;
+        margin-left: calc(-50vw + 50%);
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+    }
+
+    
+    .split-screen {
+        display: flex;
+        flex-direction: column;
+    }
+}
