@@ -228,14 +228,14 @@
     .logo {
         font-size: 1.5rem;
         font-weight: bold;
-        background: var(--surface);
+        background: #fff;
         padding: 8px 20px;
         border-radius: 50px;
     }
 
     .btn-logout {
         background: transparent;
-        border: 1px solid var(--border-color);
+        border: 1px solid #ccc;
         padding: 8px 20px;
         border-radius: 50px;
         cursor: pointer;
@@ -402,8 +402,8 @@
     }
 
     .timeline-event {
-        background: var(--dark-card);
-        color: var(--text-inverse);
+        background: #333;
+        color: white;
         padding: 15px;
         border-radius: var(--radius-md);
         margin-bottom: 10px;
@@ -413,8 +413,8 @@
     }
 
     .timeline-event.light {
-        background: var(--surface);
-        color: var(--text-main);
+        background: white;
+        color: #333;
     }
 
     .top-stats {
@@ -533,14 +533,14 @@
     }
 
     .stat-card {
-        background: var(--surface);
+        background: white;
         padding: 25px;
         border-radius: 16px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        border: 1px solid var(--border-color);
+        border: 1px solid white;
         transition: 0.2s;
     }
 
@@ -550,7 +550,7 @@
 
     .stat-title {
         font-size: 0.85rem;
-        color: var(--text-muted);
+        color: #888;
         font-weight: 700;
         text-transform: uppercase;
     }
@@ -558,7 +558,7 @@
     .stat-value {
         font-size: 2.2rem;
         font-weight: 800;
-        color: var(--text-main);
+        color: #333;
         margin-top: 5px;
     }
 
@@ -591,7 +591,7 @@
 
     /* Inventory Table */
     .inventory-panel {
-        background: var(--surface);
+        background: white;
         border-radius: 20px;
         padding: 5px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -606,16 +606,16 @@
     .custom-table th {
         text-align: left;
         padding: 20px;
-        color: var(--text-muted);
+        color: #999;
         font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        border-bottom: 2px solid var(--border-color);
+        border-bottom: 2px solid #f0f0f0;
     }
 
     .custom-table td {
         padding: 15px 20px;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid #f9f9f9;
         vertical-align: middle;
     }
 
@@ -625,7 +625,7 @@
     }
 
     .product-row:hover {
-        background-color: var(--surface-hover);
+        background-color: #f8f9fa;
     }
 
     .product-flex {
@@ -639,7 +639,7 @@
         height: 50px;
         border-radius: 10px;
         object-fit: cover;
-        background: var(--surface-hover);
+        background: #eee;
     }
 
     .badge {
@@ -647,8 +647,6 @@
         border-radius: 30px;
         font-size: 0.75rem;
         font-weight: bold;
-        background: var(--surface-hover);
-        color: var(--text-main);
     }
 
     .badge.ok {
@@ -681,7 +679,7 @@
 
     /* Modal Content */
     .modal-content {
-        background-color: var(--surface);
+        background-color: #fefefe;
         padding: 25px;
         border-radius: 12px;
         width: 90%;
@@ -693,7 +691,7 @@
 
     /* Close Button */
     .close-modal {
-        color: var(--text-muted);
+        color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
@@ -705,12 +703,12 @@
     }
 
     .close-modal:hover {
-        color: var(--text-main);
+        color: #333;
     }
 
     /* Review Item Hover Effect */
     .review-item:hover {
-        background-color: var(--surface-hover);
+        background-color: #f0f4f8;
         transform: translateX(3px);
     }
 
@@ -741,7 +739,7 @@
         font-weight: bold;
         width: 120px;
         border: none;
-        border-bottom: 2px solid var(--border-color);
+        border-bottom: 2px solid #ddd;
         padding: 5px;
         color: var(--primary);
     }
@@ -760,20 +758,20 @@
 
     .var-table th {
         text-align: left;
-        color: var(--text-muted);
+        color: #aaa;
         font-size: 0.8rem;
         padding-bottom: 10px;
     }
 
     .var-table td {
         padding: 10px 0;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid #f5f5f5;
     }
 
     .qty-box {
         width: 60px;
         padding: 8px;
-        border: 1px solid var(--border-color);
+        border: 1px solid #ddd;
         border-radius: 8px;
         text-align: center;
         font-weight: 600;
@@ -786,8 +784,8 @@
 
     /* Add Variant Section */
     .add-variant-box {
-        background: var(--surface-hover);
-        border: 2px dashed var(--border-color);
+        background: #fafafa;
+        border: 2px dashed #e0e0e0;
         border-radius: 12px;
         padding: 20px;
         margin-top: auto;
@@ -797,7 +795,7 @@
         font-size: 0.9rem;
         font-weight: 700;
         margin-bottom: 10px;
-        color: var(--text-main);
+        color: #555;
         display: flex;
         align-items: center;
         gap: 5px;
@@ -812,7 +810,7 @@
 
     .input-sm {
         padding: 8px;
-        border: 1px solid var(--border-color);
+        border: 1px solid #ddd;
         border-radius: 6px;
         width: 100%;
     }
@@ -832,8 +830,8 @@
     }
 
     .btn-save {
-        background: var(--dark-card);
-        color: var(--text-inverse);
+        background: black;
+        color: white;
         width: 100%;
         padding: 15px;
         border-radius: 12px;
@@ -844,8 +842,7 @@
     }
 
     .btn-save:hover {
-        background: var(--surface-hover);
-        color: var(--text-main);
+        background: #333;
     }
 
     .rent-header {
@@ -863,10 +860,11 @@
     }
 
     .rent-card {
-        background: var(--surface-hover);
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
         padding: 25px;
         border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
+        border: 1px solid rgba(255, 255, 255, 0.9);
         display: flex;
         align-items: center;
         gap: 20px;
@@ -891,14 +889,14 @@
 
     .rent-details h3 {
         font-size: 0.9rem;
-        color: var(--text-muted);
+        color: #666;
         margin-bottom: 5px;
     }
 
     .rent-details h2 {
         font-size: 1.8rem;
         font-weight: 700;
-        color: var(--text-main);
+        color: #333;
     }
 
     .main-content {
@@ -909,7 +907,7 @@
     }
 
     .history-panel {
-        background: var(--surface);
+        background: white;
         border-radius: var(--radius-xl);
         padding: 25px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -961,7 +959,7 @@
         width: 40px;
         height: 40px;
         border-radius: 8px;
-        border: 1px solid var(--border-color);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         background: transparent;
         color: white;
         font-size: 1.2rem;
@@ -982,7 +980,7 @@
     .total-display {
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 1px dashed var(--border-color);
+        border-top: 1px dashed rgba(255, 255, 255, 0.2);
     }
 
     .total-row {
@@ -1023,17 +1021,17 @@
         top: -9999px;
         left: -9999px;
         width: 320px;
-        background: var(--surface);
+        background: #fff;
         padding: 20px;
         font-family: 'Courier New', Courier, monospace;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        color: var(--text-main);
-        border: 1px solid var(--border-color);
+        color: black;
+        border: 1px solid #ddd;
     }
 
     .rec-header {
         text-align: center;
-        border-bottom: 1px dashed var(--border-color);
+        border-bottom: 1px dashed #000;
         padding-bottom: 10px;
         margin-bottom: 10px;
     }
@@ -1064,8 +1062,6 @@
         border-radius: 5px;
         font-size: 0.8rem;
         font-weight: bold;
-        background: var(--surface-hover);
-        color: var(--text-main);
     }
 
     /* --- VIEW MODAL STYLES --- */
@@ -1077,23 +1073,23 @@
     }
 
     .detail-box {
-        background: var(--surface-hover);
+        background: #f8f9fa;
         padding: 12px;
         border-radius: 12px;
-        border: 1px solid var(--border-color);
+        border: 1px solid #eee;
     }
 
     .detail-label {
         font-size: 0.75rem;
         text-transform: uppercase;
-        color: var(--text-muted);
+        color: #888;
         margin-bottom: 5px;
         letter-spacing: 0.5px;
     }
 
     .detail-value {
         font-weight: 600;
-        color: var(--text-main);
+        color: #333;
         font-size: 0.95rem;
         display: flex;
         align-items: center;
@@ -1108,13 +1104,11 @@
         font-size: 0.9rem;
         font-weight: 700;
         text-transform: capitalize;
-        background: var(--surface-hover);
-        color: var(--text-main);
     }
 
     .status-pill-lg.ok {
-        background: #e8f5e9;
-        color: #2e7d32;
+        background: #dcfce7;
+        color: #166534;
     }
 
     .status-pill-lg.pending {
@@ -1123,7 +1117,7 @@
     }
 
     .status-pill-lg.low {
-        background: #ffebee;
+        background: #fee2e2;
         color: #991b1b;
     }
 
@@ -1160,7 +1154,7 @@
         height: 60px;
         /* Starts same size as button */
         border-radius: 50%;
-        background: var(--surface);
+        background: white;
         z-index: 9999;
         overflow: hidden;
         /* This creates the expansion effect from the corner */
@@ -1202,7 +1196,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        background: var(--surface);
+        background: white;
         border-radius: 50%;
         padding: 5px;
     }
@@ -1210,10 +1204,10 @@
     /* Sidebar */
     .chat-sidebar {
         width: 320px;
-        border-right: 1px solid var(--border-color);
+        border-right: 1px solid #e0e0e0;
         display: flex;
         flex-direction: column;
-        background: var(--surface);
+        background: #fff;
     }
 
     .sidebar-header {
@@ -1224,7 +1218,7 @@
     }
 
     .search-input {
-        background: var(--surface-hover);
+        background: #f1f1f1;
         border: none;
         padding: 10px 15px;
         border-radius: 20px;
@@ -1246,7 +1240,7 @@
 
     .chat-contact:hover,
     .chat-contact.active {
-        background-color: var(--surface-hover);
+        background-color: #f4f4f5;
     }
 
     .chat-contact.active {
@@ -1291,12 +1285,12 @@
 
     .time {
         font-size: 0.75rem;
-        color: var(--text-muted);
+        color: #888;
     }
 
     .last-msg {
         font-size: 0.85rem;
-        color: var(--text-muted);
+        color: #888;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1307,7 +1301,7 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: var(--surface-hover);
+        background: #f5f5f5;
         /* Chat background */
         background-image: url('https://web.telegram.org/img/bg_0.png');
         /* Optional Pattern */
@@ -1315,12 +1309,12 @@
     }
 
     .chat-header {
-        background: var(--surface);
+        background: white;
         padding: 10px 20px;
         display: flex;
         align-items: center;
         gap: 10px;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid #e0e0e0;
     }
 
     .avatar-small {
@@ -1345,7 +1339,7 @@
 
     .status {
         font-size: 0.8rem;
-        color: var(--primary);
+        color: #3390ec;
     }
 
     .messages-area {
@@ -1367,13 +1361,13 @@
     }
 
     .msg-bubble.received {
-        background: var(--surface);
+        background: white;
         align-self: flex-start;
         border-bottom-left-radius: 2px;
     }
 
     .msg-bubble.sent {
-        background: var(--surface-hover);
+        background: #e3f2fd;
         /* Light Blue */
         align-self: flex-end;
         border-bottom-right-radius: 2px;
@@ -1383,12 +1377,12 @@
         display: block;
         text-align: right;
         font-size: 0.65rem;
-        color: var(--text-muted);
+        color: #999;
         margin-top: 4px;
     }
 
     .chat-input-area {
-        background: var(--surface);
+        background: white;
         padding: 10px 20px;
         display: flex;
         align-items: center;
@@ -1400,8 +1394,6 @@
         border: none;
         font-size: 1rem;
         outline: none;
-        background: transparent;
-        color: var(--text-main);
     }
 
     .attach-btn,
@@ -1410,7 +1402,7 @@
         border: none;
         cursor: pointer;
         font-size: 1.2rem;
-        color: var(--text-muted);
+        color: #888;
     }
 
     /* Mobile Responsiveness for Chat */

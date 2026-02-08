@@ -36,33 +36,7 @@ if (!$row) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Account Pending</title>
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
-        <script>
-            (function () {
-                const currentTheme = localStorage.getItem('theme');
-                if (currentTheme === 'dark-mode') {
-                    document.documentElement.classList.add('dark-mode');
-                }
-            })();
-        </script>
         <style>
-            :root {
-                --bg: #f8f9fa;
-                --surface: #ffffff;
-                --text: #333;
-                --heading: #2c3e50;
-                --muted: #6c757d;
-                --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            }
-
-            :root.dark-mode {
-                --bg: #121212;
-                --surface: #1e1e1e;
-                --text: #e0e0e0;
-                --heading: #ffffff;
-                --muted: #a0a0a0;
-                --shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-            }
-
             body {
                 margin: 0;
                 height: 100vh;
@@ -71,27 +45,27 @@ if (!$row) {
                 justify-content: center;
                 align-items: center;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                color: var(--text);
+                background-color: #f8f9fa;
+                color: #333;
                 text-align: center;
             }
 
             .status-card {
-                background: var(--surface);
+                background: white;
                 padding: 40px;
                 border-radius: 20px;
-                box-shadow: var(--shadow);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
                 max-width: 400px;
                 width: 90%;
             }
 
             h2 {
                 margin-top: 20px;
-                color: var(--heading);
+                color: #2c3e50;
             }
 
             p {
-                color: var(--muted);
+                color: #6c757d;
                 line-height: 1.6;
             }
 
@@ -471,7 +445,7 @@ $chat_sql = "
     SELECT 
         c.conversation_id,
         a.adminid as other_user_id,
-        a.name,
+        a.username as name,
         a.image, 
         (SELECT message_text FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) as last_msg,
         (SELECT created_at FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) as last_time

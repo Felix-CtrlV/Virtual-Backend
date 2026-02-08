@@ -1,7 +1,6 @@
 <?php
-// Ensure session is started (usually done in index.php, but check if needed)
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
 
 $is_logged_in = isset($_SESSION['customer_id']) && $_SESSION['customer_id'] > 0;
@@ -53,12 +52,8 @@ if (isset($_POST['submit_review'])) {
 
 <?php
 if (!isset($conn)) {
-    include '../../../BackEnd/config/dbconfig.php';
+  include '../../../BackEnd/config/dbconfig.php';
 }
-
-// Check if user is logged in
-$isLoggedIn = isset($_SESSION['customer_id']);
-$current_customer_id = $isLoggedIn ? $_SESSION['customer_id'] : null;
 
 $supplier_id = (int) $supplier['supplier_id'];
 $company_id_review = (int)($supplier['company_id'] ?? 0);
@@ -100,15 +95,14 @@ mysqli_stmt_close($review_stmt);
 
 
 if (isset($_POST['submit_review'])) {
-    // SECURITY: Prevent guests from submitting via POST even if they bypass JS
-    if (!$isLoggedIn) {
-        header("Location: customerLogin.php");
-        exit();
-    }
+  if (!isset($_SESSION['customer_id']) || $_SESSION['customer_id'] <= 0) {
+    header("Location: /Malltiverse/FrontEnd/customerLogin.php");
+    exit;
+  }
+  $customer_id = (int) $_SESSION['customer_id'];
 
-    $rating = (int) $_POST['rating'];
-    $review_text = trim($_POST['review']);
-    $customer_id = $current_customer_id; // Use the actual logged-in ID
+  $rating = (int) $_POST['rating'];
+  $review_text = trim($_POST['review']);
 
   if ($rating > 0 && !empty($review_text)) {
     $company_id_ins = (int)($supplier['company_id'] ?? 0);
@@ -125,10 +119,12 @@ if (isset($_POST['submit_review'])) {
     mysqli_stmt_execute($insert_stmt);
     mysqli_stmt_close($insert_stmt);
 
-        header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id . "&page=review");
-        exit();
-    }
+    header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id);
+    exit();
+  }
 }
+
+
 ?>
 
 <div class="review-wrapper">
@@ -174,7 +170,8 @@ if (isset($_POST['submit_review'])) {
 
             <div class="single-star me-3" style="color: var(--primary);">★</div>
 
-            <div class="flex-grow-1 mx-2">
+Mei, [2/2/2026 9:14 AM]
+<div class="flex-grow-1 mx-2">
               <div class="progress custom-progress"
                 style="height: 8px; background-color: #7f8a9f44; border-radius: 10px;">
                 <div class="progress-bar" role="progressbar"
@@ -232,39 +229,49 @@ if (isset($_POST['submit_review'])) {
         <?php endforeach; ?>
       </div>
       <!-- Add Review Form -->
+      <!-- Add Review Form / Guest Check -->
       <div class="col-md-6 review-form">
         <h4>Add a Review</h4>
-        <form method="POST" action="">
-          <div class="mb-3">
-            <label class="form-label">Add Your Rating</label>
-            <div class="star-rating svg-stars">
-              <input type="hidden" name="rating" id="rating" value="0">
-              <?php for ($i = 1; $i <= 5; $i++): ?>
-                <button type="button" class="svg-star" data-value="<?= $i ?>" aria-label="<?= $i ?> star">
-                  <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
-                    <path class="star-fill"
-                      d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.402 8.164L12 18.896 4.664 23.162l1.402-8.164L.132 9.211l8.2-1.193z" />
-                  </svg>
-                </button>
-              <?php endfor; ?>
-            </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label">Write Your Review</label>
-            <textarea name="review" class="form-control" rows="4" required></textarea>
+        <?php if (!$is_logged_in): ?>
+          <div class="guest-review-lock"
+            style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+            <p>You must be logged in to write a review.</p>
+            <button onclick="openAuthModal()" class="btn btn-primary">Login / Register</button>
           </div>
-          <?php if ($isLoggedIn): ?>
-            <button type="submit" name="submit_review">Submit Review</button>
-          <?php else: ?>
-            <button type="button" onclick="showLoginPopup()">Submit Review</button>
-          <?php endif; ?>
-        </form>
+        <?php else: ?>
+          <form method="POST" action="">
+            <div class="mb-3">
+              <label class="form-label">Add Your Rating</label>
+              <div class="star-rating svg-stars">
+                <input type="hidden" name="rating" id="rating" value="0">
+                <?php for ($i = 1; $i <= 5; $i++): ?>
+                  <button type="button" class="svg-star" data-value="<?= $i ?>" aria-label="<?= $i ?> star">
+                    <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
+                      <path class="star-fill"
+                        d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.402 8.164L12 18.896 4.664 23.162l1.402-8.164L.132 9.211l8.2-1.193z" />
+                    </svg>
+                  </button>
+                <?php endfor; ?>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Write Your Review</label>
+              <textarea name="review" class="form-control" rows="4" required></textarea>
+            </div>
+            <button type="submit" name="submit_review" class="btn btn-warnin">Submit</button>
+          </form>
+
+        <?php endif; ?>
+
       </div>
+
     </div>
   </div>
 </div>
 
+Mei, [2/2/2026 9:14 AM]
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const container = document.querySelector('.svg-stars');
