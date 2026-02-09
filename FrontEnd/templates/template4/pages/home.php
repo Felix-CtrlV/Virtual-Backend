@@ -542,7 +542,7 @@ $tagline = $supplier['tagline'] ?? 'Redefine Your Limits.';
 
     <div class="scroll-down text-white">
         <small>SCROLL</small><br>
-        <i class="fas fa-chevron-down"></i>
+        <i class="fas fa-chevron-down" style="margin-left: 17px;"></i>
     </div>
 </section>
 

@@ -30,23 +30,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         //     if ($res->num_rows > 0) {
         //         $customer = $res->fetch_assoc();
-                $cid = $_SESSION['customer_id']; 
+        $cid = $_SESSION['customer_id'];
 
-                $stmt = $conn->prepare("INSERT INTO reviews (company_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
-                $stmt->bind_param("iisi", $company_id, $cid, $review_text, $rating);
+        $stmt = $conn->prepare("INSERT INTO reviews (company_id, customer_id, review, rating, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmt->bind_param("iisi", $company_id, $cid, $review_text, $rating);
 
-                if ($stmt->execute()) {
-                    echo "<script>alert('Review published.'); window.location.href='?supplier_id=$supplier_id&page=review';</script>";
-                } else {
-                    echo "<script>alert('System error.');</script>";
-                }
-            
+        if ($stmt->execute()) {
+            echo "<script>alert('Review published.'); window.location.href='?supplier_id=$supplier_id&page=review';</script>";
         } else {
-            echo "<script>alert('Email required.');</script>";
+            echo "<script>alert('System error.');</script>";
         }
     } else {
-        echo "<script>alert('Rating and review text required.');</script>";
+        echo "<script>alert('Email required.');</script>";
     }
+}
+
 
 
 // 3. Fetch Stats
@@ -122,8 +120,15 @@ $reviews_res = $conn->query($sql_reviews);
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* --- HEADER --- */
@@ -421,7 +426,7 @@ $reviews_res = $conn->query($sql_reviews);
         line-height: 1.7;
         color: #ddd;
         margin-top: 15px;
-        padding-left: 5px;
+        padding-left: 15px;
         position: relative;
     }
 
@@ -472,26 +477,30 @@ $reviews_res = $conn->query($sql_reviews);
     .star-select-container {
         display: flex;
         flex-direction: row-reverse;
-        justify-content: center; /* Align left */
+        justify-content: center;
+        /* Align left */
         gap: 22px;
         margin-bottom: 40px;
     }
-    
-    .star-select-container input { display: none; }
-    
+
+    .star-select-container input {
+        display: none;
+    }
+
     .star-select-container label svg {
         width: 34px;
         height: 34px;
-        fill: #333; /* Empty state */
+        fill: #333;
+        /* Empty state */
         cursor: pointer;
         transition: fill 0.2s;
     }
 
     /* White Stars on Hover/Active */
     .star-select-container label:hover svg,
-    .star-select-container label:hover ~ label svg,
-    .star-select-container input:checked ~ label svg {
-        fill: #FFF; 
+    .star-select-container label:hover~label svg,
+    .star-select-container input:checked~label svg {
+        fill: #FFF;
     }
 
     /* Input Fields - Sleek Underline Style (Original) */
@@ -567,7 +576,7 @@ $reviews_res = $conn->query($sql_reviews);
             grid-template-columns: 1fr;
             gap: 30px;
         }
-        
+
         .big-score-block {
             border-right: none;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -580,12 +589,12 @@ $reviews_res = $conn->query($sql_reviews);
         .bento-wrapper {
             grid-template-columns: 1fr;
         }
-        
+
         .form-sticky-panel {
             position: static;
             margin-top: 40px;
         }
-        
+
         .page-wrapper {
             padding: 20px;
         }
@@ -597,11 +606,11 @@ $reviews_res = $conn->query($sql_reviews);
             align-items: flex-start;
             gap: 15px;
         }
-        
+
         .reviewer-header {
             flex-wrap: wrap;
         }
-        
+
         .review-stars {
             width: 100%;
             justify-content: center;
@@ -613,21 +622,21 @@ $reviews_res = $conn->query($sql_reviews);
         .review-card {
             padding: 20px;
         }
-        
+
         .reviewer-avatar {
             width: 48px;
             height: 48px;
         }
-        
+
         .star-select-container label svg {
             width: 24px;
             height: 24px;
         }
-        
+
         .futuristic-input {
             padding: 14px 0;
         }
-        
+
         .submit-btn {
             padding: 16px;
         }
@@ -639,7 +648,7 @@ $reviews_res = $conn->query($sql_reviews);
         transform: translateY(30px);
         transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    
+
     .reveal-on-scroll.is-visible {
         opacity: 1;
         transform: translateY(0);
@@ -647,7 +656,9 @@ $reviews_res = $conn->query($sql_reviews);
 
     /* --- LOADING ANIMATION FOR BARS --- */
     @keyframes slideIn {
-        from { width: 0; }
+        from {
+            width: 0;
+        }
     }
 
     .hud-fill {
@@ -658,16 +669,16 @@ $reviews_res = $conn->query($sql_reviews);
     ::-webkit-scrollbar {
         width: 8px;
     }
-    
+
     ::-webkit-scrollbar-track {
         background: rgba(255, 255, 255, 0.05);
     }
-    
+
     ::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.2);
         border-radius: 4px;
     }
-    
+
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(255, 255, 255, 0.3);
     }
@@ -714,9 +725,9 @@ $reviews_res = $conn->query($sql_reviews);
                 <?php while ($row = $reviews_res->fetch_assoc()): ?>
                     <div class="review-card reveal-on-scroll">
                         <div class="reviewer-header">
-                            <img src="<?= $row['image'] ? '../assets/customer_profiles/' . $row['image'] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' ?>" 
-                                 class="reviewer-avatar" 
-                                 alt="<?= htmlspecialchars($row['name']) ?>">
+                            <img src="<?= $row['image'] ? '../assets/customer_profiles/' . $row['image'] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' ?>"
+                                class="reviewer-avatar"
+                                alt="<?= htmlspecialchars($row['name']) ?>">
                             <div class="reviewer-info">
                                 <h3 class="reviewer-name"><?= htmlspecialchars($row['name']) ?></h3>
                                 <span class="review-date"><?= date('F j, Y', strtotime($row['created_at'])) ?></span>
@@ -741,21 +752,20 @@ $reviews_res = $conn->query($sql_reviews);
             <h2 class="form-header">Write a Review</h2>
 
             <form method="POST" action="">
-                
+
                 <!-- ORIGINAL STAR BUTTON (reverted to original style) -->
                 <div class="star-select-container">
-                    <?php for($s=5; $s>=1; $s--): ?>
-                    <input type="radio" name="rating" id="star-<?=$s?>" value="<?=$s?>">
-                    <label for="star-<?=$s?>">
-                        <svg viewBox="0 0 576 512">
-                            <path d="M259.3 17.8L194 150.2 47.9 171.5c-26.2 3.8-36.7 36.1-17.7 54.6l105.7 103-25 145.5c-4.5 26.3 23.2 46 46.4 33.7L288 439.6l130.7 68.7c23.2 12.2 50.9-7.4 46.4-33.7l-25-145.5 105.7-103c19-18.5 8.5-50.8-17.7-54.6L382 150.2 316.7 17.8c-11.7-23.6-45.6-23.9-57.4 0z" />
-                        </svg>
-                    </label>
+                    <?php for ($s = 5; $s >= 1; $s--): ?>
+                        <input type="radio" name="rating" id="star-<?= $s ?>" value="<?= $s ?>">
+                        <label for="star-<?= $s ?>">
+                            <svg viewBox="0 0 576 512">
+                                <path d="M259.3 17.8L194 150.2 47.9 171.5c-26.2 3.8-36.7 36.1-17.7 54.6l105.7 103-25 145.5c-4.5 26.3 23.2 46 46.4 33.7L288 439.6l130.7 68.7c23.2 12.2 50.9-7.4 46.4-33.7l-25-145.5 105.7-103c19-18.5 8.5-50.8-17.7-54.6L382 150.2 316.7 17.8c-11.7-23.6-45.6-23.9-57.4 0z" />
+                            </svg>
+                        </label>
                     <?php endfor; ?>
                 </div>
 
                 <!-- ORIGINAL INPUT STYLES -->
-                <input type="email" name="email" class="futuristic-input" placeholder="Email Address" required>
                 <textarea name="review_text" rows="4" class="futuristic-input" placeholder="Your Experience..." style="resize:none;" required></textarea>
 
                 <!-- ORIGINAL BUTTON STYLE -->
@@ -774,7 +784,7 @@ $reviews_res = $conn->query($sql_reviews);
                     entry.target.classList.add('is-visible');
                 }
             });
-        }, { 
+        }, {
             threshold: 0.05,
             rootMargin: "0px 0px -50px 0px"
         });
@@ -796,7 +806,7 @@ $reviews_res = $conn->query($sql_reviews);
             const submitBtn = this.querySelector('.submit-btn');
             submitBtn.innerHTML = 'Publishing...';
             submitBtn.disabled = true;
-            
+
             // Re-enable after 3 seconds if still on page (for demo)
             setTimeout(() => {
                 submitBtn.innerHTML = 'Publish';
