@@ -150,13 +150,14 @@ if ($isLoggedIn) {
             <div class="d-lg-none mt-3">
                 <?php if ($isLoggedIn): ?>
                     <div class="mobile-user-profile">
-                        <div class="google-avatar-circle"><?= $first_letter ?></div>
+                        <img class="google-avatar-circle" src="../assets/customer_profiles/<?= $user_row['image']?>"></img>
                         <div>
                             <p class="user-full-name mb-0"><?= htmlspecialchars($user_name) ?></p>
                             <small class="user-full-email"><?= htmlspecialchars($user_email) ?></small>
                         </div>
                         <a href="../utils/logout.php?supplier_id=<?= $supplier_id ?>" class="ms-auto text-danger"><i class="fas fa-sign-out-alt"></i></a>
                     </div>
+                    
                 <?php else: ?>
                     <div class="d-flex gap-2 mb-3">
                         <a href="../customerLogin.php" class="btn btn-outline-dark w-50">Login</a>
@@ -188,18 +189,23 @@ if ($isLoggedIn) {
                     <?php if ($isLoggedIn): ?>
                         <div class="dropdown user-dropdown">
                             <a class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" href="#" data-bs-toggle="dropdown">
-                                <div class="google-avatar-circle me-2"><?= $first_letter ?></div>
+                        <img class="google-avatar-circle me-2" src="../assets/customer_profiles/<?= $user_row['image']?>"></img>
                                 <small class="fw-medium"><?= htmlspecialchars($user_name) ?></small>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li>
                                     <div class="profile-info-box text-center">
-                                        <div class="google-avatar-circle mx-auto mb-2" style="width: 50px; height: 50px; font-size: 20px;"><?= $first_letter ?></div>
+                                        <img class="google-avatar-circle mx-auto mb-2" src="../assets/customer_profiles/<?= $user_row['image']?>"></img>
                                         <p class="user-full-name"><?= htmlspecialchars($user_name) ?></p>
                                         <p class="user-full-email"><?= htmlspecialchars($user_email) ?></p>
                                     </div>
                                 </li>
                                 <li><hr class="dropdown-divider m-0"></li>
+                                <li>
+                                <a class="dropdown-item py-2" href="/malltiverse/FrontEnd/customer_profile.php">
+    <i class="fas fa-user-cog me-2"></i> Edit Profile
+</a>
+                                </li>
                                 <li><a class="dropdown-item logout-link py-2" href="../utils/logout.php?supplier_id=<?= $supplier_id ?>">
                                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                                 </a></li>
@@ -244,7 +250,7 @@ if ($isLoggedIn) {
 
     function refreshBag() {
     const supplierId = "<?= $supplier_id ?>";
-    // Cache မမိအောင် timestamp ထည့်ထားတာ မှန်ပါတယ်
+    
     fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
     .then(res => res.json())
     .then(data => {
@@ -252,7 +258,7 @@ if ($isLoggedIn) {
         
         document.querySelectorAll('.cart-badge-count').forEach(el => {
             el.innerText = count;
-            // logic ကို ရှင်းရှင်းလေးပဲ ထားပါမယ်
+            
             if (count > 0) {
                 el.style.setProperty('display', 'flex', 'important');
             } else {
@@ -295,4 +301,7 @@ document.addEventListener('DOMContentLoaded', refreshBag);
     justify-content: center;
     z-index: 1000;
     border: 1px solid white;
+}
+.google-avatar-circle {
+    object-fit: cover; 
 }</style>

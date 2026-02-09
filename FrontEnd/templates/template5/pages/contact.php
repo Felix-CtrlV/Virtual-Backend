@@ -50,13 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_message'])) {
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=Inter:wght@200;400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Alert Box စာလုံးပုံစံကို Luxury ဖြစ်အောင် ပြင်ခြင်း */
+       
         .luxury-font-title {
             font-family: 'Cormorant Garamond', serif !important;
             font-size: 28px !important;
             letter-spacing: 1px !important;
         }
-        /* Header ရဲ့ အပေါ်မှာ Alert Box ပေါ်စေရန် layer မြှင့်ခြင်း */
+       
         .swal2-container {
             z-index: 99999 !important;
         }

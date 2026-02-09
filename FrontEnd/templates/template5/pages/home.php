@@ -81,7 +81,6 @@ $features = $section['features'] ?? ['Sapphire Crystal', 'Chronometer Certified'
                 <?php foreach ($features as $index => $feature): ?>
                     <div class="col-md-4 feature-col">
                         <div class="minimal-feature">
-                            <span class="f-num">0<?= $index + 1 ?></span>
                             <h4 class="f-title"><?= htmlspecialchars($feature) ?></h4>
                             <span class="f-line"></span>
                         </div>
@@ -146,17 +145,17 @@ body {
 }
 
 .editorial-title {
-    font-size: clamp(3rem, 5vw, 5rem);
-    font-weight: 900;
-    line-height: 0.9;
-    letter-spacing: -2px;
+    font-size: clamp(0.5rem,5vw, 5rem); 
+    font-weight: 600;
+    line-height: 1.1; 
+    letter-spacing: -1px;
     text-transform: uppercase;
     color: var(--sw-dark);
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     position: relative;
     z-index: 5;
-    mix-blend-mode: exclusion; /* Cool overlap effect if image slides under */
 }
+
 
 .editorial-desc {
     font-size: 1.1rem;
