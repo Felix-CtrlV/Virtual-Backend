@@ -295,26 +295,25 @@ $colors = array_values(array_unique($colors));
     // Add to Cart Logic
     document.getElementById('addToCartBtn').addEventListener('click', function () {
         if (!isLoggedIn) {
-            Swal.fire({
-                title: 'Login Required',
-                text: 'Please login to add items to your cart.',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Login Now',
-                cancelButtonText: 'Maybe Later',
-                confirmButtonColor: '#212529',
-                customClass: {
-                    popup: 'premium-swal',
-                    title: 'premium-title',
-                    htmlContainer: 'premium-text',
-                    confirmButton: 'premium-confirm-btn',
-                    cancelButton: 'premium-cancel-btn'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '../customerLogin.php';
-                }
-            });
+      Swal.fire({
+    title: 'Login Required',
+    text: 'Please login to add items to your cart.',
+    icon: 'info',
+    showCancelButton: true,
+    confirmButtonText: 'Login Now',
+    cancelButtonText: 'Maybe Later',
+    confirmButtonColor: '#212529',
+    customClass: {
+        popup: 'premium-swal',        // Popup width အတွက်
+        title: 'luxury-font-title',   // စာလုံး font အတွက်
+        confirmButton: 'premium-confirm-btn',
+        cancelButton: 'premium-cancel-btn'
+    }
+}).then((result) => {
+    if (result.isConfirmed) {
+        window.location.href = '../customerLogin.php';
+    }
+});
             return;
         }        
 
@@ -422,7 +421,39 @@ $colors = array_values(array_unique($colors));
 .swal2-confirm.premium-confirm-btn { border-radius: 10px !important; padding: 12px 30px !important; font-weight: 600 !important; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(33, 37, 41, 0.2) !important; width: 100%; margin-bottom: 10px;}
 .swal2-cancel.premium-cancel-btn { border-radius: 10px !important; background: transparent !important; color: #dc3545 !important; border: 1px solid #dc3545 !important; padding: 12px 30px !important; font-weight: 600 !important; width: 100%;}
 .swal2-icon.swal2-info { border-color: #212529 !important; color: #212529 !important; }
-.premium-swal { width: 90% !important; max-width: 320px !important; max-height: 90vh !important; overflow-y: auto !important; }
-@media screen and (min-width: 768px) { .premium-swal { max-width: 700px !important; width: auto !important; padding: 3rem !important; } .swal2-title.premium-title { font-size: 2rem !important; } }
-.text-warning { color: #f39c12 !important; }
+.premium-swal {
+    width: 90% !important; /* Mobile မှာ screen ရဲ့ ၉၀ ရာခိုင်နှုန်းပဲ ယူမယ် */
+    max-width: 400px !important;
+    border-radius: 15px !important;
+}
+
+.premium-confirm-btn {
+    border-radius: 8px !important;
+    width: 100% !important;
+    margin-bottom: 10px !important;
+}
+
+.premium-cancel-btn {
+    border-radius: 8px !important;
+    width: 100% !important;
+}
+
+/* --- PC View (Responsive) --- */
+@media screen and (min-width: 1024px) {
+    .premium-swal {
+        width: 450px !important; 
+        max-width: 600px !important;
+        padding: 2.5rem 1.5rem !important;
+    }
+    
+   
+    .swal2-actions {
+        gap: 15px !important;
+        width: 100% !important;
+    }
+
+    .premium-confirm-btn, .premium-cancel-btn {
+        width: 160px !important; 
+    }
+}
 </style>

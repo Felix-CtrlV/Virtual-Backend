@@ -121,7 +121,7 @@ if ($isLoggedIn) {
                      class="rounded-circle me-2" style="height: 40px; width: 40px; object-fit: cover;">
             <?php endif; ?>
             <div class="header-text">
-                <h1 class="fs-6 fw-bold mb-0"><?= htmlspecialchars($supplier['tags'] ?? '') ?></h1>
+                <h1 class="fs-6 fw-bold mb-0"><?= htmlspecialchars($supplier[''] ?? 'ROLEX') ?></h1>
                 <?php if (!empty($supplier['tagline'])): ?>
                     <p class="mb-0 text-muted" style="font-size: 0.65rem;"><?= htmlspecialchars($supplier['tagline']) ?></p>
                 <?php endif; ?>
@@ -244,7 +244,7 @@ if ($isLoggedIn) {
 
     function refreshBag() {
     const supplierId = "<?= $supplier_id ?>";
-   
+    // Cache မမိအောင် timestamp ထည့်ထားတာ မှန်ပါတယ်
     fetch(`../utils/fetch_cart_drawer.php?supplier_id=${supplierId}&t=${new Date().getTime()}`)
     .then(res => res.json())
     .then(data => {
@@ -252,7 +252,7 @@ if ($isLoggedIn) {
         
         document.querySelectorAll('.cart-badge-count').forEach(el => {
             el.innerText = count;
-           
+            // logic ကို ရှင်းရှင်းလေးပဲ ထားပါမယ်
             if (count > 0) {
                 el.style.setProperty('display', 'flex', 'important');
             } else {

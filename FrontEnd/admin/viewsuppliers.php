@@ -1,6 +1,6 @@
 <?php
-$pageTitle = 'View Suppliers';
-$pageSubtitle = 'Browse and manage all suppliers in the mall.';
+$pageTitle = 'View Companies';
+$pageSubtitle = 'Browse and manage all companies in the mall.';
 include("partials/nav.php");
 ?>
 

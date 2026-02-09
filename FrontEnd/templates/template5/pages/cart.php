@@ -34,31 +34,26 @@ if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
     if ($is_ordered) {
     echo "
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
-    
-    const toastPosition = window.innerWidth > 768 ? 'top-end' : 'top';
+        document.addEventListener('DOMContentLoaded', function() {
+            const Toast = Swal.mixin({
+                toast: true,
+                position:'center', 
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
 
-    const Toast = Swal.mixin({
-        toast: true,
-        position: toastPosition, 
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-    });
-
-    Toast.fire({
-        icon: 'success',
-        title: 'Order placed successfully!'
-    }).then(() => {
-        
-       window.location.href = '?supplier_id=$supplier_id&page=cart';
-
-    });
-});
+            Toast.fire({
+                icon: 'success',
+                title: 'Order placed successfully!'
+            }).then(() => {
+                window.location.href = '?supplier_id=$supplier_id&page=cart';
+            });
+        });
     </script>";
     exit();
     }

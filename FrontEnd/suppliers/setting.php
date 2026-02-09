@@ -905,6 +905,79 @@ if (!empty($company_id)) {
             gap: 20px;
         }
     }
+
+    /* --- SCOPED CSS FOR SETTINGS PAGE --- */
+    :root {
+        /* Use variables defined in main CSS, or fallback */
+        --glass-bg: var(--glass-bg, rgba(255, 255, 255, 0.95));
+        --accent: <?= $user['primary_color'] ?? '#333' ?>;
+        --pill-bg: #e0e0e0;
+    }
+
+    body.dark-mode {
+        --pill-bg: #444;
+    }
+
+    /* ... rest of your CSS ... */
+    
+    /* ADD THIS to fix the inputs in settings */
+    body.dark-mode .input-field {
+        background: #2a2a2a;
+        color: white;
+        border-color: #444;
+    }
+    
+    body.dark-mode .channel-header {
+        background: #1a1a1a;
+    }
+    
+    body.dark-mode .tab-btn {
+        color: #aaa;
+    }
+    
+    body.dark-mode .tab-btn.active {
+        color: var(--accent);
+    }
+    
+    body.dark-mode .msg-item {
+        background: #1e1e1e;
+        border-color: #333;
+        color: #ddd;
+    }
+    
+    body.dark-mode .msg-content h4 {
+        color: #fff;
+    }
+    
+    body.dark-mode .msg-body {
+        color: #bbb;
+    }
+    
+    body.dark-mode .upload-box {
+        background: #1e1e1e;
+        border-color: #444;
+    }
+
+    body.dark-mode .segmented-control {
+        background: #333;
+    }
+    
+    body.dark-mode .seg-pill {
+        background: #555;
+    }
+    
+    body.dark-mode .seg-label {
+        color: #ccc;
+    }
+    
+    body.dark-mode .template-card {
+        background: #1e1e1e;
+        border-color: #333;
+    }
+    
+    body.dark-mode .template-info {
+        color: #ddd;
+    }
 </style>
 
 <div class="settings-wrapper">

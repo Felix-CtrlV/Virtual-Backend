@@ -41,7 +41,7 @@ if(isset($conn) && isset($supplier)) {
 
 <nav class="main-nav navbar navbar-expand-lg">
     <div class="container-fluid px-0 nav-container">
-        <div class="header-wrapper">
+        <div class="header-wrapper">            
             <div class="logo-container d-flex align-items-center">
                 <?php if (!empty($shop_assets['logo'])): ?>
                     <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>" class="NFlogo">
@@ -185,8 +185,11 @@ if(isset($conn) && isset($supplier)) {
         font-size: 0.9rem;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         position: relative;
-        overflow: hidden;
-        z-index: 1;
+        display: inline-block;
+        padding: 0.5rem;
+        transform: scale(1.1); 
+        margin-right: 5px;
+        transition: color 0.3s ease;
     }
 
     .btn-logout-modern:hover {

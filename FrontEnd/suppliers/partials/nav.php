@@ -445,7 +445,7 @@ $chat_sql = "
     SELECT 
         c.conversation_id,
         a.adminid as other_user_id,
-        a.name,
+        a.username as name,
         a.image, 
         (SELECT message_text FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) as last_msg,
         (SELECT created_at FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) as last_time
@@ -935,7 +935,7 @@ $pendingOrderList = [
             <div class="panel-close" onclick="togglePanel('mobile-menu-panel')" aria-label="Close">×</div>
             <nav class="panel-nav">
                 <a href="dashboard.php" <?= $active === "dashboard" ? 'class="active"' : '' ?>
-                    onclick="togglePanel('mobile-menu-panel')">Dashboard</a>
+                    onclick="togglePanel('mobile-menu-panel')">Overview</a>
                 <a href="inventory.php" <?= $active === "inventory" ? 'class="active"' : '' ?>
                     onclick="togglePanel('mobile-menu-panel')">Inventory</a>
                 <a href="orders.php" <?= $active === "orders" ? 'class="active"' : '' ?>
@@ -957,6 +957,14 @@ $pendingOrderList = [
             <a href="orders.php" class="nav-link <?= $active === "orders" ? 'active' : '' ?>">Orders</a>
             <a href="rentpayment.php" class="nav-link <?= $active === "rentpayment" ? 'active' : '' ?>">Rent Payment</a>
             <a href="setting.php" class="nav-link <?= $active === "setting" ? 'active' : '' ?>">Settings</a>
+
+            <div class="theme-switch-wrapper" style="margin-right: 15px;">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider-theme"></div>
+                </label>
+            </div>
+
             <a href="../utils/signout.php" class="btn-logout">Logout</a>
         </div>
         <div class="mobile-toggle" onclick="togglePanel('mobile-menu-panel')" aria-label="Menu">
@@ -1216,6 +1224,32 @@ $pendingOrderList = [
                     document.body.style.overflow = '';
                 }
             };
+        </script>
+        <script>
+            // --- DARK MODE LOGIC ---
+            const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+            const currentTheme = localStorage.getItem('theme');
+
+            // 1. Check LocalStorage on load
+            if (currentTheme) {
+                document.body.classList.add(currentTheme); // Adds 'dark-mode' class
+                if (currentTheme === 'dark-mode') {
+                    toggleSwitch.checked = true;
+                }
+            }
+
+            // 2. Handle Switch Event
+            function switchTheme(e) {
+                if (e.target.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            toggleSwitch.addEventListener('change', switchTheme, false);
         </script>
 </body>
 

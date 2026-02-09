@@ -24,16 +24,16 @@ $lastweekcount = $lastweek['last_week'];
 $thisweekcount = (int) $thisweek['this_week'];
 $lastweekcount = (int) $lastweek['last_week'];
 
-$diff = 0;
-$percent = 0;
+$diff = max(0, $thisweekcount - $lastweekcount);
 
-if ($thisweekcount > 0 && $lastweekcount > 0) {
-    $diff = $thisweekcount - $lastweekcount;
-    $percent = round(($diff / $lastweekcount) * 100, 1);
-} elseif ($thisweekcount > 0 && $lastweekcount == 0) {
-    $diff = $thisweekcount;
+if ($lastweekcount > 0) {
+    $percent = max(0, round(($diff / $lastweekcount) * 100, 1));
+} elseif ($thisweekcount > 0) {
     $percent = 100;
+} else {
+    $percent = 0;
 }
+
 
 // ...................................................................................................................................................
 
@@ -209,13 +209,15 @@ if ($rev_res) {
 }
 
 // --- BEST / WORST COMPANIES: Rank by revenue for selected year (and optional month) ---
-$best_companies_sql = "SELECT c.company_id, c.company_name, SUM(o.price) AS revenue, COUNT(o.order_id) AS order_count
-    FROM orders o
-    JOIN companies c ON o.company_id = c.company_id
-    WHERE YEAR(o.order_date) = $filter_year " . ($filter_month ? "AND MONTH(o.order_date) = $filter_month" : "") . "
-    GROUP BY c.company_id, c.company_name
-    ORDER BY revenue DESC
-    LIMIT 15";
+$best_companies_sql = "
+SELECT c.company_id, c.company_name, SUM(o.price) AS revenue
+FROM orders o
+JOIN companies c ON o.company_id = c.company_id
+WHERE YEAR(o.order_date) = $filter_year
+GROUP BY c.company_id, c.company_name
+ORDER BY revenue DESC
+LIMIT 15";
+
 $best_companies_res = mysqli_query($conn, $best_companies_sql);
 $best_companies = [];
 $rank = 1;
@@ -282,6 +284,19 @@ if (!empty($top_company_ids)) {
 ?>
 
 <section class="section active">
+    <div id="dashboard-quick-stats" class="dashboard-quick-stats" style="display:none;">
+        <span class="qs-label">Pending:</span>
+        <span class="qs-value"><?= (int)($pending_count ?? 0) ?></span>
+        <span class="qs-divider"></span>
+        <span class="qs-label">Orders this month:</span>
+        <span class="qs-value"><?= number_format($orders_this_month ?? 0) ?></span>
+        <span class="qs-divider"></span>
+        <span class="qs-label">Revenue (month):</span>
+        <span class="qs-value">$<?= number_format((float)($rentrow['total_collected_amount'] ?? 0), 2) ?></span>
+        <span class="qs-divider"></span>
+        <span class="qs-label">Total companies:</span>
+        <span class="qs-value"><?= (int)($total_companies ?? 0) ?></span>
+    </div>
     <div class="grid">
         <div class="card">
             <div class="card-header">
@@ -405,6 +420,7 @@ if (!empty($top_company_ids)) {
         style="margin-top: 24px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
         <form method="get" action="dashboard.php"
             style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <?php if (!empty($adminid)): ?><input type="hidden" name="adminid" value="<?= htmlspecialchars($adminid) ?>"><?php endif; ?>
             <label style="color: var(--muted); font-size: 0.9rem;">Year</label>
             <select name="year" onchange="this.form.submit()"
                 style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 0.9rem;">
@@ -490,10 +506,36 @@ if (!empty($top_company_ids)) {
 
 <script src="script.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof Chart === 'undefined') return;
+document.addEventListener('DOMContentLoaded', function () {
+    // Remember filter: redirect to saved year/month if none in URL
+    var urlParams = new URLSearchParams(window.location.search);
+    var rememberFilter = localStorage.getItem('admin_remember_filter') === '1';
+    var savedYear = localStorage.getItem('dashboard_filter_year');
+    var savedMonth = localStorage.getItem('dashboard_filter_month');
+    if (rememberFilter && savedYear && !urlParams.has('year')) {
+        var url = 'dashboard.php?year=' + savedYear;
+        if (savedMonth && savedMonth !== '0') url += '&month=' + savedMonth;
+        var aid = urlParams.get('adminid');
+        if (aid) url += (url.indexOf('?') >= 0 ? '&' : '?') + 'adminid=' + encodeURIComponent(aid);
+        window.location.replace(url);
+        return;
+    }
+    if (rememberFilter && urlParams.has('year')) {
+        localStorage.setItem('dashboard_filter_year', urlParams.get('year') || '');
+        localStorage.setItem('dashboard_filter_month', urlParams.get('month') || '0');
+    }
 
-        // Mall revenue line chart (selected year, 12 months)
+    // Quick stats visibility
+    var main = document.getElementById('mainContent');
+    if (main) {
+        var showQuick = localStorage.getItem('admin_quick_stats') !== '0';
+        var qs = document.getElementById('dashboard-quick-stats');
+        if (qs) qs.style.display = showQuick ? 'flex' : 'none';
+    }
+
+    if (typeof Chart === 'undefined') return;
+
+    // Mall revenue line chart (selected year, 12 months)
         var revenueCtx = document.getElementById('dashboardRevenueChart');
         if (revenueCtx) {
             new Chart(revenueCtx, {
@@ -512,23 +554,23 @@ if (!empty($top_company_ids)) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' }
+plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (v) { return '$' + v; }
+                        }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function (v) { return '$' + v; }
-                            }
-                        },
-                        x: { grid: { display: false } }
-                    }
+                    x: { grid: { display: false } }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // Company revenue trend (multi-line, competitive)
+    // Company revenue trend (multi-line, competitive)
         var companyTrendCtx = document.getElementById('dashboardCompanyTrendChart');
         if (companyTrendCtx) {
             var companyTrendDatasets = <?= json_encode($company_trend_datasets ?? []) ?>;
@@ -542,24 +584,23 @@ if (!empty($top_company_ids)) {
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { position: 'top' }
+plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (v) { return '$' + v; }
+                        }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function (v) { return '$' + v; }
-                            }
-                        },
-                        x: { grid: { display: false } }
-                    }
+                    x: { grid: { display: false } }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // Line chart: customers & companies per month
-        var lineCtx = document.getElementById('dashboardLineChart');
+    var lineCtx = document.getElementById('dashboardLineChart');
         if (lineCtx) {
             new Chart(lineCtx, {
                 type: 'line',
@@ -587,18 +628,18 @@ if (!empty($top_company_ids)) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                        x: { grid: { display: false } }
-                    }
+plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // Pie chart: store overview (Customers, Active companies, Pending companies)
+    // Pie chart: store overview (Customers, Active companies, Pending companies)
         var pieCtx = document.getElementById('dashboardPieChart');
         if (pieCtx) {
             var totalCust = <?= (int) $totalcustomer ?>;

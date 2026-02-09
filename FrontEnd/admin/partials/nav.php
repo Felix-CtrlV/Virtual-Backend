@@ -100,7 +100,6 @@ if ($chat_query) {
     <title><?php echo htmlspecialchars($pageTitle); ?> - Malltiverse Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/adminstyle.css">
-
     <style>
         /* Existing Notification Styles */
         .notif-container {
@@ -718,7 +717,7 @@ if ($chat_query) {
                 <lord-icon src="https://cdn.lordicon.com/kwnsnjyg.json" trigger="loop" delay="2000"
                     colors="primary:#ffffff" style="width:25px;height:25px">
                 </lord-icon>
-                <span class="nav-label-main">Dashboard</span>
+                <span class="nav-label-main">Overview</span>
                 <span class="nav-badge">Today</span>
             </a>
         </ul>
@@ -739,7 +738,7 @@ if ($chat_query) {
                     colors="primary:#ffffff,secondary:#ffffff,tertiary:#000000,quaternary:#ffffff,quinary:#ffffff"
                     style="width:25px;height:25px">
                 </lord-icon>
-                <span class="nav-label-main">View Companies</span>
+                <span class="nav-label-main">Companies</span>
             </a>
             <a class="nav-button <?php echo $active === 'reviews' ? 'active' : ''; ?>"
                 href="reviews.php?adminid=<?php echo urlencode($adminid); ?>">
@@ -821,7 +820,17 @@ if ($chat_query) {
                     </div>
                 </div>
 
-                <div class="avatar"><?php echo strtoupper(substr($name, 0, 1)); ?></div>
+                <?php
+                $adminImg = $admininfo['image'] ?? '';
+                $adminImgPath = $adminImg && file_exists(__DIR__ . '/../../assets/customer_profiles/' . $adminImg)
+                    ? '../assets/customer_profiles/' . $adminImg
+                    : '';
+                ?>
+                <?php if ($adminImgPath): ?>
+                    <img class="avatar" style="border: 1px solid white; object-fit: cover;" src="<?php echo htmlspecialchars($adminImgPath); ?>" alt="Avatar">
+                <?php else: ?>
+                    <div class="avatar" style="display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px;"><?php echo strtoupper(substr($name ?? 'A', 0, 1)); ?></div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -1076,6 +1085,18 @@ function renderMessages(messages, silent) {
                 notifBtn.addEventListener('click', (e) => {
                     if (e.target.closest('.notif-dropdown')) return;
                     notifDropdown.classList.toggle('show');
+                    if (notifDropdown.classList.contains('show') && localStorage.getItem('admin_notification_sound') === '1') {
+                        try {
+                            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            var o = ctx.createOscillator();
+                            var g = ctx.createGain();
+                            o.connect(g); g.connect(ctx.destination);
+                            o.frequency.value = 800; o.type = 'sine';
+                            g.gain.setValueAtTime(0.15, ctx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                            o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.1);
+                        } catch (err) {}
+                    }
                 });
 
                 document.addEventListener('click', (e) => {
