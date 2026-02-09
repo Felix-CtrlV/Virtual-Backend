@@ -10,25 +10,25 @@ $supplier_id = $_GET["supplier_id"] ?? 0;
 // 2. Fetch User Data (Only if logged in)
 if ($customer_id > 0) {
     // Ensure $conn is defined in your included files before this script runs
-    if(isset($conn)) {
+    if (isset($conn)) {
         $u_stmt = $conn->prepare("SELECT name, email, image FROM customers WHERE customer_id = ?");
         $u_stmt->bind_param("i", $customer_id);
         $u_stmt->execute();
         $u_res = $u_stmt->get_result()->fetch_assoc();
-        
+
         $user_name = $u_res['name'] ?? 'User';
         $user_email = $u_res['email'] ?? 'No email';
-        
+
         $has_image = !empty($u_res['image']) && file_exists("../assets/customer_profiles/" . $u_res['image']);
         $user_image_path = $has_image ? "../assets/customer_profiles/" . $u_res['image'] : "";
-        $user_initial = strtoupper(substr($user_name, 0, 1)); 
+        $user_initial = strtoupper(substr($user_name, 0, 1));
     }
 }
 
 // 3. Cart Count Logic
 $cart_count = 0;
-if(isset($conn) && isset($supplier)) {
-    $company_id = isset($supplier['company_id']) ? (int)$supplier['company_id'] : 0;
+if (isset($conn) && isset($supplier)) {
+    $company_id = isset($supplier['company_id']) ? (int) $supplier['company_id'] : 0;
     $sql_cart = "SELECT COUNT(*) AS total_items FROM cart WHERE customer_id = ? AND company_id = ?";
     $stmt_c = $conn->prepare($sql_cart);
     $stmt_c->bind_param("ii", $customer_id, $company_id);
@@ -41,14 +41,15 @@ if(isset($conn) && isset($supplier)) {
 
 <nav class="main-nav navbar navbar-expand-lg">
     <div class="container-fluid px-0 nav-container">
-        <div class="header-wrapper">            
+        <div class="header-wrapper">
             <div class="logo-container d-flex align-items-center">
                 <?php if (!empty($shop_assets['logo'])): ?>
-                    <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>" class="NFlogo">
+                    <img src="../uploads/shops/<?= $supplier_id ?>/<?= htmlspecialchars($shop_assets['logo']) ?>"
+                        class="NFlogo">
                     <h1 class="site-title"><?= htmlspecialchars($supplier['company_name']) ?></h1>
                 <?php endif; ?>
             </div>
-            
+
             <button class="navbar-toggler" id="navToggle" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -57,11 +58,11 @@ if(isset($conn) && isset($supplier)) {
         <div class="collapse navbar-collapse" id="navMenuContent">
             <ul class="navbar-nav ms-auto align-items-lg-center">
                 <?php $base_url = "?supplier_id=" . $supplier_id; ?>
-                <li class="nav-item"><a class="navlink" href="<?= $base_url ?>&page=home">HOME</a></li>
-                <li class="nav-item"><a class="navlink" href="<?= $base_url ?>&page=about">ABOUT US</a></li>
-                <li class="nav-item"><a class="navlink" href="<?= $base_url ?>&page=product">PRODUCT</a></li>
-                <li class="nav-item"><a class="navlink" href="<?= $base_url ?>&page=contact">CONTACT</a></li>
-                <li class="nav-item"><a class="navlink" href="<?= $base_url ?>&page=review">REVIEW</a></li>
+                <li class="nav-item"><a class="navlink <?= ($page === 'home') ? 'active' : '' ?>" href="<?= $base_url ?>&page=home">HOME</a></li>
+                <li class="nav-item"><a class="navlink <?= ($page === 'product') ? 'active' : '' ?>" href="<?= $base_url ?>&page=product">PRODUCT</a></li>
+                <li class="nav-item"><a class="navlink <?= ($page === 'about') ? 'active' : '' ?>" href="<?= $base_url ?>&page=about">ABOUT US</a></li>
+                <li class="nav-item"><a class="navlink <?= ($page === 'contact') ? 'active' : '' ?>" href="<?= $base_url ?>&page=contact">CONTACT</a></li>
+                <li class="nav-item"><a class="navlink <?= ($page === 'review') ? 'active' : '' ?>" href="<?= $base_url ?>&page=review">REVIEW</a></li>
 
                 <li class="nav-item">
                     <a class="navlink exit-btn" href="/malltiverse/frontend/customer">
@@ -81,7 +82,8 @@ if(isset($conn) && isset($supplier)) {
                 <li class="nav-item ms-lg-3">
                     <?php if ($customer_id > 0): ?>
                         <div class="dropdown">
-                            <a class="nav-link p-0 no-caret profile-trigger" href="#" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link p-0 no-caret profile-trigger" href="#" role="button"
+                                data-bs-toggle="dropdown">
                                 <?php if ($has_image): ?>
                                     <img src="<?= $user_image_path ?>" class="rounded-circle nav-profile-img shadow-sm">
                                 <?php else: ?>
@@ -91,16 +93,23 @@ if(isset($conn) && isset($supplier)) {
 
                             <div class="dropdown-menu dropdown-menu-end glass-dropdown fade-animation">
 
-                                <div class="user-card mx-3 mb-3 p-3 d-flex align-items-center justify-content-center text-center">
+                                <div
+                                    class="user-card mt-3 mx-3 mb-3 p-3 d-flex align-items-center justify-content-center text-center">
                                     <div class="overflow-hidden">
-                                        <h6 class="mb-1 fw-bold text-dark text-truncate user-name"><?= htmlspecialchars($user_name) ?></h6>
-                                        <small class="text-muted text-truncate d-block user-email"><?= htmlspecialchars($user_email) ?></small>
+                                        <h6 class="mb-1 fw-bold text-dark text-truncate user-name">
+                                            <?= htmlspecialchars($user_name) ?></h6>
+                                        <small
+                                            class="text-muted text-truncate d-block user-email"><?= htmlspecialchars($user_email) ?></small>
                                     </div>
                                 </div>
-                                
+
                                 <div class="dropdown-divider mx-3" style="border-color: rgba(0,0,0,0.05);"></div>
-                                
-                                <div class="p-3">
+                                <div class="p-3" style="display: flex; flex-direction: column; gap: 15px;">
+                                    <a class="btn-logout-modern" href="/malltiverse/FrontEnd/customer_profile.php">
+                                        <span>Edit Profile</span>
+                                        <i class="fas fa-user-cog ms-2"></i>
+                                    </a>
+
                                     <a class="btn-logout-modern" href="../utils/logout.php?supplier_id=<?= $supplier_id ?>">
                                         <span>Log out</span>
                                         <i class="fa-solid fa-arrow-right-from-bracket ms-2"></i>
@@ -120,27 +129,44 @@ if(isset($conn) && isset($supplier)) {
 </nav>
 
 <style>
-    .main-nav { font-family: 'Poppins', sans-serif; }
+    .main-nav {
+        font-family: 'Poppins', sans-serif;
+    }
+
     .profile-initial-circle {
-        width: 40px; height: 40px;
+        width: 40px;
+        height: 40px;
         background: linear-gradient(135deg, #0d6efd, #0a58ca);
-        color: white; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 600; font-size: 1.2rem;
-        cursor: pointer; transition: transform 0.2s ease;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s ease;
         border: 2px solid #fff;
     }
-    .nav-profile-img { 
-        width: 40px; height: 40px; 
-        object-fit: cover; cursor: pointer;
-        border: 2px solid #fff; transition: transform 0.2s ease;
+
+    .nav-profile-img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid #fff;
+        transition: transform 0.2s ease;
     }
+
     .profile-trigger:hover .profile-initial-circle,
     .profile-trigger:hover .nav-profile-img {
         transform: scale(1.05);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
     }
-    .no-caret::after { display: none !important; }
+
+    .no-caret::after {
+        display: none !important;
+    }
 
     .glass-dropdown {
         width: 280px;
@@ -160,26 +186,48 @@ if(isset($conn) && isset($supplier)) {
     }
 
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
 
     .user-card {
         background: rgba(255, 255, 255, 0.3) !important;
         border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.4);
+        padding-top: 30px !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
-    .user-name { font-size: 0.9rem; color: #333; }
-    .user-email { font-size: 0.85rem; color: #666; }
+
+    .user-name {
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .user-email {
+        font-size: 0.85rem;
+        color: #666;
+    }
 
     .btn-logout-modern {
-        display: flex; align-items: center; justify-content: center;
-        width: 100%;
-        padding: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 90%;
+        padding: 15px 0;
         background: rgba(255, 255, 255, 0.6);
         color: #dc3545;
         border: 1px solid #ffcccc;
-        border-radius: 12px;
+        border-radius: 16px;
         text-decoration: none;
         font-weight: 600;
         font-size: 0.9rem;
@@ -187,12 +235,17 @@ if(isset($conn) && isset($supplier)) {
         position: relative;
         display: inline-block;
         padding: 0.5rem;
-        transform: scale(1.1); 
+        transform: scale(1.1);
         margin-right: 5px;
         transition: color 0.3s ease;
+        display: flex !important;
+        margin: 0px auto !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .btn-logout-modern:hover {
+        width: 100%;
         background: rgba(94, 141, 199, 0.8);
         color: #fff;
         border-color: rgba(94, 141, 199, 0.8);
@@ -207,7 +260,7 @@ if(isset($conn) && isset($supplier)) {
         justify-content: center;
         width: 38px;
         height: 38px;
-        background: rgba(220, 235, 255, 0.45); 
+        background: rgba(220, 235, 255, 0.45);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         color: #000000;
@@ -252,18 +305,39 @@ if(isset($conn) && isset($supplier)) {
     .login-pill-btn:active {
         transform: scale(0.95);
     }
-    
-    .btn-logout-modern i { transition: transform 0.3s ease; }
-    .btn-logout-modern:hover i { transform: translateX(5px); }    
-    .cart-linkk { color: #0b0101; position: relative; display: inline-block; padding: 0.5rem; transform: scale(1.1); margin-right: 5px; }
-    .cart-badge { position: absolute; top: 2px; right: -2px; font-size: 0.6rem; padding: 0.3em 0.5em; transform: translate(20%, -20%); }
+
+    .btn-logout-modern i {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-logout-modern:hover i {
+        transform: translateX(5px);
+    }
+
+    .cart-linkk {
+        color: #0b0101;
+        position: relative;
+        display: inline-block;
+        padding: 0.5rem;
+        transform: scale(1.1);
+        margin-right: 5px;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: 2px;
+        right: -2px;
+        font-size: 0.6rem;
+        padding: 0.3em 0.5em;
+        transform: translate(20%, -20%);
+    }
 </style>
 
 <script>
     const toggleBtn = document.getElementById('navToggle');
     const menu = document.getElementById('navMenuContent');
 
-    if(toggleBtn) {
+    if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
             menu.classList.toggle('show');
         });

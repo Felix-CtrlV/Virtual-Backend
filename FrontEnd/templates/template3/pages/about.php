@@ -1,13 +1,13 @@
 <main class="about-page">
     <div class="about-gallery">
         <div class="gallery-item item-1">
-            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner2?>" alt="Fashion Piece">
+            <img src="../uploads/shops/<?= $supplier['supplier_id'] ?>/<?= $banner2 ?>" alt="Fashion Piece">
         </div>
         <div class="gallery-item item-2">
-            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner3?>" alt="Floral Decor">
+            <img src="../uploads/shops/<?= $supplier['supplier_id'] ?>/<?= $banner3 ?>" alt="Floral Decor">
         </div>
         <div class="gallery-item item-3">
-            <img src="../uploads/shops/<?= $supplier['supplier_id']?>/<?= $banner4?>" alt="Furniture Decor">
+            <img src="../uploads/shops/<?= $supplier['supplier_id'] ?>/<?= $banner4 ?>" alt="Furniture Decor">
         </div>
     </div>
 
@@ -33,7 +33,7 @@
                 </div>
             </div>
         </div>
-    </div>    
+    </div>
 </main>
 <script>
     const reveal = () => {

@@ -109,6 +109,11 @@
     font-weight: 800;
 }
 
+.navlink:hover {
+    color: #a52a2a;
+    font-weight: 800;
+}
+
 .navlink.active::after {
     background: #0b0101;
 }
@@ -2032,13 +2037,13 @@ form textarea {
         visibility: visible;
         transform: translate(-50%, 0);
     }
-    
-    .navbar-collapse.hide{
+
+    .navbar-collapse.hide {
         opacity: 0;
         visibility: hidden;
         transform: translate(0, 0%);
     }
-    
+
 
     /* 3. The Navigation Links */
     .navbar-nav {
@@ -2081,7 +2086,7 @@ form textarea {
         margin: 0px;
     }
 
-    .cart-linkk{
+    .cart-linkk {
         margin-right: none;
     }
 
@@ -2092,10 +2097,3 @@ form textarea {
         box-shadow: none !important;
     }
 }
-
-
-
-
-
-
-

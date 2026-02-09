@@ -1,22 +1,48 @@
 <style>
-    .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 60px; }
-    .page-btn {
-        border: 1px solid #ddd; padding: 10px 18px; cursor: pointer; background: #fff;
-        border-radius: 6px; font-weight: bold; transition: 0.3s;
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 60px;
     }
-    .page-btn:hover:not(:disabled) { border-color: #007bff; color: linear-gradient(145deg, rgba(159, 204, 223, 0.8)); background: #f0f7ff; }
-    .page-btn.active { background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6));; border-color: #007bff; }
-    .page-btn:disabled { color: #ccc; cursor: not-allowed; }
+
+    .page-btn {
+        border: 1px solid #ddd;
+        padding: 10px 18px;
+        cursor: pointer;
+        background: #fff;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        border-color: #007bff;
+        color: linear-gradient(145deg, rgba(159, 204, 223, 0.8));
+        background: #f0f7ff;
+    }
+
+    .page-btn.active {
+        background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6));
+        ;
+        border-color: #007bff;
+    }
+
+    .page-btn:disabled {
+        color: #ccc;
+        cursor: not-allowed;
+    }
 </style>
 
-<section class="page-content product-page">    
-    <div class="container" style="padding-top: 0;">        
+<section class="page-content product-page">
+    <div class="container" style="padding-top: 0;">
         <h2 class="text-center">Latest Stock Items</h2>
         <div class="search-bar">
             <input type="text" name="search_product" id="searchBar" placeholder="Search items.....">
             <i class="fas fa-search"></i>
         </div>
-        <div class="row g-4" id="productResults"></div> <div id="paginationControls" class="pagination-container"></div> 
+        <div class="row g-4" id="productResults"></div>
+        <div id="paginationControls" class="pagination-container"></div>
     </div>
 </section>
 
@@ -41,17 +67,17 @@
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: params.toString()
         })
-        .then(res => res.json())
-        .then(data => {
-            resultContainer.innerHTML = data.html;
-            renderPagination(data.total_pages, page);
-        });
+            .then(res => res.json())
+            .then(data => {
+                resultContainer.innerHTML = data.html;
+                renderPagination(data.total_pages, page);
+            });
     }
 
     function renderPagination(total, current) {
         let html = "";
         if (total <= 1) { paginationContainer.innerHTML = ""; return; }
-        
+
         for (let i = 1; i <= total; i++) {
             html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="fetchProduct(searchInput.value, ${i})">${i}</button>`;
         }

@@ -2,31 +2,6 @@
 $current_page = 'home.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($supplier['company_name'] ?? 'ULTRA') ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../templates/<?= basename(__DIR__) ?>/style.css">
-
-    <style>        
-        /* Hero Section Styling */
-        .hero {
-            height: 85vh;
-            background: url('../uploads/shops/<?= $supplier_id ?>/<?= $banner1 ?>') no-repeat center center/cover;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
-</head>
-
-<body>
 <section class="hero" style="margin: 0; padding: 0; min-width: 98.95vw;">
         <?php if ($shop_assets['template_type'] == 'video'): ?>
             <video class="hero-media" autoplay muted loop playsinline src="../uploads/shops/<?= $supplier_id?>/<?= $banner1?>"></video>
