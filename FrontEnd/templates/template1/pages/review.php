@@ -170,7 +170,7 @@ if (isset($_POST['submit_review'])) {
 
             <div class="single-star me-3" style="color: var(--primary);">★</div>
 
-Mei, [2/2/2026 9:14 AM]
+
 <div class="flex-grow-1 mx-2">
               <div class="progress custom-progress"
                 style="height: 8px; background-color: #7f8a9f44; border-radius: 10px;">
@@ -271,7 +271,7 @@ Mei, [2/2/2026 9:14 AM]
   </div>
 </div>
 
-Mei, [2/2/2026 9:14 AM]
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const container = document.querySelector('.svg-stars');

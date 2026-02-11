@@ -260,7 +260,7 @@ $page_path = __DIR__ . "/pages/$page.php";
             </div>
         </div>
     </div>
-\
+
 <!-- Auth popup -->
 <div id="authModal" class="auth-modal">
   <div class="auth-box">
