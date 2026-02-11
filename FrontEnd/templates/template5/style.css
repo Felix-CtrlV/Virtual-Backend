@@ -599,16 +599,52 @@ h1 {
 
 }
 
-.search-bar{
-    margin-top:20px;
-    margin-left:50px;
-   
-}
-.search-bar input{
-    width:250px;
+/* Search Bar Container */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    border-radius: 25px;
+    padding: 2px 12px;
     
-   
+    /* Left align lote pho d lay pyin pay pr */
+    width: 220px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 3%;    /* Screen asoon ne ma kat ag 5% lout char htar tl */
+    margin-right: auto; /* D dar lay ka nya bet ko twin htout pay dar */
+    
+    border: 1.5px solid #ddd;
+    transition: all 0.3s ease;
 }
+
+/* Input & Button ka to lay tway ne tait pite nyi nay mhar par */
+#searchBar {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 6px;
+    width: 100%;
+    font-size: 14px;
+}
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+    .search-bar {
+        margin-left: auto;  /* Left margin ko auto pyan pay tl */
+        margin-right: auto; /* Right margin ka auto shi pee tharr so tot center yout thwar mal */
+        width: 80%;         /* Mobile screen ne swar ag width ko nanyi nanyi kyi pay lo ya tl */
+        max-width: 250px;   /* Phit naing yin d lout htat ma kyi ag kan htar dar par */
+    }
+}
+
+.search-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 14px;
+}
+
 .feature-card:hover {
   transform: translateY(-10px); /* Lifts up gracefully */
   border-color: #d4af37; /* Changes to a Gold/Brass color */
@@ -3884,7 +3920,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
     padding: 12px 20px;
     display: flex;
     align-items: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* ပိုပြီး Smooth ဖြစ်စေဖို့ */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
     font-weight: 500;
 }
 

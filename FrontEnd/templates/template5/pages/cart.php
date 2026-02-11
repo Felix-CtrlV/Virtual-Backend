@@ -1081,21 +1081,13 @@ document.addEventListener('DOMContentLoaded', function() {
     recalculateCart();
 });
 
-// --- 4. QUANTITY UPDATE (WITH DIM EFFECT) ---
 function updateModernQuantity(cartId, newQty, maxStock) {
     if (newQty > maxStock) {
         modernAlert.fire({
             icon: 'warning',
             title: 'Stock Alert',
             text: `Maximum ${maxStock} items only`,
-            confirmButtonColor: '#6366f1',
-            cancelButtonColor: '#d33',
-            showCancelButton: true,
-            cancelButtonText: 'Cancel',
-            confirmButtonText: 'Adjust Quantity',
-            backdrop: 'rgba(0,0,0,0.4)',
-            timer: 3000,
-            timerProgressBar: true
+            confirmButtonColor: '#6366f1'
         });
         return;
     }
@@ -1106,19 +1098,18 @@ function updateModernQuantity(cartId, newQty, maxStock) {
 
     const qtyElement = document.getElementById('qty-' + cartId);
     
-   
     if (qtyElement) {
         qtyElement.style.opacity = '0.3';
         qtyElement.style.transform = 'scale(0.8)';
         qtyElement.innerText = newQty;
-        recalculateCart();
+        recalculateCart(); // မျက်စိရှေ့တင် စျေးနှုန်းအရင်တွက်မယ်
     }
 
     clearTimeout(updateTimer);
     updateTimer = setTimeout(() => {
-        const rootPath = window.location.origin + '/malltiverse/frontend/utils/update_cart_qty.php';
+        // ⚠️ ဒီလမ်းကြောင်းက ဖိုင်နာမည်ကို သေချာပြန်စစ်ပါ (qty လား quantity လား)
+        const rootPath = '../utils/update_cart_qty.php'; 
         
-       
         fetch(rootPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1126,33 +1117,33 @@ function updateModernQuantity(cartId, newQty, maxStock) {
         })
         .then(res => res.json())
         .then(data => {
-           
             if (qtyElement) {
                 qtyElement.style.opacity = '1';
                 qtyElement.style.transform = 'scale(1)';
             }
 
             if (data.status === 'success') {
-               
                 modernToast.fire({
                     icon: 'success',
                     title: 'Quantity updated'
                 });
-              
+
+                // 🌟 ဒီနေရာမှာ အပေါ်က Badge ကို update လုပ်တဲ့ function ခေါ်မယ်
+                if (typeof refreshBag === 'function') {
+                    refreshBag();
+                }
             } else {
+                // Error ဖြစ်ရင် (ဥပမာ stock မလောက်ရင်) reload မလုပ်ဘဲ error ပြရုံပဲလုပ်ပါ
+                modernAlert.fire({ icon: 'error', title: 'Fail', text: data.message });
                 location.reload(); 
             }
         })
-        .catch(() => {
-            
+        .catch((err) => {
+            console.error(err);
             if (qtyElement) { 
                 qtyElement.style.opacity = '1'; 
                 qtyElement.style.transform = 'scale(1)'; 
             }
-            modernToast.fire({
-                icon: 'error',
-                title: 'Update failed'
-            });
         });
     }, 500);
 }
@@ -1175,23 +1166,23 @@ function initiateRemove(cartId) {
     const itemElement = document.querySelector(`#qty-${cartId}`)?.closest('.modern-item');
     if (!itemElement) return;
 
-    // ၁. UI မှာ ယာယီ ဖျောက်ထားမယ် (User Experience ကောင်းအောင်)
+    
     itemElement.style.transition = 'all 0.4s ease';
     itemElement.style.transform = 'translateX(100px)';
     itemElement.style.opacity = '0';
 
-    // ၂. Backend (PHP) ကို လှမ်းဖျက်မယ်
-    // မှတ်ချက်: '../utils/removeFromCart.php' က file structure ပေါ်မူတည်ပြီး ပြောင်းလဲနိုင်ပါတယ်
-    // အကောင်းဆုံးကတော့ PHP ဘက်ကနေ base_url ကို variable တစ်ခုအနေနဲ့ echo ထုတ်ပေးထားတာ ပိုကောင်းပါတယ်
     
-    // မိတ်ဆွေရဲ့ လက်ရှိ path အတိုင်းသုံးမယ်ဆိုရင် folder name မှန်မမှန် အရင်စစ်ပါ
+   
+    
+    
+    
     const rootPath = window.location.origin + '/malltiverse/frontend/utils/removeFromCart.php'; 
 
     fetch(rootPath, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Cache-Control': 'no-cache' // Cache မမိအောင် ထည့်မယ်
+            'Cache-Control': 'no-cache' 
         },
         body: new URLSearchParams({ 'cart_id': cartId })
     })
