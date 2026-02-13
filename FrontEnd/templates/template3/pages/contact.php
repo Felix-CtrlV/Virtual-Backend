@@ -1,6 +1,5 @@
 <?php
-// Since this file is INCLUDED by index.php, the path 
-// starts from the Shop/ folder location.
+
 require_once '../utils/messages.php';
 
 $message_sent = false;
