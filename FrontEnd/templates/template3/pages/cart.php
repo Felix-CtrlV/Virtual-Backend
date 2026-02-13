@@ -73,7 +73,7 @@ if ($customer_id > 0 && $company_id > 0) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* Your Original CSS (Untouched) */
+
         .qty-control-btn { background: transparent; border: 1px solid #ddd; color: #555; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s; cursor: pointer; font-size: 9px; }
         .qty-control-btn:hover:not(:disabled) { background-color: #f8f9fa; border-color: #bbb; color: #000; }
         .qty-number { font-weight: 600; font-size: 15px; min-width: 25px; text-align: center; }
@@ -86,20 +86,62 @@ if ($customer_id > 0 && $company_id > 0) {
         .order-summary-card { border: 1px solid #dee2e6; border-radius: 0.25rem; box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075); }
         .continue-shopping-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #dee2e6; border-radius: 8px; color: #333; text-decoration: none; font-weight: 500; transition: background-color 0.2s; }
         .continue-shopping-btn i { margin-right: 8px; }
-        .login-prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(100, 149, 237, 0.15); display: none; justify-content: center; align-items: center; z-index: 10001; backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%); }
-        .login-prompt-card { background-color: #90b1ce; backdrop-filter: blur(15px) saturate(160%); -webkit-backdrop-filter: blur(15px) saturate(160%); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; padding: 45px 35px; border-radius: 28px; text-align: center; position: relative; border: 1px solid rgba(255, 255, 255, 0.3); }
-        .btn-login-alt { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.5); backdrop-filter: blur(5px); }
-        .btn-login-alt:hover { background: rgba(255, 255, 255, 0.9); color: #4682B4; box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3); }
-        .login-prompt-card h2 { color: #ffffff; font-size: 30px; margin-bottom: 12px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
-        .login-prompt-card p { color: #ffffff; opacity: 0.9; margin-bottom: 35px; font-size: 16px; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); }
-        .modal-action-btn { display: block; width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 50px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; border: none; cursor: pointer; text-align: center; }
-        .btn-create-alt { background: transparent; color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); }
+        .login-prompt-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); 
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            backdrop-filter: blur(15px);
+        }
+        .login-prompt-card {
+            background: rgba(255, 255, 255, 0.1); 
+            width: 100%;
+            max-width: 400px;
+            padding: 45px 35px;
+            border-radius: 28px;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .login-prompt-card h2 { 
+            color: #ffffff; font-size: 30px; margin-bottom: 12px; font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .login-prompt-card p { 
+            color: #ffffff; opacity: 0.9; margin-bottom: 35px; font-size: 16px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+        .modal-action-btn {
+            display: block; width: 100%; padding: 14px; margin-bottom: 15px;
+            border-radius: 50px; font-size: 15px; font-weight: 600;
+            text-decoration: none; transition: all 0.3s ease; border: none; cursor: pointer;
+            text-align: center;
+        }
+        .btn-login-alt { 
+            background: rgba(255, 255, 255, 0.15); color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .btn-login-alt:hover { 
+            background: #ffffff; color: #000000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+        .btn-create-alt { 
+            background: transparent; color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+        }
         .btn-create-alt:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.1); }
-        .divider-container { color: #ffffff; font-weight: 500; opacity: 0.7; display: flex; align-items: center; margin: 25px 0; }
+        .divider-container { 
+            color: #ffffff; font-weight: 500; opacity: 0.7; display: flex; align-items: center; margin: 25px 0; 
+        }
         .divider-container::before, .divider-container::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.4); }
         .divider-container:not(:empty)::before { margin-right: 15px; }
         .divider-container:not(:empty)::after { margin-left: 15px; }
-
+        
         .glass-popup {
             background: rgba(255, 255, 255, 0.12) !important;
             backdrop-filter: blur(25px) saturate(180%) !important;

@@ -98,16 +98,10 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
 
         .qty-error { color: #ff4d4d; font-size: 0.9rem; margin-top: 8px; display: none; font-weight: 600; }
         .add-cart:disabled { background-color: #d1d1d1 !important; cursor: not-allowed; opacity: 0.7; }
-        .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }        
-        
-        /* .cart-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .cart-modal { background: white; padding: 40px; border-radius: 10px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease; }
-        .success-icon { width: 80px; height: 80px; background-color: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }           
-        .success-icon::after { content: ''; width: 60px; height: 60px; background-color: #2196f3; border-radius: 50%; position: absolute; }
-        .success-icon i { color: white; font-size: 30px; z-index: 1; } */
+        .stock-info { font-size: 0.9rem; color: #555; margin-top: 5px; font-weight: 500; }
         .cart-modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.3); /* Transparent dark background */
+            background: rgba(0, 0, 0, 0.3);
             display: none; justify-content: center; align-items: center; z-index: 9999; 
             backdrop-filter: blur(10px); 
         }
@@ -169,7 +163,7 @@ $currentUrl = urlencode($_SERVER['REQUEST_URI']);
         }
 
         .login-prompt-card {
-            background: rgba(255, 255, 255, 0.1); 
+            background: rgba(255, 255, 255, 0.1);
             width: 100%;
             max-width: 400px;
             padding: 45px 35px;

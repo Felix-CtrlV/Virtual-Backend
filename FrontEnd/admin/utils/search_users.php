@@ -1,19 +1,37 @@
 <?php
-// utils/search_users.php
 include("../../../BackEnd/config/dbconfig.php");
 
 $search = $_POST['search'] ?? '';
-$searchParam = "$search%";
+$roleFilter = $_POST['role'] ?? 'all';
+$statusFilter = $_POST['status'] ?? 'all';
+
+$searchParam = "%$search%";
+$conditions = ["(name LIKE ? OR email LIKE ?)"];
+$params = [$searchParam, $searchParam];
+$types = "ss";
+
+if ($roleFilter !== 'all') {
+    $conditions[] = "role = ?";
+    $params[] = $roleFilter;
+    $types .= "s";
+}
+if ($statusFilter !== 'all') {
+    $conditions[] = "LOWER(status) = ?";
+    $params[] = strtolower($statusFilter);
+    $types .= "s";
+}
+
+$where = implode(" AND ", $conditions);
 
 $sql = "SELECT *
 FROM ( SELECT adminid AS id, name, email, status, created_at, 'admin' AS role FROM admins
  UNION ALL SELECT supplier_id AS id, name, email, status, created_at, 'supplier' AS role FROM suppliers
  UNION ALL SELECT customer_id AS id, name, email, status, created_at, 'customer' AS role FROM customers
-) AS users WHERE (name LIKE ? OR email LIKE ? OR status LIKE ? OR role LIKE ?)
+) AS users WHERE $where
 ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'supplier' THEN 2 WHEN 'customer' THEN 3 END, name;";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssss", $searchParam, $searchParam, $searchParam, $searchParam);
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $userresult = $stmt->get_result();
 

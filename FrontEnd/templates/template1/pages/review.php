@@ -1,4 +1,5 @@
 <?php
+// Ensure session is started (usually done in index.php, but check if needed)
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
@@ -20,10 +21,11 @@ if (isset($_POST['submit_review'])) {
 
   if ($rating > 0 && !empty($review_text)) {
 
-    $company_id = (int)($supplier['company_id'] ?? 0);
+    $company_id = (int) ($supplier['company_id'] ?? 0);
     if ($company_id <= 0 && $supplier_id > 0) {
       $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
-      if ($r) $company_id = (int)$r['company_id'];
+      if ($r)
+        $company_id = (int) $r['company_id'];
     }
     $insert_stmt = mysqli_prepare(
       $conn,
@@ -55,11 +57,16 @@ if (!isset($conn)) {
   include '../../../BackEnd/config/dbconfig.php';
 }
 
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['customer_id']);
+$current_customer_id = $isLoggedIn ? $_SESSION['customer_id'] : null;
+
 $supplier_id = (int) $supplier['supplier_id'];
-$company_id_review = (int)($supplier['company_id'] ?? 0);
+$company_id_review = (int) ($supplier['company_id'] ?? 0);
 if ($company_id_review <= 0 && $supplier_id > 0) {
   $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
-  if ($r) $company_id_review = (int)$r['company_id'];
+  if ($r)
+    $company_id_review = (int) $r['company_id'];
 }
 
 // Fetch reviews with customer profile images (reviews table uses company_id)
@@ -95,20 +102,22 @@ mysqli_stmt_close($review_stmt);
 
 
 if (isset($_POST['submit_review'])) {
-  if (!isset($_SESSION['customer_id']) || $_SESSION['customer_id'] <= 0) {
-    header("Location: /Malltiverse/FrontEnd/customerLogin.php");
-    exit;
+  // SECURITY: Prevent guests from submitting via POST even if they bypass JS
+  if (!$isLoggedIn) {
+    header("Location: customerLogin.php");
+    exit();
   }
-  $customer_id = (int) $_SESSION['customer_id'];
 
   $rating = (int) $_POST['rating'];
   $review_text = trim($_POST['review']);
+  $customer_id = $current_customer_id; // Use the actual logged-in ID
 
   if ($rating > 0 && !empty($review_text)) {
-    $company_id_ins = (int)($supplier['company_id'] ?? 0);
+    $company_id_ins = (int) ($supplier['company_id'] ?? 0);
     if ($company_id_ins <= 0 && isset($supplier_id) && $supplier_id > 0) {
       $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT company_id FROM companies WHERE supplier_id = $supplier_id LIMIT 1"));
-      if ($r) $company_id_ins = (int)$r['company_id'];
+      if ($r)
+        $company_id_ins = (int) $r['company_id'];
     }
     $insert_stmt = mysqli_prepare(
       $conn,
@@ -119,12 +128,10 @@ if (isset($_POST['submit_review'])) {
     mysqli_stmt_execute($insert_stmt);
     mysqli_stmt_close($insert_stmt);
 
-    header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id);
+    header("Location: " . $_SERVER['PHP_SELF'] . "?supplier_id=" . $supplier_id . "&page=review");
     exit();
   }
 }
-
-
 ?>
 
 <div class="review-wrapper">
@@ -170,8 +177,8 @@ if (isset($_POST['submit_review'])) {
 
             <div class="single-star me-3" style="color: var(--primary);">★</div>
 
-Mei, [2/2/2026 9:14 AM]
-<div class="flex-grow-1 mx-2">
+
+            <div class="flex-grow-1 mx-2">
               <div class="progress custom-progress"
                 style="height: 8px; background-color: #7f8a9f44; border-radius: 10px;">
                 <div class="progress-bar" role="progressbar"
@@ -229,17 +236,9 @@ Mei, [2/2/2026 9:14 AM]
         <?php endforeach; ?>
       </div>
       <!-- Add Review Form -->
-      <!-- Add Review Form / Guest Check -->
       <div class="col-md-6 review-form">
-        <h4>Add a Review</h4>
-
-        <?php if (!$is_logged_in): ?>
-          <div class="guest-review-lock"
-            style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
-            <p>You must be logged in to write a review.</p>
-            <button onclick="openAuthModal()" class="btn btn-primary">Login / Register</button>
-          </div>
-        <?php else: ?>
+        <?php if ($isLoggedIn): ?>
+          <h4>Add a Review</h4>
           <form method="POST" action="">
             <div class="mb-3">
               <label class="form-label">Add Your Rating</label>
@@ -260,18 +259,26 @@ Mei, [2/2/2026 9:14 AM]
               <label class="form-label">Write Your Review</label>
               <textarea name="review" class="form-control" rows="4" required></textarea>
             </div>
-            <button type="submit" name="submit_review" class="btn btn-warnin">Submit</button>
+
+            <button type="submit" name="submit_review" class="btn-submit">Submit Review</button>
           </form>
 
+        <?php else: ?>
+          <div class="login-prompt-container text-center p-5 border rounded bg-light">
+            <p class="mb-4 text-secondary" style="font-size: 1.1rem;">
+              Please login or create an account to submit a review.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+              <a href="/Malltiverse/FrontEnd/customerLogin.php" class="btn-login">Login</a>
+              <a href="/Malltiverse/FrontEnd/customerRegister.php" class="btn-register">Register</a>
+            </div>
+          </div>
         <?php endif; ?>
-
       </div>
-
     </div>
   </div>
 </div>
 
-Mei, [2/2/2026 9:14 AM]
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const container = document.querySelector('.svg-stars');

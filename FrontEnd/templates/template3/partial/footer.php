@@ -16,9 +16,9 @@
                 <ul class="footer-links">
                     <?php $base_url = "?supplier_id=" . $supplier_id; ?>
                     <li><a href="<?= $base_url ?>&page=home">Home</a></li>
-                    <li><a href="<?= $base_url ?>&page=shop">Shop</a></li>
+                    <li><a href="<?= $base_url ?>&page=shop">Product</a></li>
                     <li><a href="<?= $base_url ?>&page=about">About Us</a></li>
-                    <li><a href="<?= $base_url ?>&page=collection">Collection</a></li>
+                    <li><a href="<?= $base_url ?>&page=collection">Contact</a></li>
                     <li><a href="<?= $base_url ?>&page=review">Review</a></li>
                 </ul>
             </div>

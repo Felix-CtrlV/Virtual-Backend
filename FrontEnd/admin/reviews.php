@@ -145,32 +145,31 @@ $base_url = 'reviews.php' . ($query_string ? '?' . $query_string . '&' : '?');
 
     <form method="get" action="reviews.php" class="reviews-filter-form" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; padding: 16px; background: rgba(15,23,42,0.5); border-radius: 12px; border: 1px solid var(--border);">
         <input type="hidden" name="p" value="1">
-        <input type="text" name="q" value="<?= htmlspecialchars($filter_search) ?>" placeholder="Search reviewer or review..." style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px; min-width: 200px;">
-        <select name="company" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+        <input type="text" name="q" id="reviewsSearch" value="<?= htmlspecialchars($filter_search) ?>" placeholder="Search reviewer or review..." style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px; min-width: 200px;">
+        <select name="company" class="reviews-live-filter" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
             <option value="0">All companies</option>
             <?php foreach ($companies as $co): ?>
                 <option value="<?= (int)$co['company_id'] ?>" <?= $filter_company === (int)$co['company_id'] ? 'selected' : '' ?>><?= htmlspecialchars($co['company_name']) ?></option>
             <?php endforeach; ?>
         </select>
-        <select name="rating" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+        <select name="rating" class="reviews-live-filter" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
             <option value="all" <?= $filter_rating === 'all' ? 'selected' : '' ?>>All ratings</option>
             <option value="poor" <?= $filter_rating === 'poor' ? 'selected' : '' ?>>Poor (1–2★)</option>
             <option value="average" <?= $filter_rating === 'average' ? 'selected' : '' ?>>Average (3–4★)</option>
             <option value="excellent" <?= $filter_rating === 'excellent' ? 'selected' : '' ?>>Excellent (5★)</option>
         </select>
-        <select name="date" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+        <select name="date" class="reviews-live-filter" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
             <option value="all" <?= $filter_date === 'all' ? 'selected' : '' ?>>All time</option>
             <option value="7d" <?= $filter_date === '7d' ? 'selected' : '' ?>>Last 7 days</option>
             <option value="30d" <?= $filter_date === '30d' ? 'selected' : '' ?>>Last 30 days</option>
             <option value="month" <?= $filter_date === 'month' ? 'selected' : '' ?>>This month</option>
         </select>
-        <select name="sort" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+        <select name="sort" class="reviews-live-filter" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
             <option value="newest" <?= $filter_sort === 'newest' ? 'selected' : '' ?>>Newest first</option>
             <option value="oldest" <?= $filter_sort === 'oldest' ? 'selected' : '' ?>>Oldest first</option>
             <option value="lowest" <?= $filter_sort === 'lowest' ? 'selected' : '' ?>>Lowest rating</option>
             <option value="highest" <?= $filter_sort === 'highest' ? 'selected' : '' ?>>Highest rating</option>
         </select>
-        <button type="submit" class="btn-primary btn">Apply</button>
         <?php if ($filter_search || $filter_company || $filter_rating !== 'all' || $filter_date !== 'all'): ?>
             <a href="reviews.php" class="btn-ghost btn">Clear</a>
         <?php endif; ?>
@@ -232,9 +231,27 @@ $base_url = 'reviews.php' . ($query_string ? '?' . $query_string . '&' : '?');
 
 <script src="script.js"></script>
 <script>
-document.querySelector('.reviews-filter-form').addEventListener('change', function() {
-    this.querySelector('input[name="p"]').value = '1';
-});
+(function() {
+    var form = document.querySelector('.reviews-filter-form');
+    if (!form) return;
+    form.querySelectorAll('.reviews-live-filter').forEach(function(el) {
+        el.addEventListener('change', function() {
+            form.querySelector('input[name="p"]').value = '1';
+            form.submit();
+        });
+    });
+    var searchInput = document.getElementById('reviewsSearch');
+    if (searchInput) {
+        var debounce;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounce);
+            debounce = setTimeout(function() {
+                form.querySelector('input[name="p"]').value = '1';
+                form.submit();
+            }, 350);
+        });
+    }
+})();
 </script>
 </body>
 </html>

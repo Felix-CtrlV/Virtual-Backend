@@ -200,8 +200,22 @@ include("partials/nav.php");
         
         <div class="table-wrapper" id="tableWrapper">
             <div class="card">
-                <div class="search">
-                    <input autocomplete="off" type="text" id="searchuser" placeholder="Search Users..." onkeyup="fetchUsers(this.value)" />
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; padding: 4px 0;">
+                    <div class="search" style="flex: 1; min-width: 200px;">
+                        <input autocomplete="off" type="text" id="searchuser" placeholder="Search users..." />
+                    </div>
+                    <select id="filterRole" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+                        <option value="all">All roles</option>
+                        <option value="customer">Customer</option>
+                        <option value="supplier">Supplier</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <select id="filterStatus" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+                        <option value="all">All statuses</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="banned">Banned</option>
+                    </select>
                 </div>
                 <table>
                     <thead>
@@ -265,11 +279,15 @@ include("partials/nav.php");
     let currentUser = { id: null, role: null };
 
     // 1. Fetch Table
-    function fetchUsers(query = "") {
+    function fetchUsers() {
+        var q = (document.getElementById("searchuser") || {}).value || "";
+        var role = (document.getElementById("filterRole") || {}).value || "all";
+        var status = (document.getElementById("filterStatus") || {}).value || "all";
+        var body = "search=" + encodeURIComponent(q) + "&role=" + encodeURIComponent(role) + "&status=" + encodeURIComponent(status);
         fetch("utils/search_users.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "search=" + encodeURIComponent(query)
+            body: body
         })
         .then(res => res.text())
         .then(data => {
@@ -444,7 +462,15 @@ include("partials/nav.php");
         }
     }
 
-    // Initial load
+    // Live filters
+    var searchDebounce;
+    document.getElementById("searchuser").addEventListener("keyup", function() {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(fetchUsers, 300);
+    });
+    document.getElementById("filterRole").addEventListener("change", fetchUsers);
+    document.getElementById("filterStatus").addEventListener("change", fetchUsers);
+
     fetchUsers();
 </script>
 </body>

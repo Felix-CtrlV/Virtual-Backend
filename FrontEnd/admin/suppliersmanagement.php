@@ -65,6 +65,16 @@ $reviewquery = "SELECT ROUND(AVG(rating),1) AS avg_rating, COUNT(*) AS total_rev
 $reviewresult = mysqli_query($conn, $reviewquery);
 $reviewrow = mysqli_fetch_assoc($reviewresult);
 
+$rent_history = [];
+$rent_stmt = $conn->prepare("SELECT amount, paid_date, due_date FROM rent_payments WHERE company_id = ? ORDER BY paid_date DESC LIMIT 5");
+if ($rent_stmt) {
+    $rent_stmt->bind_param("i", $company_id);
+    $rent_stmt->execute();
+    $rent_res = $rent_stmt->get_result();
+    while ($r = $rent_res->fetch_assoc()) $rent_history[] = $r;
+    $rent_stmt->close();
+}
+
 $banner_string = $supplierrow["banner"];
 $banners = explode(",", $banner_string);
 $banner_count = count($banners);
@@ -177,7 +187,7 @@ $statusClass = match ($status) {
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" style="grid-column: span 2;">
             <div class="card-title">Contact Information</div>
             <p style="font-size: 12px; color: var(--muted); margin-top: 6px;">
                 <strong>Email:</strong> <?= htmlspecialchars($supplierrow['email'] ?? '') ?><br>
@@ -188,12 +198,13 @@ $statusClass = match ($status) {
 
         <div class="card">
             <div class="card-title">Contract Details</div>
-            <p style="font-size: 12px; color: var(--muted); margin-top: 6px;">
+            <p style="font-size: 12px; color: var(--muted); margin: 0px 0px 18px 0px;">
                 <strong>Contract:</strong>
                 <?= !empty($supplierrow['contract_start']) ? date('M d, Y', strtotime($supplierrow['contract_start'])) : 'N/A' ?>
                 <strong> - </strong>
                 <?= !empty($supplierrow['contract_end']) ? date('M d, Y', strtotime($supplierrow['contract_end'])) : 'N/A' ?>
             </p>
+            <a href="rentingpayment.php?adminid=<?= urlencode($adminid) ?>" class="btn btn-ghost" style="margin-top:10px;padding:6px 0px;font-size:11px;">View Rent Dashboard</a>
         </div>
 
         <div class="card">
@@ -211,6 +222,35 @@ $statusClass = match ($status) {
                 }
                 ?>
             </p>
+        </div>
+
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-header" style="margin-bottom:8px;">
+                <div class="card-title">Recent Rent Payments</div>
+                <a href="rentingpayment.php?adminid=<?= urlencode($adminid) ?>" class="btn btn-ghost" style="padding:0px 0px 10px 10px;font-size:11px;">View All</a>
+            </div>
+            <?php if (!empty($rent_history)): ?>
+                <table style="font-size:12px;">
+                    <thead>
+                        <tr>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Due</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rent_history as $rh): ?>
+                            <tr>
+                                <td>$<?= number_format((float)($rh['amount'] ?? 0), 2) ?></td>
+                                <td><?= !empty($rh['paid_date']) ? date('M d, Y', strtotime($rh['paid_date'])) : 'N/A' ?></td>
+                                <td><?= !empty($rh['due_date']) ? date('M d, Y', strtotime($rh['due_date'])) : 'N/A' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <p style="font-size:12px;color:var(--muted);">No rent payment history.</p>
+            <?php endif; ?>
         </div>
     </div>
     

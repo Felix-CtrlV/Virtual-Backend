@@ -1,13 +1,14 @@
 <?php
 // Since this file is INCLUDED by index.php, the path 
 // starts from the Shop/ folder location.
-require_once '../utils/messages.php'; 
+require_once '../utils/messages.php';
 
 $message_sent = false;
 $error_message = "";
 
 // Capture the supplier_id from the URL (?supplier_id=1)
-$company_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
+// $supplier_id = isset($_GET['supplier_id']) ? intval($_GET['supplier_id']) : 0;
+
 
 if (isset($_POST['submit'])) {
     $message = htmlspecialchars(trim($_POST['message']));
@@ -16,7 +17,7 @@ if (isset($_POST['submit'])) {
     if (!empty($message) && $company_id > 0) {
         // $conn comes from the include in index.php
         $success = sendContactMessage($conn, $customer_id, $company_id, $message);
-        
+
         if ($success) {
             $message_sent = true;
         } else {
@@ -32,15 +33,16 @@ if (isset($_POST['submit'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | Brandflow Agency</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <style>
         .glass-popup {
             background: rgba(255, 255, 255, 0.08) !important;
@@ -67,11 +69,25 @@ if (isset($_POST['submit'])) {
         .swal2-icon.swal2-success {
             border-color: #000000 !important;
         }
+
         .swal2-icon.swal2-success [class^='swal2-success-line'] {
             background-color: #000000 !important;
         }
+
         .swal2-icon.swal2-success .swal2-success-ring {
             border: 4px solid #000000 !important;
+        }
+
+        .swal2-success-circular-line-left {
+            display: none !important;
+        }
+
+        .swal2-success-circular-line-right {
+            display: none !important;
+        }
+
+        .swal2-success-fix {
+            display: none !important;
         }
 
         .glass-confirm-btn {
@@ -80,8 +96,8 @@ if (isset($_POST['submit'])) {
             border-radius: 14px !important;
             padding: 12px 40px !important;
             font-weight: 600 !important;
-            border: none !important; 
-            outline: none !important; 
+            border: none !important;
+            outline: none !important;
             box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.4) !important;
             transition: all 0.3s ease !important;
             cursor: pointer;
@@ -94,6 +110,7 @@ if (isset($_POST['submit'])) {
         }
     </style>
 </head>
+
 <body>
     <section class="contact-wrapper">
         <div class="section-header">
@@ -106,7 +123,7 @@ if (isset($_POST['submit'])) {
             <div class="side-title">
                 <div class="title-wrapper">
                     <h2>
-                        <span class="light-text">GET IN</span> 
+                        <span class="light-text">GET IN</span>
                         <span class="bold-text">TOUCH</span>
                     </h2>
                     <div class="decorative-line"></div>
@@ -162,7 +179,8 @@ if (isset($_POST['submit'])) {
                 <div class="form-info-text animate-right">
                     <p class="query-tag">HAVE ANY QUERY?</p>
                     <h2>CONTACT <span class="accent">US</span></h2>
-                    <p class="description">We’re here to help! Send us a message and our team will get back to you within 24 hours.</p>
+                    <p class="description">We’re here to help! Send us a message and our team will get back to you
+                        within 24 hours.</p>
                     <div class="social-links">
                         <i class="fab fa-facebook-f"></i>
                         <i class="fab fa-instagram"></i>
@@ -174,42 +192,43 @@ if (isset($_POST['submit'])) {
     </section>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const config = {
-            customClass: {
-                popup: 'glass-popup',
-                title: 'glass-title',
-                htmlContainer: 'glass-content',
-                confirmButton: 'glass-confirm-btn'
-            },
-            buttonsStyling: false,
-            confirmButtonText: 'Understood',
-            showClass: {
-                popup: 'swal2-noanimation',
-                backdrop: 'swal2-noanimation'
-            }
-        };
+        document.addEventListener('DOMContentLoaded', function () {
+            const config = {
+                customClass: {
+                    popup: 'glass-popup',
+                    title: 'glass-title',
+                    htmlContainer: 'glass-content',
+                    confirmButton: 'glass-confirm-btn'
+                },
+                buttonsStyling: false,
+                confirmButtonText: 'Understood',
+                showClass: {
+                    popup: 'swal2-noanimation',
+                    backdrop: 'swal2-noanimation'
+                }
+            };
 
-        <?php if ($message_sent): ?>
-            Swal.fire({
-                ...config,
-                title: 'Success!',
-                text: 'Your message has been delivered to our team.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-        <?php endif; ?>
+            <?php if ($message_sent): ?>
+                Swal.fire({
+                    ...config,
+                    title: 'Success!',
+                    text: 'Your message has been delivered to our team.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            <?php endif; ?>
 
-        <?php if (!empty($error_message)): ?>
-            Swal.fire({
-                ...config,
-                title: 'Something went wrong',
-                text: '<?php echo $error_message; ?>',
-                icon: 'error',
-                confirmButtonText: 'Try Again'
-            });
-        <?php endif; ?>
-    });
+            <?php if (!empty($error_message)): ?>
+                Swal.fire({
+                    ...config,
+                    title: 'Something went wrong',
+                    text: '<?php echo $error_message; ?>',
+                    icon: 'error',
+                    confirmButtonText: 'Try Again'
+                });
+            <?php endif; ?>
+        });
     </script>
 </body>
+
 </html>

@@ -48,7 +48,6 @@ elseif (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER'])) {
             <p id="message" class="<?= !empty($message) ? 'error-msg' : '' ?>"><?= $message; ?></p>
 
             <form id="loginform" method="POST">
-                <!-- Hidden input to pass return_url -->
                 <input type="hidden" id="return_url" value="<?= htmlspecialchars($redirectUrl) ?>">
 
                 <div class="input-group">
@@ -80,15 +79,14 @@ elseif (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER'])) {
                 </button>
             </div>
 
-            <!-- Forgot Password Modal -->
             <div id="forgot-password-modal" style="display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
                 <div style="background: linear-gradient(rgb(111 22 253 / 60%), rgb(73 73 120 / 90%)); padding:30px; border-radius:10px; max-width:400px; width:90%;">
                     <h3 style="margin-top:0;">Reset Password</h3>
                     <p id="forgot-message" style="color: #666; font-size: 0.9rem;"></p>
                     <input type="email" id="forgot-email" placeholder="Enter your email" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:5px;">
                     <div style="display:flex; gap:10px; margin-top:15px;">
-                        <button onclick="document.getElementById('forgot-password-modal').style.display='none'" style="flex:1; padding:10px; background:#f5f5f5; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
-                        <button onclick="handleForgotPassword()" style="flex:1; padding:10px; background:#000; color:white; border:none; border-radius:5px; cursor:pointer;">Send Reset Link</button>
+                        <button type="button" onclick="document.getElementById('forgot-password-modal').style.display='none'" style="flex:1; padding:10px; background:#f5f5f5; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+                        <button type="button" onclick="handleForgotPassword()" style="flex:1; padding:10px; background:#000; color:white; border:none; border-radius:5px; cursor:pointer;">Send Reset Link</button>
                     </div>
                 </div>
             </div>
@@ -146,7 +144,7 @@ elseif (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER'])) {
             });
         }
 
-        // AJAX login logic
+        // AJAX login logic (UPDATED TO HANDLE BANNED REDIRECTS)
         const form = document.getElementById('loginform');
         const message = document.getElementById('message');
 
@@ -167,8 +165,14 @@ elseif (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER'])) {
                     // Redirect to the return URL from backend
                     window.location.href = data.return_url || 'index.php';
                 } else {
-                    message.classList.add('error-msg');
-                    message.textContent = data.message || "Invalid Credentials";
+                    // Check if we need to redirect to Banned Page
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        // Standard Error
+                        message.classList.add('error-msg');
+                        message.textContent = data.message || "Invalid Credentials";
+                    }
                 }
             })
             .catch(err=>{

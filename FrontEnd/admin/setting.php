@@ -14,7 +14,7 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
 
     <form action="utils/adminSettingChanges.php" method="post" enctype="multipart/form-data" id="profileForm">
         <input type="hidden" name="savebutton" value="1">
-        <div class="section-actions" style="justify-content: flex-end; margin-bottom: 10px; margin-left: 68vw;">
+        <div class="section-actions" style="justify-content: flex-end; margin-bottom: 10px;">
             <a href="setting.php" class="btn-ghost btn">Cancel</a>
             <button type="submit" name="savebutton" value="1" class="btn-primary btn">Save changes</button>
         </div>
@@ -25,7 +25,7 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
                 <div class="card-header">
                     <div>
                         <div class="card-title">Profile picture</div>
-                        <div class="card-value" style="font-size: 13px; font-weight: 400; color: var(--muted);">JPG, PNG, GIF or WebP — max 2 MB</div>
+                        <div class="card-value" style="font-size: 0.929rem; font-weight: 400; color: var(--muted);">JPG, PNG, GIF or WebP — max 2 MB</div>
                     </div>
                     </div>
                     <div class="profile-photo-section">
@@ -51,11 +51,11 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
                 <div class="card-header">
                     <div>
                         <div class="card-title">Account information</div>
-                        <div class="card-value" style="font-size: 16px;"><?= htmlspecialchars($name) ?></div>
+                        <div class="card-value" style="font-size: 1.143rem;"><?= htmlspecialchars($name) ?></div>
                     </div>
                     <span class="card-chip">Administrator</span>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; font-size: 13px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; font-size: 0.929rem;">
                     <div>
                         <label style="display: block; margin-bottom: 4px; color: var(--muted);">Full name</label>
                         <input autocomplete="off" name="fullname" type="text" value="<?= htmlspecialchars($name) ?>" required
@@ -85,10 +85,10 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
             <div class="card-header">
                 <div>
                     <div class="card-title">Change password</div>
-                    <div class="card-value" style="font-size: 13px; font-weight: 400; color: var(--muted);">Leave blank to keep current password. New password must be at least 8 characters.</div>
+                    <div class="card-value" style="font-size: 0.929rem; font-weight: 400; color: var(--muted);">Leave blank to keep current password. New password must be at least 8 characters.</div>
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; font-size: 13px; max-width: 560px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; font-size: 0.929rem; max-width: 560px;">
                 <div>
                     <label style="display: block; margin-bottom: 4px; color: var(--muted);">Current password</label>
                     <input autocomplete="off" name="current_password" type="password" id="current_password" placeholder="••••••••"
@@ -99,13 +99,13 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
                     <label style="display: block; margin-bottom: 4px; color: var(--muted);">New password</label>
                     <input autocomplete="new-password" name="new_password" type="password" id="new_password" placeholder="Min 8 characters"
                         class="settings-input" minlength="8">
-                    <span id="pwdHint" style="font-size: 11px; color: var(--muted); display: block; margin-top: 4px;"></span>
+                    <span id="pwdHint" style="font-size: 0.786rem; color: var(--muted); display: block; margin-top: 4px;"></span>
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 4px; color: var(--muted);">Confirm new password</label>
                     <input autocomplete="new-password" name="confirm_password" type="password" id="confirm_password" placeholder="Confirm new password"
                         class="settings-input">
-                    <span id="confirmHint" style="font-size: 11px; color: var(--danger); display: none; margin-top: 4px;">Passwords do not match</span>
+                    <span id="confirmHint" style="font-size: 0.786rem; color: var(--danger); display: none; margin-top: 4px;">Passwords do not match</span>
                 </div>
             </div>
         </div>
@@ -116,32 +116,89 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
         <div class="card-header">
             <div>
                 <div class="card-title">Preferences</div>
-                <div class="card-value" style="font-size: 13px; font-weight: 400; color: var(--muted);">Saved in your browser</div>
+                <div class="card-value" style="font-size: 0.929rem; font-weight: 400; color: var(--muted);">Saved in your browser — changes apply instantly</div>
             </div>
         </div>
-        <div style="font-size: 13px; margin-top: 8px;">
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                    <label class="switch">
-                        <input type="checkbox" id="pref-quick-stats" aria-label="Show quick stats">
-                        <span class="slider"></span>
+        <div style="margin-top: 16px;">
+            <!-- Font style -->
+            <div class="pref-section">
+                <div class="pref-section-title">Font style</div>
+                <div class="font-cards">
+                    <div class="font-card selected" data-font="inter" style="font-family:'Inter',sans-serif">
+                        <div class="font-card-preview" style="font-family: Inter;">Aa</div>
+                        <div class="font-card-name">Inter</div>
+                    </div>
+                    <div class="font-card" data-font="roboto" style="font-family:'Roboto',sans-serif">
+                        <div class="font-card-preview" style="font-family: Roboto;">Aa</div>
+                        <div class="font-card-name">Roboto</div>
+                    </div>
+                    <div class="font-card" data-font="dmsans" style="font-family:'DM Sans',sans-serif">
+                        <div class="font-card-preview"  style="font-family: DM Sans;">Aa</div>
+                        <div class="font-card-name">DM Sans</div>
+                    </div>
+                    <div class="font-card" data-font="opensans" style="font-family:'Open Sans',sans-serif">
+                        <div class="font-card-preview"  style="font-family: Open Sans;">Aa</div>
+                        <div class="font-card-name">Open Sans</div>
+                    </div>
+                    <div class="font-card" data-font="poppins" style="font-family:'Poppins',sans-serif">
+                        <div class="font-card-preview"  style="font-family: Poppins;">Aa</div>
+                        <div class="font-card-name">Poppins</div>
+                    </div>
+                    <div class="font-card" data-font="sourcesans" style="font-family:'Source Sans 3',sans-serif">
+                        <div class="font-card-preview" style="font-family: Source Sans 3;">Aa</div>
+                        <div class="font-card-name">Source Sans</div>
+                    </div>
+                    <div class="font-card" data-font="system" style="font-family:system-ui,sans-serif">
+                        <div class="font-card-preview"  style="font-family: system-ui;">Aa</div>
+                        <div class="font-card-name">System</div>
+                    </div>
+                    <div class="font-card" data-font="georgia" style="font-family:Georgia,serif">
+                        <div class="font-card-preview"  style="font-family: Georgia;">Aa</div>
+                        <div class="font-card-name">Georgia</div>
+                    </div>
+                </div>
+                <script>!function(){var f=localStorage.getItem('admin_font')||'inter';document.querySelectorAll('.font-card').forEach(function(c){c.classList.toggle('selected',c.getAttribute('data-font')===f);});}();</script>
+            </div>
+
+            <!-- Font size -->
+            <div class="pref-section">
+                <div class="pref-section-title">Font size</div>
+                <div class="font-size-row">
+                    <span style="font-size:0.786rem;color:var(--muted);">Small</span>
+                    <input type="range" id="font-size-slider" class="font-size-slider" min="12" max="18" value="14" step="1">
+                    <span style="font-size:0.786rem;color:var(--muted);">Large</span>
+                    <span class="font-size-value" id="font-size-value">14</span>
+                    <span style="font-size:0.786rem;color:var(--muted);">px</span>
+                </div>
+                <script>!function(){var s=parseInt(localStorage.getItem('admin_font_size'),10)||14;var sl=document.getElementById('font-size-slider');var ve=document.getElementById('font-size-value');if(sl){sl.value=s;}if(ve){ve.textContent=s;}}();</script>
+            </div>
+
+            <!-- Other toggles -->
+            <div class="pref-section" style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+                <div class="pref-section-title">Dashboard & notifications</div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                        <label class="switch">
+                            <input type="checkbox" id="pref-quick-stats" aria-label="Show quick stats">
+                            <span class="slider"></span>
+                        </label>
+                        <span>Show quick stats on dashboard</span>
                     </label>
-                    <span>Show quick stats on dashboard</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                    <label class="switch">
-                        <input type="checkbox" id="pref-remember-filter" aria-label="Remember filter">
-                        <span class="slider"></span>
+                    <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                        <label class="switch">
+                            <input type="checkbox" id="pref-remember-filter" aria-label="Remember filter">
+                            <span class="slider"></span>
+                        </label>
+                        <span>Remember year/month filter on dashboard</span>
                     </label>
-                    <span>Remember year/month filter on dashboard</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                    <label class="switch">
-                        <input type="checkbox" id="pref-notification-sound" aria-label="Notification sound">
-                        <span class="slider"></span>
+                    <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                        <label class="switch">
+                            <input type="checkbox" id="pref-notification-sound" aria-label="Notification sound">
+                            <span class="slider"></span>
+                        </label>
+                        <span>Notification sound when opening pending registrations</span>
                     </label>
-                    <span>Notification sound when opening pending registrations</span>
-                </label>
+                </div>
             </div>
         </div>
     </div>
@@ -155,7 +212,7 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
     border: 1px solid rgba(148,163,184,0.4);
     background: rgba(15,23,42,0.9);
     color: var(--text);
-    font-size: 13px;
+    font-size: 0.929rem;
 }
 .settings-input:focus {
     outline: none;
@@ -215,10 +272,10 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
     opacity: 0.6;
 }
 .profile-photo-text {
-    font-size: 12px;
+    font-size: 0.857rem;
 }
 .profile-photo-btn {
-    font-size: 13px;
+    font-size: 0.929rem;
     font-weight: 500;
     color: var(--accent);
 }
@@ -231,9 +288,21 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
 <script>
 (function() {
     var STORAGE_KEYS = {
+        font: 'admin_font',
+        fontSize: 'admin_font_size',
         quickStats: 'admin_quick_stats',
         rememberFilter: 'admin_remember_filter',
         notificationSound: 'admin_notification_sound'
+    };
+    var FONT_MAP = {
+        inter: "'Inter',sans-serif",
+        roboto: "'Roboto',sans-serif",
+        dmsans: "'DM Sans',sans-serif",
+        opensans: "'Open Sans',sans-serif",
+        poppins: "'Poppins',sans-serif",
+        sourcesans: "'Source Sans 3',sans-serif",
+        system: "system-ui,-apple-system,sans-serif",
+        georgia: "Georgia,serif"
     };
     function get(key, defaultVal) {
         var v = localStorage.getItem(key);
@@ -242,14 +311,46 @@ $adminImgPath = $adminImg && file_exists(__DIR__ . '/../assets/customer_profiles
     function set(key, val) {
         localStorage.setItem(key, val ? '1' : '0');
     }
+    function applyFont(f) {
+        var stack = FONT_MAP[f] || FONT_MAP.inter;
+        document.documentElement.style.setProperty('--font-family', stack);
+        localStorage.setItem(STORAGE_KEYS.font, f);
+    }
+    function applyFontSize(s) {
+        document.documentElement.style.setProperty('--font-size-base', s + 'px');
+        localStorage.setItem(STORAGE_KEYS.fontSize, String(s));
+    }
     document.addEventListener('DOMContentLoaded', function() {
+        var font = localStorage.getItem(STORAGE_KEYS.font) || 'inter';
+        var fontSize = parseInt(localStorage.getItem(STORAGE_KEYS.fontSize), 10) || 14;
+
+        document.querySelectorAll('.font-card').forEach(function(c) {
+            c.classList.toggle('selected', c.getAttribute('data-font') === font);
+            c.addEventListener('click', function() {
+                var f = this.getAttribute('data-font');
+                document.querySelectorAll('.font-card').forEach(function(x) { x.classList.remove('selected'); });
+                this.classList.add('selected');
+                applyFont(f);
+            });
+        });
+
+        var slider = document.getElementById('font-size-slider');
+        var valueEl = document.getElementById('font-size-value');
+        slider.value = fontSize;
+        valueEl.textContent = fontSize;
+        slider.addEventListener('input', function() {
+            var s = parseInt(this.value, 10);
+            valueEl.textContent = s;
+            applyFontSize(s);
+        });
+
         document.getElementById('pref-quick-stats').checked = get(STORAGE_KEYS.quickStats, true);
         document.getElementById('pref-remember-filter').checked = get(STORAGE_KEYS.rememberFilter, false);
         document.getElementById('pref-notification-sound').checked = get(STORAGE_KEYS.notificationSound, false);
 
         ['pref-quick-stats','pref-remember-filter','pref-notification-sound'].forEach(function(id, i) {
-            var key = Object.values(STORAGE_KEYS)[i];
-            document.getElementById(id).addEventListener('change', function() { set(key, this.checked); });
+            var key = ['quickStats','rememberFilter','notificationSound'][i];
+            document.getElementById(id).addEventListener('change', function() { set(STORAGE_KEYS[key], this.checked); });
         });
     });
 })();

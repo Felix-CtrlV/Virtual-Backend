@@ -17,15 +17,15 @@
     }
 
     .page-btn:hover:not(:disabled) {
-        border-color: #007bff;
+        border-color: #98B9D5;
         color: linear-gradient(145deg, rgba(159, 204, 223, 0.8));
         background: #f0f7ff;
     }
 
     .page-btn.active {
         background: linear-gradient(145deg, rgba(159, 204, 223, 0.8), rgba(71, 78, 111, 0.6));
-        ;
-        border-color: #007bff;
+
+        border-color: #98B9D5;
     }
 
     .page-btn:disabled {

@@ -3,18 +3,19 @@
 <?php
 // --- 1. PAGINATION CALCULATIONS ---
 $limit = 8; // 12 products per page
-$current_page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
-if ($current_page < 1) $current_page = 1;
+$current_page = isset($_GET['p']) ? (int) $_GET['p'] : 1;
+if ($current_page < 1)
+  $current_page = 1;
 $offset = ($current_page - 1) * $limit;
 
 // --- 2. GET TOTAL COUNT (To know how many pages exist) ---
 // Change the first condition
 if (!isset($_GET['category_id'])) {
-    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE company_id = ? AND status != 'unavailable'");
-    mysqli_stmt_bind_param($count_stmt, "i", $company_id);
+  $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE company_id = ? AND status != 'unavailable'");
+  mysqli_stmt_bind_param($count_stmt, "i", $company_id);
 } else {
-    $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE company_id = ? AND category_id = ? AND status != 'unavailable'");
-    mysqli_stmt_bind_param($count_stmt, "ii", $company_id, $_GET['category_id']);
+  $count_stmt = mysqli_prepare($conn, "SELECT COUNT(*) FROM products WHERE company_id = ? AND category_id = ? AND status != 'unavailable'");
+  mysqli_stmt_bind_param($count_stmt, "ii", $company_id, $_GET['category_id']);
 }
 mysqli_stmt_execute($count_stmt);
 $count_result = mysqli_stmt_get_result($count_stmt);
@@ -26,18 +27,26 @@ mysqli_stmt_close($count_stmt);
 <section class="products-page pt-5">
   <div class="container">
     <h2 class="text-center mb-5">Our Products</h2>
+    <div class="row justify-content-center mb-4">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input type="text" id="search_input" class="form-control" placeholder="Search for products...">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+        </div>
+      </div>
+    </div>
 
     <div class="product_list_grid">
       <?php
       // --- 3. FETCH PRODUCTS WITH LIMIT & OFFSET ---
       if (!isset($_GET['category_id'])) {
-    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT ? OFFSET ?");
-    mysqli_stmt_bind_param($products_stmt, "iii", $company_id, $limit, $offset);
-} else {
-    // ADD THE STATUS CHECK HERE TOO:
-    $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND category_id = ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT ? OFFSET ?");
-    mysqli_stmt_bind_param($products_stmt, "iiii", $company_id, $_GET['category_id'], $limit, $offset);
-}
+        $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        mysqli_stmt_bind_param($products_stmt, "iii", $company_id, $limit, $offset);
+      } else {
+        // ADD THE STATUS CHECK HERE TOO:
+        $products_stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE company_id = ? AND category_id = ? AND status != 'unavailable' ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        mysqli_stmt_bind_param($products_stmt, "iiii", $company_id, $_GET['category_id'], $limit, $offset);
+      }
       if ($products_stmt) {
         mysqli_stmt_execute($products_stmt);
         $products_result = mysqli_stmt_get_result($products_stmt);
@@ -76,9 +85,10 @@ mysqli_stmt_close($count_stmt);
 
     <?php if ($total_pages > 1): ?>
       <div class="pagination-container" style="margin: 50px 0 80px 0; text-align: center;">
-        <?php 
-          $url_params = "supplier_id=$supplier_id&page=products";
-          if (isset($_GET['category_id'])) $url_params .= "&category_id=" . $_GET['category_id'];
+        <?php
+        $url_params = "supplier_id=$supplier_id&page=products";
+        if (isset($_GET['category_id']))
+          $url_params .= "&category_id=" . $_GET['category_id'];
         ?>
 
         <?php if ($current_page > 1): ?>
@@ -100,8 +110,83 @@ mysqli_stmt_close($count_stmt);
   </div>
 </section>
 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    // Save the initial content to restore if search is cleared
+    var initialContent = $('.product_list_grid').html();
+    var initialPagination = $('.pagination-container').html();
+
+    // 1. Initialize the debounce timer variable
+    var debounceTimer;
+
+    $('#search_input').on('keyup', function () {
+      var searchTerm = $(this).val();
+      var supplierId = '<?php echo $supplier_id; ?>';
+      var categoryId = '<?php echo isset($_GET['category_id']) ? $_GET['category_id'] : ""; ?>';
+
+      // 2. Clear the previous timer every time a key is pressed
+      clearTimeout(debounceTimer);
+
+      // 3. Set a new timer
+      debounceTimer = setTimeout(function () {
+        if (searchTerm.length > 0) {
+          $.ajax({
+            url: '../templates/template1/utils/search.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+              search: searchTerm,
+              supplier_id: supplierId,
+              category_id: categoryId,
+              page: 1
+            },
+            success: function (response) {
+              $('.product_list_grid').html(response.html);
+              $('.pagination-container').hide();
+            }
+          });
+        } else {
+          // Restore original content if search is empty
+          $('.product_list_grid').html(initialContent);
+          $('.pagination-container').html(initialPagination).show();
+        }
+      }, 300); // 300ms delay
+    });
+  });
+</script>
+
 <style>
-  .pag-btn { padding: 8px 16px; border: 1px solid #ccc; text-decoration: none; color: #333; border-radius: 4px; }
-  .pag-btn.active { background-color: #333; color: #fff; border-color: #333; }
-  .pag-btn:hover { background-color: #f4f4f4; }
+  /* Optional styling for the search box */
+  .input-group-text {
+    background: #333;
+    color: #fff;
+    border: 1px solid #333;
+  }
+
+  .form-control:focus {
+    box-shadow: none;
+    border-color: #333;
+  }
+</style>
+
+<style>
+  .pag-btn {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+  }
+
+  .pag-btn.active {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
+  }
+
+  .pag-btn:hover {
+    background-color: #f4f4f4;
+  }
 </style>

@@ -661,7 +661,7 @@
     transform: translateX(-50%);
 }
 
-.card-text.price::after {
+/* .card-text.price::after {
     content: '';
     display: block;
     left: 50%;
@@ -669,8 +669,9 @@
     width: 30px;
     height: 2px;
     background-color: #a52a2a;
+    justify-content: center;
     margin: 8px auto 0;
-}
+} */
 
 .card-product-grid {
     display: grid;

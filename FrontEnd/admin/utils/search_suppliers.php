@@ -3,6 +3,20 @@ include("../../../BackEnd/config/dbconfig.php");
 $adminid = $_SESSION["adminid"] ?? null;
 
 $search = $_POST['search'] ?? '';
+$statusFilter = $_POST['status'] ?? 'all';
+
+$like = "%$search%";
+$conditions = ["(c.company_name LIKE ? OR s.name LIKE ? OR s.email LIKE ?)"];
+$params = [$like, $like, $like];
+$types = "sss";
+
+if ($statusFilter === 'active') {
+    $conditions[] = "c.status = 'active'";
+} elseif ($statusFilter === 'pending') {
+    $conditions[] = "c.status = 'pending'";
+}
+
+$where = implode(" AND ", $conditions);
 
 $sql = "
 SELECT 
@@ -29,19 +43,13 @@ LEFT JOIN companies c
 LEFT JOIN shop_assets sa 
     ON sa.company_id = c.company_id
 
-WHERE (
-    c.company_name LIKE ?
-    OR s.name LIKE ?
-    OR s.email LIKE ?
-    OR s.status LIKE ?
-)
+WHERE $where
 
 ORDER BY s.created_at DESC;
 ";
 
 $stmt = $conn->prepare($sql);
-$like = "$search%";
-$stmt->bind_param("ssss", $like, $like, $like, $like);
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $supplierresult = $stmt->get_result();
 

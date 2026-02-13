@@ -99,7 +99,19 @@ if ($chat_query) {
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($pageTitle); ?> - Malltiverse Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Open+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/adminstyle.css">
+    <script>
+    (function(){
+        var f=localStorage.getItem('admin_font')||'inter';
+        var s=parseInt(localStorage.getItem('admin_font_size'),10)||14;
+        var fontMap={inter:"'Inter',sans-serif",roboto:"'Roboto',sans-serif",dmsans:"'DM Sans',sans-serif",opensans:"'Open Sans',sans-serif",poppins:"'Poppins',sans-serif",sourcesans:"'Source Sans 3',sans-serif",system:"system-ui,-apple-system,sans-serif",georgia:"Georgia,serif"};
+        document.documentElement.style.setProperty('--font-family',fontMap[f]||fontMap.inter);
+        document.documentElement.style.setProperty('--font-size-base',s+'px');
+    })();
+    </script>
     <style>
         /* Existing Notification Styles */
         .notif-container {
@@ -770,8 +782,11 @@ if ($chat_query) {
 
         <div class="nav-foot">
             <p>Signed in as <strong><?php echo htmlspecialchars($name); ?></strong></p>
-            <small>Malltiverse • v1.0.0</small><br>
-            <small><a href="../utils/signout.php">Sign out</a></small>
+            <small>Malltiverse • v1.0.0</small>
+            <a href="utils/signout.php" class="signout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign out</span>
+            </a>
         </div>
     </aside>
 

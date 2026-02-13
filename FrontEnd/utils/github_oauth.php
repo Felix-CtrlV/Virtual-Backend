@@ -125,56 +125,57 @@ switch ($user_type) {
         break;
 
     case 'supplier':
-        $stmt = $conn->prepare("SELECT supplier_id FROM suppliers WHERE email = ?");
+        $stmt = $conn->prepare("SELECT supplier_id, status FROM suppliers WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             $supplier = $result->fetch_assoc();
+
+            if (($supplier['status'] ?? '') === 'banned') {
+                $_SESSION['banned_user'] = [
+                    'id' => $supplier['supplier_id'],
+                    'type' => 'supplier'
+                ];
+                header('Location: ../banned.php');
+                exit;
+            }
+
             $_SESSION['supplier_logged_in'] = true;
             $_SESSION['supplierid'] = $supplier['supplier_id'];
             $redirect_to = $return_url ?: '../suppliers/dashboard.php';
         } else {
-            // Register supplier
-            $password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
-            $company_name = $name . "'s Shop";
-            $stmt = $conn->prepare("INSERT INTO suppliers (name, email, password, company_name, status) VALUES (?, ?, ?, ?, 'pending')");
-            $stmt->bind_param("ssss", $name, $email, $password, $company_name);
-            if ($stmt->execute()) {
-                $_SESSION['supplier_logged_in'] = true;
-                $_SESSION['supplierid'] = $conn->insert_id;
-                $redirect_to = $return_url ?: '../suppliers/dashboard.php';
-            } else {
-                $redirect_to = '../supplierLogin.php?error=registration_failed';
-            }
+            header('Location: ../supplierLogin.php?error=not_registered');
+            exit;
         }
         break;
 
     case 'customer':
     default:
-        $stmt = $conn->prepare("SELECT customer_id FROM customers WHERE email = ?");
+        $stmt = $conn->prepare("SELECT customer_id, status FROM customers WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             $customer = $result->fetch_assoc();
+
+            if (($customer['status'] ?? '') === 'banned') {
+                $_SESSION['banned_user'] = [
+                    'id' => $customer['customer_id'],
+                    'type' => 'customer'
+                ];
+                header('Location: ../banned.php');
+                exit;
+            }
+
             $_SESSION['customer_logged_in'] = true;
             $_SESSION['customer_id'] = $customer['customer_id'];
             $redirect_to = $return_url ?: '../index.html';
         } else {
-            // Register customer
-            $password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO customers (name, email, password) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $name, $email, $password);
-            if ($stmt->execute()) {
-                $_SESSION['customer_logged_in'] = true;
-                $_SESSION['customer_id'] = $conn->insert_id;
-                $redirect_to = $return_url ?: '../index.html';
-            } else {
-                $redirect_to = '../customerLogin.php?error=registration_failed';
-            }
+            header('Location: ../customerLogin.php?error=not_registered');
+            exit;
         }
         break;
 }

@@ -1,84 +1,73 @@
 <?php
-// =========================================================
-// 1. CONFIGURATION & MOCK DATA (Replace this with DB calls)
-// =========================================================
+session_start();
+// Adjust the path to your dbconfig as needed. 
+// Assuming banned.php is in the root and config is in BackEnd/config/
+require_once '../BackEnd/config/dbconfig.php'; 
 
-// Set the timezone to match your server/user region
-date_default_timezone_set('UTC');
-
-// In a real scenario, you would parse your XML/CSV file here.
-// For this preview, we simulate the data structure you provided:
-// ban_id, entity_type, entity_id, reason, banned_at, banned_until, banned_by
-
-$banned_users = [
-    [
-        'ban_id'       => 'BAN-8842-XJ',
-        'entity_type'  => 'user',
-        'entity_id'    => '1001',
-        'reason'       => 'Violation of Community Standards (Section 4.2): Harassment.',
-        'banned_at'    => '2023-10-25 14:30:00',
-        'banned_until' => '2025-12-31 23:59:59', // Future date for demo
-        'banned_by'    => 'Trust & Safety Team'
-    ],
-    // Add more rows here...
-];
-
-// SIMULATION: Let's assume the current user is ID 1001
-$current_user_id = '1001'; 
-$my_ban = null;
-
-// Find the user in the "Database"
-foreach ($banned_users as $ban) {
-    if ($ban['entity_id'] === $current_user_id) {
-        $my_ban = $ban;
-        break;
-    }
+// 1. Check if we have a flagged user in the session
+if (!isset($_SESSION['banned_user'])) {
+    header("Location: index.php");
+    exit();
 }
 
-// If no ban found, redirect or show success (Optional)
-if (!$my_ban) {
-    die("Access Granted: User is not banned.");
+$entity_id   = $_SESSION['banned_user']['id'];
+$entity_type = $_SESSION['banned_user']['type']; // 'supplier' or 'customer'
+
+// 2. Fetch Ban Details + Admin Username
+// We join banned_list with the admin table to get the username instead of ID
+$sql = "SELECT b.reason, b.banned_at, b.banned_until, a.username 
+        FROM banned_list b
+        LEFT JOIN admins a ON b.banned_by = a.adminid
+        WHERE b.entity_id = ? AND b.entity_type = ? 
+        ORDER BY b.banned_at DESC LIMIT 1";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("is", $entity_id, $entity_type); // "i" for int id, "s" for string type
+$stmt->execute();
+$result = $stmt->get_result();
+$ban_data = $result->fetch_assoc();
+
+if (!$ban_data) {
+    die("Error: Account is suspended, but no ban record was found. Please contact support.");
 }
 
-// =========================================================
-// 2. HELPER LOGIC (Date Formatting)
-// =========================================================
-
-$start_date = new DateTime($my_ban['banned_at']);
-$end_date   = new DateTime($my_ban['banned_until']);
+// 3. Date & Countdown Logic
+$start_date = new DateTime($ban_data['banned_at']);
+$end_date   = new DateTime($ban_data['banned_until']);
 $now        = new DateTime();
-$interval   = $now->diff($end_date);
 
-// Format remaining time nicely
+$is_active = $end_date > $now;
+$interval  = $now->diff($end_date);
+
 $remaining_text = "";
-if ($end_date < $now) {
-    $remaining_text = "Ban Expired";
-    $is_active = false;
+if ($is_active) {
+    $parts = [];
+    if ($interval->y > 0) $parts[] = $interval->y . ' yr';
+    if ($interval->m > 0) $parts[] = $interval->m . ' mo';
+    if ($interval->d > 0) $parts[] = $interval->d . ' days';
+    if ($interval->h > 0) $parts[] = $interval->h . ' hrs';
+    
+    // Show top 2 significant units (e.g., "1 mo, 2 days")
+    $remaining_text = implode(', ', array_slice($parts, 0, 2));
 } else {
-    $remaining_text = $interval->format('%a days, %h hours remaining');
-    $is_active = true;
+    $remaining_text = "Ban Expired";
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied | Account Suspended</title>
+    <title>Access Denied</title>
     <style>
-        /* MODERN CSS RESET & VARIABLES */
         :root {
-            --bg-color: #0f1117;       /* Dark Discord/GitHub-like bg */
-            --card-bg: #1e2128;        /* Slightly lighter card */
-            --accent-red: #ff4d4d;     /* Alert Red */
-            --accent-dim: #3a1c1c;     /* Dim Red Background */
+            --bg-color: #0f1117;
+            --card-bg: #1e2128;
+            --accent-red: #ff4d4d;
             --text-main: #ffffff;
             --text-muted: #a0a3b1;
-            --border-color: #2f3342;
-            --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-stack: 'Inter', system-ui, sans-serif;
         }
-
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
@@ -88,162 +77,68 @@ if ($end_date < $now) {
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
         }
-
-        /* CARD CONTAINER */
         .ban-card {
             background: var(--card-bg);
-            width: 100%;
-            max-width: 550px;
+            width: 90%;
+            max-width: 500px;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #2f3342;
             overflow: hidden;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* HEADER SECTION */
-        .ban-header {
-            background: var(--accent-dim);
-            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             text-align: center;
+        }
+        .ban-header {
+            background: rgba(255, 77, 77, 0.1);
+            padding: 30px;
             border-bottom: 1px solid rgba(255, 77, 77, 0.2);
         }
-
-        .icon-lock {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 77, 77, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-        
         .icon-lock svg {
             fill: var(--accent-red);
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 15px;
         }
-
-        h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        /* DETAILS BODY */
-        .ban-body {
-            padding: 30px;
-        }
-
-        /* REASON BOX */
+        h1 { margin: 0; font-size: 24px; }
+        .ban-body { padding: 30px; text-align: left; }
         .reason-box {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             padding: 15px;
-            border-radius: 8px;
             border-left: 3px solid var(--accent-red);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            border-radius: 4px;
         }
-
-        .reason-label {
-            display: block;
+        .label {
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
             color: var(--text-muted);
+            display: block;
             margin-bottom: 5px;
-            font-weight: 600;
         }
-
-        .reason-text {
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-        /* DATA GRID */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .info-value {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* TIMESTAMP BADGE */
         .timer-badge {
             background: #2b2f3a;
-            color: var(--text-muted);
-            padding: 8px 12px;
+            padding: 12px;
             border-radius: 6px;
-            font-size: 13px;
-            text-align: center;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
+            font-size: 14px;
         }
-
-        .timer-highlight {
-            color: var(--accent-red);
-            font-weight: bold;
-        }
-
-        /* FOOTER */
+        .timer-val { color: var(--accent-red); font-weight: bold; }
         .ban-footer {
-            padding: 20px 30px;
+            padding: 15px;
             background: rgba(0,0,0,0.2);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             font-size: 12px;
             color: var(--text-muted);
         }
-
-        .btn-contact {
-            background: transparent;
-            border: 1px solid var(--text-muted);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-contact:hover {
-            border-color: var(--text-main);
-            color: var(--text-main);
-        }
-
     </style>
 </head>
 <body>
-
     <div class="ban-card">
         <div class="ban-header">
             <div class="icon-lock">
@@ -254,52 +149,29 @@ if ($end_date < $now) {
             <h1>Account Suspended</h1>
             <div class="subtitle">Access to this resource has been disabled.</div>
         </div>
-
         <div class="ban-body">
-            
             <div class="reason-box">
-                <span class="reason-label">Reason for suspension</span>
-                <div class="reason-text">
-                    <?php echo htmlspecialchars($my_ban['reason']); ?>
-                </div>
+                <span class="label">Reason</span>
+                <div><?php echo htmlspecialchars($ban_data['reason']); ?></div>
             </div>
-
             <div class="info-grid">
-                <div class="info-item">
-                    <span class="reason-label">Ban ID</span>
-                    <span class="info-value"><?php echo htmlspecialchars($my_ban['ban_id']); ?></span>
+                <div>
+                    <span class="label">Banned By</span>
+                    <div><?php echo htmlspecialchars($ban_data['username']); ?></div>
                 </div>
-                <div class="info-item">
-                    <span class="reason-label">Authorized By</span>
-                    <span class="info-value"><?php echo htmlspecialchars($my_ban['banned_by']); ?></span>
-                </div>
-            </div>
-
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="reason-label">Date Issued</span>
-                    <span class="info-value"><?php echo $start_date->format('M d, Y'); ?></span>
-                </div>
-                <div class="info-item">
-                    <span class="reason-label">Expiry Date</span>
-                    <span class="info-value"><?php echo $end_date->format('M d, Y'); ?></span>
+                <div>
+                    <span class="label">Date Issued</span>
+                    <div><?php echo $start_date->format('M d, Y'); ?></div>
                 </div>
             </div>
-
             <div class="timer-badge">
-                <span>Duration Remaining:</span>
-                <span class="timer-highlight">
-                    <?php echo $is_active ? $remaining_text : "Permanently Banned"; ?>
-                </span>
+                <span>Time Remaining:</span>
+                <span class="timer-val"><?php echo $remaining_text; ?></span>
             </div>
-
         </div>
-
         <div class="ban-footer">
-            <span>&copy; <?php echo date('Y'); ?> Security System</span>
-            <a href="mailto:" class="btn-contact">Contact Support</a> //admin email
+            &copy; <?php echo date('Y'); ?> Malltiverse Security System
         </div>
     </div>
-
 </body>
 </html>

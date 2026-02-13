@@ -4,11 +4,42 @@ if (!isset($supplier)) {
     die("Access Denied");
 }
 
+// --- NEW: Message Handling Logic ---
+require_once '../utils/messages.php'; 
+
+$message_sent = false;
+$error_message = "";
+
+// Use the existing supplier logic to get the ID
+$company_id = $supplier['supplier_id'] ?? 1;
+
+if (isset($_POST['submit'])) {
+    $message = htmlspecialchars(trim($_POST['message']));
+    $customer_id = 1; // Replace with $_SESSION['user_id'] if available
+
+    if (!empty($message) && $company_id > 0) {
+        // $conn comes from the include in index.php
+        $success = sendContactMessage($conn, $customer_id, $company_id, $message);
+        
+        if ($success) {
+            $message_sent = true;
+        } else {
+            $error_message = "Database error: Could not save message.";
+        }
+    } else {
+        $error_message = "Please enter a message.";
+    }
+}
+// -----------------------------------
+
 $company_name = $supplier['company_name'] ?? 'BRAND';
 $tagline = $supplier['tagline'] ?? 'Get in touch.';
 
 // Fetch colors from shop_assets
 $supplier_id = $supplier['supplier_id'] ?? 1;
+// Ensure $company_id is set for the color query if it wasn't already
+if (!isset($company_id)) $company_id = $supplier_id; 
+
 $color_sql = "SELECT primary_color, secondary_color FROM shop_assets WHERE company_id = $company_id LIMIT 1";
 $color_result = $conn->query($color_sql);
 $primary_color = "#000000"; // Default
@@ -263,6 +294,7 @@ if ($color_result && $color_result->num_rows > 0) {
     .marquee-content {
         display: inline-block;
         animation: marquee 20s linear infinite;
+        color:black;
     }
 
     .marquee-item {
@@ -787,27 +819,42 @@ if ($color_result && $color_result->num_rows > 0) {
         opacity: 1;
         transform: translateY(0);
     }
+    
+    /* FEEDBACK MESSAGES */
+    .alert-message {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .alert-success {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .alert-error {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
 </style>
 
 <div class="contact-hero">
-    <!-- 3D Animated Grid Background -->
     <div class="hero-grid" id="heroGrid"></div>
     
-    <!-- Floating 3D Shapes -->
     <div class="hero-shapes">
         <div class="shape shape-1"></div>
         <div class="shape shape-2"></div>
         <div class="shape shape-3"></div>
     </div>
     
-    <!-- Hero Content -->
     <div class="hero-content">
         <h1 class="contact-title">Contact</h1>
         <p class="contact-sub">Let's Build Something Great</p>
     </div>
 </div>
 
-<!-- ORIGINAL MARQUEE CONTAINER (as requested) -->
 <div class="marquee-container">
     <div class="marquee-content">
         <span class="marquee-item">Customer Support</span>
@@ -881,24 +928,20 @@ if ($color_result && $color_result->num_rows > 0) {
                 <h2>Send a Message</h2>
                 <p>Fill out the form below and our team will get back to you within 2 hours during business hours.</p>
             </div>
+            
+            <?php if ($message_sent): ?>
+                <div class="alert-message alert-success">Message Sent Successfully!</div>
+            <?php elseif (!empty($error_message)): ?>
+                <div class="alert-message alert-error"><?= $error_message ?></div>
+            <?php endif; ?>
 
             <form id="contactForm" method="POST" action="">
-                <div class="form-group">
-                    <input type="text" id="subject" name="subject" class="modern-input" placeholder=" " required />
-                    <label class="form-label" for="subject">Subject</label>
-                </div>
-
-                <div class="form-group">
-                    <input type="email" id="email" name="email" class="modern-input" placeholder=" " required />
-                    <label class="form-label" for="email">Your Email</label>
-                </div>
-
                 <div class="form-group">
                     <textarea id="message" name="message" class="modern-input" placeholder=" " style="min-height: 180px;" required></textarea>
                     <label class="form-label" for="message">Your Message</label>
                 </div>
 
-                <button type="submit" class="submit-btn">
+                <button type="submit" name="submit" class="submit-btn">
                     Send Message
                 </button>
             </form>
@@ -966,50 +1009,9 @@ if ($color_result && $color_result->num_rows > 0) {
             this.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
         }
 
-        // 3. FORM SUBMISSION
-        const form = document.getElementById('contactForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const btn = form.querySelector('.submit-btn');
-                const originalText = btn.innerHTML;
-                const originalBg = btn.style.background;
-                
-                // Show loading state
-                btn.innerHTML = '<span style="display:flex;align-items:center;gap:10px;">Sending<span style="width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></span></span>';
-                btn.disabled = true;
-                btn.style.opacity = '0.8';
-                
-                // Add CSS for spinner
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                // Simulate API call
-                setTimeout(() => {
-                    // Success state
-                    btn.innerHTML = 'Message Sent ✓';
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                    
-                    // Reset form
-                    form.reset();
-                    
-                    // Revert after 3 seconds
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = originalBg;
-                    }, 3000);
-                }, 2000);
-            });
-        }
+        // 3. FORM SUBMISSION (Fake JS loader removed to allow PHP submission)
+        // I have removed the JS "preventDefault" block here so the form 
+        // will actually submit to the PHP logic at the top of the file.
 
         // 4. INPUT LABEL ANIMATION
         const inputs = document.querySelectorAll('.modern-input');

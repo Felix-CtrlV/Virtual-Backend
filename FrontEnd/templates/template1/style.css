@@ -1664,6 +1664,116 @@ CONTACT PAGE STYLES
 }
 
 
+
+
+/* Style for the Submit Review Button */
+.review-form button[type="submit"], 
+.review-form button[onclick="showLoginPopup()"] {
+    background-color: #6c7a91; /* The grayish-blue color from the image */
+    color: #ffffff;            /* White text */
+    padding: 10px 24px;        /* Vertical and horizontal spacing */
+    border: none;              /* Remove default browser borders */
+    border-radius: 8px;        /* Rounded corners */
+    font-size: 16px;           /* Text size */
+    font-weight: 500;          /* Medium thickness for text */
+    cursor: pointer;           /* Hand icon on hover */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Hover effect to make it feel interactive */
+.review-form button:hover {
+    background-color: #5a677d; /* Slightly darker shade on hover */
+}
+
+/* Active/Click effect */
+.review-form button:active {
+    transform: scale(0.98);    /* Subtle press-down effect */
+}
+
+
+
+
+
+/* REVIEW POP UP */
+.login-prompt-container {
+    background-color: #fff !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Dark Login Button */
+.btn-login {
+    background-color: #212529; /* Dark charcoal */
+    color: #ffffff;
+    padding: 10px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-login:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* White Register Button with Border */
+.btn-register {
+    background-color: #ffffff;
+    color: #212529;
+    padding: 10px 30px;
+    border: 1px solid #212529;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-register:hover {
+    background-color: #f8f9fa;
+    color: #000;
+}
+
+/* Submit Button Style from previous request */
+.btn-submit {
+    background-color: #6c7a91;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .checkout-btn {
 
     flex: 1;
@@ -1836,7 +1946,7 @@ CONTACT PAGE STYLES
 
 
 .cart-link {
-    padding: .5rem .5rem .5rem .5rem !important;
+    padding: .5rem .5rem .2rem .5rem !important;
     position: relative;
     display: inline-block;
 }
@@ -1897,35 +2007,6 @@ CONTACT PAGE STYLES
     display: block;
 }
 
-/*====
-cart login====*/
-.cart-sidebar {
-    position: fixed;
-    top: 0;
-    right: -360px;
-    width: 360px;
-    height: 100%;
-    background: #fff;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    transition: right .3s ease;
-}
-.cart-sidebar.open {
-    right: 0;
-}
-.cart-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.4);
-    opacity: 0;
-    pointer-events: none;
-    transition: .3s;
-}
-.cart-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
 
 
 .color-preview {
@@ -2575,3 +2656,5 @@ body {
         /* Increase or decrease this px value for the gap */
     }
 }
+
+

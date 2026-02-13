@@ -20,7 +20,8 @@ if (!$email || !$password) {
     exit;
 }
 
-$sql = "SELECT customer_id, password FROM customers WHERE email = ? and status = 'active' LIMIT 1";
+// 1. Fetch Customer (Removed "and status = 'active'" and added status to SELECT)
+$sql = "SELECT customer_id, password, status FROM customers WHERE email = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
@@ -41,19 +42,33 @@ if (!$customer) {
     exit;
 }
 
-/*Change*/
+// 2. Verify Password
 if (password_verify($password, $customer['password'])) {
    
+    // 3. CHECK BAN STATUS
+    if ($customer['status'] === 'banned') {
+        // Set session data for banned.php to use
+        $_SESSION['banned_user'] = [
+            'id' => $customer['customer_id'],
+            'type' => 'customer'
+        ];
+        
+        // Return redirect instruction to frontend
+        echo json_encode([
+            'success' => false, 
+            'redirect' => 'banned.php' 
+        ]);
+        exit;
+    }
+
+    // 4. Success Login
     $_SESSION['customer_logged_in'] = true; 
     $_SESSION['customer_id'] = $customer['customer_id']; 
     $_SESSION['is_logged_in'] = true; 
     
-
-    
     $new_id = $customer['customer_id'];
     mysqli_query($conn, "UPDATE cart SET customer_id = '$new_id' WHERE customer_id = 1");
 
-   
     echo json_encode(['success' => true, 'return_url' => $returnUrl]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid email or password']);

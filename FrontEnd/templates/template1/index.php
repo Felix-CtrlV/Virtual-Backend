@@ -13,7 +13,7 @@ if (!isset($conn)) {
 }
 require_once __DIR__ . '/../../utils/Ordered.php';
 
-    require_once __DIR__ . '/../../utils/colorSwitch.php';
+require_once __DIR__ . '/../../utils/colorSwitch.php';
 
 
 // 3. ORDER PROCESSING LOGIC
@@ -21,11 +21,11 @@ $customer_id = $_SESSION['customer_id'] ?? 0; // Use session if available, else 
 $supplier_id = isset($_GET['supplier_id']) ? (int) $_GET['supplier_id'] : 0;
 
 $company_query = mysqli_prepare($conn, "select * from companies where supplier_id = ?");
-if($company_query){
+if ($company_query) {
     mysqli_stmt_bind_param($company_query, "i", $supplier_id);
     mysqli_stmt_execute($company_query);
     $company_result = mysqli_stmt_get_result($company_query);
-}else{
+} else {
     $company_result = false;
 }
 
@@ -45,12 +45,6 @@ if (isset($_GET['payment_status']) && $_GET['payment_status'] === 'success') {
 if (isset($_GET['payment_success']) && $_GET['payment_success'] === 'true') {
     echo "<script>alert('Order Placed Successfully!');</script>";
 }
-
-
-
-$supplier_id = (int) $supplier['supplier_id'];
-
-
 
 // --- (Your existing shop_assets logic) ---
 
@@ -151,15 +145,15 @@ function getCartCount($conn, $customer_id)
 
 }
 
-
-
+// 1. Initialize with a default value to prevent "Undefined variable" error
 $cart_count = 0;
 
+// 2. Only update it if the user is logged in
 if (isset($_SESSION['customer_id'])) {
-
-    $cart_count = getCartCount($conn, $_SESSION['customer_id']);
-
+    $cart_count = getCartCount($conn, $_SESSION['customer_id'], $company_id);
 }
+
+
 
 // ==========================================
 
@@ -186,7 +180,7 @@ $page_path = __DIR__ . "/pages/$page.php";
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title><?= htmlspecialchars($supplier['company_name']) ?></title>
+    <title><?= htmlspecialchars($company_row['company_name'] ?? 'Shop') ?></title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -199,8 +193,12 @@ $page_path = __DIR__ . "/pages/$page.php";
     <style>
         :root {
 
-        --primary: <?= htmlspecialchars($primaryColor) ?>;
-        --secondary: <?= htmlspecialchars($secondaryColor) ?>;
+            --primary:
+                <?= htmlspecialchars($primaryColor) ?>
+            ;
+            --secondary:
+                <?= htmlspecialchars($secondaryColor) ?>
+            ;
 
         }
     </style>
@@ -260,7 +258,7 @@ $page_path = __DIR__ . "/pages/$page.php";
             </div>
         </div>
     </div>
-\
+
 <!-- Auth popup -->
 <div id="authModal" class="auth-modal">
   <div class="auth-box">
@@ -270,136 +268,288 @@ $page_path = __DIR__ . "/pages/$page.php";
       <button id="authLoginBtn">Login</button>
       <button id="authRegisterBtn">Create Account</button>
     </div>
-    <button class="auth-close">&times;</button>
-  </div>
-</div>
 
-<style>
-.auth-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 99999999; }
-.auth-modal.show { display: flex; }
-.auth-box {
-    position: relative; /* make positioning for child absolute elements work */
-    background: #fff;
-    padding: 24px;
-    border-radius: 14px;
-    width: 320px;
-    text-align: center;
-}
+    <style>
+        /* Backdrop - darker and blurred */
+        .auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            /* Adds a premium blurred background */
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+        }
 
-/* Style the close button */
-.auth-close {
-    position: absolute;
-    top: 2px;
-    right: 12px;
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #333;
-}
+        .auth-modal.show {
+            display: flex;
+        }
 
-.auth-actions button { margin: 10px; padding: 10px 16px; cursor: pointer; }
-</style>
+        /* The White Box */
+        .auth-box {
+            position: relative;
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 24px;
+            /* Very rounded corners */
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease-out;
+        }
 
-<script>
-function openAuthModal() {
-    document.getElementById("authModal")?.classList.add("show");
-}
-document.querySelector(".auth-close")?.addEventListener("click", () => {
-    document.getElementById("authModal").classList.remove("show");
-});
-document.getElementById("authLoginBtn")?.addEventListener("click", () => {
-    window.location.href = "/Malltiverse/FrontEnd/customerLogin.php";
-});
-document.getElementById("authRegisterBtn")?.addEventListener("click", () => {
-    window.location.href = "/Malltiverse/FrontEnd/customerRegister.php";
-});
-</script>
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
 
-<script>
-/* ================================
-   CART DRAWER CORE LOGIC
-================================ */
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
 
-const cartDrawer = document.getElementById("cartDrawer");
-const cartOverlay = document.getElementById("cartOverlay");
-const cartItemsContainer = document.getElementById("cartItemsContainer");
-const closeCartBtn = document.getElementById("closeCart");
-const cartTrigger = document.getElementById("cartIconTrigger");
+        .auth-box h3 {
+            font-weight: 800;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
 
-/* ---------- OPEN / CLOSE ---------- */
-function openCart() {
-    cartDrawer.classList.add("open");
-    cartOverlay.classList.add("active");
-}
+        .auth-box p {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
 
-function closeCart() {
-    cartDrawer.classList.remove("open");
-    cartOverlay.classList.remove("active");
-}
+        /* Buttons Layout */
+        .auth-actions {
+            display: flex;
+            flex-direction: column;
+            /* Stacked buttons like the image */
+            gap: 12px;
+        }
 
-closeCartBtn?.addEventListener("click", closeCart);
-cartOverlay?.addEventListener("click", closeCart);
+        /* Login Button (Black/Dark) */
+        #authLoginBtn {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
 
-/* ---------- GUEST VIEW ---------- */
-function renderGuestCart() {
-    cartItemsContainer.innerHTML = `
+        #authLoginBtn:hover {
+            background: #000;
+            transform: translateY(-2px);
+        }
+
+        /* Register Button (Outline) */
+        #authRegisterBtn {
+            background: transparent;
+            color: #1a1a1a;
+            border: 2px solid #e0e0e0;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        #authRegisterBtn:hover {
+            border-color: #1a1a1a;
+            background: #f8f8f8;
+        }
+
+        /* Close Button Style */
+        .auth-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #f0f0f0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: 0.2s;
+        }
+
+        .auth-close:hover {
+            background: #e0e0e0;
+            color: #000;
+        }
+    </style>
+
+    <script>
+        function openAuthModal() {
+            document.getElementById("authModal")?.classList.add("show");
+        }
+        document.querySelector(".auth-close")?.addEventListener("click", () => {
+            document.getElementById("authModal").classList.remove("show");
+        });
+        document.getElementById("authLoginBtn")?.addEventListener("click", () => {
+            window.location.href = "/Malltiverse/FrontEnd/customerLogin.php";
+        });
+        document.getElementById("authRegisterBtn")?.addEventListener("click", () => {
+            window.location.href = "/Malltiverse/FrontEnd/customerRegister.php";
+        });
+    </script>
+
+    <script>
+        /* ================================
+           CART DRAWER CORE LOGIC
+        ================================ */
+
+        const cartDrawer = document.getElementById("cartDrawer");
+        const cartOverlay = document.getElementById("cartOverlay");
+        const cartItemsContainer = document.getElementById("cartItemsContainer");
+        const closeCartBtn = document.getElementById("closeCart");
+        const cartTrigger = document.getElementById("cartIconTrigger");
+
+        /* ---------- OPEN / CLOSE ---------- */
+        function openCart() {
+            cartDrawer.classList.add("open");
+            cartOverlay.classList.add("active");
+        }
+
+        function closeCart() {
+            cartDrawer.classList.remove("open");
+            cartOverlay.classList.remove("active");
+        }
+
+        closeCartBtn?.addEventListener("click", closeCart);
+        cartOverlay?.addEventListener("click", closeCart);
+
+        /* ---------- GUEST VIEW ---------- */
+        function renderGuestCart() {
+            cartItemsContainer.innerHTML = `
         <div style="padding:24px; text-align:center">
             <p>Please login or create an account to view your cart.</p>
             <button onclick="location.href='/Malltiverse/FrontEnd/customerLogin.php'" class="btn btn-dark me-2">Login</button>
             <button onclick="location.href='/Malltiverse/FrontEnd/customerRegister.php'" class="btn btn-outline-dark">Register</button>
         </div>
     `;
-}
+        }
 
-/* ---------- EMPTY CART ---------- */
-function renderEmptyCart() {
-    cartItemsContainer.innerHTML = `
+        /* ---------- EMPTY CART ---------- */
+        function renderEmptyCart() {
+            cartItemsContainer.innerHTML = `
         <p class="text-center text-muted mt-4">Your bag is empty.</p>
     `;
-}
+        }
+        /* ---------- LOAD CART ---------- */
+        function refreshCartDrawer(supplierId) {
+            openCart();
 
-/* ---------- LOAD CART ---------- */
-function refreshCartDrawer(supplierId) {
-    openCart();
-
-    if (!window.IS_LOGGED_IN) {
-        renderGuestCart();
-        return;
-    }
-
-    fetch(`../utils/get_cart_data.php?supplier_id=${supplierId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data || !data.items || data.items.length === 0) {
-                renderEmptyCart();
+            if (!window.IS_LOGGED_IN) {
+                renderGuestCart();
                 return;
             }
 
-            cartItemsContainer.innerHTML = "";
+            fetch(`../utils/get_cart_data.php?supplier_id=${supplierId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || !data.items || data.items.length === 0) {
+                        renderEmptyCart();
+                        document.getElementById('cartFooter').innerHTML = ''; // Clear footer if empty
 
-            data.items.forEach(item => {
-                cartItemsContainer.innerHTML += `
-                    <div class="cart-item mb-3">
-                        <strong>${item.name}</strong><br>
-                        Qty: ${item.qty}<br>
-                        $${parseFloat(item.price).toFixed(2)}
+                        const badge = document.getElementById('nav-cart-count');
+                        if (badge) { badge.style.display = 'none'; badge.innerText = '0'; }
+                        return;
+                    }
+
+                    let html = '';
+                    data.items.forEach(item => {
+                        const availableStock = item.availableStock !== undefined ? item.availableStock : 999;
+
+                        // Matches the layout of the first image
+                        html += `
+                <div class="cart-item-block mb-4" style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <div class="d-flex gap-3">
+                        <img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-bold">${item.name}</h6>
+                            <div class="text-muted small d-flex align-items-center gap-2 mb-2">
+                                <span>Color:</span>
+                                <span style="background-color: ${item.color_code || '#000'}; width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 1px solid #ddd;"></span>
+                                <span>| Size: ${item.size || 'N/A'}</span>
+                                <span>| Qty: ${item.qty}</span>
+                            </div>
+                            
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="qty-selector-container d-flex align-items-center gap-2">
+                                    <button class="btn btn-sm btn-light border qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, -1, ${supplierId}, ${availableStock})">−</button>
+                                    <span class="qty-display fw-bold" style="min-width: 20px; text-align: center;">${item.qty}</span>
+                                    <button class="btn btn-sm btn-light border qty-button" onclick="changeQty(${item.cart_id}, ${item.qty}, 1, ${supplierId}, ${availableStock})">+</button>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="fw-bold">$${parseFloat(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                <button onclick="removeItem(${item.cart_id}, ${supplierId})" class="btn btn-sm text-danger p-0 border-0 bg-transparent">
+                                    <i class="bi bi-trash"></i> <small>Remove</small>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                `;
-            });
-        })
-        .catch(err => {
-            console.error(err);
-            renderEmptyCart();
+                </div>`;
+                    });
+
+                    cartItemsContainer.innerHTML = html;
+
+                    const badge = document.getElementById('nav-cart-count');
+                    if (badge) {
+                        badge.innerText = data.items.length; // This makes it "2" instead of "3"
+                        badge.style.display = 'flex';
+                    }
+
+                    // Update Total and Checkout Button
+                    const footer = document.getElementById('cartFooter');
+                    if (footer) {
+                        footer.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-3 pt-3 border-top">
+                        <span class="fs-5">Total:</span>
+                        <span class="fs-4 fw-bold">$${data.total}</span>
+                    </div>
+                    <button class="btn btn-dark w-100 py-3 rounded-pill fw-bold" onclick="window.location.href='../utils/accessCheckout.php?supplier_id=${supplierId}'">
+                        Checkout
+                    </button>`;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    renderEmptyCart();
+                });
+        }
+
+        /* ---------- CLICK BIND ---------- */
+        cartTrigger?.addEventListener("click", () => {
+            refreshCartDrawer(<?= (int) $supplier_id ?>);
         });
-}
+    </script>
 
-/* ---------- CLICK BIND ---------- */
-cartTrigger?.addEventListener("click", () => {
-    refreshCartDrawer(<?= (int)$supplier_id ?>);
-});
-</script>
-
+    <?php // Re-open PHP to echo the variables safely ?>
+    <script>
+        window.IS_LOGGED_IN = <?= isset($_SESSION['customer_id']) ? 'true' : 'false' ?>;
+        window.INITIAL_CART_COUNT = <?= (int) $cart_count ?>;
+    </script>
 
 </body>
 

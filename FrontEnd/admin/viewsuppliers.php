@@ -7,13 +7,17 @@ include("partials/nav.php");
 <section class="section active">
 
     <div class="card">
-        <div class="section-header" style="margin-bottom: 12px;">
-            <div class="search" method="post">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px;">
+            <div class="search" style="flex: 1; min-width: 200px;">
                 <lord-icon class="search-icon" src="https://cdn.lordicon.com/xaekjsls.json" trigger="loop" delay="2000"
-                    colors="primary:#ffffff" style="width:13px;height:13px">
-                </lord-icon>
-                <input autocomplete="off" type="text" id="searchshop" placeholder="Search Shops..." />
+                    colors="primary:#ffffff" style="width:13px;height:13px"></lord-icon>
+                <input autocomplete="off" type="text" id="searchshop" placeholder="Search shops..." />
             </div>
+            <select id="filterStatus" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text); font-size: 13px;">
+                <option value="all">All statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+            </select>
         </div>
         <table>
             <thead>
@@ -40,11 +44,14 @@ include("partials/nav.php");
     const searchInput = document.getElementById("searchshop");
     const tableBody = document.getElementById("suppliertable");
 
-    function fetchSuppliers(query = "") {
+    function fetchSuppliers() {
+        var q = (document.getElementById("searchshop") || {}).value || "";
+        var status = (document.getElementById("filterStatus") || {}).value || "all";
+        var body = "search=" + encodeURIComponent(q) + "&status=" + encodeURIComponent(status);
         fetch("./utils/search_suppliers.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "search=" + encodeURIComponent(query)
+            body: body
         })
             .then(res => res.text())
             .then(data => {
@@ -54,15 +61,12 @@ include("partials/nav.php");
 
     fetchSuppliers();
 
-    let debounceTimer;
-
-    searchInput.addEventListener("keyup", () => {
+    var debounceTimer;
+    searchInput.addEventListener("keyup", function() {
         clearTimeout(debounceTimer);
-
-        debounceTimer = setTimeout(() => {
-            fetchSuppliers(searchInput.value);
-        }, 300);
+        debounceTimer = setTimeout(fetchSuppliers, 300);
     });
+    document.getElementById("filterStatus").addEventListener("change", fetchSuppliers);
 
 </script>
 

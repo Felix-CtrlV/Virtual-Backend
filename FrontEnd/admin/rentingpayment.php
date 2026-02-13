@@ -317,10 +317,75 @@ if ($recentpaymentsresult) {
                 </table>
             </div>
         </div>
+
+        <div class="card" style="grid-column: span 4;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">All Companies – Rent Status</div>
+                    <div class="card-trend" style="color:var(--muted);">Search and filter live</div>
+                </div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px;">
+                <div class="search" style="flex:1;min-width:200px;">
+                    <lord-icon class="search-icon" src="https://cdn.lordicon.com/xaekjsls.json" trigger="loop" delay="2000" colors="primary:#ffffff" style="width:13px;height:13px"></lord-icon>
+                    <input autocomplete="off" type="text" id="rentSearch" placeholder="Search by company..." />
+                </div>
+                <select id="rentStatusFilter" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-light);color:var(--text);font-size:13px;">
+                    <option value="all">All</option>
+                    <option value="paid">Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+            </div>
+            <div style="overflow:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shop</th>
+                            <th>Monthly Rent</th>
+                            <th>Last Paid</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rentTableBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </section>
 
 <script src="script.js"></script>
+
+<script>
+    (function() {
+        var searchEl = document.getElementById("rentSearch");
+        var filterEl = document.getElementById("rentStatusFilter");
+        var tableBody = document.getElementById("rentTableBody");
+        function fetchRent() {
+            var q = (searchEl || {}).value || "";
+            var status = (filterEl || {}).value || "all";
+            var body = "search=" + encodeURIComponent(q) + "&status=" + encodeURIComponent(status);
+            fetch("./utils/search_rent_payments.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: body
+            })
+                .then(function(r) { return r.text(); })
+                .then(function(html) { tableBody.innerHTML = html; });
+        }
+        if (searchEl) {
+            var debounce;
+            searchEl.addEventListener("keyup", function() {
+                clearTimeout(debounce);
+                debounce = setTimeout(fetchRent, 300);
+            });
+        }
+        if (filterEl) filterEl.addEventListener("change", fetchRent);
+        fetchRent();
+    })();
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
